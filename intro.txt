@@ -1,0 +1,37 @@
+I want to make a runescape 3 website that is used to prepare for leagues equilibrium - see: https://secure.runescape.com/m=news/countdown-to-leagues-ii-equilibrium
+
+The important part of the website is that this league has region locking for the following areas:
+misthanlin (you start with)
+karamja (free unlock)
+havenhythe (free unlock)
+
+the other regions you have only unlock a max of 3 of these:
+morytania
+anachronia
+kharidian desert
+asgarnia
+wilderness (includes fort forthinty)
+fremenik province
+kandarin
+tirannwn
+
+
+we will need to work out what items and bosses belong to each region to document them. 
+
+once we have populated bosses and there drops we will cover other areas such as skilling.
+
+Other areas like the underworld (which we assume is part of misthanlin) or Mazcab (which we assume is part of desert) will need to be considered.
+You may need to ask me for my opinion on where these other non mainland areas belong to, e.g. the arc islands or the lost grove.
+
+you will need to access and search the https://runescape.wiki website to gather info.
+e.g. resources like https://runescape.wiki/w/Bosses can be used to see all bosses and then you can tree explore to find out more info about the boss.
+
+
+
+The website should have a homepage which utilises cookies to allow users to select their regions. 
+
+
+Then unlocks should be displayed below as to what those regions unlock.
+
+
+See the map.jpg image - ideally you could allow the users to click the regions on that image to toggle unlock regions.

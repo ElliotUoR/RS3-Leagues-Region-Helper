@@ -1,0 +1,276 @@
+import { useEffect, useMemo, useState } from 'react';
+import EquipmentSlot from '../components/EquipmentSlot';
+import GearItemRow from '../components/GearItemRow';
+import GearStatsSummary from '../components/GearStatsSummary';
+import { COMBAT_STYLES, GEAR } from '../data/gear';
+import { isGearItemAvailable } from '../data/gearAvailability';
+import { buildShareUrl } from '../utils/shareBuild';
+
+const SLOT_LABELS = {
+  head: 'Head',
+  pocket: 'Pocket',
+  back: 'Back',
+  neck: 'Neck',
+  ammo: 'Ammo',
+  weapon: 'Weapon',
+  torso: 'Torso',
+  offhand: 'Off-hand',
+  legs: 'Legs',
+  hands: 'Hands',
+  feet: 'Feet',
+  ring: 'Ring',
+};
+
+// Reading order matches the classic RS3 worn-equipment interface layout.
+const SLOT_GRID_AREAS = `
+  ". head pocket"
+  "back neck ammo"
+  "weapon torso offhand"
+  ". legs ."
+  "hands feet ring"
+`;
+
+const STYLE_LABELS = {
+  melee: 'Melee',
+  ranged: 'Ranged',
+  magic: 'Magic',
+  necromancy: 'Necromancy',
+};
+
+const SORT_OPTIONS = [
+  { id: 'default', label: 'Default' },
+  { id: 'level', label: 'Level' },
+  { id: 'damage', label: 'Dmg' },
+  { id: 'accuracy', label: 'Acc' },
+  { id: 'lifeBonus', label: 'Tank' },
+];
+
+function sortItems(items, sortBy) {
+  if (sortBy === 'default') return items;
+  return [...items].sort((a, b) => {
+    const valueOf = (item) => {
+      if (sortBy === 'level') return item.level?.level ?? 0;
+      return item.stats?.[sortBy] ?? 0;
+    };
+    return valueOf(b) - valueOf(a);
+  });
+}
+
+export default function GearPage({
+  isUnlocked,
+  selected,
+  selectedRelics,
+  style,
+  setStyle,
+  defaultStyle,
+  setDefaultStyle,
+  activeSlot,
+  selectSlot,
+  equipped,
+  equippedNamesByStyle,
+  toggleItem,
+  clearLoadout,
+  offhandBlocked,
+}) {
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('default');
+  const [shareStatus, setShareStatus] = useState('idle'); // idle | copied | manual
+  const [hideLocked, setHideLocked] = useState(false);
+
+  // An item outside the player's picked regions still counts as "available"
+  // once it's the item actually equipped in this slot — that's the whole
+  // signal for "this was equipped via Ignore restrictions" (or loaded from a
+  // save/share where someone else had it force-equipped). No separate
+  // override flag needs to be tracked or persisted anywhere: the equipped
+  // state itself is the implied override, for exactly as long as it stays
+  // equipped.
+  function isItemAvailable(item) {
+    if (activeSlot === 'offhand' && offhandBlocked) return false;
+    if (equipped[activeSlot]?.name === item.name) return true;
+    return isGearItemAvailable(item, isUnlocked);
+  }
+
+  const displayItems = useMemo(() => {
+    const items = GEAR[style]?.[activeSlot] ?? [];
+    const query = search.trim().toLowerCase();
+    const matched = query ? items.filter((item) => item.name.toLowerCase().includes(query)) : items;
+    // Available items always sort ahead of locked ones; each group keeps its
+    // own sort order (e.g. by Dmg) so locked gear doesn't drown out valid gear.
+    const available = matched.filter((item) => isItemAvailable(item));
+    const locked = hideLocked ? [] : matched.filter((item) => !isItemAvailable(item));
+    return [...sortItems(available, sortBy), ...sortItems(locked, sortBy)];
+  }, [style, activeSlot, search, sortBy, isUnlocked, offhandBlocked, equipped, hideLocked]);
+
+  useEffect(() => {
+    setSearch('');
+  }, [style, activeSlot]);
+
+  async function handleShare() {
+    const url = buildShareUrl({ regions: selected, equippedNamesByStyle, relics: selectedRelics, defaultStyle });
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareStatus('copied');
+    } catch {
+      window.prompt('Copy this link to share your build:', url);
+      setShareStatus('manual');
+    }
+    setTimeout(() => setShareStatus('idle'), 2500);
+  }
+
+  const SHARE_LABELS = { copied: 'Link copied!', manual: 'Link ready', idle: 'Share build' };
+  const hasEquippedItems = Object.keys(equipped).length > 0;
+  const slotHasAnyItems = (GEAR[style]?.[activeSlot] ?? []).length > 0;
+
+  function handleClearLoadout() {
+    if (!hasEquippedItems) return;
+    if (window.confirm(`Clear your entire ${STYLE_LABELS[style]} loadout?`)) {
+      clearLoadout();
+    }
+  }
+
+  return (
+    <>
+      <header>
+        <div className="gear-page-heading">
+          <h1>Gear Planner</h1>
+          <div className="gear-page-actions">
+            <button
+              type="button"
+              className="clear-loadout-button"
+              onClick={handleClearLoadout}
+              disabled={!hasEquippedItems}
+            >
+              Clear loadout
+            </button>
+            <button type="button" className="share-button" onClick={handleShare}>
+              {SHARE_LABELS[shareStatus]}
+            </button>
+          </div>
+        </div>
+        <p>
+          Pick a combat style, then click a slot to see the best-in-slot gear for it. Each item
+          shows the region(s) it needs — greyed-out items are locked until you select those
+          regions on the Regions page.
+        </p>
+      </header>
+
+      <main className="gear-page">
+        <div className="style-tabs-row">
+          <div className="style-tabs" role="tablist">
+            {COMBAT_STYLES.map((s) => (
+              <button
+                key={s}
+                type="button"
+                role="tab"
+                aria-selected={style === s}
+                className={`style-tab${style === s ? ' active' : ''}`}
+                onClick={() => setStyle(s)}
+              >
+                {STYLE_LABELS[s]}
+              </button>
+            ))}
+          </div>
+
+          <label
+            className="default-style-toggle"
+            title="The style shown first when you open the planner or a shared link."
+          >
+            <input
+              type="checkbox"
+              checked={style === defaultStyle}
+              onChange={(e) => e.target.checked && setDefaultStyle(style)}
+            />
+            <span>Default: {STYLE_LABELS[defaultStyle]}</span>
+          </label>
+        </div>
+
+        <div className="gear-layout">
+          <div className="equip-grid" style={{ gridTemplateAreas: SLOT_GRID_AREAS }}>
+            {Object.keys(SLOT_LABELS).map((slotId) => (
+              <EquipmentSlot
+                key={slotId}
+                slotId={slotId}
+                label={SLOT_LABELS[slotId]}
+                item={equipped[slotId]}
+                isActive={activeSlot === slotId}
+                onSelect={selectSlot}
+                disabled={slotId === 'offhand' && offhandBlocked}
+              />
+            ))}
+          </div>
+
+          <GearStatsSummary equipped={equipped} />
+        </div>
+
+        <div className="gear-item-list">
+          <div className="gear-item-list-header">
+            <h3>{SLOT_LABELS[activeSlot]} — {STYLE_LABELS[style]}</h3>
+            <input
+              type="search"
+              className="gear-search"
+              placeholder="Search items…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              disabled={activeSlot === 'offhand' && offhandBlocked}
+            />
+          </div>
+
+          <div className="gear-item-list-controls">
+            <div className="sort-tabs" role="tablist" aria-label="Sort by">
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={sortBy === opt.id}
+                  className={`sort-tab${sortBy === opt.id ? ' active' : ''}`}
+                  onClick={() => setSortBy(opt.id)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <label className="hide-locked-toggle">
+              <input
+                type="checkbox"
+                checked={hideLocked}
+                onChange={(e) => setHideLocked(e.target.checked)}
+              />
+              <span>Hide locked items</span>
+            </label>
+          </div>
+
+          {activeSlot === 'offhand' && offhandBlocked && (
+            <p className="gear-notice">Your two-handed weapon blocks the off-hand slot.</p>
+          )}
+
+          {displayItems.length > 0 && (
+            <div className="gear-item-rows">
+              {displayItems.map((item) => (
+                <GearItemRow
+                  key={item.name}
+                  item={item}
+                  equipped={equipped[activeSlot]?.name === item.name}
+                  available={isItemAvailable(item)}
+                  isUnlocked={isUnlocked}
+                  onToggle={toggleItem}
+                />
+              ))}
+            </div>
+          )}
+          {displayItems.length === 0 && hideLocked && slotHasAnyItems && (
+            <p className="gear-empty">
+              All {STYLE_LABELS[style].toLowerCase()} items for this slot are locked. Turn off
+              "Hide locked items" to see them.
+            </p>
+          )}
+          {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && (
+            <p className="gear-empty">
+              No {STYLE_LABELS[style].toLowerCase()} items exist for this slot.
+            </p>
+          )}
+        </div>
+      </main>
+    </>
+  );
+}
