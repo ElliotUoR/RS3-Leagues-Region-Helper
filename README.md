@@ -3,6 +3,8 @@
 Static site for preparing for the next RS3 league 'Equilibrium'. Choose your regions, prepare
 gear loadouts for each combat styles; view unlockable abilties and relics, and share/import your loadout.
 
+Visit https://elliotuor.github.io/RS3-Leagues-Region-Helper/ to try it out.
+
 Changes are persisted through local storage and imported builds do not overwrite your stored build unless you
 explicitly tell it to do so.
 
