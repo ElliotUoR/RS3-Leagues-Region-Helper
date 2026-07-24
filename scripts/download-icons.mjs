@@ -62,6 +62,13 @@ async function downloadWithRetry(url, dest) {
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // The wiki can return a 200 with an HTML "file not found" page for a
+      // bad filename - writing that as e.g. a .png would silently corrupt
+      // the icon, so refuse anything that isn't actually an image.
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.startsWith('image/')) {
+        throw new Error(`not an image (content-type: ${contentType || 'unknown'})`);
+      }
       const buf = Buffer.from(await res.arrayBuffer());
       writeFileSync(dest, buf);
       return true;

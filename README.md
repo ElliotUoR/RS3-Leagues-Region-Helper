@@ -18,6 +18,8 @@ A few areas aren't on the main map and are grouped as follows:
 - **Lost Grove** → Tirannwn
 
 
+Feel free to contribute if you notice any mistakes.
+
 ## Development
 
 ```bash
