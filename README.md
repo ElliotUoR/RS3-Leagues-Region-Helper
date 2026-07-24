@@ -1,9 +1,10 @@
 # RS3 Leagues II: Equilibrium — Region Prep
 
-A static reference site for planning region unlocks in RuneScape 3's Leagues II: Equilibrium
-game mode. Misthalin, Karamja, and Havenhythe are always unlocked; you may pick up to 3 more
-regions from the remaining 8. Pick your regions on the map or checklist and see what's
-unlocked — your selection is saved in the browser (`localStorage`), no account or server needed.
+Static site for preparing for the next RS3 league 'Equilibrium'. Choose your regions, prepare
+gear loadouts for each combat styles; view unlockable abilties and relics, and share/import your loadout.
+
+Changes are persisted through local storage and imported builds do not overwrite your stored build unless you
+explicitly tell it to do so.
 
 ## Region mapping notes
 
