@@ -38,7 +38,6 @@ const STYLE_LABELS = {
 };
 
 const SORT_OPTIONS = [
-  { id: 'default', label: 'Default' },
   { id: 'level', label: 'Level' },
   { id: 'damage', label: 'Dmg' },
   { id: 'accuracy', label: 'Acc' },
@@ -46,7 +45,6 @@ const SORT_OPTIONS = [
 ];
 
 function sortItems(items, sortBy) {
-  if (sortBy === 'default') return items;
   return [...items].sort((a, b) => {
     const valueOf = (item) => {
       if (sortBy === 'level') return item.level?.level ?? 0;
@@ -73,7 +71,7 @@ export default function GearPage({
   offhandBlocked,
 }) {
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('default');
+  const [sortBy, setSortBy] = useState('level');
   const [shareStatus, setShareStatus] = useState('idle'); // idle | copied | manual
   const [hideLocked, setHideLocked] = useState(false);
 
