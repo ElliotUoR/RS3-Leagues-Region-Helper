@@ -3,7 +3,7 @@ import { sanitizeRegionSelection } from '../hooks/useRegionSelection';
 import { sanitizeRelicSelection } from '../hooks/useRelicSelection';
 import { sanitizeEquippedNames, sanitizeStyle } from '../data/gearShape';
 
-// Bumped from 3 to 4 to add the gear planner's default style — v2/v3 links
+// Bumped from 3 to 4 to add the gear planner's default style - v2/v3 links
 // still decode fine (defaultStyle just comes back as 'melee'), so no need to
 // bump further or invalidate old links.
 const SHARE_VERSION = 4;
@@ -12,8 +12,8 @@ const SHARE_PARAM = 'share';
 // Encodes the current build (all 4 styles' loadouts + default style + region
 // picks + relic picks) into a URL-safe, LZ-compressed string suitable for
 // the `share` query param. lz-string's dictionary-based compression does
-// well on this JSON shape (lots of repeated keys — style names, region ids,
-// slot names) — typically 40-60% smaller than plain base64 for a realistic
+// well on this JSON shape (lots of repeated keys - style names, region ids,
+// slot names) - typically 40-60% smaller than plain base64 for a realistic
 // loadout.
 export function encodeShareBuild({ regions, equippedNamesByStyle, relics, defaultStyle }) {
   const payload = { v: SHARE_VERSION, r: regions, g: equippedNamesByStyle, k: relics, d: defaultStyle };
@@ -22,9 +22,9 @@ export function encodeShareBuild({ regions, equippedNamesByStyle, relics, defaul
 
 // Decodes a `share` param value back into
 // `{ regions, equippedNamesByStyle, relics, defaultStyle }`. Returns null on
-// any failure (corrupt/truncated/unrecognised-version payload) — callers
+// any failure (corrupt/truncated/unrecognised-version payload) - callers
 // should treat that identically to "no share param at all". Accepts v2/v3
-// payloads (missing relics/defaultStyle fields) for backward compatibility —
+// payloads (missing relics/defaultStyle fields) for backward compatibility -
 // missing fields simply sanitize down to their empty/default value.
 export function decodeShareBuild(param) {
   if (!param) return null;

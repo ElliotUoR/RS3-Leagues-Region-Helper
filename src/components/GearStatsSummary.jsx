@@ -3,7 +3,7 @@ const ATTACK_STYLES = ['stab', 'slash', 'crush', 'magic', 'ranged'];
 // `damage`/`accuracy` are flat rating numbers on every item type, not
 // percentages. Weapon/offhand/ammo ratings are on a much larger numeric
 // scale than armour/accessory ratings, so they're still tracked separately
-// to keep the totals readable — but neither is a "%".
+// to keep the totals readable - but neither is a "%".
 const WEAPON_SLOTS = new Set(['weapon', 'offhand', 'ammo']);
 
 function sumStats(equipped) {
@@ -86,13 +86,13 @@ export default function GearStatsSummary({ equipped }) {
           <tr>
             <td>Attack</td>
             {ATTACK_STYLES.map((k) => (
-              <td key={k}>{totals.attack[k]}</td>
+              <td key={k}>{totals.attack[k].toFixed(1)}</td>
             ))}
           </tr>
           <tr>
             <td>Defence</td>
             {ATTACK_STYLES.map((k) => (
-              <td key={k}>{totals.defence[k]}</td>
+              <td key={k}>{totals.defence[k].toFixed(1)}</td>
             ))}
           </tr>
         </tbody>

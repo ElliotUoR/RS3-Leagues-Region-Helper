@@ -2,7 +2,7 @@
 //
 // Scope: only abilities that runescape.wiki's "Unlocking abilities" section
 // (https://runescape.wiki/w/Abilities#Unlocking_abilities) marks as locked
-// by something other than a plain skill-level requirement — codex reads,
+// by something other than a plain skill-level requirement - codex reads,
 // quest completions, monster/boss drops, shop purchases, or one specific
 // skill milestone (Dive). The vast majority of abilities unlock automatically
 // at their level requirement and are intentionally out of scope here; this
@@ -11,7 +11,7 @@
 //
 // `style` is the ability's real combat-style classification (per
 // runescape.wiki's Melee/Ranged/Magic/Necromancy/Defensive ability-list
-// pages), NOT the skill named in its level requirement — e.g. several
+// pages), NOT the skill named in its level requirement - e.g. several
 // Constitution-levelled abilities (Storm Shards, Onslaught, Reprisal, etc.)
 // are officially "Defensive" abilities usable by any combat style, and are
 // classified here as 'generic'. No unlockable ability is Necromancy-specific
@@ -20,7 +20,7 @@
 //
 // `source.region` follows the exact same conventions as gear.js/regions.js
 // (single id / AND array / `{ anyOf }` OR-group / 'global' / 'relic') and is
-// read by the same gearAvailability.js helpers — no separate ability-specific
+// read by the same gearAvailability.js helpers - no separate ability-specific
 // availability logic needed.
 //
 // Icons come from runescape.wiki's ability icon files, which are named
@@ -33,7 +33,7 @@ export const ABILITY_STYLES = ['melee', 'ranged', 'magic', 'necromancy', 'generi
 // `worldWakes: true` marks the 4 abilities granted by completing The World
 // Wakes (a Kandarin-set quest, per its Guthixian ruins climax). Some players
 // treat this quest as effectively "already done" for Leagues purposes
-// (auto-completed quest lines) — the Abilities page's "World Wakes -
+// (auto-completed quest lines) - the Abilities page's "World Wakes -
 // Autocompleted" toggle uses this flag to show these 4 as unlocked
 // regardless of whether Kandarin is actually selected.
 export const ABILITIES = [

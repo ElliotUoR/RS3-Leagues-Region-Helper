@@ -1,13 +1,13 @@
 // One-time (and re-runnable) migration: downloads every hotlinked
 // runescape.wiki icon referenced in src/data/*.js into public/icons/, then
 // rewrites those data files to reference the local copy instead. Safe to
-// re-run later when new items are added — already-downloaded files are
+// re-run later when new items are added - already-downloaded files are
 // skipped, and only newly-added wiki URLs get fetched.
 //
 // Handles two shapes:
 //   1. Literal icon URL strings, e.g. icon: 'https://runescape.wiki/w/Special:FilePath/X.png'
 //   2. regions.js's `FP(file)` helper, used to build boss-drop icon URLs from
-//      a bare filename — every FP('X.png') call site shares one definition,
+//      a bare filename - every FP('X.png') call site shares one definition,
 //      so once every referenced file is downloaded we flip that single
 //      definition to build a local path instead, fixing every call site at
 //      once without touching them individually.
@@ -26,12 +26,12 @@ const abilitiesFile = path.join(root, 'src', 'data', 'abilities.js');
 const relicsFile = path.join(root, 'src', 'data', 'relics.js');
 const dataFiles = [gearFile, regionsFile, abilitiesFile, relicsFile];
 
-// Note: apostrophes are intentionally allowed in the URL body — some entries
+// Note: apostrophes are intentionally allowed in the URL body - some entries
 // are double-quoted strings with a literal (unescaped) apostrophe in the URL
 // (e.g. "...Stalker's_charm.png"), which is valid JS since double-quoted
 // strings don't terminate on `'`. Single-quoted strings never contain a
 // literal apostrophe (that would be invalid JS), so they always URL-encode
-// it as %27 instead — meaning allowing `'` here can never cause a match to
+// it as %27 instead - meaning allowing `'` here can never cause a match to
 // run past the real end of a single-quoted URL.
 const URL_RE = /https:\/\/runescape\.wiki\/[^\s"`]+\.(?:png|jpg|jpeg|gif|svg)(?:\?[^\s"`]*)?/gi;
 const FP_CALL_RE = /FP\('([^']+)'\)/g;
@@ -133,10 +133,10 @@ async function main() {
     for (const match of originalText.get(file).matchAll(FP_CALL_RE)) fpFilenames.add(match[1]);
   }
   // The FP() call-site argument (`filename`) is used as-is to build the wiki
-  // fetch URL (correct — that's a real URL path segment, %-encoding and
+  // fetch URL (correct - that's a real URL path segment, %-encoding and
   // all). But the file saved to disk needs the *decoded* name: at runtime
   // FP() builds `icons/${filename}` verbatim, and a browser resolving that
-  // as an <img src> auto-decodes any %XX sequences in the path — so
+  // as an <img src> auto-decodes any %XX sequences in the path - so
   // "icons/Lady_Grey%27s_guitar.png" gets requested as
   // "icons/Lady_Grey's_guitar.png". The file on disk has to be named to
   // match what actually gets requested, not the raw call-site argument.
@@ -155,7 +155,7 @@ async function main() {
       if (!text.includes(url)) continue;
       // A decoded local path can contain a literal apostrophe (e.g.
       // "icons/Devourer's_Guard.png") even when the original URL was
-      // single-quoted (with the apostrophe safely %27-encoded) — plainly
+      // single-quoted (with the apostrophe safely %27-encoded) - plainly
       // substituting the URL text in that case would leave a raw apostrophe
       // sitting inside a single-quoted string, breaking JS syntax. Re-quote
       // any single-quoted occurrence as double-quoted first, since that's
@@ -178,7 +178,7 @@ async function main() {
       text = text.replace(FP_DEFINITION, FP_DEFINITION_LOCAL);
       console.log(`Rewrote FP() helper definition to build local icon paths in ${path.relative(root, file)}.`);
     } else if (fpFailed > 0 && text.includes(FP_DEFINITION)) {
-      console.log(`Left FP() helper pointing at runescape.wiki in ${path.relative(root, file)} — ${fpFailed} drop icon(s) failed to download.`);
+      console.log(`Left FP() helper pointing at runescape.wiki in ${path.relative(root, file)} - ${fpFailed} drop icon(s) failed to download.`);
     }
 
     writeFileSync(file, text, 'utf8');

@@ -4,7 +4,7 @@ import { FIXED_REGIONS, MAX_OPTIONAL, REGIONS } from '../data/regions';
 export const REGIONS_STORAGE_KEY = 'rs3-leagues-regions';
 
 // Validates an arbitrary array (from localStorage or a decoded share link)
-// down to known, non-fixed region ids — drops anything stale/invalid/fixed.
+// down to known, non-fixed region ids - drops anything stale/invalid/fixed.
 export function sanitizeRegionSelection(raw) {
   if (!Array.isArray(raw)) return [];
   return raw.filter((id) => REGIONS[id] && !REGIONS[id].fixed);
@@ -24,7 +24,7 @@ function loadInitialSelection() {
 // `initialSelection`, when provided (e.g. a decoded share link), seeds state
 // instead of localStorage. `persist: false` keeps the hook fully interactive
 // (toggleRegion/isUnlocked behave identically either way) but skips writing
-// to localStorage — used for previewing someone else's shared build without
+// to localStorage - used for previewing someone else's shared build without
 // touching the viewer's own saved selection.
 export function useRegionSelection({ initialSelection, persist = true } = {}) {
   const [selected, setSelected] = useState(() => initialSelection ?? loadInitialSelection());

@@ -1,5 +1,5 @@
 // Best-effort mapping from an in-game item/boss name to its runescape.wiki
-// page — most page titles match the display name with spaces swapped for
+// page - most page titles match the display name with spaces swapped for
 // underscores, which is the same convention used for icon FilePath URLs
 // throughout src/data/gear.js and src/data/regions.js.
 export function wikiUrl(name) {

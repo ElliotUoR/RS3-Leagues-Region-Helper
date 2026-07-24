@@ -40,7 +40,7 @@ export default function RegionPicker({ selected, isUnlocked, toggleRegion, overL
         })}
         {overLimit && (
           <p className="region-limit-note">
-            You've selected more than {MAX_OPTIONAL} regions — that's over the Leagues limit.
+            You've selected more than {MAX_OPTIONAL} regions - that's over the Leagues limit.
           </p>
         )}
       </fieldset>

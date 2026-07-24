@@ -17,7 +17,7 @@ function currentRoute() {
 
 // Owns the region-selection and gear-loadout hooks. Rendered with a `key`
 // tied to whether a shared build is active, so entering/exiting shared view
-// fully remounts this subtree — the hooks re-run their seed logic from
+// fully remounts this subtree - the hooks re-run their seed logic from
 // scratch (re-reading real localStorage on exit, or re-seeding from the
 // shared payload on entry) instead of carrying over stale in-memory state.
 function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
@@ -55,7 +55,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
       {sharedBuild && (
         <div className="shared-banner">
           <span>
-            You're viewing a shared build — your own saved regions and gear are unaffected. Feel
+            You're viewing a shared build - your own saved regions and gear are unaffected. Feel
             free to explore; nothing here saves automatically.
           </span>
           <div className="shared-banner-actions">

@@ -39,7 +39,7 @@ export default function AbilitiesPage({ isUnlocked }) {
       <header>
         <h1>Abilities</h1>
         <p>
-          Abilities that are locked behind a codex, quest, drop, or shop purchase — greyed out
+          Abilities that are locked behind a codex, quest, drop, or shop purchase - greyed out
           until you've picked the region(s) that provide them. Abilities that simply unlock at a
           skill level aren't shown here.
         </p>
@@ -72,7 +72,7 @@ export default function AbilitiesPage({ isUnlocked }) {
               <span>World Wakes - Autocompleted</span>
             </label>
 
-            <label className="hide-locked-toggle" title="Skips component tags (Ports components, Cywir components) — you'll only need the ability's other listed region(s).">
+            <label className="hide-locked-toggle" title="Skips component tags (Ports components, Cywir components) - you'll only need the ability's other listed region(s).">
               <input
                 type="checkbox"
                 checked={ignoreComponents}

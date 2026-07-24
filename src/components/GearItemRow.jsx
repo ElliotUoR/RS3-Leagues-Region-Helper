@@ -14,7 +14,7 @@ function describeSource(source) {
 }
 
 // `damage`/`accuracy` are flat rating numbers on every item type, not
-// percentages — RS3's modern combat system doesn't express them as %.
+// percentages - RS3's modern combat system doesn't express them as %.
 const WEAPON_SLOTS = new Set(['weapon', 'offhand', 'ammo']);
 
 function keyStats(item) {

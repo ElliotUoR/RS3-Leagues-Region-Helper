@@ -3,14 +3,14 @@
 const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
 
 // Splits an item's `source.region` into an ordered list of AND-groups, where
-// each group is `{ regions: [...], label?, component? }` — any one region in
+// each group is `{ regions: [...], label?, component? }` - any one region in
 // `regions` being unlocked satisfies that group. An optional `label` (e.g.
 // "Luminate ore") tells the UI to collapse the group's alternatives into a
-// single named tag instead of listing each region — used for wide OR-groups
+// single named tag instead of listing each region - used for wide OR-groups
 // (5+ regions) where spelling out every alternative gets unreadable. An
 // optional `component: true` marks a group that represents an Invention
 // component requirement (e.g. "Cywir components", "Ports components") rather
-// than a plain region visit — see isGearItemAvailable's `ignoreComponents`
+// than a plain region visit - see isGearItemAvailable's `ignoreComponents`
 // option, used by the Abilities page's "Ignore component requirements"
 // toggle to treat these groups as automatically satisfied. Mirrors the
 // `region` conventions documented in gear.js:
@@ -18,7 +18,7 @@ const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
 //   - 'relic'                 -> [{ regions: ['relic'] }]
 //   - a single region id      -> [{ regions: [regionId] }]
 //   - a plain array of region ids (combination item, AND) ->
-//       [{ regions: [id1] }, { regions: [id2] }, ...] — one single-region
+//       [{ regions: [id1] }, { regions: [id2] }, ...] - one single-region
 //       group per entry
 //   - an array that also contains `{ anyOf: [...], label?, component? }`
 //       entries -> each anyOf entry becomes its own OR-group, e.g.
@@ -55,7 +55,7 @@ export function normalizeRegions(item) {
 
 // Items that structurally require more regions than a single Leagues run can
 // unlock (3 fixed + up to 3 optional) are marked `source.impossible: true`
-// rather than expressed as an unsatisfiable region combination — this lets
+// rather than expressed as an unsatisfiable region combination - this lets
 // the UI show a permanent "not obtainable" badge instead of a normal (if
 // always-locked) region tag set. `source.impossibleReason` is an optional
 // human-readable explanation shown in the badge's tooltip.
@@ -68,7 +68,7 @@ export function isGearItemImpossible(item) {
 // OR-alternative, and the item must not be flagged `impossible`.
 //
 // `options.ignoreComponents` (default false) treats any `component: true`
-// group as automatically satisfied regardless of region — used by the
+// group as automatically satisfied regardless of region - used by the
 // Abilities page's "Ignore component requirements" toggle, which lets a
 // player who already has the Invention component stockpiled skip that
 // region requirement while still needing the item's other regions.

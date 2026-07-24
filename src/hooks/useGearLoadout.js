@@ -14,7 +14,7 @@ function loadInitialState() {
     return {
       equippedNames: sanitizeEquippedNames(parsed.equippedNames),
       // Older saves stored the last-viewed tab as `style` rather than an
-      // explicit default — fall back to that if `defaultStyle` isn't there.
+      // explicit default - fall back to that if `defaultStyle` isn't there.
       defaultStyle: sanitizeStyle(parsed.defaultStyle ?? parsed.style),
       activeSlot: GEAR_SLOTS.includes(parsed.activeSlot) ? parsed.activeSlot : 'weapon',
     };
@@ -24,15 +24,15 @@ function loadInitialState() {
 }
 
 // `initialEquippedNames`/`initialDefaultStyle`, when provided (e.g. a decoded
-// share link), seed the loadout instead of localStorage — activeSlot always
+// share link), seed the loadout instead of localStorage - activeSlot always
 // defaults to 'weapon' in that case (a share link doesn't carry transient UI
 // state like which slot was last selected). `persist: false` keeps
 // equip/unequip and default-style changes fully interactive but skips
-// writing to localStorage — used when previewing a shared build without
+// writing to localStorage - used when previewing a shared build without
 // touching the viewer's own saved loadout.
 //
 // The visible tab always opens on `defaultStyle` on every fresh load (page
-// refresh, or opening a share link) — it's an explicit, player-set choice
+// refresh, or opening a share link) - it's an explicit, player-set choice
 // rather than "whichever tab happened to be open last."
 export function useGearLoadout({ initialEquippedNames, initialDefaultStyle, persist = true } = {}) {
   const [initial] = useState(() =>
@@ -95,7 +95,7 @@ export function useGearLoadout({ initialEquippedNames, initialDefaultStyle, pers
     setActiveSlot(slotId);
   }
 
-  // Clears every equipped slot for the *current* style only — the other 3
+  // Clears every equipped slot for the *current* style only - the other 3
   // styles' loadouts are untouched, since each style's gear is planned
   // independently.
   function clearLoadout() {

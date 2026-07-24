@@ -1,4 +1,4 @@
-# RS3 Leagues II: Equilibrium — Region Prep
+# RS3 Leagues II: Equilibrium - Region Prep
 
 Static site for preparing for the next RS3 league 'Equilibrium'. Choose your regions, prepare
 gear loadouts for each combat styles; view unlockable abilties and relics, and share/import your loadout.
@@ -37,7 +37,7 @@ One-time setup after your first push:
 1. Push this repo to GitHub.
 2. In the repo, go to **Settings → Pages**.
 3. Under **Build and deployment → Source**, select **GitHub Actions**.
-4. Push to `main` (or re-run the workflow) — the site will be published at
+4. Push to `main` (or re-run the workflow) - the site will be published at
    `https://<username>.github.io/<repo-name>/`.
 
 The Vite config uses `base: './'`, so the build works under any repo name/subpath without

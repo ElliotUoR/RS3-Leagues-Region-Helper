@@ -83,7 +83,7 @@ export const OPTIONAL_REGIONS = REGION_IDS.filter((id) => !REGIONS[id].fixed);
 // `quest: true` marks a boss whose only encounter is a one-time,
 // non-repeatable quest fight (e.g. Count Draynor, Pest Queen). These stay
 // in the dataset for completeness but are filtered out of the site's
-// visual per-region boss list — only standing/repeatable bosses display.
+// visual per-region boss list - only standing/repeatable bosses display.
 // Note: TokHaar-Hok and Abomination both have a post-quest "refight" option
 // per the wiki, but are still tagged quest:true per explicit user decision.
 //

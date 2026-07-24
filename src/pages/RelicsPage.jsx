@@ -43,7 +43,7 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
         <h1>Relics</h1>
         <p>
           Archaeology relic powers, greyed out until you've picked the region(s) their dig site or
-          collection requires. Pick up to {MAX_SELECTED} to plan your final loadout — click a
+          collection requires. Pick up to {MAX_SELECTED} to plan your final loadout - click a
           picked relic again to free up its slot.
         </p>
       </header>

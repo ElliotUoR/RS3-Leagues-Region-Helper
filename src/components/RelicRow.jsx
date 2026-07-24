@@ -4,8 +4,8 @@ import { wikiContextMenuHandler } from '../utils/wiki';
 
 // Row for a relic power: power name (primary) + relic/artefact name
 // (subtitle), icon, region tags, effect text, and unlock detail. Unlike
-// AbilityRow this one IS clickable — selecting/deselecting one of the
-// player's 3 chosen relics — but right-click still opens the underlying
+// AbilityRow this one IS clickable - selecting/deselecting one of the
+// player's 3 chosen relics - but right-click still opens the underlying
 // relic's wiki page, same as everywhere else.
 export default function RelicRow({ relic, available, isUnlocked, selected, selectable, onToggleSelect }) {
   const classes = [
@@ -19,7 +19,7 @@ export default function RelicRow({ relic, available, isUnlocked, selected, selec
     .join(' ');
 
   // A picked relic must stay removable even if it becomes locked afterwards
-  // (e.g. the player deselects a region it depended on) — only a *new* pick
+  // (e.g. the player deselects a region it depended on) - only a *new* pick
   // requires the relic to be available and a slot to be free.
   const canClick = selected || (available && selectable);
 

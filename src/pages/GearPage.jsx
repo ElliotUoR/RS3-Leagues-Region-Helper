@@ -78,7 +78,7 @@ export default function GearPage({
   const [hideLocked, setHideLocked] = useState(false);
 
   // An item outside the player's picked regions still counts as "available"
-  // once it's the item actually equipped in this slot — that's the whole
+  // once it's the item actually equipped in this slot - that's the whole
   // signal for "this was equipped via Ignore restrictions" (or loaded from a
   // save/share where someone else had it force-equipped). No separate
   // override flag needs to be tracked or persisted anywhere: the equipped
@@ -149,7 +149,7 @@ export default function GearPage({
         </div>
         <p>
           Pick a combat style, then click a slot to see the best-in-slot gear for it. Each item
-          shows the region(s) it needs — greyed-out items are locked until you select those
+          shows the region(s) it needs - greyed-out items are locked until you select those
           regions on the Regions page.
         </p>
       </header>
@@ -204,7 +204,7 @@ export default function GearPage({
 
         <div className="gear-item-list">
           <div className="gear-item-list-header">
-            <h3>{SLOT_LABELS[activeSlot]} — {STYLE_LABELS[style]}</h3>
+            <h3>{SLOT_LABELS[activeSlot]} - {STYLE_LABELS[style]}</h3>
             <input
               type="search"
               className="gear-search"

@@ -4,7 +4,7 @@
 // Each entry's primary `name` is the *relic power* (the permanent passive
 // buff granted at the mysterious monolith, e.g. "Font of Life"), with
 // `relicName` as the underlying artefact/relic that grants it (e.g. "The
-// Mortal Cup") shown as a subtitle — per the naming the relic is commonly
+// Mortal Cup") shown as a subtitle - per the naming the relic is commonly
 // known by is the artefact, but what you actually see and use in-game is the
 // power.
 //
@@ -14,7 +14,7 @@
 // specific skill or combat).
 //
 // `effect` is the relic power's actual in-game description, quoted verbatim
-// from the wiki's relic power infobox — shown in its own colour in the UI to
+// from the wiki's relic power infobox - shown in its own colour in the UI to
 // distinguish "what it does" from "how you unlock it" (`source.detail`).
 //
 // `source.region` follows the exact same conventions as gear.js/abilities.js
@@ -22,7 +22,7 @@
 // past the relic's own collection/dig-site to each *component's* actual
 // origin where a relic combines parts from multiple sources (e.g. Ring of
 // Solomon needs both the Stormguard Citadel dig site AND Armadyl's Tower in
-// Asgarnia) — several relics also chain through an earlier relic's
+// Asgarnia) - several relics also chain through an earlier relic's
 // prerequisite (the four Hand of Glory luck rings must be made in order),
 // which pulls in that earlier relic's region(s) too. Misthalin/Karamja/
 // Havenhythe sources are still listed even though those regions are always
@@ -230,7 +230,7 @@ export const RELICS = [
         "Activate the seed (Imcando anvil, Warforge Dig Site) while wearing flame gloves (All Fired Up quest, a beacon chain across Morytania, Asgarnia, and the Wilderness)",
       impossible: true,
       impossibleReason:
-        'Requires the Warforge Dig Site (Kandarin) plus lighting beacons across Morytania, Asgarnia, and the Wilderness for All Fired Up — 4 optional regions, more than a single Leagues run can unlock.',
+        'Requires the Warforge Dig Site (Kandarin) plus lighting beacons across Morytania, Asgarnia, and the Wilderness for All Fired Up - 4 optional regions, more than a single Leagues run can unlock.',
       region: ['kandarin', 'morytania', 'asgarnia', 'wilderness'],
     },
   },
@@ -354,7 +354,7 @@ export const RELICS = [
     icon: FP('Abyssal_Link.png'),
     source: {
       type: 'skilling',
-      detail: 'Craft via Invention (111) — requires having completed The World Wakes',
+      detail: 'Craft via Invention (111) - requires having completed The World Wakes',
       region: 'kandarin',
     },
   },
@@ -386,7 +386,7 @@ export const RELICS = [
     icon: FP('Conservation_of_Energy.png'),
     source: {
       type: 'skilling',
-      detail: "Craft via Invention (108) — requires deciphering Howl's workshop blueprints (Stormguard Citadel)",
+      detail: "Craft via Invention (108) - requires deciphering Howl's workshop blueprints (Stormguard Citadel)",
       region: 'kandarin',
     },
   },

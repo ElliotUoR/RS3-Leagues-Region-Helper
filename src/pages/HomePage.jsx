@@ -6,7 +6,7 @@ export default function HomePage({ selected, toggleRegion, isUnlocked, overLimit
   return (
     <>
       <header>
-        <h1>RS3 Leagues II: Equilibrium — Region Prep</h1>
+        <h1>RS3 Leagues II: Equilibrium - Region Prep</h1>
         <p>
           Misthalin, Karamja, and Havenhythe are always unlocked. Pick up to 3 more regions to
           plan your route.

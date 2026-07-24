@@ -1,14 +1,14 @@
 // Best-in-slot gear reference for RS3 Leagues II: Equilibrium.
 //
 // Scope: gear that's actually obtainable within a Leagues run (quests, shops,
-// or the region-locked bosses catalogued in regions.js) — not full-game BIS
+// or the region-locked bosses catalogued in regions.js) - not full-game BIS
 // regardless of source. Each style/slot aims to store every genuinely viable
 // item found during research, not just a trimmed top list.
 //
 // `slot: 'weapon'` covers both two-handed weapons and one-handed main-hand
-// weapons — check `twoHanded` to know whether it blocks the offhand slot.
+// weapons - check `twoHanded` to know whether it blocks the offhand slot.
 // Neck/ring/pocket/back items are frequently NOT style-specific (e.g. Amulet
-// of Souls buffs every style) — those are still listed per-style so a
+// of Souls buffs every style) - those are still listed per-style so a
 // style's full loadout can be read from one place, even if the same item
 // appears under multiple styles.
 
@@ -29,7 +29,7 @@ export const GEAR_SLOTS = [
   'pocket',
 ];
 
-// Stat block fields (all optional — populate what the wiki infobox has):
+// Stat block fields (all optional - populate what the wiki infobox has):
 //   level            skill/combat level requirement
 //   armour           armour rating
 //   lifeBonus        life points bonus
@@ -47,23 +47,23 @@ export const GEAR_SLOTS = [
 //   { type: 'shop', shop: 'Shop Name' }
 //   { type: 'skilling', skill: 'Invention' }
 //   { type: 'combination', region: ['kandarin', 'kharidianDesert'], note: '...' }
-//     — used when an item's crafting chain draws materials from genuinely
+//     - used when an item's crafting chain draws materials from genuinely
 //     different named sources across regions (rather than one boss with
 //     multiple drop locations); see `region` conventions below
 //
 // `region` conventions:
 //   - a single region id (e.g. 'wilderness') ties the item to that region
 //   - 'global' means the item is obtainable regardless of region selection
-//     (Treasure Trails/clue scroll rewards, Reaper point purchases — these
+//     (Treasure Trails/clue scroll rewards, Reaper point purchases - these
 //     aren't gated behind any of the 11 Leagues regions)
-//   - 'relic' means the item is a Leagues relic reward — always available
+//   - 'relic' means the item is a Leagues relic reward - always available
 //     regardless of region selection, shown with its own distinct tag
 //     (separate from 'global' so it reads differently in the UI)
 //   - an array of region ids (e.g. ['misthalin', 'kharidianDesert']) marks a
 //     combination item whose crafting/assembly chain draws from multiple
-//     regions — ALL listed regions must be unlocked to obtain it (AND)
+//     regions - ALL listed regions must be unlocked to obtain it (AND)
 //   - an array entry can also be `{ anyOf: [...] }` instead of a plain region
-//     id, marking an OR-group within an otherwise-AND array — e.g.
+//     id, marking an OR-group within an otherwise-AND array - e.g.
 //     region: ['asgarnia', { anyOf: ['wilderness', 'kandarin'] }] means
 //     "asgarnia AND (wilderness OR kandarin)". A bare `{ anyOf: [...] }` with
 //     no surrounding array means the whole requirement is just that one
@@ -71,7 +71,7 @@ export const GEAR_SLOTS = [
 //     exact evaluation logic and RegionTags.jsx for how it renders
 //     (AND-groups separated by "+", OR-alternatives within a group by "/").
 //   - an `anyOf` entry can also carry a `label` (e.g.
-//     `{ anyOf: [...5 regions], label: 'Luminate ore' }`) — used for wide
+//     `{ anyOf: [...5 regions], label: 'Luminate ore' }`) - used for wide
 //     OR-groups (4+ regions, typically a shared crafting-material source
 //     like an ore) where spelling out every alternative pill gets
 //     unreadable. Labelled groups collapse to a single named tag that lights
@@ -80,7 +80,7 @@ export const GEAR_SLOTS = [
 //     per-region pills.
 //   - `source.impossible: true` marks an item that structurally requires
 //     more regions than a single Leagues run can unlock (3 fixed + up to 3
-//     optional) — rather than expressing an unsatisfiable region
+//     optional) - rather than expressing an unsatisfiable region
 //     combination, this shows a permanent "Not obtainable" badge instead of
 //     region tags. Pair with `source.impossibleReason` for the tooltip text.
 //
@@ -90,7 +90,7 @@ export const GEAR_SLOTS = [
 
 // neck/ring/pocket/back items, defined once and applied to every style whose
 // `applicableStyles` includes it (see the population loop at the bottom of
-// this file) — most of these buff several or all combat styles at once.
+// this file) - most of these buff several or all combat styles at once.
 const UNIVERSAL_ACCESSORIES = [
   // NECK
   { name: 'Amulet of the Forsaken', slot: 'neck', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
@@ -132,7 +132,7 @@ const UNIVERSAL_ACCESSORIES = [
   { name: 'Essence of Finality amulet', slot: 'neck', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
     stats: { damage: 55.7, accuracy: 0, lifeBonus: 0, prayerBonus: 7, setEffect: 'Best-in-slot all-style neck item.' },
     icon: 'icons/Essence_of_Finality_amulet.png',
-    source: { type: 'combination', region: 'global', note: 'Crafted from Alchemical hydrix + Amulet of Souls (both skilling) + a Reaper necklace (500 Reaper points) — no real-region gate on any component.' } },
+    source: { type: 'combination', region: 'global', note: 'Crafted from Alchemical hydrix + Amulet of Souls (both skilling) + a Reaper necklace (500 Reaper points) - no real-region gate on any component.' } },
   { name: 'Third age amulet', slot: 'neck', applicableStyles: ['magic'], level: null,
     stats: { damage: 37.3, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: null },
     icon: 'icons/Third_age_amulet.png',
@@ -482,11 +482,11 @@ const UNIVERSAL_ACCESSORIES = [
     icon: "icons/Culinaromancer's_gloves_10.png",
     source: { type: 'quest', quest: 'Recipe for Disaster (Lumbridge Castle cellar reward)', region: 'misthalin' } },
   { name: 'Regen bracelet', slot: 'hands', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
-    stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats — passive-only item: triples base life point regeneration rate (0.1% to 0.3% every 6s).' },
+    stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats - passive-only item: triples base life point regeneration rate (0.1% to 0.3% every 6s).' },
     icon: 'icons/Regen_bracelet.png',
     source: { type: 'shop', shop: 'Crafted', region: 'global' } },
   { name: 'Combat bracelet', slot: 'hands', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
-    stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats — passive-only item: charges provide teleports to Warriors\' Guild, Champions\' Guild, Edgeville Monastery, and Ranging Guild.' },
+    stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats - passive-only item: charges provide teleports to Warriors\' Guild, Champions\' Guild, Edgeville Monastery, and Ranging Guild.' },
     icon: 'icons/Combat_bracelet.png',
     source: { type: 'shop', shop: 'Crafted', region: 'global' } },
 
@@ -510,7 +510,7 @@ const UNIVERSAL_ACCESSORIES = [
 
   // FEET
   { name: 'Goldenhawk boots', slot: 'feet', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
-    stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats — passive-only item: grants Agility XP periodically while running, skilling, or using ultimate abilities.' },
+    stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats - passive-only item: grants Agility XP periodically while running, skilling, or using ultimate abilities.' },
     icon: 'icons/Goldenhawk_boots.png',
     source: { type: 'shop', shop: '"Golden Footed" Tier 1 Leagues relic', region: 'relic' } },
 ];
@@ -555,7 +555,7 @@ export const GEAR = {
           attack: { stab: 0, slash: 2123.3, crush: 0, magic: 0, ranged: 0 },
           defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 },
           damage: 2123.3, accuracy: 2765, lifeBonus: 0, prayerBonus: 0,
-          setEffect: 'Purifying Light (passive on kill): 65-75% melee dmg to up to 4 extra enemies within 6 tiles. Special: Sunfall Slam. Hybrid weapon — usable with any combat style.',
+          setEffect: 'Purifying Light (passive on kill): 65-75% melee dmg to up to 4 extra enemies within 6 tiles. Special: Sunfall Slam. Hybrid weapon - usable with any combat style.',
         },
         icon: "icons/Tumeken's_Light.png",
         source: { type: 'boss', boss: 'Amascut, the Devourer', region: 'kharidianDesert' },
@@ -572,7 +572,7 @@ export const GEAR = {
           setEffect: 'Ashen Vow: +12% dmg dealt / -12% dmg received vs marked "Flamebound Rival". Special: Igneous Showdown.',
         },
         icon: 'icons/Ek-ZekKil.png',
-        source: { type: 'boss', boss: 'TzKal-Zuk', region: 'misthalin', note: 'Smithed (95 Smithing) from obsidian blade + magma core + ancient hilt, all Hard Mode drops from TzKal-Zuk (EGWD TzekHaar Front, Senntisten) — corrected from karamja to match TzKal-Zuk\'s own region.' },
+        source: { type: 'boss', boss: 'TzKal-Zuk', region: 'misthalin', note: 'Smithed (95 Smithing) from obsidian blade + magma core + ancient hilt, all Hard Mode drops from TzKal-Zuk (EGWD TzekHaar Front, Senntisten) - corrected from karamja to match TzKal-Zuk\'s own region.' },
       },
       {
         name: 'Dark Shard of Leng',
@@ -656,7 +656,7 @@ export const GEAR = {
           setEffect: null,
         },
         icon: 'icons/Abyssal_scourge.png',
-        source: { type: 'boss', boss: 'Abyssal lords', region: 'misthalin', note: '115 Slayer monster; spawns at the Senntisten Asylum (misthalin) and also in the Wilderness — misthalin alone is sufficient to obtain it.' },
+        source: { type: 'boss', boss: 'Abyssal lords', region: 'misthalin', note: '115 Slayer monster; spawns at the Senntisten Asylum (misthalin) and also in the Wilderness - misthalin alone is sufficient to obtain it.' },
       },
       {
         name: 'Spear of Annihilation',
@@ -670,7 +670,7 @@ export const GEAR = {
           setEffect: 'Halberd, 2-tile range.',
         },
         icon: 'icons/Spear_of_Annihilation.png',
-        source: { type: 'skilling', detail: 'Archaeology — rare (1/50,000) excavation from the Bandos\'s sanctum debris hotspot at the Warforge Dig Site, beneath Feldip Hills.', region: 'kandarin' },
+        source: { type: 'skilling', detail: 'Archaeology - rare (1/50,000) excavation from the Bandos\'s sanctum debris hotspot at the Warforge Dig Site, beneath Feldip Hills.', region: 'kandarin' },
       },
       {
         name: 'Masterwork Spear of Annihilation',
@@ -863,7 +863,7 @@ export const GEAR = {
           setEffect: null,
         },
         icon: "icons/Superior_Statius's_warhammer.png",
-        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Statius's warhammer (Revenants, Forinthry Dungeon) via an ancient warriors' equipment patch obtained from Wilderness Slayer — both wilderness-sourced." },
+        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Statius's warhammer (Revenants, Forinthry Dungeon) via an ancient warriors' equipment patch obtained from Wilderness Slayer - both wilderness-sourced." },
       },
       {
         name: "Superior Vesta's Longsword",
@@ -877,7 +877,7 @@ export const GEAR = {
           setEffect: null,
         },
         icon: "icons/Superior_Vesta's_longsword.png",
-        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Vesta's longsword (Chaos Elemental / Revenants) via an ancient warriors' equipment patch obtained from Wilderness Slayer — both wilderness-sourced." },
+        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Vesta's longsword (Chaos Elemental / Revenants) via an ancient warriors' equipment patch obtained from Wilderness Slayer - both wilderness-sourced." },
       },
       {
         name: "Superior Vesta's Spear",
@@ -891,7 +891,7 @@ export const GEAR = {
           setEffect: 'Halberd, 2-tile range.',
         },
         icon: "icons/Superior_Vesta's_spear.png",
-        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Vesta's spear via an ancient warriors' equipment patch obtained from Wilderness Slayer — both wilderness-sourced." },
+        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Vesta's spear via an ancient warriors' equipment patch obtained from Wilderness Slayer - both wilderness-sourced." },
       },
       {
         name: "Varanus's Mercy",
@@ -1406,7 +1406,7 @@ export const GEAR = {
       { name: "Superior Statius's full helm", slot: 'head', level: { skill: 'Defence', level: 88 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 414.8, slash: 414.8, crush: 414.8, magic: -622, ranged: -331 }, damage: 22.0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Tier 88 upgrade of base Statius\'s full helm. Non-tradeable once upgraded, augmentable.' },
         icon: "icons/Superior_Statius's_full_helm.png",
-        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Statius's full helm (Chaos Elemental drop) via an ancient warriors' equipment patch obtained from Wilderness Slayer — both components are wilderness-sourced." } },
+        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Statius's full helm (Chaos Elemental drop) via an ancient warriors' equipment patch obtained from Wilderness Slayer - both components are wilderness-sourced." } },
       { name: 'Bane full helm', slot: 'head', level: { skill: 'Defence', level: 80 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 338.8, slash: 338.8, crush: 338.8, magic: -508, ranged: -271 }, damage: 0, accuracy: 0, lifeBonus: 750, prayerBonus: 0, setEffect: null },
         icon: 'icons/Bane_full_helm.png', source: { type: 'skill', detail: 'Smithed from banite ore, generally available' } },
@@ -1448,7 +1448,7 @@ export const GEAR = {
             { anyOf: ['anachronia', 'asgarnia', 'wilderness', 'kandarin'], label: 'Oricalchite ore' },
             { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' },
           ],
-          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore — only the ore-source regions gate this piece.',
+          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore - only the ore-source regions gate this piece.',
         } },
       { name: 'Trimmed masterwork helm', slot: 'head', level: { skill: 'Defence', level: 92 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: -686, ranged: -365 }, defence: { stab: 457.4, slash: 457.4, crush: 457.4, magic: 0, ranged: 0 }, damage: 23.0, accuracy: 0, lifeBonus: 0, prayerBonus: 2, setEffect: null },
@@ -1487,7 +1487,7 @@ export const GEAR = {
       { name: "Superior Vesta's Chainbody", slot: 'torso', level: { skill: 'Defence', level: 88 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 477.0, slash: 477.0, crush: 477.0, magic: -715, ranged: -381 }, damage: 33.0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Tier 88 upgrade of base Vesta\'s chainbody. Non-tradeable once upgraded, augmentable.' },
         icon: "icons/Superior_Vesta's_Chainbody.png",
-        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Vesta's chainbody (Chaos Elemental drop) via an ancient warriors' equipment patch obtained from Wilderness Slayer — both components are wilderness-sourced." } },
+        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Vesta's chainbody (Chaos Elemental drop) via an ancient warriors' equipment patch obtained from Wilderness Slayer - both components are wilderness-sourced." } },
       { name: 'Bane platebody', slot: 'torso', level: { skill: 'Defence', level: 80 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 389.6, slash: 389.6, crush: 389.6, magic: -584, ranged: -311 }, damage: 0, accuracy: 0, lifeBonus: 1125, prayerBonus: 0, setEffect: null },
         icon: 'icons/Bane_platebody.png', source: { type: 'skill', detail: 'Smithed from banite ore, generally available' } },
@@ -1538,7 +1538,7 @@ export const GEAR = {
             { anyOf: ['anachronia', 'asgarnia', 'wilderness', 'kandarin'], label: 'Oricalchite ore' },
             { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' },
           ],
-          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore — only the ore-source regions gate this piece.',
+          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore - only the ore-source regions gate this piece.',
         } },
       { name: 'Trimmed masterwork platebody', slot: 'torso', level: { skill: 'Defence', level: 92 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: -789, ranged: -420 }, defence: { stab: 526.0, slash: 526.0, crush: 526.0, magic: 0, ranged: 0 }, damage: 34.5, accuracy: 0, lifeBonus: 0, prayerBonus: 3, setEffect: null },
@@ -1577,7 +1577,7 @@ export const GEAR = {
       { name: "Superior Vesta's plateskirt", slot: 'legs', level: { skill: 'Defence', level: 88 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 456.2, slash: 456.2, crush: 456.2, magic: -684, ranged: -364 }, damage: 27.5, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Tier 88 upgrade of base Vesta\'s plateskirt. Non-tradeable once upgraded, augmentable.' },
         icon: "icons/Superior_Vesta's_plateskirt.png",
-        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Vesta's plateskirt (Chaos Elemental drop) via an ancient warriors' equipment patch obtained from Wilderness Slayer — both components are wilderness-sourced." } },
+        source: { type: 'combination', region: ['wilderness'], note: "Upgrade of Vesta's plateskirt (Chaos Elemental drop) via an ancient warriors' equipment patch obtained from Wilderness Slayer - both components are wilderness-sourced." } },
       { name: 'Bane platelegs', slot: 'legs', level: { skill: 'Defence', level: 80 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 372.6, slash: 372.6, crush: 372.6, magic: -558, ranged: -298 }, damage: 0, accuracy: 0, lifeBonus: 1125, prayerBonus: 0, setEffect: null },
         icon: 'icons/Bane_platelegs.png', source: { type: 'skill', detail: 'Smithed from banite ore, generally available' } },
@@ -1619,7 +1619,7 @@ export const GEAR = {
             { anyOf: ['anachronia', 'asgarnia', 'wilderness', 'kandarin'], label: 'Oricalchite ore' },
             { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' },
           ],
-          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore — only the ore-source regions gate this piece.',
+          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore - only the ore-source regions gate this piece.',
         } },
       { name: 'Trimmed masterwork platelegs', slot: 'legs', level: { skill: 'Defence', level: 92 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: -754, ranged: -402 }, defence: { stab: 503.1, slash: 503.1, crush: 503.1, magic: 0, ranged: 0 }, damage: 28.7, accuracy: 0, lifeBonus: 0, prayerBonus: 2, setEffect: null },
@@ -1666,7 +1666,7 @@ export const GEAR = {
             { anyOf: ['anachronia', 'asgarnia', 'wilderness', 'kandarin'], label: 'Oricalchite ore' },
             { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' },
           ],
-          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore — only the ore-source regions gate this piece.',
+          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore - only the ore-source regions gate this piece.',
         } },
       { name: 'Trimmed masterwork gloves', slot: 'hands', level: { skill: 'Defence', level: 92 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: -173, ranged: -92 }, defence: { stab: 114.3, slash: 114.3, crush: 114.3, magic: 0, ranged: 0 }, damage: 14.3, accuracy: 0, lifeBonus: 0, prayerBonus: 1, setEffect: null },
@@ -1716,7 +1716,7 @@ export const GEAR = {
             { anyOf: ['anachronia', 'asgarnia', 'wilderness', 'kandarin'], label: 'Oricalchite ore' },
             { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' },
           ],
-          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore — only the ore-source regions gate this piece.',
+          note: 'Smithed (99 Smithing) from glorious bars, refined from luminate/oricalchite/light animica ore - only the ore-source regions gate this piece.',
         } },
       { name: 'Trimmed masterwork boots', slot: 'feet', level: { skill: 'Defence', level: 92 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: -173, ranged: -92 }, defence: { stab: 114.3, slash: 114.3, crush: 114.3, magic: 0, ranged: 0 }, damage: 14.3, accuracy: 0, lifeBonus: 0, prayerBonus: 1, setEffect: null },
@@ -1744,7 +1744,7 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 2765 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 1211.3, accuracy: 2765, lifeBonus: 0, prayerBonus: 0, setEffect: 'Passive "Perfect Equilibrium": builds stacks per hit, triggers bonus damage on threshold. Special attack "Balance by Force" reduces stacks needed.' },
         icon: 'icons/Bow_of_the_Last_Guardian.png', source: { type: 'boss', boss: 'Zamorak, Lord of Chaos', region: 'misthalin' } },
       { name: 'Seren godbow', slot: 'weapon', twoHanded: true, level: { skill: 'Ranged', level: 92 },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 2577 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 2056.2, accuracy: 2577, lifeBonus: 0, prayerBonus: 0, setEffect: 'Special attack "Crystal Rain" (30% adrenaline): fires 5 arrows, 30s cooldown. Chargebow — supplies own ammo.' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 2577 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 2056.2, accuracy: 2577, lifeBonus: 0, prayerBonus: 0, setEffect: 'Special attack "Crystal Rain" (30% adrenaline): fires 5 arrows, 30s cooldown. Chargebow - supplies own ammo.' },
         icon: 'icons/Seren_godbow.png', source: { type: 'boss', boss: 'Telos, the Warden', region: 'kharidianDesert', note: 'Assembled from a Dormant Seren godbow + 3 anima orbs (pure/volcanic/corrupted), all Telos drops.' } },
       { name: 'Eldritch crossbow', slot: 'weapon', twoHanded: true, level: { skill: 'Ranged', level: 92 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 2577 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 1173.0, accuracy: 2577, lifeBonus: 0, prayerBonus: 0, setEffect: 'Special attack "Split Soul" (25% adrenaline): converts Soul Split healing into damage against target for 15s.' },
@@ -1805,8 +1805,8 @@ export const GEAR = {
         source: {
           type: 'combination',
           impossible: true,
-          impossibleReason: 'Requires eternal magic logs/branches (kandarin), a fully repaired Noxious weapon + Ascension crossbow (undead dragon leather, wilderness), Morytania materials, and light animica ore (anachronia/tirannwn/kharidianDesert) — four non-overlapping regions, more than a single Leagues run (max 3 optional) can unlock.',
-          note: 'Requires kandarin + wilderness + morytania + light animica ore — 4 non-overlapping regions, more than a Leagues run can unlock.',
+          impossibleReason: 'Requires eternal magic logs/branches (kandarin), a fully repaired Noxious weapon + Ascension crossbow (undead dragon leather, wilderness), Morytania materials, and light animica ore (anachronia/tirannwn/kharidianDesert) - four non-overlapping regions, more than a single Leagues run (max 3 optional) can unlock.',
+          note: 'Requires kandarin + wilderness + morytania + light animica ore - 4 non-overlapping regions, more than a Leagues run can unlock.',
         },
       },
     ],
@@ -1836,7 +1836,7 @@ export const GEAR = {
         icon: 'icons/Black_stone_arrows.png', source: { type: 'boss', boss: 'Crassian Leviathan', region: 'wilderness', note: 'Tips also drop from Taraket the Necromancer. Fletching recipe bought for 350,000 Dungeoneering tokens.' } },
       { name: 'Ascendri bolts', slot: 'ammo', level: { skill: 'Ranged', level: 90, note: '80 Fletching to make' },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1353.6 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 902.4, accuracy: null, lifeBonus: 0, prayerBonus: 0, setEffect: 'Can be enchanted (90 Magic, Enchant Crossbow Bolt) into Enchanted ascendri bolts for a bonus special ability.' },
-        icon: 'icons/Ascendri_bolts.png', source: { type: 'boss', boss: 'Legio Primus (Ascension Monastery)', region: 'kandarin', note: 'Fletched from Ascension bolts (Legiones drop) tipped with Hydrix — Ascension Monastery is kandarin, not the Wilderness Ambassador fight.' } },
+        icon: 'icons/Ascendri_bolts.png', source: { type: 'boss', boss: 'Legio Primus (Ascension Monastery)', region: 'kandarin', note: 'Fletched from Ascension bolts (Legiones drop) tipped with Hydrix - Ascension Monastery is kandarin, not the Wilderness Ambassador fight.' } },
       { name: 'Ascension bolts', slot: 'ammo', level: { skill: 'Ranged', level: 90 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1296 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 1296, accuracy: null, lifeBonus: 0, prayerBonus: 0, setEffect: null },
         icon: 'icons/Ascension_bolts.png', source: { type: 'boss', boss: 'Legio Primus', region: 'kandarin', note: 'Direct monster drop from the Legiones.' } },
@@ -2113,7 +2113,7 @@ export const GEAR = {
         level: { skill: 'Magic', level: 95 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 2765, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 },
           damage: 912, accuracy: 2765, lifeBonus: 0, prayerBonus: 0,
-          setEffect: 'Paired with Ode to Deceit: "Song of Destruction" — damage-over-time abilities build up to 100 Essence Corruption stacks for scaling damage/adrenaline bonuses. Innate Mastery enchant (Shard of Genesis Essence) raises magic attack to 3100.' },
+          setEffect: 'Paired with Ode to Deceit: "Song of Destruction" - damage-over-time abilities build up to 100 Essence Corruption stacks for scaling damage/adrenaline bonuses. Innate Mastery enchant (Shard of Genesis Essence) raises magic attack to 3100.' },
         icon: 'icons/Roar_of_Awakening.png',
         source: { type: 'boss', boss: 'Nakatra, Devourer Eternal', region: 'misthalin' },
       },
@@ -2309,8 +2309,8 @@ export const GEAR = {
         source: {
           type: 'combination',
           impossible: true,
-          impossibleReason: "Requires an Abyssal runic synapse (Abyss runecrafting, wilderness), volatile runic bricks, a fully repaired noxious weapon, and glorious bars refined from luminate/oricalchite/light animica ore — more distinct optional regions than a single Leagues run (max 3) can unlock.",
-          note: 'Requires wilderness (Abyss runecrafting) plus luminate/oricalchite/light animica ore access — more regions than a Leagues run can unlock.',
+          impossibleReason: "Requires an Abyssal runic synapse (Abyss runecrafting, wilderness), volatile runic bricks, a fully repaired noxious weapon, and glorious bars refined from luminate/oricalchite/light animica ore - more distinct optional regions than a single Leagues run (max 3) can unlock.",
+          note: 'Requires wilderness (Abyss runecrafting) plus luminate/oricalchite/light animica ore access - more regions than a Leagues run can unlock.',
         },
       },
     ],
@@ -2831,7 +2831,7 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 259.8, slash: 259.8, crush: 259.8, magic: 259.8, ranged: 259.8 }, damage: 17.5, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Deathdealer robes (Tier 70): per piece worn, 1% chance to apply Death Mark' },
         icon: 'icons/Deathdealer_hood_(tier_70).png', source: { type: 'skill', detail: "Crafted at Soul Forge, Kili's Knowledge V (power)" } },
       { name: 'Crown of the First Necromancer', slot: 'head', level: { skill: 'Defence', level: 95, note: 'also Necromancy 95' },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 491.6, slash: 491.6, crush: 491.6, magic: 491.6, ranged: 491.6 }, damage: 23.7, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer — 2pc: +7% conjure basic damage per piece (up to 5); 4pc: +5% conjure duration per piece (up to 5)' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 491.6, slash: 491.6, crush: 491.6, magic: 491.6, ranged: 491.6 }, damage: 23.7, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer - 2pc: +7% conjure basic damage per piece (up to 5); 4pc: +5% conjure duration per piece (up to 5)' },
         icon: 'icons/Crown_of_the_First_Necromancer.png', source: { type: 'boss', boss: 'Rasial, the First Necromancer', region: 'misthalin' } },
       { name: "Misalionar's death mask", slot: 'head', level: { skill: 'Defence', level: 95, note: 'also Necromancy 95' },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 491.6, slash: 491.6, crush: 491.6, magic: 491.6, ranged: 491.6 }, damage: 23.7, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Identical stats to Crown of the First Necromancer.' },
@@ -2853,7 +2853,7 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 500.9, slash: 500.9, crush: 500.9, magic: 500.9, ranged: 500.9 }, damage: 33.7, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Deathdealer robes (Tier 90): per piece worn, 2% chance to apply Death Mark' },
         icon: 'icons/Deathdealer_robe_top_(tier_90).png', source: { type: 'skill', detail: "Crafted at Soul Forge, Kili's Knowledge VII (power)" } },
       { name: 'Robe top of the First Necromancer', slot: 'torso', level: { skill: 'Defence', level: 95, note: 'also Necromancy 95' },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 565.3, slash: 565.3, crush: 565.3, magic: 565.3, ranged: 565.3 }, damage: 35.6, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer — 2pc: +7% conjure basic damage per piece; 4pc: +5% conjure duration per piece' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 565.3, slash: 565.3, crush: 565.3, magic: 565.3, ranged: 565.3 }, damage: 35.6, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer - 2pc: +7% conjure basic damage per piece; 4pc: +5% conjure duration per piece' },
         icon: 'icons/Robe_top_of_the_First_Necromancer.png', source: { type: 'boss', boss: 'Rasial, the First Necromancer', region: 'misthalin' } },
     ],
     legs: [
@@ -2864,7 +2864,7 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 479.1, slash: 479.1, crush: 479.1, magic: 479.1, ranged: 479.1 }, damage: 28.1, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Deathdealer robes (Tier 90): per piece worn, 2% chance to apply Death Mark' },
         icon: 'icons/Deathdealer_robe_bottom_(tier_90).png', source: { type: 'skill', detail: "Crafted at Soul Forge, Kili's Knowledge VII (power)" } },
       { name: 'Robe bottom of the First Necromancer', slot: 'legs', level: { skill: 'Defence', level: 95, note: 'also Necromancy 95' },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 540.7, slash: 540.7, crush: 540.7, magic: 540.7, ranged: 540.7 }, damage: 29.6, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer — 2pc: +7% conjure basic damage per piece; 4pc: +5% conjure duration per piece' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 540.7, slash: 540.7, crush: 540.7, magic: 540.7, ranged: 540.7 }, damage: 29.6, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer - 2pc: +7% conjure basic damage per piece; 4pc: +5% conjure duration per piece' },
         icon: 'icons/Robe_bottom_of_the_First_Necromancer.png', source: { type: 'boss', boss: 'Rasial, the First Necromancer', region: 'misthalin' } },
     ],
     hands: [
@@ -2875,7 +2875,7 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 108.9, slash: 108.9, crush: 108.9, magic: 108.9, ranged: 108.9 }, damage: 14.0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Deathdealer robes (Tier 90): per piece worn, 2% chance to apply Death Mark' },
         icon: 'icons/Deathdealer_gloves_(tier_90).png', source: { type: 'skill', detail: "Crafted at Soul Forge, Kili's Knowledge VII (power)" } },
       { name: 'Hand wrap of the First Necromancer', slot: 'hands', level: { skill: 'Defence', level: 95, note: 'also Necromancy 95' },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 122.9, slash: 122.9, crush: 122.9, magic: 122.9, ranged: 122.9 }, damage: 14.8, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer — 2pc: +7% conjure basic damage per piece; 4pc: +5% conjure duration per piece' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 122.9, slash: 122.9, crush: 122.9, magic: 122.9, ranged: 122.9 }, damage: 14.8, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer - 2pc: +7% conjure basic damage per piece; 4pc: +5% conjure duration per piece' },
         icon: 'icons/Hand_wrap_of_the_First_Necromancer.png', source: { type: 'boss', boss: 'Rasial, the First Necromancer', region: 'misthalin' } },
     ],
     feet: [
@@ -2886,7 +2886,7 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 108.9, slash: 108.9, crush: 108.9, magic: 108.9, ranged: 108.9 }, damage: 14.0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Deathdealer robes (Tier 90): per piece worn, 2% chance to apply Death Mark' },
         icon: 'icons/Deathdealer_boots_(tier_90).png', source: { type: 'skill', detail: "Crafted at Soul Forge, Kili's Knowledge VII (power)" } },
       { name: 'Foot wraps of the First Necromancer', slot: 'feet', level: { skill: 'Defence', level: 95, note: 'also Necromancy 95' },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 122.9, slash: 122.9, crush: 122.9, magic: 122.9, ranged: 122.9 }, damage: 14.8, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer — 2pc: +7% conjure basic damage per piece; 4pc: +5% conjure duration per piece' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 122.9, slash: 122.9, crush: 122.9, magic: 122.9, ranged: 122.9 }, damage: 14.8, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Robes of the First Necromancer - 2pc: +7% conjure basic damage per piece; 4pc: +5% conjure duration per piece' },
         icon: 'icons/Foot_wraps_of_the_First_Necromancer.png', source: { type: 'boss', boss: 'Rasial, the First Necromancer', region: 'misthalin' } },
     ],
     back: [],
