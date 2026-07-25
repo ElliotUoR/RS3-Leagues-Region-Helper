@@ -4,6 +4,7 @@ import GearItemRow from '../components/GearItemRow';
 import GearStatsSummary from '../components/GearStatsSummary';
 import { COMBAT_STYLES, GEAR } from '../data/gear';
 import { isGearItemAvailable } from '../data/gearAvailability';
+import { getArmourRating } from '../utils/gearStats';
 import { buildShareUrl } from '../utils/shareBuild';
 
 const SLOT_LABELS = {
@@ -41,13 +42,15 @@ const SORT_OPTIONS = [
   { id: 'level', label: 'Level' },
   { id: 'damage', label: 'Dmg' },
   { id: 'accuracy', label: 'Acc' },
-  { id: 'lifeBonus', label: 'Tank' },
+  { id: 'armour', label: 'Tank (Arm)' },
+  { id: 'lifeBonus', label: 'Tank (LP)' },
 ];
 
-function sortItems(items, sortBy) {
+function sortItems(items, sortBy, style) {
   return [...items].sort((a, b) => {
     const valueOf = (item) => {
       if (sortBy === 'level') return item.level?.level ?? 0;
+      if (sortBy === 'armour') return getArmourRating(item, style);
       return item.stats?.[sortBy] ?? 0;
     };
     return valueOf(b) - valueOf(a);
@@ -96,12 +99,33 @@ export default function GearPage({
     // own sort order (e.g. by Dmg) so locked gear doesn't drown out valid gear.
     const available = matched.filter((item) => isItemAvailable(item));
     const locked = hideLocked ? [] : matched.filter((item) => !isItemAvailable(item));
-    return [...sortItems(available, sortBy), ...sortItems(locked, sortBy)];
+    return [...sortItems(available, sortBy, style), ...sortItems(locked, sortBy, style)];
   }, [style, activeSlot, search, sortBy, isUnlocked, offhandBlocked, equipped, hideLocked]);
+
+  // Only offer sort tabs for stats this slot's items actually carry (e.g. no
+  // "Acc" tab for a pure armour slot where every item's accuracy is 0) -
+  // based on the full unfiltered slot list, not the search results, so tabs
+  // don't flicker in/out as the player types.
+  const visibleSortOptions = useMemo(() => {
+    const items = GEAR[style]?.[activeSlot] ?? [];
+    const hasAccuracy = items.some((item) => item.stats?.accuracy);
+    const hasArmour = items.some((item) => getArmourRating(item, style));
+    const hasLifeBonus = items.some((item) => item.stats?.lifeBonus);
+    return SORT_OPTIONS.filter((opt) => {
+      if (opt.id === 'accuracy') return hasAccuracy;
+      if (opt.id === 'armour') return hasArmour;
+      if (opt.id === 'lifeBonus') return hasLifeBonus;
+      return true;
+    });
+  }, [style, activeSlot]);
 
   useEffect(() => {
     setSearch('');
   }, [style, activeSlot]);
+
+  useEffect(() => {
+    if (!visibleSortOptions.some((opt) => opt.id === sortBy)) setSortBy('level');
+  }, [visibleSortOptions, sortBy]);
 
   async function handleShare() {
     const url = buildShareUrl({ regions: selected, equippedNamesByStyle, relics: selectedRelics, defaultStyle });
@@ -215,7 +239,7 @@ export default function GearPage({
 
           <div className="gear-item-list-controls">
             <div className="sort-tabs" role="tablist" aria-label="Sort by">
-              {SORT_OPTIONS.map((opt) => (
+              {visibleSortOptions.map((opt) => (
                 <button
                   key={opt.id}
                   type="button"
@@ -248,6 +272,7 @@ export default function GearPage({
                 <GearItemRow
                   key={item.name}
                   item={item}
+                  style={style}
                   equipped={equipped[activeSlot]?.name === item.name}
                   available={isItemAvailable(item)}
                   isUnlocked={isUnlocked}

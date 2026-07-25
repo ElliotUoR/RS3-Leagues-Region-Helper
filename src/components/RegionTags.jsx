@@ -70,6 +70,11 @@ export default function RegionTags({ item, isUnlocked }) {
           )}
         </span>
       ))}
+      {item.source?.softRegion && (
+        <TagTooltip className="region-tag region-tag-soft" tooltip={item.source.softNote}>
+          Possibly {REGION_SHORT_LABELS[item.source.softRegion] ?? item.source.softRegion}
+        </TagTooltip>
+      )}
     </span>
   );
 }

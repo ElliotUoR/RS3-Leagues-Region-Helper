@@ -183,7 +183,9 @@ export const ABILITIES = [
     source: {
       type: 'boss',
       detail: 'Read the Invoke Lord of Bones incantation codex, dropped by Zemouregal & Vorkath',
-      region: 'wilderness',
+      region: 'misthalin',
+      softRegion: 'wilderness',
+      softNote: "Fort Forinthry sits inside Wilderness territory - the wiki tags it Misthalin for this League. Purely informational; doesn't affect availability.",
     },
   },
   {

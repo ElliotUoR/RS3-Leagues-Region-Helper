@@ -16,9 +16,7 @@ export default function SpellbooksPage({ isUnlocked }) {
       <header>
         <h1>Spellbooks & Prayers</h1>
         <p>
-          Which spellbooks, prayer books, and their extensions your region picks unlock. Cards
-          with a dashed "Possibly" tag have an unconfirmed extra requirement and are shown as
-          available regardless.
+          Which spellbooks, prayer books, and their extensions your region picks unlock.
         </p>
       </header>
 

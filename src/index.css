@@ -677,6 +677,7 @@ main.gear-page {
 
 .sort-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
 }
 
@@ -924,14 +925,63 @@ main.abilities-page .gear-item-rows {
 }
 
 .gear-item-stats:not(.gear-item-passive) {
-  color: var(--stat-color, #2f8f5c);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
   opacity: 1;
+}
+
+.gear-stat {
   font-weight: 500;
 }
 
+.gear-stat + .gear-stat::before {
+  content: '·';
+  margin: 0 5px;
+  color: var(--text);
+  opacity: 0.4;
+  font-weight: 400;
+}
+
+.gear-stat-dmg {
+  color: var(--stat-dmg-color, #c0392b);
+}
+
+.gear-stat-lp {
+  color: var(--stat-lp-color, #2f8f5c);
+}
+
+.gear-stat-armour {
+  color: var(--stat-armour-color, #5c7a94);
+}
+
+.gear-stat-prayer {
+  color: var(--stat-prayer-color, #6b6b76);
+}
+
+.gear-stat-acc {
+  color: var(--stat-acc-color, #2f8f5c);
+}
+
 @media (prefers-color-scheme: dark) {
-  .gear-item-stats:not(.gear-item-passive) {
-    color: var(--stat-color, #6fd39a);
+  .gear-stat-dmg {
+    color: var(--stat-dmg-color, #ff6b6b);
+  }
+
+  .gear-stat-lp {
+    color: var(--stat-lp-color, #6fd39a);
+  }
+
+  .gear-stat-armour {
+    color: var(--stat-armour-color, #a8c5dd);
+  }
+
+  .gear-stat-prayer {
+    color: var(--stat-prayer-color, #f2f2f7);
+  }
+
+  .gear-stat-acc {
+    color: var(--stat-acc-color, #6fd39a);
   }
 }
 
@@ -939,19 +989,19 @@ main.abilities-page .gear-item-rows {
    the native `title`) - unreachable on touch devices. Tapping toggles a
    floating bubble with the same text; TagTooltip closes it on outside tap. */
 .tag-tooltip-anchor {
-  position: relative;
   margin: 0;
   font: inherit;
   line-height: normal;
   cursor: pointer;
 }
 
+/* Positioned via inline `top`/`left`/`transform` (see TagTooltip.jsx) -
+   rendered through a portal into document.body so it isn't clipped by an
+   ancestor card's `overflow: hidden`, with `position: fixed` so it isn't
+   affected by that ancestor's scroll/stacking context either. */
 .tag-tooltip-bubble {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
+  position: fixed;
+  z-index: 1000;
   width: max-content;
   max-width: 220px;
   padding: 6px 10px;

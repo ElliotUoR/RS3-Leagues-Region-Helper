@@ -1,5 +1,6 @@
 import RegionTags from './RegionTags';
 import RetryImage from './RetryImage';
+import { getArmourRating } from '../utils/gearStats';
 import { wikiContextMenuHandler } from '../utils/wiki';
 
 function describeSource(source) {
@@ -17,19 +18,33 @@ function describeSource(source) {
 // percentages - RS3's modern combat system doesn't express them as %.
 const WEAPON_SLOTS = new Set(['weapon', 'offhand', 'ammo']);
 
-function keyStats(item) {
+// A negative bonus (e.g. -3 prayer on some magic armour) already carries its
+// own minus sign - prefixing every value with "+" unconditionally produces
+// "+-3" instead of "-3".
+function formatSigned(n) {
+  return n < 0 ? `${n}` : `+${n}`;
+}
+
+function keyStats(item, style) {
   const s = item.stats;
   if (!s) return [];
   const isWeaponStat = WEAPON_SLOTS.has(item.slot);
   const bits = [];
-  if (s.damage) bits.push(isWeaponStat ? `${s.damage} dmg rating` : `+${s.damage} dmg`);
-  if (s.accuracy) bits.push(isWeaponStat ? `${s.accuracy} acc rating` : `+${s.accuracy} acc`);
-  if (s.lifeBonus) bits.push(`+${s.lifeBonus} LP`);
-  if (s.prayerBonus) bits.push(`+${s.prayerBonus} prayer`);
+  if (s.damage) {
+    bits.push({ type: 'dmg', text: isWeaponStat ? `${s.damage} dmg rating` : `${formatSigned(s.damage)} dmg` });
+  }
+  if (isWeaponStat) {
+    if (s.accuracy) bits.push({ type: 'acc', text: `${s.accuracy} acc rating` });
+  } else {
+    const armour = getArmourRating(item, style);
+    if (armour) bits.push({ type: 'armour', text: `${armour} armour` });
+  }
+  if (s.lifeBonus) bits.push({ type: 'lp', text: `${formatSigned(s.lifeBonus)} LP` });
+  if (s.prayerBonus) bits.push({ type: 'prayer', text: `${formatSigned(s.prayerBonus)} prayer` });
   return bits;
 }
 
-export default function GearItemRow({ item, equipped, available, isUnlocked, onToggle }) {
+export default function GearItemRow({ item, style, equipped, available, isUnlocked, onToggle }) {
   const classes = [
     'gear-item-row',
     equipped ? 'equipped' : '',
@@ -37,6 +52,7 @@ export default function GearItemRow({ item, equipped, available, isUnlocked, onT
   ]
     .filter(Boolean)
     .join(' ');
+  const stats = keyStats(item, style);
 
   return (
     <div className={classes}>
@@ -64,8 +80,14 @@ export default function GearItemRow({ item, equipped, available, isUnlocked, onT
               </span>
             )}
             <span className="gear-item-source">{describeSource(item.source)}</span>
-            {keyStats(item).length > 0 ? (
-              <span className="gear-item-stats">{keyStats(item).join(' · ')}</span>
+            {stats.length > 0 ? (
+              <span className="gear-item-stats">
+                {stats.map((bit) => (
+                  <span key={bit.type} className={`gear-stat gear-stat-${bit.type}`}>
+                    {bit.text}
+                  </span>
+                ))}
+              </span>
             ) : (
               item.stats?.setEffect && (
                 <span className="gear-item-stats gear-item-passive">{item.stats.setEffect}</span>

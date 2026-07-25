@@ -8,7 +8,7 @@ export const REGIONS = {
   misthalin: {
     name: 'Misthalin',
     fixed: true,
-    includes: ['Underworld'],
+    includes: ['Underworld', 'Fort Forinthry'],
     hotspot: { x: 53, y: 44 },
   },
   karamja: {
@@ -46,7 +46,6 @@ export const REGIONS = {
   wilderness: {
     name: 'Wilderness',
     fixed: false,
-    includes: ['Fort Forinthry'],
     hotspot: { x: 53, y: 20 },
   },
   fremennikProvince: {
@@ -74,7 +73,9 @@ export const OPTIONAL_REGIONS = REGION_IDS.filter((id) => !REGIONS[id].fixed);
 // Boss -> region mappings, sourced from runescape.wiki (location/infobox pages)
 // and cross-checked against the region-folding rules confirmed with the user:
 //   Underworld -> misthalin, Mazcab -> kharidianDesert,
-//   The Arc -> asgarnia, Fort Forinthry -> wilderness,
+//   The Arc -> asgarnia, Fort Forinthry -> misthalin (per its own wiki
+//   infobox's "League" field for the Equilibrium League specifically -
+//   despite being geographically embedded in the Wilderness),
 //   Daemonheim-based content -> wilderness, Feldip Hills -> kandarin,
 //   Troll Country/GWD -> asgarnia, Lost Grove -> tirannwn.
 // A long tail of ~40 older/obscure legacy quest bosses is intentionally
@@ -92,7 +93,7 @@ export const OPTIONAL_REGIONS = REGION_IDS.filter((id) => !REGIONS[id].fixed);
 const FP = (file) => `icons/${file}`;
 
 export const BOSSES = [
-  // Misthalin (incl. Underworld / Senntisten)
+  // Misthalin (incl. Underworld / Senntisten, Fort Forinthry)
   {
     name: 'Dragith Nurn',
     region: 'misthalin',
@@ -231,6 +232,16 @@ export const BOSSES = [
   },
   { name: 'Count Draynor', region: 'misthalin', subLocation: 'Draynor Manor', quest: true },
   { name: 'Culinaromancer', region: 'misthalin', subLocation: 'Realm of the Culinaromancer', quest: true },
+  {
+    name: 'Zemouregal & Vorkath',
+    region: 'misthalin',
+    subLocation: 'Fort Forinthry',
+    drops: [
+      { name: "Vorkath's spike", icon: FP("Vorkath%27s_spike.png") },
+      { name: 'Invoke Lord of Bones incantation codex', icon: FP('Invoke_Lord_of_Bones_incantation_codex.png') },
+      { name: "Vorkath's scale", icon: FP("Vorkath%27s_scale.png") },
+    ],
+  },
 
   // Karamja (incl. TzHaar City)
   {
@@ -731,7 +742,7 @@ export const BOSSES = [
   },
   { name: 'Pest Queen', region: 'asgarnia', subLocation: "Valluta's Domain", quest: true },
 
-  // Wilderness (incl. Fort Forinthry, Daemonheim-based content)
+  // Wilderness (incl. Daemonheim-based content)
   {
     name: 'Corporeal Beast',
     region: 'wilderness',
@@ -804,16 +815,6 @@ export const BOSSES = [
       { name: 'Greater Barge ability codex', icon: FP('Greater_Barge_ability_codex.png') },
       { name: 'Draconic energy', icon: FP('Draconic_energy.png') },
       { name: 'Inert black stone crystal', icon: FP('Inert_black_stone_crystal.png') },
-    ],
-  },
-  {
-    name: 'Zemouregal & Vorkath',
-    region: 'wilderness',
-    subLocation: 'Fort Forinthry',
-    drops: [
-      { name: "Vorkath's spike", icon: FP("Vorkath%27s_spike.png") },
-      { name: 'Invoke Lord of Bones incantation codex', icon: FP('Invoke_Lord_of_Bones_incantation_codex.png') },
-      { name: "Vorkath's scale", icon: FP("Vorkath%27s_scale.png") },
     ],
   },
   {
