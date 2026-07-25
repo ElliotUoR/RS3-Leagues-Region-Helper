@@ -134,6 +134,7 @@ function App() {
         onExitShared={exitSharedView}
         onAdopted={() => setSharedBuild(null)}
       />
+      <footer className="site-footer">Fan made site - not affiliated with Jagex</footer>
     </div>
   );
 }
