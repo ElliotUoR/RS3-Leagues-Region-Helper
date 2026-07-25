@@ -3,6 +3,7 @@ import AbilitiesPage from './pages/AbilitiesPage';
 import GearPage from './pages/GearPage';
 import HomePage from './pages/HomePage';
 import RelicsPage from './pages/RelicsPage';
+import SpellbooksPage from './pages/SpellbooksPage';
 import { REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
@@ -12,6 +13,7 @@ function currentRoute() {
   if (window.location.hash === '#gear') return 'gear';
   if (window.location.hash === '#abilities') return 'abilities';
   if (window.location.hash === '#relics') return 'relics';
+  if (window.location.hash === '#spellbooks') return 'spellbooks';
   return 'home';
 }
 
@@ -82,6 +84,9 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
         <a href="#relics" className={route === 'relics' ? 'active' : ''}>
           Relics
         </a>
+        <a href="#spellbooks" className={route === 'spellbooks' ? 'active' : ''}>
+          Spellbooks & Prayers
+        </a>
       </nav>
 
       {route === 'gear' && (
@@ -91,6 +96,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
       {route === 'relics' && (
         <RelicsPage isUnlocked={isUnlocked} selected={selectedRelics} toggleRelic={toggleRelic} />
       )}
+      {route === 'spellbooks' && <SpellbooksPage isUnlocked={isUnlocked} />}
       {route === 'home' && (
         <HomePage
           selected={selected}

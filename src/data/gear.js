@@ -2462,7 +2462,7 @@ export const GEAR = {
         name: 'Ruinous staff', slot: 'weapon', twoHanded: true,
         level: { skill: 'Magic', level: 90 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 3100, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 },
-          damage: 864, accuracy: 3100, lifeBonus: 0, prayerBonus: 0, setEffect: null },
+          damage: 1296, accuracy: 3100, lifeBonus: 0, prayerBonus: 0, setEffect: 'Passive "Warpbane": +12% damage vs. Daemonheim creatures when both ruinous weapons equipped.' },
         icon: 'icons/Ruinous_staff.png',
         source: { type: 'shop', shop: 'Marmaros, Dungeoneering rewards trader', region: 'wilderness' },
       },
