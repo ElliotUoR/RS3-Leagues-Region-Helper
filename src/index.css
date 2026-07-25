@@ -304,13 +304,21 @@ main {
   margin-top: 8px;
 }
 
-.unlock-region {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+.unlocks-list-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
 }
 
-.unlock-region:last-child {
-  border-bottom: none;
+.unlock-region {
+  flex: 1 1 260px;
+  min-width: 220px;
+  max-width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel-bg) 60%, transparent);
 }
 
 .unlock-region h3 {

@@ -42,6 +42,7 @@ export default function UnlocksList({ isUnlocked }) {
   return (
     <div className="unlocks-list">
       <h2>Your unlocks</h2>
+      <div className="unlocks-list-body">
       {unlockedIds.map((id) => {
         const region = REGIONS[id];
         const bosses = BOSSES.filter((b) => b.region === id && !b.quest);
@@ -80,6 +81,7 @@ export default function UnlocksList({ isUnlocked }) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
