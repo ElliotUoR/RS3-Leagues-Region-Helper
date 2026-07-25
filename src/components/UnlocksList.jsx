@@ -1,10 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BossRow from './BossRow';
 import { BOSSES, FIXED_REGIONS, REGIONS, REGION_IDS } from '../data/regions';
 
+// Purely a local display preference (which regions' unlock lists are
+// collapsed) - persisted so it survives reloads, but deliberately kept out
+// of shareBuild.js's payload since it's not part of the build being shared.
+const MINIMISED_STORAGE_KEY = 'rs3-leagues-unlocks-minimised';
+
+function loadInitialMinimised() {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = window.localStorage.getItem(MINIMISED_STORAGE_KEY);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? new Set(parsed) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
 export default function UnlocksList({ isUnlocked }) {
   const unlockedIds = REGION_IDS.filter((id) => isUnlocked(id));
-  const [minimised, setMinimised] = useState(() => new Set());
+  const [minimised, setMinimised] = useState(loadInitialMinimised);
+
+  useEffect(() => {
+    window.localStorage.setItem(MINIMISED_STORAGE_KEY, JSON.stringify([...minimised]));
+  }, [minimised]);
 
   const toggleMinimised = (id) => {
     setMinimised((prev) => {
