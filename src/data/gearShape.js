@@ -30,3 +30,19 @@ export function sanitizeEquippedNames(raw) {
 export function sanitizeStyle(style) {
   return COMBAT_STYLES.includes(style) ? style : 'melee';
 }
+
+// The weapon slotted inside an equipped Essence of Finality necklace, per
+// style - stored separately from `equippedNames` since it isn't a real
+// GEAR_SLOTS slot (the necklace itself still occupies 'neck' as normal).
+export function emptyEofWeaponNames() {
+  return { melee: null, ranged: null, magic: null, necromancy: null };
+}
+
+export function sanitizeEofWeaponNames(raw) {
+  const names = emptyEofWeaponNames();
+  if (!raw || typeof raw !== 'object') return names;
+  for (const style of COMBAT_STYLES) {
+    if (typeof raw[style] === 'string') names[style] = raw[style];
+  }
+  return names;
+}

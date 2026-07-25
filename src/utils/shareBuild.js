@@ -1,41 +1,50 @@
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
 import { sanitizeRegionSelection } from '../hooks/useRegionSelection';
 import { sanitizeRelicSelection } from '../hooks/useRelicSelection';
-import { sanitizeEquippedNames, sanitizeStyle } from '../data/gearShape';
+import { sanitizeEofWeaponNames, sanitizeEquippedNames, sanitizeStyle } from '../data/gearShape';
 
-// Bumped from 3 to 4 to add the gear planner's default style - v2/v3 links
-// still decode fine (defaultStyle just comes back as 'melee'), so no need to
-// bump further or invalidate old links.
-const SHARE_VERSION = 4;
+// Bumped from 4 to 5 to add the Essence of Finality slotted-weapon picks -
+// v2/v3/v4 links still decode fine (eofWeaponNamesByStyle just comes back
+// empty), so no need to bump further or invalidate old links.
+const SHARE_VERSION = 5;
 const SHARE_PARAM = 'share';
 
-// Encodes the current build (all 4 styles' loadouts + default style + region
-// picks + relic picks) into a URL-safe, LZ-compressed string suitable for
-// the `share` query param. lz-string's dictionary-based compression does
-// well on this JSON shape (lots of repeated keys - style names, region ids,
-// slot names) - typically 40-60% smaller than plain base64 for a realistic
-// loadout.
-export function encodeShareBuild({ regions, equippedNamesByStyle, relics, defaultStyle }) {
-  const payload = { v: SHARE_VERSION, r: regions, g: equippedNamesByStyle, k: relics, d: defaultStyle };
+// Encodes the current build (all 4 styles' loadouts + EOF weapon picks +
+// default style + region picks + relic picks) into a URL-safe, LZ-compressed
+// string suitable for the `share` query param. lz-string's dictionary-based
+// compression does well on this JSON shape (lots of repeated keys - style
+// names, region ids, slot names) - typically 40-60% smaller than plain
+// base64 for a realistic loadout.
+export function encodeShareBuild({ regions, equippedNamesByStyle, eofWeaponNamesByStyle, relics, defaultStyle }) {
+  const payload = {
+    v: SHARE_VERSION,
+    r: regions,
+    g: equippedNamesByStyle,
+    f: eofWeaponNamesByStyle,
+    k: relics,
+    d: defaultStyle,
+  };
   return compressToEncodedURIComponent(JSON.stringify(payload));
 }
 
 // Decodes a `share` param value back into
-// `{ regions, equippedNamesByStyle, relics, defaultStyle }`. Returns null on
-// any failure (corrupt/truncated/unrecognised-version payload) - callers
-// should treat that identically to "no share param at all". Accepts v2/v3
-// payloads (missing relics/defaultStyle fields) for backward compatibility -
-// missing fields simply sanitize down to their empty/default value.
+// `{ regions, equippedNamesByStyle, eofWeaponNamesByStyle, relics, defaultStyle }`.
+// Returns null on any failure (corrupt/truncated/unrecognised-version
+// payload) - callers should treat that identically to "no share param at
+// all". Accepts v2/v3/v4 payloads (missing relics/defaultStyle/eof fields)
+// for backward compatibility - missing fields simply sanitize down to their
+// empty/default value.
 export function decodeShareBuild(param) {
   if (!param) return null;
   try {
     const json = decompressFromEncodedURIComponent(param);
     if (!json) return null;
     const parsed = JSON.parse(json);
-    if (![2, 3, SHARE_VERSION].includes(parsed?.v)) return null;
+    if (![2, 3, 4, SHARE_VERSION].includes(parsed?.v)) return null;
     return {
       regions: sanitizeRegionSelection(parsed.r),
       equippedNamesByStyle: sanitizeEquippedNames(parsed.g),
+      eofWeaponNamesByStyle: sanitizeEofWeaponNames(parsed.f),
       relics: sanitizeRelicSelection(parsed.k),
       defaultStyle: sanitizeStyle(parsed.d),
     };
@@ -58,7 +67,7 @@ export function stripShareParam() {
 }
 
 // Builds the full shareable URL for the current build.
-export function buildShareUrl({ regions, equippedNamesByStyle, relics, defaultStyle }) {
-  const encoded = encodeShareBuild({ regions, equippedNamesByStyle, relics, defaultStyle });
+export function buildShareUrl({ regions, equippedNamesByStyle, eofWeaponNamesByStyle, relics, defaultStyle }) {
+  const encoded = encodeShareBuild({ regions, equippedNamesByStyle, eofWeaponNamesByStyle, relics, defaultStyle });
   return `${window.location.origin}${window.location.pathname}?${SHARE_PARAM}=${encoded}#gear`;
 }

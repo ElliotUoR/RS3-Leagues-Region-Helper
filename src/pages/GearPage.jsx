@@ -22,9 +22,13 @@ const SLOT_LABELS = {
   ring: 'Ring',
 };
 
+const EOF_LABEL = 'EOF weapon';
+
 // Reading order matches the classic RS3 worn-equipment interface layout.
+// 'eof' (top-left, left of the helmet) only ever renders when an Essence of
+// Finality necklace is equipped - see the conditional EquipmentSlot below.
 const SLOT_GRID_AREAS = `
-  ". head pocket"
+  "eof head pocket"
   "back neck ammo"
   "weapon torso offhand"
   ". legs ."
@@ -72,6 +76,10 @@ export default function GearPage({
   toggleItem,
   clearLoadout,
   offhandBlocked,
+  eofVisible,
+  eofWeapon,
+  eofWeaponNamesByStyle,
+  toggleEofWeapon,
 }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('level');
@@ -84,15 +92,27 @@ export default function GearPage({
   // save/share where someone else had it force-equipped). No separate
   // override flag needs to be tracked or persisted anywhere: the equipped
   // state itself is the implied override, for exactly as long as it stays
-  // equipped.
+  // equipped. The EOF picker isn't a real equipped slot, so it checks
+  // `eofWeapon` instead of `equipped[activeSlot]`.
   function isItemAvailable(item) {
     if (activeSlot === 'offhand' && offhandBlocked) return false;
+    if (activeSlot === 'eof') {
+      if (eofWeapon?.name === item.name) return true;
+      return isGearItemAvailable(item, isUnlocked);
+    }
     if (equipped[activeSlot]?.name === item.name) return true;
     return isGearItemAvailable(item, isUnlocked);
   }
 
   const displayItems = useMemo(() => {
-    const items = GEAR[style]?.[activeSlot] ?? [];
+    // The EOF slot holds a weapon's spirit purely for its special attack -
+    // one-handed or two-handed both qualify (confirmed against the amulet's
+    // own wiki page, which lists both) - only weapons with no special attack
+    // never show up here.
+    const items =
+      activeSlot === 'eof'
+        ? (GEAR[style]?.weapon ?? []).filter((item) => item.specialAttack)
+        : GEAR[style]?.[activeSlot] ?? [];
     const query = search.trim().toLowerCase();
     const matched = query ? items.filter((item) => item.name.toLowerCase().includes(query)) : items;
     // Available items always sort ahead of locked ones; each group keeps its
@@ -100,13 +120,15 @@ export default function GearPage({
     const available = matched.filter((item) => isItemAvailable(item));
     const locked = hideLocked ? [] : matched.filter((item) => !isItemAvailable(item));
     return [...sortItems(available, sortBy, style), ...sortItems(locked, sortBy, style)];
-  }, [style, activeSlot, search, sortBy, isUnlocked, offhandBlocked, equipped, hideLocked]);
+  }, [style, activeSlot, search, sortBy, isUnlocked, offhandBlocked, equipped, eofWeapon, hideLocked]);
 
   // Only offer sort tabs for stats this slot's items actually carry (e.g. no
   // "Acc" tab for a pure armour slot where every item's accuracy is 0) -
   // based on the full unfiltered slot list, not the search results, so tabs
-  // don't flicker in/out as the player types.
+  // don't flicker in/out as the player types. The EOF picker shows special
+  // attack text instead of stats, so it never has sort tabs.
   const visibleSortOptions = useMemo(() => {
+    if (activeSlot === 'eof') return [];
     const items = GEAR[style]?.[activeSlot] ?? [];
     const hasAccuracy = items.some((item) => item.stats?.accuracy);
     const hasArmour = items.some((item) => getArmourRating(item, style));
@@ -128,7 +150,13 @@ export default function GearPage({
   }, [visibleSortOptions, sortBy]);
 
   async function handleShare() {
-    const url = buildShareUrl({ regions: selected, equippedNamesByStyle, relics: selectedRelics, defaultStyle });
+    const url = buildShareUrl({
+      regions: selected,
+      equippedNamesByStyle,
+      eofWeaponNamesByStyle,
+      relics: selectedRelics,
+      defaultStyle,
+    });
     try {
       await navigator.clipboard.writeText(url);
       setShareStatus('copied');
@@ -141,7 +169,11 @@ export default function GearPage({
 
   const SHARE_LABELS = { copied: 'Link copied!', manual: 'Link ready', idle: 'Share build' };
   const hasEquippedItems = Object.keys(equipped).length > 0;
-  const slotHasAnyItems = (GEAR[style]?.[activeSlot] ?? []).length > 0;
+  const slotHasAnyItems =
+    activeSlot === 'eof'
+      ? (GEAR[style]?.weapon ?? []).some((item) => item.specialAttack)
+      : (GEAR[style]?.[activeSlot] ?? []).length > 0;
+  const activeSlotLabel = activeSlot === 'eof' ? EOF_LABEL : SLOT_LABELS[activeSlot];
 
   function handleClearLoadout() {
     if (!hasEquippedItems) return;
@@ -208,6 +240,16 @@ export default function GearPage({
 
         <div className="gear-layout">
           <div className="equip-grid" style={{ gridTemplateAreas: SLOT_GRID_AREAS }}>
+            {eofVisible && (
+              <EquipmentSlot
+                slotId="eof"
+                label="EOF"
+                item={eofWeapon}
+                isActive={activeSlot === 'eof'}
+                onSelect={selectSlot}
+                miniIcon={equipped.neck?.icon}
+              />
+            )}
             {Object.keys(SLOT_LABELS).map((slotId) => (
               <EquipmentSlot
                 key={slotId}
@@ -226,7 +268,7 @@ export default function GearPage({
 
         <div className="gear-item-list">
           <div className="gear-item-list-header">
-            <h3>{SLOT_LABELS[activeSlot]} - {STYLE_LABELS[style]}</h3>
+            <h3>{activeSlotLabel} - {STYLE_LABELS[style]}</h3>
             <input
               type="search"
               className="gear-search"
@@ -273,10 +315,15 @@ export default function GearPage({
                   key={item.name}
                   item={item}
                   style={style}
-                  equipped={equipped[activeSlot]?.name === item.name}
+                  equipped={
+                    activeSlot === 'eof'
+                      ? eofWeapon?.name === item.name
+                      : equipped[activeSlot]?.name === item.name
+                  }
                   available={isItemAvailable(item)}
                   isUnlocked={isUnlocked}
-                  onToggle={toggleItem}
+                  onToggle={activeSlot === 'eof' ? toggleEofWeapon : toggleItem}
+                  showSpecialAttack={activeSlot === 'eof'}
                 />
               ))}
             </div>
@@ -287,7 +334,12 @@ export default function GearPage({
               "Hide locked items" to see them.
             </p>
           )}
-          {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && (
+          {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && activeSlot === 'eof' && (
+            <p className="gear-empty">
+              No {STYLE_LABELS[style].toLowerCase()} weapons with a special attack exist for this slot.
+            </p>
+          )}
+          {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && activeSlot !== 'eof' && (
             <p className="gear-empty">
               No {STYLE_LABELS[style].toLowerCase()} items exist for this slot.
             </p>

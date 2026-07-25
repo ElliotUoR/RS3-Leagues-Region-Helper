@@ -44,7 +44,7 @@ function keyStats(item, style) {
   return bits;
 }
 
-export default function GearItemRow({ item, style, equipped, available, isUnlocked, onToggle }) {
+export default function GearItemRow({ item, style, equipped, available, isUnlocked, onToggle, showSpecialAttack }) {
   const classes = [
     'gear-item-row',
     equipped ? 'equipped' : '',
@@ -53,6 +53,23 @@ export default function GearItemRow({ item, style, equipped, available, isUnlock
     .filter(Boolean)
     .join(' ');
   const stats = keyStats(item, style);
+
+  let bottomInfo = item.stats?.setEffect && (
+    <span className="gear-item-stats gear-item-passive">{item.stats.setEffect}</span>
+  );
+  if (showSpecialAttack) {
+    bottomInfo = <span className="gear-item-stats gear-item-special">{item.specialAttack}</span>;
+  } else if (stats.length > 0) {
+    bottomInfo = (
+      <span className="gear-item-stats">
+        {stats.map((bit) => (
+          <span key={bit.type} className={`gear-stat gear-stat-${bit.type}`}>
+            {bit.text}
+          </span>
+        ))}
+      </span>
+    );
+  }
 
   return (
     <div className={classes}>
@@ -80,19 +97,7 @@ export default function GearItemRow({ item, style, equipped, available, isUnlock
               </span>
             )}
             <span className="gear-item-source">{describeSource(item.source)}</span>
-            {stats.length > 0 ? (
-              <span className="gear-item-stats">
-                {stats.map((bit) => (
-                  <span key={bit.type} className={`gear-stat gear-stat-${bit.type}`}>
-                    {bit.text}
-                  </span>
-                ))}
-              </span>
-            ) : (
-              item.stats?.setEffect && (
-                <span className="gear-item-stats gear-item-passive">{item.stats.setEffect}</span>
-              )
-            )}
+            {bottomInfo}
           </span>
         </div>
       </button>

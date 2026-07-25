@@ -589,6 +589,37 @@ main.gear-page {
   line-height: 1.2;
 }
 
+.equip-slot-content {
+  position: relative;
+  width: 28px;
+  height: 28px;
+}
+
+.equip-slot-content .retry-image {
+  width: 28px;
+  height: 28px;
+}
+
+.equip-slot-content .equip-slot-mini-icon {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--bg);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.equip-slot-content .equip-slot-mini-icon img {
+  object-fit: contain;
+}
+
+.gear-item-special {
+  color: var(--accent);
+}
+
 .gear-stats-summary {
   background: var(--panel-bg);
   border: 1px solid var(--border);
@@ -1317,4 +1348,61 @@ main.abilities-page .gear-item-rows {
   .unlock-group-children {
     gap: 6px;
   }
+}
+
+/* Assumptions page */
+
+.assumptions-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.assumptions-group {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+
+.assumptions-group h2 {
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+
+.assumptions-intro {
+  font-size: 13px;
+  opacity: 0.8;
+  margin: 0 0 14px;
+}
+
+.assumptions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.assumptions-item {
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.assumptions-item strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+
+.assumptions-item p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.5;
 }

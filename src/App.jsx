@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AbilitiesPage from './pages/AbilitiesPage';
+import AssumptionsPage from './pages/AssumptionsPage';
 import GearPage from './pages/GearPage';
 import HomePage from './pages/HomePage';
 import RelicsPage from './pages/RelicsPage';
@@ -14,6 +15,7 @@ function currentRoute() {
   if (window.location.hash === '#abilities') return 'abilities';
   if (window.location.hash === '#relics') return 'relics';
   if (window.location.hash === '#spellbooks') return 'spellbooks';
+  if (window.location.hash === '#assumptions') return 'assumptions';
   return 'home';
 }
 
@@ -29,6 +31,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
   });
   const gear = useGearLoadout({
     initialEquippedNames: sharedBuild?.equippedNamesByStyle,
+    initialEofWeaponNames: sharedBuild?.eofWeaponNamesByStyle,
     initialDefaultStyle: sharedBuild?.defaultStyle,
     persist: !sharedBuild,
   });
@@ -43,6 +46,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
       GEAR_STORAGE_KEY,
       JSON.stringify({
         equippedNames: gear.equippedNamesByStyle,
+        eofWeaponNames: gear.eofWeaponNamesByStyle,
         defaultStyle: gear.defaultStyle,
         activeSlot: gear.activeSlot,
       }),
@@ -87,6 +91,9 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
         <a href="#spellbooks" className={route === 'spellbooks' ? 'active' : ''}>
           Spellbooks & Prayers
         </a>
+        <a href="#assumptions" className={route === 'assumptions' ? 'active' : ''}>
+          Assumptions
+        </a>
       </nav>
 
       {route === 'gear' && (
@@ -97,6 +104,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
         <RelicsPage isUnlocked={isUnlocked} selected={selectedRelics} toggleRelic={toggleRelic} />
       )}
       {route === 'spellbooks' && <SpellbooksPage isUnlocked={isUnlocked} />}
+      {route === 'assumptions' && <AssumptionsPage />}
       {route === 'home' && (
         <HomePage
           selected={selected}

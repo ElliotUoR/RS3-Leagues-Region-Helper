@@ -1,11 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
-import { GEAR, GEAR_SLOTS } from '../data/gear';
-import { emptyEquippedNames, sanitizeEquippedNames, sanitizeStyle } from '../data/gearShape';
+import { ESSENCE_OF_FINALITY_NAMES, GEAR, GEAR_SLOTS } from '../data/gear';
+import {
+  emptyEofWeaponNames,
+  emptyEquippedNames,
+  sanitizeEofWeaponNames,
+  sanitizeEquippedNames,
+  sanitizeStyle,
+} from '../data/gearShape';
 
 export const GEAR_STORAGE_KEY = 'rs3-leagues-gear-planner';
 
+// 'eof' is a pseudo-slot (the Essence of Finality weapon picker) - not a real
+// GEAR_SLOTS entry, but still a valid thing for `activeSlot` to be.
+const SELECTABLE_SLOTS = new Set([...GEAR_SLOTS, 'eof']);
+
 function loadInitialState() {
-  const fallback = { equippedNames: emptyEquippedNames(), defaultStyle: 'melee', activeSlot: 'weapon' };
+  const fallback = {
+    equippedNames: emptyEquippedNames(),
+    eofWeaponNames: emptyEofWeaponNames(),
+    defaultStyle: 'melee',
+    activeSlot: 'weapon',
+  };
   if (typeof window === 'undefined') return fallback;
   try {
     const raw = window.localStorage.getItem(GEAR_STORAGE_KEY);
@@ -13,10 +28,11 @@ function loadInitialState() {
     const parsed = JSON.parse(raw);
     return {
       equippedNames: sanitizeEquippedNames(parsed.equippedNames),
+      eofWeaponNames: sanitizeEofWeaponNames(parsed.eofWeaponNames),
       // Older saves stored the last-viewed tab as `style` rather than an
       // explicit default - fall back to that if `defaultStyle` isn't there.
       defaultStyle: sanitizeStyle(parsed.defaultStyle ?? parsed.style),
-      activeSlot: GEAR_SLOTS.includes(parsed.activeSlot) ? parsed.activeSlot : 'weapon',
+      activeSlot: SELECTABLE_SLOTS.has(parsed.activeSlot) ? parsed.activeSlot : 'weapon',
     };
   } catch {
     return fallback;
@@ -34,11 +50,17 @@ function loadInitialState() {
 // The visible tab always opens on `defaultStyle` on every fresh load (page
 // refresh, or opening a share link) - it's an explicit, player-set choice
 // rather than "whichever tab happened to be open last."
-export function useGearLoadout({ initialEquippedNames, initialDefaultStyle, persist = true } = {}) {
+export function useGearLoadout({
+  initialEquippedNames,
+  initialEofWeaponNames,
+  initialDefaultStyle,
+  persist = true,
+} = {}) {
   const [initial] = useState(() =>
     initialEquippedNames
       ? {
           equippedNames: sanitizeEquippedNames(initialEquippedNames),
+          eofWeaponNames: sanitizeEofWeaponNames(initialEofWeaponNames),
           defaultStyle: sanitizeStyle(initialDefaultStyle),
           activeSlot: 'weapon',
         }
@@ -48,14 +70,15 @@ export function useGearLoadout({ initialEquippedNames, initialDefaultStyle, pers
   const [style, setStyle] = useState(initial.defaultStyle);
   const [activeSlot, setActiveSlot] = useState(initial.activeSlot);
   const [equippedNamesByStyle, setEquippedNamesByStyle] = useState(initial.equippedNames);
+  const [eofWeaponNamesByStyle, setEofWeaponNamesByStyle] = useState(initial.eofWeaponNames);
 
   useEffect(() => {
     if (!persist) return;
     window.localStorage.setItem(
       GEAR_STORAGE_KEY,
-      JSON.stringify({ equippedNames: equippedNamesByStyle, defaultStyle, activeSlot }),
+      JSON.stringify({ equippedNames: equippedNamesByStyle, eofWeaponNames: eofWeaponNamesByStyle, defaultStyle, activeSlot }),
     );
-  }, [equippedNamesByStyle, defaultStyle, activeSlot, persist]);
+  }, [equippedNamesByStyle, eofWeaponNamesByStyle, defaultStyle, activeSlot, persist]);
 
   // Resolve persisted item names back to live item objects from GEAR so a
   // saved/shared loadout always reflects current stats/availability data.
@@ -72,6 +95,24 @@ export function useGearLoadout({ initialEquippedNames, initialDefaultStyle, pers
   }, [equippedNamesByStyle, style]);
 
   const offhandBlocked = Boolean(equipped.weapon?.twoHanded);
+
+  // The EOF slot only exists while an Essence of Finality necklace (either
+  // version) is worn in 'neck' - the weapon whose spirit is slotted inside it
+  // is still remembered per-style even while hidden, so re-equipping the
+  // necklace later brings the same weapon straight back.
+  const eofVisible = ESSENCE_OF_FINALITY_NAMES.includes(equipped.neck?.name);
+  const eofWeapon = useMemo(() => {
+    const name = eofWeaponNamesByStyle[style];
+    if (!name) return null;
+    return GEAR[style]?.weapon?.find((i) => i.name === name) ?? null;
+  }, [eofWeaponNamesByStyle, style]);
+
+  // If the necklace comes off (or a shared/loaded build never had it on)
+  // while the EOF picker is open, fall back to a real slot rather than
+  // showing a picker for a slot that no longer exists on screen.
+  useEffect(() => {
+    if (activeSlot === 'eof' && !eofVisible) setActiveSlot('weapon');
+  }, [activeSlot, eofVisible]);
 
   function toggleItem(item) {
     setEquippedNamesByStyle((prev) => {
@@ -90,8 +131,16 @@ export function useGearLoadout({ initialEquippedNames, initialDefaultStyle, pers
     });
   }
 
+  function toggleEofWeapon(item) {
+    setEofWeaponNamesByStyle((prev) => ({
+      ...prev,
+      [style]: prev[style] === item.name ? null : item.name,
+    }));
+  }
+
   function selectSlot(slotId) {
     if (slotId === 'offhand' && offhandBlocked) return;
+    if (slotId === 'eof' && !eofVisible) return;
     setActiveSlot(slotId);
   }
 
@@ -100,6 +149,7 @@ export function useGearLoadout({ initialEquippedNames, initialDefaultStyle, pers
   // independently.
   function clearLoadout() {
     setEquippedNamesByStyle((prev) => ({ ...prev, [style]: {} }));
+    setEofWeaponNamesByStyle((prev) => ({ ...prev, [style]: null }));
   }
 
   return {
@@ -114,5 +164,9 @@ export function useGearLoadout({ initialEquippedNames, initialDefaultStyle, pers
     toggleItem,
     clearLoadout,
     offhandBlocked,
+    eofVisible,
+    eofWeapon,
+    eofWeaponNamesByStyle,
+    toggleEofWeapon,
   };
 }
