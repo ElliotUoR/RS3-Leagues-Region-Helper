@@ -1,5 +1,6 @@
 import RegionTags from './RegionTags';
 import RetryImage from './RetryImage';
+import TagTooltip from './TagTooltip';
 import { isGearItemAvailable } from '../data/gearAvailability';
 import { REGION_SHORT_LABELS } from '../data/regionColors';
 import { wikiContextMenuHandler } from '../utils/wiki';
@@ -24,9 +25,9 @@ export default function UnlockCard({ entry, isUnlocked, extension }) {
         <span className="unlock-card-name">
           {entry.name}
           {extension && (
-            <span className="badge unlock-card-extension-badge" title={`Extends ${extension}`}>
+            <TagTooltip className="badge unlock-card-extension-badge" tooltip={`Extends ${extension}`}>
               extension
-            </span>
+            </TagTooltip>
           )}
         </span>
         <RegionTags item={entry} isUnlocked={isUnlocked} />
@@ -44,9 +45,9 @@ export default function UnlockCard({ entry, isUnlocked, extension }) {
       {entry.source?.detail && <p className="unlock-card-detail">{entry.source.detail}</p>}
 
       {entry.softRegion && (
-        <span className="region-tag region-tag-soft" title={entry.softNote}>
+        <TagTooltip className="region-tag region-tag-soft" tooltip={entry.softNote}>
           Possibly {REGION_SHORT_LABELS[entry.softRegion] ?? entry.softRegion}
-        </span>
+        </TagTooltip>
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 import { isGearItemImpossible, normalizeRegionGroups } from '../data/gearAvailability';
 import { REGION_COLORS, REGION_SHORT_LABELS } from '../data/regionColors';
+import TagTooltip from './TagTooltip';
 
 function isRegionUnlocked(regionId, isUnlocked) {
   return regionId === 'global' || regionId === 'relic' || isUnlocked(regionId);
@@ -26,12 +27,12 @@ function ResourcePill({ label, regions, isUnlocked }) {
   const unlocked = regions.some((r) => isRegionUnlocked(r, isUnlocked));
   const regionNames = regions.map((r) => REGION_SHORT_LABELS[r] ?? r).join(' / ');
   return (
-    <span
+    <TagTooltip
       className={`region-tag region-tag-resource${unlocked ? ' region-tag-resource-unlocked' : ''}`}
-      title={`Requires: ${regionNames}`}
+      tooltip={`Requires: ${regionNames}`}
     >
       {label}
-    </span>
+    </TagTooltip>
   );
 }
 
@@ -39,12 +40,12 @@ export default function RegionTags({ item, isUnlocked }) {
   if (isGearItemImpossible(item)) {
     return (
       <span className="region-tags">
-        <span
+        <TagTooltip
           className="region-tag region-tag-impossible"
-          title={item.source?.impossibleReason ?? 'Requires more regions than a single Leagues run can unlock.'}
+          tooltip={item.source?.impossibleReason ?? 'Requires more regions than a single Leagues run can unlock.'}
         >
           Not obtainable
-        </span>
+        </TagTooltip>
       </span>
     );
   }

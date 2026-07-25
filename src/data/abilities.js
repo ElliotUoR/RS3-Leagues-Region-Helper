@@ -177,6 +177,36 @@ export const ABILITIES = [
     },
   },
   {
+    name: 'Invoke Lord of Bones',
+    style: 'necromancy',
+    icon: FP('Invoke_Lord_of_Bones.png'),
+    source: {
+      type: 'boss',
+      detail: 'Read the Invoke Lord of Bones incantation codex, dropped by Zemouregal & Vorkath',
+      region: 'wilderness',
+    },
+  },
+  {
+    name: 'Double Escape',
+    style: 'generic',
+    icon: FP('Double_Escape_codex.png'),
+    source: {
+      type: 'skilling',
+      detail: 'Read the Double Escape codex, crafted from 750 codex pages (farmed on the Anachronia Agility Course) at a lectern',
+      region: 'anachronia',
+    },
+  },
+  {
+    name: 'Double Surge',
+    style: 'generic',
+    icon: FP('Double_Surge_codex.png'),
+    source: {
+      type: 'skilling',
+      detail: 'Read the Double Surge codex, crafted from 750 codex pages (farmed on the Anachronia Agility Course) at a lectern',
+      region: 'anachronia',
+    },
+  },
+  {
     name: 'Reprisal',
     style: 'generic',
     icon: FP('Reprisal.png'),
