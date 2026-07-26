@@ -253,7 +253,7 @@ export const RELICS = [
     effect:
       'Grant a 50% experience boost when creating Summoning pouches, but pouches are crafted one at a time, every 4 ticks (2.4 seconds), instead of all at once.',
     icon: FP('Spirit_Weaver.png'),
-    source: { type: 'skilling', detail: 'Complete the Dragonkin VI collection (Daemonheim Dig Site)', region: 'wilderness' },
+    source: { type: 'skilling', detail: 'Complete the Dragonkin VI collection (Daemonheim Dig Site), submitted to Sharrigan', region: ['wilderness', 'anachronia'], note: 'The completed collection must be handed in to Sharrigan, the dragonkin artefact collector, at the Anachronia base camp.' },
   },
   {
     name: 'Deathless',
@@ -302,7 +302,12 @@ export const RELICS = [
     source: {
       type: 'skilling',
       detail: 'Give two hellfire katars (Byzroth remains, Infernal Source Dig Site) to Dagon the Gatekeeper',
-      region: 'misthalin',
+      region: [
+        'misthalin',
+        { anyOf: ['kandarin'], label: 'Harlequin cow' },
+        { anyOf: ['kandarin'], label: 'Goblin potion' },
+      ],
+      note: "Requires completing the Dagon Bye mystery first, which itself requires completing the Contract Claws mystery. Contract Claws needs a Harlequin cow (bred at Manor Farm, kandarin) and a Goblin potion (pharmakos berries via Land of the Goblins/Goblin Cave content, kandarin).",
     },
   },
   {

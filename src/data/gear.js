@@ -1275,7 +1275,7 @@ export const GEAR = {
         },
         specialAttack: 'Slice & Dice (50% adrenaline): 4 hits totalling 360-440% ability damage (180-220%, 90-110%, then two hits of 45-55%).',
         icon: "icons/Dragon_claw.png",
-        source: { type: 'boss', boss: 'Tormented demons', region: 'global', note: 'Rare legacy drop, unlocked via While Guthix Sleeps - not gated to any single Leagues region; also obtainable from Metamorphic Geodes (60 Mining).' },
+        source: { type: 'boss', boss: 'Tormented demons', region: 'misthalin', note: 'Rare legacy drop, unlocked via While Guthix Sleeps - Ancient Guthix Temple, accessed via the Tears of Guthix cave in Lumbridge Swamp (misthalin); also obtainable from Metamorphic Geodes (60 Mining).' },
       },
       {
         name: 'Dragon Dagger',
@@ -1290,7 +1290,7 @@ export const GEAR = {
         },
         specialAttack: 'Draconic Puncture (25% adrenaline): 2 hits for 125-155% ability damage each (250-310% total), with +15% accuracy.',
         icon: "icons/Dragon_dagger.png",
-        source: { type: 'shop', shop: 'Grand Exchange - common tradeable, dropped by numerous monsters', region: 'global' },
+        source: { type: 'shop', shop: "Jukat's Dragon Sword Shop, Zanaris", region: 'misthalin', note: 'Not GE-tradeable in Leagues - bought from Jukat (Zanaris, misthalin). Also obtainable from Rasolo (Baxtorian Falls, kandarin), Urbi (Sophanem, kharidianDesert), or a revenant ork drop (Revenant Caves, wilderness).' },
       },
       {
         name: 'Annihilation',
@@ -1320,7 +1320,7 @@ export const GEAR = {
         },
         specialAttack: 'Powerstab (50% adrenaline): hits up to 25 targets in a 5x5 area for 260-320% ability damage (7x7 when slotted via Essence of Finality with a halberd-type weapon).',
         icon: 'icons/Dragon_2h_sword.png',
-        source: { type: 'shop', shop: 'Grand Exchange - common tradeable, dropped by numerous monsters', region: 'global' },
+        source: { type: 'shop', shop: "Jukat's Dragon Sword Shop, Zanaris", region: 'misthalin', note: "Not GE-tradeable in Leagues - bought from Jukat (Zanaris, misthalin). Also dropped by Kalphite Queen or Exiled Kalphite Queen (kharidianDesert), Chaos Elemental (wilderness), or Giant Mole (asgarnia)." },
       },
       {
         name: 'Granite Maul',
@@ -1335,7 +1335,7 @@ export const GEAR = {
         },
         specialAttack: 'Quick Smash (50% adrenaline): instantly strikes for 115-135% ability damage, ignoring any cooldowns.',
         icon: "icons/Granite_maul.png",
-        source: { type: 'shop', shop: 'Grand Exchange - common tradeable', region: 'global' },
+        source: { type: 'boss', boss: 'Gargoyle', region: { anyOf: ['kandarin', 'wilderness', 'morytania'] }, note: 'Only dropped by gargoyles (75 Slayer): Ancient Cavern/Kuradal\'s Dungeon (kandarin), Chaos Tunnels or Abandoned Farm (wilderness), or Slayer Tower (morytania). Also GE-tradeable, but ultimately sourced from a gargoyle kill.' },
       },
       {
         name: "Vesta's Spear",
@@ -1380,7 +1380,7 @@ export const GEAR = {
         },
         specialAttack: 'Draconic Cleave (25% adrenaline): 275-315% ability damage.',
         icon: "icons/Dragon_longsword.png",
-        source: { type: 'shop', shop: "Jukat's Dragon Sword Shop, Zanaris (100,000 coins)", region: 'global' },
+        source: { type: 'shop', shop: "Jukat's Dragon Sword Shop, Zanaris (100,000 coins)", region: 'misthalin', note: 'Zanaris is accessed via the Lumbridge Swamp Caves and folds to misthalin.' },
       },
       {
         name: 'Dragon Hatchet',
