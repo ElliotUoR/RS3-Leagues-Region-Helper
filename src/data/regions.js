@@ -168,6 +168,7 @@ export const BOSSES = [
       { name: 'Scripture of Jas', icon: FP('Scripture_of_Jas.png') },
       { name: 'Manuscript of Jas', icon: FP('Manuscript_of_Jas.png') },
       { name: 'Fractured Staff of Armadyl component', icon: FP('Fractured_Staff_of_Armadyl.png') },
+      { name: 'Fractured Staff of Armadyl', icon: FP('Fractured_Staff_of_Armadyl.png') },
     ],
   },
   {
@@ -195,6 +196,15 @@ export const BOSSES = [
       { name: 'Cryptbloom gloves (incomplete)', icon: FP('Cryptbloom_gloves_(incomplete).png') },
       { name: 'Cryptbloom boots (incomplete)', icon: FP('Cryptbloom_boots_(incomplete).png') },
       { name: 'Scripture of Bik', icon: FP('Scripture_of_Bik.png') },
+      { name: 'Cryptbloom helm', icon: 'icons/Cryptbloom_helm.png' },
+      { name: 'Cryptbloom top', icon: 'icons/Cryptbloom_top.png' },
+      { name: 'Cryptbloom bottoms', icon: 'icons/Cryptbloom_bottoms.png' },
+      { name: 'Cryptbloom gloves', icon: 'icons/Cryptbloom_gloves.png' },
+      { name: 'Cryptbloom boots', icon: 'icons/Cryptbloom_boots.png' },
+      { name: 'Deathspore arrows', icon: 'icons/Deathspore_arrows.png' },
+      { name: 'Splintering arrows', icon: 'icons/Splintering_arrows.png' },
+      { name: 'Grasping rune pouch', icon: 'icons/Grasping_rune_pouch.png' },
+      { name: 'Large rune pouch (unsealed)', icon: 'icons/Large_rune_pouch.png' },
     ],
   },
   {
@@ -207,6 +217,11 @@ export const BOSSES = [
       { name: 'Ek-ZekKil', icon: FP('Ek-ZekKil.png') },
       { name: 'Igneous stone', icon: FP('Igneous_stone.png') },
       { name: "TzKal-Zuk's helmet", icon: FP('TzKal-Zuk%27s_helmet.png') },
+      { name: 'Igneous Kal-Zuk', icon: 'icons/Igneous_Kal-Zuk.png' },
+      { name: 'Igneous Kal-Ket', icon: 'icons/Igneous_Kal-Ket.png' },
+      { name: 'Igneous Kal-Xil', icon: 'icons/Igneous_Kal-Xil.png' },
+      { name: 'Igneous Kal-Mej', icon: 'icons/Igneous_Kal-Mej.png' },
+      { name: 'Igneous Kal-Mor', icon: 'icons/Igneous_Kal-Mor.png' },
     ],
   },
   {
@@ -240,6 +255,18 @@ export const BOSSES = [
       { name: "Vorkath's spike", icon: FP("Vorkath%27s_spike.png") },
       { name: 'Invoke Lord of Bones incantation codex', icon: FP('Invoke_Lord_of_Bones_incantation_codex.png') },
       { name: "Vorkath's scale", icon: FP("Vorkath%27s_scale.png") },
+      { name: 'Dracolich coif', icon: 'icons/Dracolich_coif.png' },
+      { name: 'Elite dracolich coif', icon: 'icons/Elite_Dracolich_coif.png' },
+      { name: 'Undead dragonhide coif', icon: 'icons/Undead_dragonhide_coif.png' },
+      { name: 'Dracolich hauberk', icon: 'icons/Dracolich_hauberk.png' },
+      { name: 'Elite dracolich hauberk', icon: 'icons/Elite_Dracolich_hauberk.png' },
+      { name: 'Dracolich chaps', icon: 'icons/Dracolich_chaps.png' },
+      { name: 'Elite dracolich chaps', icon: 'icons/Elite_Dracolich_chaps.png' },
+      { name: 'Dracolich vambraces', icon: 'icons/Dracolich_vambraces.png' },
+      { name: 'Elite dracolich vambraces', icon: 'icons/Elite_Dracolich_vambraces.png' },
+      { name: 'Dracolich boots', icon: 'icons/Dracolich_boots.png' },
+      { name: 'Elite dracolich boots', icon: 'icons/Elite_Dracolich_boots.png' },
+      { name: "Zemouregal's nexus", icon: "icons/Zemouregal's_nexus.png" },
     ],
   },
 
@@ -308,8 +335,8 @@ export const BOSSES = [
       { name: "Ahrim's robe skirt", icon: FP("Ahrim%27s_robe_skirt.png") },
       { name: "Ahrim's staff", icon: FP("Ahrim%27s_staff.png") },
       { name: "Karil's coif", icon: FP("Karil%27s_coif.png") },
-      { name: "Karil's top", icon: FP("Karil%27s_top.png") },
-      { name: "Karil's skirt", icon: FP("Karil%27s_skirt.png") },
+      { name: "Karil's leathertop", icon: FP("Karil%27s_top.png") },
+      { name: "Karil's leatherskirt", icon: FP("Karil%27s_skirt.png") },
       { name: "Karil's crossbow", icon: FP("Karil%27s_crossbow.png") },
       { name: "Torag's helm", icon: FP("Torag%27s_helm.png") },
       { name: "Torag's platebody", icon: FP("Torag%27s_platebody.png") },
@@ -323,6 +350,12 @@ export const BOSSES = [
       { name: "Guthan's platebody", icon: FP("Guthan%27s_platebody.png") },
       { name: "Guthan's chainskirt", icon: FP("Guthan%27s_chainskirt.png") },
       { name: "Guthan's warspear", icon: FP("Guthan%27s_warspear.png") },
+      { name: "Linza's helm", icon: "icons/Linza's_helm.png" },
+      { name: "Linza's cuirass", icon: "icons/Linza's_cuirass.png" },
+      { name: "Linza's greaves", icon: "icons/Linza's_greaves.png" },
+      { name: 'Amulet of the Forsaken', icon: 'icons/Amulet_of_the_forsaken.png' },
+      { name: 'Blighted rebounder', icon: 'icons/Blighted_rebounder.png' },
+      { name: "Ahrim's book of magic", icon: "icons/Ahrim's_book_of_magic.png" },
     ],
   },
   {
@@ -347,6 +380,7 @@ export const BOSSES = [
       { name: "Araxxi's web", icon: FP("Araxxi%27s_web.png") },
       { name: "Araxxi's eye", icon: FP("Araxxi%27s_eye.png") },
       { name: 'Araxyte egg', icon: FP('Araxyte_egg.png') },
+      { name: 'Araxyte arrow', icon: 'icons/Araxyte_arrow.png' },
     ],
   },
   { name: 'Barrelchest', region: 'morytania', subLocation: 'Harmony Island Monastery', quest: true },
@@ -452,6 +486,7 @@ export const BOSSES = [
       { name: "Gloves of Tumeken's resplendence", icon: "icons/Gloves_of_Tumeken's_resplendence.png" },
       { name: "Boots of Tumeken's resplendence", icon: "icons/Boots_of_Tumeken's_resplendence.png" },
       { name: 'Shard of Genesis Essence', icon: 'icons/Shard_of_Genesis_Essence.png' },
+      { name: "The Devourer's Nexus", icon: "icons/The_Devourer's_Nexus.png" },
     ],
   },
   {
@@ -551,9 +586,11 @@ export const BOSSES = [
     subLocation: 'Pit of Trials (Mazcab)',
     drops: [
       { name: 'Teci', icon: 'icons/Teci.png' },
-      { name: 'Achto Primeval mask', icon: 'icons/Achto_Primeval_mask.png' },
-      { name: 'Achto Primeval gloves', icon: 'icons/Achto_Primeval_gloves.png' },
-      { name: 'Achto Primeval boots', icon: 'icons/Achto_Primeval_boots.png' },
+      { name: 'Primeval mask', icon: 'icons/Achto_Primeval_mask.png' },
+      { name: 'Primeval gloves', icon: 'icons/Achto_Primeval_gloves.png' },
+      { name: 'Primeval boots', icon: 'icons/Achto_Primeval_boots.png' },
+      { name: 'Primeval robe top', icon: 'icons/Primeval_robe_top.png' },
+      { name: 'Primeval robe legs', icon: 'icons/Primeval_robe_legs.png' },
       { name: 'Achto Tempest cowl', icon: 'icons/Achto_Tempest_cowl.png' },
       { name: 'Achto Tempest gloves', icon: 'icons/Achto_Tempest_gloves.png' },
       { name: 'Achto Tempest boots', icon: 'icons/Achto_Tempest_boots.png' },
@@ -596,6 +633,9 @@ export const BOSSES = [
       { name: 'Ancient summoning stone', icon: 'icons/Ancient_summoning_stone.png' },
       { name: "Vorago's arm", icon: "icons/Vorago's_arm.png" },
       { name: 'Ancient artefact', icon: 'icons/Ancient_artefact.png' },
+      { name: 'Tectonic mask', icon: 'icons/Tectonic_mask.png' },
+      { name: 'Tectonic robe top', icon: 'icons/Tectonic_robe_top.png' },
+      { name: 'Tectonic robe bottom', icon: 'icons/Tectonic_robe_bottom.png' },
     ],
   },
   {
@@ -752,6 +792,7 @@ export const BOSSES = [
       { name: 'Divine sigil', icon: FP('Divine_sigil.png') },
       { name: 'Elysian sigil', icon: FP('Elysian_sigil.png') },
       { name: 'Spectral sigil', icon: FP('Spectral_sigil.png') },
+      { name: 'Spirit shield', icon: 'icons/Spirit_shield.png' },
     ],
   },
   {
@@ -787,6 +828,7 @@ export const BOSSES = [
       { name: "Morrigan's coif", icon: FP("Morrigan%27s_coif.png") },
       { name: "Morrigan's leather body", icon: FP("Morrigan%27s_leather_body.png") },
       { name: "Morrigan's leather chaps", icon: FP("Morrigan%27s_leather_chaps.png") },
+      { name: "Superior Zuriel's staff", icon: "icons/Superior_Zuriel's_staff.png" },
     ],
   },
   {
@@ -994,5 +1036,156 @@ export const ACTIVITIES = [
       { name: "Legatus's Emberstaff", icon: "icons/Legatus's_Emberstaff.png" },
       { name: "Misalionar's death mask", icon: "icons/Misalionar's_death_mask.png" },
     ],
+  },
+  {
+    name: 'Shifting Tombs',
+    region: 'kharidianDesert',
+    subLocation: 'minigame treasure chests',
+    drops: [{ name: 'Off-hand Khopesh of the Kharidian', icon: 'icons/Off-hand_khopesh_of_the_Kharidian.png' }],
+  },
+];
+
+// Region-locked drops from generic monster types/families - deliberately
+// kept separate from BOSSES because these aren't a single named boss
+// encounter (a monster family with several variants, a minigame NPC, a
+// location-wide "any monster here" drop, etc.). Same shape as BOSSES so
+// UnlocksList can render both with the same BossRow component.
+export const MONSTERS = [
+  {
+    name: 'Abyssal lords',
+    region: 'misthalin',
+    drops: [{ name: 'Abyssal Scourge', icon: 'icons/Abyssal_scourge.png' }],
+  },
+  {
+    name: 'Tormented demons',
+    region: 'misthalin',
+    drops: [{ name: 'Dragon Claws', icon: 'icons/Dragon_claw.png' }],
+  },
+  {
+    name: 'Rex Matriarchs',
+    region: 'anachronia',
+    subLocation: 'Savage spear parts',
+    drops: [{ name: "Laniakea's Spear", icon: "icons/Laniakea's_spear.png" }],
+  },
+  {
+    name: 'Slayer dinosaurs',
+    region: 'anachronia',
+    subLocation: 'Ripper / Venomous / Feral / Brutish',
+    drops: [
+      { name: 'Laceration boots', icon: 'icons/Laceration_boots.png' },
+      { name: 'Bone blowpipe', icon: 'icons/Bone_blowpipe.png' },
+    ],
+  },
+  {
+    name: 'Vile bloom creatures',
+    region: 'anachronia',
+    subLocation: 'Liverwort / Luminous snaggler / Devil’s snare / Lampenflora',
+    drops: [{ name: 'Blast diffusion boots', icon: 'icons/Blast_diffusion_boots.png' }],
+  },
+  {
+    name: 'Dagannoth Kings',
+    region: 'fremennikProvince',
+    drops: [{ name: 'Dragon Hatchet', icon: 'icons/Dragon_hatchet.png' }],
+  },
+  {
+    name: 'Sanguine Crawler',
+    region: 'havenhythe',
+    drops: [{ name: 'Vampyrism gloves', icon: 'icons/Vampyrism_gloves.png' }],
+  },
+  {
+    name: 'Corrupted creatures',
+    region: 'kharidianDesert',
+    subLocation: 'Sophanem Slayer Dungeon',
+    drops: [{ name: 'Khopesh of the Kharidian', icon: 'icons/Khopesh_of_the_Kharidian.png' }],
+  },
+  {
+    name: 'Automaton Tracer',
+    region: 'kandarin',
+    drops: [{ name: 'Pneumatic gloves', icon: 'icons/Pneumatic_gloves.png' }],
+  },
+  {
+    name: 'Automaton Guardian',
+    region: 'kandarin',
+    drops: [{ name: 'Static gloves', icon: 'icons/Static_gloves.png' }],
+  },
+  {
+    name: 'Automaton Generator',
+    region: 'kandarin',
+    drops: [{ name: 'Tracking gloves', icon: 'icons/Tracking_gloves.png' }],
+  },
+  {
+    name: 'The Nightmare',
+    region: 'kandarin',
+    drops: [{ name: 'Nightmare gauntlets', icon: 'icons/Nightmare_gauntlets.png' }],
+  },
+  {
+    name: 'The Legiones',
+    region: 'kandarin',
+    subLocation: 'Ascension Monastery',
+    drops: [
+      { name: 'Ascension bolts', icon: 'icons/Ascension_bolts.png' },
+      { name: 'Ascendri bolts', icon: 'icons/Ascendri_bolts.png' },
+    ],
+  },
+  {
+    name: 'Ganodermic runt / Ganodermic beast',
+    region: 'morytania',
+    subLocation: 'Polypore Dungeon',
+    drops: [
+      { name: 'Ganodermic gloves', icon: 'icons/Ganodermic_gloves.png' },
+      { name: 'Ganodermic boots', icon: 'icons/Ganodermic_boots.png' },
+    ],
+  },
+  {
+    name: "Black mask monsters",
+    region: 'morytania',
+    subLocation: "Mos Le'Harmless",
+    drops: [{ name: 'Slayer helmet', icon: 'icons/Slayer_helmet.png' }],
+  },
+  {
+    name: 'The Lost Grove monsters',
+    region: 'tirannwn',
+    subLocation: "Solak's instance",
+    drops: [
+      { name: 'Cinderbane gloves', icon: 'icons/Cinderbane_gloves.png' },
+      { name: 'Blight bolts', icon: 'icons/Blight_bolts.png' },
+    ],
+  },
+  {
+    name: 'Lava strykewyrm',
+    region: 'wilderness',
+    drops: [{ name: 'Lava Whip', icon: 'icons/Lava_whip.png' }],
+  },
+  {
+    name: 'Ripper demons / Slasher demons',
+    region: 'wilderness',
+    drops: [
+      { name: 'Ripper Claw', icon: 'icons/Ripper_claw.png' },
+      { name: 'Off-hand Ripper Claw', icon: 'icons/Off-hand_ripper_claw.png' },
+    ],
+  },
+  {
+    name: 'Wilderness Slayer cave (reward chest)',
+    region: 'wilderness',
+    drops: [
+      { name: 'Annihilation', icon: 'icons/Annihilation.png' },
+      { name: 'Decimation', icon: 'icons/Decimation.png' },
+      { name: 'Obliteration', icon: 'icons/Obliteration.png' },
+    ],
+  },
+  {
+    name: 'Kolodion',
+    region: 'wilderness',
+    subLocation: 'Mage Arena minigame',
+    drops: [
+      { name: 'Guthix Staff', icon: 'icons/Guthix_staff.png' },
+      { name: 'Zamorak Staff', icon: 'icons/Zamorak_staff.png' },
+    ],
+  },
+  {
+    name: 'Wilderness monsters',
+    region: 'wilderness',
+    subLocation: 'general drop',
+    drops: [{ name: 'Wild arrow', icon: 'icons/Wild_arrow.png' }],
   },
 ];

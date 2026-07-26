@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import BossRow from './BossRow';
-import { ACTIVITIES, BOSSES, FIXED_REGIONS, REGIONS, REGION_IDS } from '../data/regions';
+import { ACTIVITIES, BOSSES, FIXED_REGIONS, MONSTERS, REGIONS, REGION_IDS } from '../data/regions';
 
 // Purely a local display preference (which regions' unlock lists are
 // collapsed) - persisted so it survives reloads, but deliberately kept out
@@ -47,6 +47,7 @@ export default function UnlocksList({ isUnlocked }) {
         const region = REGIONS[id];
         const bosses = BOSSES.filter((b) => b.region === id && !b.quest);
         const activities = ACTIVITIES.filter((a) => a.region === id);
+        const monsters = MONSTERS.filter((m) => m.region === id);
         const isMinimised = minimised.has(id);
         return (
           <div key={id} className="unlock-region">
@@ -75,7 +76,8 @@ export default function UnlocksList({ isUnlocked }) {
                     ))}
                   </ul>
                 ) : (
-                  activities.length === 0 && <p className="region-empty">No boss data added for this region yet.</p>
+                  activities.length === 0 &&
+                  monsters.length === 0 && <p className="region-empty">No boss data added for this region yet.</p>
                 )}
                 {activities.length > 0 && (
                   <>
@@ -83,6 +85,16 @@ export default function UnlocksList({ isUnlocked }) {
                     <ul className="boss-list">
                       {activities.map((a) => (
                         <BossRow key={a.name} boss={a} />
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {monsters.length > 0 && (
+                  <>
+                    <h4 className="unlock-region-subheading">Monster drops</h4>
+                    <ul className="boss-list">
+                      {monsters.map((m) => (
+                        <BossRow key={m.name} boss={m} />
                       ))}
                     </ul>
                   </>

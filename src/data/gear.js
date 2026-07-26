@@ -790,7 +790,7 @@ export const GEAR = {
           setEffect: 'Base form of Khopesh of Tumeken (before Magister blessings).',
         },
         icon: 'icons/Khopesh_of_the_Kharidian.png',
-        source: { type: 'boss', boss: 'The Magister', region: 'kharidianDesert', note: 'Drops in the Sophanem Slayer Dungeon.' },
+        source: { type: 'boss', boss: 'Corrupted creatures', region: 'kharidianDesert', note: 'Rare drop (1/15,000, or 1/8,000 on a Slayer assignment) from Corrupted scorpions/scarabs, Feline/Gorilla/Imperial warrior akh and other Sophanem Slayer Dungeon monsters - not a Magister drop.' },
       },
       {
         name: 'Laniakea\'s Spear',
@@ -948,7 +948,7 @@ export const GEAR = {
           setEffect: null,
         },
         icon: 'icons/Khopesh_of_Tumeken.png',
-        source: { type: 'boss', boss: 'The Magister', region: 'kharidianDesert', note: 'Direct drop, or crafted (92 Crafting) by blessing a khopesh with Magister-scrap-derived blessings' },
+        source: { type: 'combination', region: 'kharidianDesert', note: "Made (92 Crafting) from a Khopesh of the Kharidian (Corrupted creatures, Sophanem Slayer Dungeon) + Blessing of the Sand/Sky/Sea, each crafted from 100 Scraps of Scripture from Phylactery (The Magister's own drop)." },
       },
       {
         name: 'Drygore Rapier',
@@ -1498,7 +1498,7 @@ export const GEAR = {
           setEffect: null,
         },
         icon: 'icons/Khopesh_of_Elidinis.png',
-        source: { type: 'boss', boss: 'The Magister', region: 'kharidianDesert', note: 'Blessings crafted from Magister-exclusive scraps; base khopesh from Shifting Tombs (also gated behind The Magister access)' },
+        source: { type: 'combination', region: 'kharidianDesert', note: "Made (92 Crafting) from an Off-hand khopesh of the Kharidian (Shifting Tombs minigame chest reward) + Blessing of the Sand/Sky/Sea, each crafted from 100 Scraps of Scripture from Phylactery (The Magister's own drop)." },
       },
       {
         name: 'Kalphite Defender',
@@ -1571,7 +1571,7 @@ export const GEAR = {
           setEffect: null,
         },
         icon: 'icons/Off-hand_khopesh_of_the_Kharidian.png',
-        source: { type: 'boss', boss: 'The Magister', region: 'kharidianDesert', note: 'Drops in the Sophanem Slayer Dungeon.' },
+        source: { type: 'shop', shop: 'Shifting Tombs treasure chests (1/800, in place of feathers of Ma’at)', region: 'kharidianDesert' },
       },
       {
         name: 'Off-hand ruinous rapier',
@@ -2334,10 +2334,20 @@ export const GEAR = {
         icon: 'icons/Ascension_bolts.png', source: { type: 'boss', boss: 'Legio Primus', region: 'kandarin', note: 'Direct monster drop from the Legiones.' } },
       { name: 'Bane arrows', slot: 'ammo', level: { skill: 'Ranged', level: 80, note: '76 Fletching to make' },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 768 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 1152, accuracy: null, lifeBonus: 0, prayerBonus: 0, setEffect: '+40% auto-attack damage, +25% ability damage, and +30% flat accuracy against creature types the specific bane variant is attuned to.' },
-        icon: 'icons/Bane_arrow.png', source: { type: 'boss', boss: 'Arch-Glacor', region: 'misthalin', note: "Banite ore mined (80 Mining) from the Glacor cavern, Arch-Glacor's lair." } },
+        icon: 'icons/Bane_arrow.png',
+        source: {
+          type: 'skilling',
+          region: { anyOf: ['misthalin', 'fremennikProvince', 'karamja', 'wilderness'], label: 'Banite ore' },
+          detail: "80 Mining to mine banite ore (Glacor cavern mine / Arctic azure habitat mine / Jatizso dungeon elite mine / Tarshak's sanctum mine / Wilderness Pirates' Hideout mine - not an Arch-Glacor drop), then Tune Banite Ore, smelt, smith the bars at Kethsi, and 76 Fletching to make the arrows.",
+        } },
       { name: 'Bane bolts', slot: 'ammo', level: { skill: 'Ranged', level: 85, note: '76 Fletching to make' },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 768 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 1152, accuracy: null, lifeBonus: 0, prayerBonus: 0, setEffect: 'Same bane bonuses as bane arrows against attuned creature types.' },
-        icon: 'icons/Bane_bolts.png', source: { type: 'boss', boss: 'Arch-Glacor', region: 'misthalin', note: 'Banite ore mined from the Glacor cavern.' } },
+        icon: 'icons/Bane_bolts.png',
+        source: {
+          type: 'skilling',
+          region: { anyOf: ['misthalin', 'fremennikProvince', 'karamja', 'wilderness'], label: 'Banite ore' },
+          detail: "Same banite ore sourcing as Bane arrows (not an Arch-Glacor drop) - mined at 80 Mining, then smelted/smithed at Kethsi and fletched (76 Fletching).",
+        } },
       { name: 'Havensilver bolts', slot: 'ammo', level: { skill: 'Ranged', level: 1, note: '9 Fletching to make' },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 72 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 72, accuracy: null, lifeBonus: 0, prayerBonus: 0, setEffect: 'Deal full, un-mitigated damage against sanguine creatures instead of reduced damage from normal ammo.' },
         icon: 'icons/Havensilver_bolt.png', source: { type: 'boss', boss: 'Silverquill, the Dreadhog', region: 'havenhythe', note: 'Silver/Sanguine spines from Silverquill tip the bolts; havensilver schematic taught by NPC Liat in Havenhythe.' } },
