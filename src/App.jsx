@@ -11,10 +11,21 @@ import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection
 import { parseShareParam, stripShareParam } from './utils/shareBuild';
 import versionInfo from './data/version.json';
 
-function formatUpdatedAt(iso) {
-  const date = new Date(iso);
+// Always renders in GMT/UTC (not the visitor's local timezone) so the
+// timestamp reads the same for everyone, with the zone spelled out rather
+// than left implicit.
+function formatUpdatedAt(raw) {
+  const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  const formatted = date.toLocaleString('en-GB', {
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${formatted} GMT`;
 }
 
 function currentRoute() {

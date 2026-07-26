@@ -17,7 +17,10 @@ if (existsSync(versionFile)) {
 
 const data = {
   version: version.toFixed(1),
-  updatedAt: new Date().toISOString(),
+  // toUTCString() (e.g. "Sun, 26 Jul 2026 03:00:22 GMT") spells out GMT
+  // explicitly, unlike toISOString()'s trailing "Z" - readable at a glance
+  // in both the raw JSON and the footer, no timezone-conversion ambiguity.
+  updatedAt: new Date().toUTCString(),
 };
 
 writeFileSync(versionFile, `${JSON.stringify(data, null, 2)}\n`);

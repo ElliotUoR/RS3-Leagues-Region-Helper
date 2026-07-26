@@ -52,8 +52,8 @@ export const ASSUMPTION_GROUPS = [
         detail: "Jukat's Dragon Sword Shop (Dragon dagger, Dragon 2h sword, Dragon longsword) is reached via the Lumbridge Swamp Caves, so Zanaris is folded into Misthalin - same reasoning as Tormented demons' Ancient Guthix Temple.",
       },
       {
-        title: 'Polypore Dungeon -> Misthalin (disputed)',
-        detail: "The dungeon entrance sits on a River Salve island roughly between Morytania and Kharidian Desert, with no confirmed League region tag of its own. Treated as Misthalin for now; the Ganodermic armour set, Ganodermic gloves/boots, and the Polypore staff all carry both a 'Possibly Kharidian Desert' and a 'Possibly Morytania' soft tag alongside their hard Misthalin requirement.",
+        title: 'Polypore Dungeon -> Morytania',
+        detail: "Confirmed via a fan-maintained coordinate-mapped region spreadsheet (not the wiki's own League infobox field). Gates the Ganodermic armour set, Ganodermic gloves/boots, the Polypore staff, and (via Masterwork green cloth's ganodermic flake requirement) the Masterwork hat.",
       },
     ],
   },
