@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "fetch-icons": "node scripts/download-icons.mjs"
+    "fetch-icons": "node scripts/download-icons.mjs",
+    "shortlink-words": "node scripts/extract-shortlink-words.mjs"
   },
   "dependencies": {
     "lz-string": "^1.5.0",
