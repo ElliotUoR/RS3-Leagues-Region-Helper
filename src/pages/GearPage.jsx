@@ -5,7 +5,8 @@ import GearStatsSummary from '../components/GearStatsSummary';
 import { COMBAT_STYLES, GEAR } from '../data/gear';
 import { isGearItemAvailable } from '../data/gearAvailability';
 import { getArmourRating } from '../utils/gearStats';
-import { buildShareUrl } from '../utils/shareBuild';
+import { buildShareUrl, encodeShareBuild } from '../utils/shareBuild';
+import { createShortLink } from '../utils/api';
 
 const SLOT_LABELS = {
   head: 'Head',
@@ -84,6 +85,7 @@ export default function GearPage({
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('level');
   const [shareStatus, setShareStatus] = useState('idle'); // idle | copied | manual
+  const [shortenStatus, setShortenStatus] = useState('idle'); // idle | working | copied | manual | error
   const [hideLocked, setHideLocked] = useState(false);
 
   // An item outside the player's picked regions still counts as "available"
@@ -167,7 +169,43 @@ export default function GearPage({
     setTimeout(() => setShareStatus('idle'), 2500);
   }
 
+  // Short links depend on the optional backend (docs/deployment.md) - on
+  // GitHub Pages, or before the backend is deployed, /api/shorten simply
+  // doesn't exist, so this fails and falls back to 'error' rather than
+  // breaking anything. The full `?share=` link above always works
+  // regardless, since it's handled entirely client-side.
+  async function handleShorten() {
+    setShortenStatus('working');
+    try {
+      const payload = encodeShareBuild({
+        regions: selected,
+        equippedNamesByStyle,
+        eofWeaponNamesByStyle,
+        relics: selectedRelics,
+        defaultStyle,
+      });
+      const url = await createShortLink(payload);
+      try {
+        await navigator.clipboard.writeText(url);
+        setShortenStatus('copied');
+      } catch {
+        window.prompt('Copy this short link:', url);
+        setShortenStatus('manual');
+      }
+    } catch {
+      setShortenStatus('error');
+    }
+    setTimeout(() => setShortenStatus('idle'), 2500);
+  }
+
   const SHARE_LABELS = { copied: 'Link copied!', manual: 'Link ready', idle: 'Share build' };
+  const SHORTEN_LABELS = {
+    idle: 'Short link',
+    working: 'Creating…',
+    copied: 'Short link copied!',
+    manual: 'Short link ready',
+    error: 'Short links unavailable',
+  };
   const hasEquippedItems = Object.keys(equipped).length > 0;
   const slotHasAnyItems =
     activeSlot === 'eof'
@@ -198,6 +236,14 @@ export default function GearPage({
             </button>
             <button type="button" className="share-button" onClick={handleShare}>
               {SHARE_LABELS[shareStatus]}
+            </button>
+            <button
+              type="button"
+              className="share-button"
+              onClick={handleShorten}
+              disabled={shortenStatus === 'working'}
+            >
+              {SHORTEN_LABELS[shortenStatus]}
             </button>
           </div>
         </div>

@@ -5,10 +5,12 @@ import GearPage from './pages/GearPage';
 import HomePage from './pages/HomePage';
 import RelicsPage from './pages/RelicsPage';
 import SpellbooksPage from './pages/SpellbooksPage';
+import ReportIssueButton from './components/ReportIssueButton';
 import { REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
 import { parseShareParam, stripShareParam } from './utils/shareBuild';
+import { trackPageview } from './utils/api';
 import versionInfo from './data/version.json';
 
 // Always renders in GMT/UTC (not the visitor's local timezone) so the
@@ -146,6 +148,13 @@ function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
+  // Fires on every route change (including the initial mount) - a no-op
+  // wherever the backend isn't deployed yet (e.g. GitHub Pages), see
+  // utils/api.js.
+  useEffect(() => {
+    trackPageview(window.location.hash || '#home');
+  }, [route]);
+
   function exitSharedView() {
     stripShareParam();
     setSharedBuild(null);
@@ -166,6 +175,7 @@ function App() {
           {`· v${versionInfo.version}`}
           {formatUpdatedAt(versionInfo.updatedAt) && ` · Updated ${formatUpdatedAt(versionInfo.updatedAt)}`}
         </span>
+        <ReportIssueButton />
       </footer>
     </div>
   );
