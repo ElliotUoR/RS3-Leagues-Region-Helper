@@ -1,0 +1,34 @@
+name: Deploy to Hetzner
+
+# Separate from deploy.yml (GitHub Pages, unchanged) - this deploys the
+# self-hosted jellyflow.xyz/Leagues instance. See docs/deployment.md
+# section 11 for the one-time server-side setup this depends on (a
+# dedicated `deploy` user + SSH key, shared with the JellyFlow repo).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: hetzner-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH in and re-deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_DEPLOY_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/rs3-site
+            git pull
+            npm ci
+            npm run build
+            cd deploy
+            docker compose up -d --build

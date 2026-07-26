@@ -190,6 +190,60 @@ cd deploy
 docker compose up -d --build      # rebuilds the node image if server/ changed
 ```
 
+## 11. Auto-deploy (CI/CD)
+
+Once the manual steps above work, [`​.github/workflows/deploy-hetzner.yml`](../.github/workflows/deploy-hetzner.yml)
+automates step 10 on every push to `main` - it SSHes in and re-runs exactly
+those commands. This is shared, one-time setup: the same dedicated deploy
+user and SSH key work for both this repo and the JellyFlow repo (and any
+future project on this domain) - do this once, not per-project.
+
+**Create a dedicated `deploy` user** (scoped to just what it needs - docker
+access and these two project directories - rather than reusing your own
+admin SSH key for automation):
+
+```bash
+sudo adduser --disabled-password --gecos "" deploy
+sudo usermod -aG docker deploy
+sudo chown -R deploy:deploy /opt/rs3-site /opt/jellyflow-base
+```
+
+**Generate a dedicated key pair for CI** (on your own machine - no
+passphrase, since it has to run unattended):
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/jellyflow_deploy -N ""
+```
+
+**Install the public key for the deploy user** (on the server):
+
+```bash
+sudo mkdir -p /home/deploy/.ssh
+cat jellyflow_deploy.pub | sudo tee -a /home/deploy/.ssh/authorized_keys
+sudo chown -R deploy:deploy /home/deploy/.ssh
+sudo chmod 700 /home/deploy/.ssh
+sudo chmod 600 /home/deploy/.ssh/authorized_keys
+```
+
+**Verify it works before wiring up CI**:
+
+```bash
+ssh -i ~/.ssh/jellyflow_deploy deploy@<server-ip> "whoami && docker ps"
+```
+
+**Add GitHub Actions secrets** - in this repo's Settings → Secrets and
+variables → Actions (repeat for the JellyFlow repo too, same values):
+- `HETZNER_HOST` - the server's IP or hostname
+- `HETZNER_DEPLOY_USER` - `deploy`
+- `HETZNER_SSH_KEY` - the contents of `~/.ssh/jellyflow_deploy` (the
+  **private** key - never the `.pub` file)
+
+Once those three secrets exist, pushing to `main` deploys automatically.
+The workflow only touches this repo's own directory (`/opt/rs3-site`) - it
+has no way to affect JellyFlow's deployment or the shared Caddy/LiveKit
+setup, since the `deploy` user's access is scoped to both project
+directories but the workflow itself only ever `cd`s into its own.
+
 ## Rolling back
 
 ```bash
