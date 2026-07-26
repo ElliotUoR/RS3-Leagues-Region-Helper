@@ -1107,9 +1107,25 @@ export const MONSTERS = [
     drops: [{ name: 'Khopesh of the Kharidian', icon: 'icons/Khopesh_of_the_Kharidian.png' }],
   },
   {
+    name: 'Desert strykewyrm',
+    region: 'kharidianDesert',
+    drops: [{ name: 'Focus sight', icon: 'icons/Focus_sight.png' }],
+  },
+  {
+    name: 'Profane Scabarite',
+    region: 'kharidianDesert',
+    subLocation: 'Scabarite Cavern / Temple of Isolation',
+    drops: [{ name: 'Ensouled spectral lens', icon: 'icons/Ensouled_spectral_lens.png' }],
+  },
+  {
     name: 'Automaton Tracer',
     region: 'kandarin',
     drops: [{ name: 'Pneumatic gloves', icon: 'icons/Pneumatic_gloves.png' }],
+  },
+  {
+    name: 'Jungle strykewyrm',
+    region: 'kandarin',
+    drops: [{ name: 'Hexcrest', icon: 'icons/Hexcrest.png' }],
   },
   {
     name: 'Automaton Guardian',
@@ -1149,7 +1165,7 @@ export const MONSTERS = [
     ],
   },
   {
-    name: "Black mask monsters",
+    name: 'Cave Horrors',
     region: 'morytania',
     subLocation: "Mos Le'Harmless",
     drops: [{ name: 'Slayer helmet', icon: 'icons/Slayer_helmet.png' }],
