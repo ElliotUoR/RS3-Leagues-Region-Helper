@@ -36,6 +36,39 @@ function ResourcePill({ label, regions, isUnlocked }) {
   );
 }
 
+// Archaeology dig-site-artefact-only requirement (see the `artefact` field
+// docs in gearAvailability.js). Always single-region - label is derived
+// ("Artefacts: X") rather than hand-written, and the tooltip is
+// item-specific (what exactly gets skipped once the "Artefacts are not
+// region-locked" toggle is on), falling back to a generic explanation.
+function ArtefactPill({ regionId, note, isUnlocked }) {
+  const unlocked = isRegionUnlocked(regionId, isUnlocked);
+  const label = `Artefacts: ${REGION_SHORT_LABELS[regionId] ?? regionId}`;
+  return (
+    <TagTooltip
+      className={`region-tag region-tag-artefact${unlocked ? ' region-tag-artefact-unlocked' : ''}`}
+      tooltip={note ?? 'Region required to obtain artefacts.'}
+    >
+      {label}
+    </TagTooltip>
+  );
+}
+
+function RegionGroupPill({ group, isUnlocked }) {
+  if (group.artefact) {
+    return <ArtefactPill regionId={group.regions[0]} note={group.note} isUnlocked={isUnlocked} />;
+  }
+  if (group.label) {
+    return <ResourcePill label={group.label} regions={group.regions} isUnlocked={isUnlocked} />;
+  }
+  return group.regions.map((regionId, altIndex) => (
+    <span className="region-tag-or-item" key={regionId}>
+      {altIndex > 0 && <span className="region-tag-or">/</span>}
+      <RegionPill regionId={regionId} unlocked={isRegionUnlocked(regionId, isUnlocked)} />
+    </span>
+  ));
+}
+
 export default function RegionTags({ item, isUnlocked }) {
   if (isGearItemImpossible(item)) {
     return (
@@ -58,26 +91,17 @@ export default function RegionTags({ item, isUnlocked }) {
         // eslint-disable-next-line react/no-array-index-key
         <span className="region-tag-group" key={groupIndex}>
           {groupIndex > 0 && <span className="region-tag-and">+</span>}
-          {group.label ? (
-            <ResourcePill label={group.label} regions={group.regions} isUnlocked={isUnlocked} />
-          ) : (
-            group.regions.map((regionId, altIndex) => (
-              <span className="region-tag-or-item" key={regionId}>
-                {altIndex > 0 && <span className="region-tag-or">/</span>}
-                <RegionPill regionId={regionId} unlocked={isRegionUnlocked(regionId, isUnlocked)} />
-              </span>
-            ))
-          )}
+          <RegionGroupPill group={group} isUnlocked={isUnlocked} />
         </span>
       ))}
       {item.source?.softRegion && (
         <TagTooltip className="region-tag region-tag-soft" tooltip={item.source.softNote}>
-          Possibly {REGION_SHORT_LABELS[item.source.softRegion] ?? item.source.softRegion}
+          {item.source.softLabel ?? `Possibly ${REGION_SHORT_LABELS[item.source.softRegion] ?? item.source.softRegion}`}
         </TagTooltip>
       )}
-      {item.source?.softRegions?.map(({ region, note }) => (
+      {item.source?.softRegions?.map(({ region, note, label }) => (
         <TagTooltip key={region} className="region-tag region-tag-soft" tooltip={note}>
-          Possibly {REGION_SHORT_LABELS[region] ?? region}
+          {label ?? `Possibly ${REGION_SHORT_LABELS[region] ?? region}`}
         </TagTooltip>
       ))}
     </span>

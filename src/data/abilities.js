@@ -225,7 +225,7 @@ export const ABILITIES = [
     source: {
       type: 'shop',
       detail: 'Purchased with 63,000,000 Shattered anima from Shattered Worlds',
-      region: 'global',
+      region: 'asgarnia',
     },
   },
   {
@@ -265,7 +265,7 @@ export const ABILITIES = [
     source: {
       type: 'shop',
       detail: 'Purchased with 90,000,000 Shattered anima from Shattered Worlds',
-      region: 'global',
+      region: 'asgarnia',
     },
   },
   {
@@ -275,7 +275,7 @@ export const ABILITIES = [
     source: {
       type: 'shop',
       detail: 'Purchased with 90,000,000 Shattered anima from Shattered Worlds',
-      region: 'global',
+      region: 'asgarnia',
     },
   },
   {
@@ -285,7 +285,7 @@ export const ABILITIES = [
     source: {
       type: 'shop',
       detail: 'Purchased with 90,000,000 Shattered anima from Shattered Worlds',
-      region: 'global',
+      region: 'asgarnia',
     },
   },
   {

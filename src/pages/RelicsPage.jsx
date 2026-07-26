@@ -16,6 +16,11 @@ const MAX_SELECTED = MAX_RELICS;
 export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
+  const [ignoreArtefactRegions, setIgnoreArtefactRegions] = useState(false);
+
+  function isRelicAvailable(relic) {
+    return isGearItemAvailable(relic, isUnlocked, { ignoreArtefactRegions });
+  }
 
   const displayRelics = useMemo(() => {
     const categoryFiltered = tab === 'all' ? RELICS : RELICS.filter((r) => r.category === tab);
@@ -30,10 +35,11 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
     // everything else keeps the usual unlocked-before-locked convention.
     const picked = selected.map((name) => searched.find((r) => r.name === name)).filter(Boolean);
     const rest = searched.filter((r) => !selected.includes(r.name));
-    const available = rest.filter((r) => isGearItemAvailable(r, isUnlocked));
-    const locked = rest.filter((r) => !isGearItemAvailable(r, isUnlocked));
+    const available = rest.filter((r) => isRelicAvailable(r));
+    const locked = rest.filter((r) => !isRelicAvailable(r));
     return [...picked, ...available, ...locked];
-  }, [tab, search, selected, isUnlocked]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, search, selected, isUnlocked, ignoreArtefactRegions]);
 
   const tabLabel = tab === 'all' ? 'relics' : `${CATEGORY_LABELS[tab].toLowerCase()} relics`;
 
@@ -72,6 +78,20 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
+          <div className="abilities-toggles">
+            <label
+              className="hide-locked-toggle"
+              title="Archaeology materials can be gathered remotely via Research, without visiting the dig site itself - treats 'Artefacts: X' tags as satisfied. A relic's collector hand-in location, and any non-Archaeology component, still gates as normal."
+            >
+              <input
+                type="checkbox"
+                checked={ignoreArtefactRegions}
+                onChange={(e) => setIgnoreArtefactRegions(e.target.checked)}
+              />
+              <span>Artefacts are not region-locked</span>
+            </label>
+          </div>
         </div>
 
         <p className="relic-pick-count">
@@ -84,7 +104,7 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
               <RelicRow
                 key={relic.name}
                 relic={relic}
-                available={isGearItemAvailable(relic, isUnlocked)}
+                available={isRelicAvailable(relic)}
                 isUnlocked={isUnlocked}
                 selected={selected.includes(relic.name)}
                 selectable={selected.length < MAX_SELECTED}

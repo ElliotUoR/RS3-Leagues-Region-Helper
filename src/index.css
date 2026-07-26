@@ -1134,6 +1134,22 @@ main.abilities-page .gear-item-rows {
   border: 1px dashed color-mix(in srgb, var(--resource-color) 55%, transparent);
 }
 
+.region-tag-artefact {
+  background: var(--bg);
+  color: var(--text);
+  opacity: 0.5;
+  border: 1px dashed var(--border);
+  cursor: help;
+}
+
+.region-tag-artefact-unlocked {
+  --artefact-color: #8a63d2;
+  opacity: 1;
+  background: color-mix(in srgb, var(--artefact-color) 18%, transparent);
+  color: var(--artefact-color);
+  border: 1px dashed color-mix(in srgb, var(--artefact-color) 55%, transparent);
+}
+
 .region-tag-impossible {
   font-size: 10px;
   font-weight: 600;

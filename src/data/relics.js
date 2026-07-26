@@ -28,6 +28,19 @@
 // Havenhythe sources are still listed even though those regions are always
 // unlocked (fixed), for an accurate/complete tag display.
 //
+// `{ anyOf: [region], artefact: true, note }` marks a region that's only
+// required to physically excavate a dig site's *artefacts* - since those
+// materials can be gathered remotely via the Archaeology Research system
+// (Exam Centre, spending chronotes) without visiting the dig site itself,
+// these render as a distinct "Artefacts: X" tag and get skipped entirely
+// when the Relics page's "Artefacts are not region-locked" toggle is on.
+// A relic's actual collector/hand-in NPC location, and any non-Archaeology
+// component (a boss drop, a quest reward, a site-bound puzzle/altar/statue
+// interaction rather than a delegable collection), still gates as a normal
+// hard region regardless of that toggle - see gearAvailability.js for the
+// full mechanism (mirrors the existing Abilities page "Ignore component
+// requirements" toggle/`component: true` pattern).
+//
 // Dig site -> region mapping used throughout (confirmed per-site on
 // runescape.wiki): Infernal Source -> misthalin, Everlight -> morytania,
 // Kharid-et -> kharidianDesert, Senntisten -> misthalin, Stormguard Citadel
@@ -66,18 +79,29 @@ export const RELICS = [
     category: 'skilling',
     effect: 'Adds 10% to all reputation earned at the Heart of Gielinor, the Farming Guild, Menaphos and Mazcab.',
     icon: FP('Unexpected_Diplomacy.png'),
-    source: { type: 'skilling', detail: 'Complete the Zarosian I collection (Kharid-et Dig Site)', region: 'kharidianDesert' },
+    source: {
+      type: 'skilling',
+      detail: 'Complete the Zarosian I collection (Kharid-et Dig Site), handed in to Soran, Emissary of Zaros, in south-west Varrock',
+      region: [
+        'misthalin',
+        { anyOf: ['kharidianDesert'], artefact: true, note: 'Region required to obtain artefacts - needs the Kharid-et dig site materials for the Zarosian I collection.' },
+      ],
+    },
   },
   {
     name: 'Pouch Protector',
     relicName: 'Threads of Fate',
+    wikiName: 'Threads of Fate (relic)',
     category: 'skilling',
     effect: 'Runecrafting pouches will no longer degrade when used, including massive pouches.',
     icon: FP('Pouch_Protector.png'),
     source: {
       type: 'combination',
-      detail: 'Combine an abyssal thread (Zamorakian I collection, Infernal Source Dig Site) with a giant pouch',
-      region: 'misthalin',
+      detail: 'Combine an abyssal thread (Zamorakian I collection, Infernal Source Dig Site) with a giant pouch, handed in to Isaura in the Black Knights\' Base, Taverley Dungeon',
+      region: [
+        'asgarnia',
+        { anyOf: ['misthalin'], artefact: true, note: 'Region required to obtain artefacts - needs the Infernal Source dig site materials for the Zamorakian I collection.' },
+      ],
     },
   },
   {
@@ -104,7 +128,8 @@ export const RELICS = [
       type: 'combination',
       detail:
         'Combine a lock of hair (Saradomin I collection, Everlight Dig Site) with an amulet of the forsaken (Barrows)',
-      region: 'morytania',
+      region: ['morytania', 'asgarnia'],
+      note: 'The Saradomin I collection is handed in to Sir Atcha at the White Knights\' Castle, Falador.',
     },
   },
   {
@@ -129,8 +154,11 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail:
-        "Combine a Guardian's tear (Guthixian I collection, Moonrise Dig Site) with expensive spices (Let Them Eat Pie quest reward, Taverley/Burthorpe)",
-      region: ['havenhythe', 'asgarnia'],
+        "Combine a Guardian's tear (Guthixian I collection, Moonrise Dig Site) with expensive spices (Let Them Eat Pie quest reward, Taverley/Burthorpe), handed in to Artiefax in Taverley",
+      region: [
+        'asgarnia',
+        { anyOf: ['havenhythe'], artefact: true, note: 'Region required to obtain artefacts - needs the Moonrise (Amberfell) dig site materials for the Guthixian I collection.' },
+      ],
     },
   },
   {
@@ -155,7 +183,10 @@ export const RELICS = [
       type: 'combination',
       detail:
         'Combine a chaos star (Shakroth remains, Infernal Source Dig Site) with a chaotic gatestone (Daemonheim Rewards shop, 60 Dungeoneering)',
-      region: ['misthalin', 'wilderness'],
+      region: [
+        'wilderness',
+        { anyOf: ['misthalin'], artefact: true, note: 'Region required to obtain artefacts - needs the Infernal Source dig site chaos star.' },
+      ],
     },
   },
   {
@@ -175,8 +206,12 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail:
-        'Complete the Smoky Fings collection (artefacts from Infernal Source, Everlight, and Kharid-et Dig Sites) and hand it in to Chief Tess in Kandarin',
-      region: ['morytania', 'kharidianDesert', 'kandarin'],
+        'Complete the Smoky Fings collection (artefacts from Infernal Source, Everlight, and Kharid-et Dig Sites) and hand it in to Chief Tess in Oo\'glog',
+      region: [
+        'kandarin',
+        { anyOf: ['morytania'], artefact: true, note: 'Region required to obtain artefacts - needs the Everlight dig site materials for the Smoky Fings collection.' },
+        { anyOf: ['kharidianDesert'], artefact: true, note: 'Region required to obtain artefacts - needs the Kharid-et dig site materials for the Smoky Fings collection.' },
+      ],
     },
   },
   {
@@ -188,8 +223,11 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail:
-        "Give King Oberon's moonshroom spores (Armadylean I collection, Stormguard Citadel Dig Site) to the Fairy Queen",
-      region: 'kandarin',
+        "Give King Oberon's moonshroom spores (Armadylean I collection, Stormguard Citadel Dig Site) to the Fairy Queen in Zanaris",
+      region: [
+        'misthalin',
+        { anyOf: ['kandarin'], artefact: true, note: 'Region required to obtain artefacts - needs the Stormguard Citadel dig site materials for the Armadylean I collection.' },
+      ],
     },
   },
   {
@@ -202,7 +240,10 @@ export const RELICS = [
       type: 'combination',
       detail:
         "Give an aviansie dreamcoat (tailory debris, Stormguard Citadel Dig Site) to Armadyl (his tower, south of Falador)",
-      region: ['kandarin', 'asgarnia'],
+      region: [
+        'asgarnia',
+        { anyOf: ['kandarin'], artefact: true, note: 'Region required to obtain artefacts - needs the Stormguard Citadel dig site tailory debris.' },
+      ],
     },
   },
   {
@@ -227,10 +268,10 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail:
-        "Activate the seed (Imcando anvil, Warforge Dig Site) while wearing flame gloves (All Fired Up quest, a beacon chain across Morytania, Asgarnia, and the Wilderness)",
+        "Activate the seed on the Imcando anvil/forge at Warforge Dig Site, while wearing flame gloves (All Fired Up quest, a beacon chain across Morytania, Asgarnia, and the Wilderness)",
       impossible: true,
       impossibleReason:
-        'Requires the Warforge Dig Site (Kandarin) plus lighting beacons across Morytania, Asgarnia, and the Wilderness for All Fired Up - 4 optional regions, more than a single Leagues run can unlock.',
+        'Requires the Warforge Dig Site forge interaction (Kandarin) plus lighting beacons across Morytania, Asgarnia, and the Wilderness for All Fired Up - 4 optional regions, more than a single Leagues run can unlock.',
       region: ['kandarin', 'morytania', 'asgarnia', 'wilderness'],
     },
   },
@@ -242,8 +283,11 @@ export const RELICS = [
     icon: FP('Sticky_Fingers.png'),
     source: {
       type: 'combination',
-      detail: 'Give a Dominarian device (Oikos fishing hut remnants, Everlight Dig Site) to Reldo or Charos',
-      region: 'morytania',
+      detail: 'Give a Dominarian device (Oikos fishing hut remnants, Everlight Dig Site) to Reldo (Varrock Palace Library) or Charos',
+      region: [
+        'misthalin',
+        { anyOf: ['morytania'], artefact: true, note: 'Region required to obtain artefacts - needs the Everlight dig site materials for the Dominarian device.' },
+      ],
     },
   },
   {
@@ -253,7 +297,15 @@ export const RELICS = [
     effect:
       'Grant a 50% experience boost when creating Summoning pouches, but pouches are crafted one at a time, every 4 ticks (2.4 seconds), instead of all at once.',
     icon: FP('Spirit_Weaver.png'),
-    source: { type: 'skilling', detail: 'Complete the Dragonkin VI collection (Daemonheim Dig Site), submitted to Sharrigan', region: ['wilderness', 'anachronia'], note: 'The completed collection must be handed in to Sharrigan, the dragonkin artefact collector, at the Anachronia base camp.' },
+    source: {
+      type: 'skilling',
+      detail: 'Complete the Dragonkin VI collection (Daemonheim Dig Site), submitted to Sharrigan',
+      region: [
+        'anachronia',
+        { anyOf: ['wilderness'], artefact: true, note: 'Region required to obtain artefacts - needs the Daemonheim dig site materials for the Dragonkin VI collection.' },
+      ],
+      note: 'The completed collection must be handed in to Sharrigan, the dragonkin artefact collector, at the Anachronia base camp.',
+    },
   },
   {
     name: 'Deathless',
@@ -265,7 +317,11 @@ export const RELICS = [
       type: 'combination',
       detail:
         "Complete the Wise Am the Music Man collection (Everlight and Stormguard Citadel Dig Sites) and give Koschei's needle to Koschei the Deathless (Rellekka)",
-      region: ['morytania', 'kandarin', 'fremennikProvince'],
+      region: [
+        'fremennikProvince',
+        { anyOf: ['morytania'], artefact: true, note: 'Region required to obtain artefacts - needs the Everlight dig site materials for the Wise Am the Music Man collection.' },
+        { anyOf: ['kandarin'], artefact: true, note: 'Region required to obtain artefacts - needs the Stormguard Citadel dig site materials for the Wise Am the Music Man collection.' },
+      ],
     },
   },
   {
@@ -276,7 +332,7 @@ export const RELICS = [
     icon: FP('Fury_of_the_Small.png'),
     source: {
       type: 'skilling',
-      detail: 'Combine the red hand and green skull cave paintings (both Warforge Dig Site)',
+      detail: 'Combine the red hand and green skull cave paintings, done on-site at the Warforge Dig Site',
       region: 'kandarin',
     },
   },
@@ -318,8 +374,12 @@ export const RELICS = [
     icon: FP('Bait_and_Switch.png'),
     source: {
       type: 'skilling',
-      detail: 'Give Bob the cat (Lumbridge) a restored death mask (dragonkin coffin, Orthen Dig Site)',
-      region: 'anachronia',
+      detail: 'Give Bob the cat a restored death mask (dragonkin coffin, Orthen Dig Site)',
+      region: { anyOf: ['anachronia'], artefact: true, note: 'Region required to obtain artefacts - needs the Orthen dig site death mask.' },
+      note: "Bob the cat has one of the largest wander radii in the game (spotted across Misthalin, Asgarnia, Kandarin, and the desert) with no single fixed hand-in spot, so no reliable hard region can be asserted for actually finding him.",
+      softRegion: 'kharidianDesert',
+      softLabel: 'Catspeak amulet',
+      softNote: "Talking to Bob the cat requires a Catspeak amulet, a reward from Icthlarin's Little Helper (collected from the Sphinx in Sophanem, kharidianDesert) - not confirmed as a hard requirement, but plausibly needed.",
     },
   },
   {
@@ -331,8 +391,8 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail:
-        'Create the Soma relic from Skeka flasks (Orthenglass flask, near the corbicula rex hunting site, Orthen Dig Site) using sweet honeycomb, only obtainable in Kandarin',
-      region: ['anachronia', 'kandarin'],
+        'Create the Soma relic from Skeka flasks (Orthenglass flask, near the corbicula rex hunting site, Orthen Dig Site, filled with Anachronia water on-site) using sweet honeycomb, only obtainable in Kandarin',
+      region: ['kandarin', 'anachronia'],
     },
   },
   {
@@ -369,7 +429,15 @@ export const RELICS = [
     category: 'skilling',
     effect: '2% more experience when training support skills.',
     icon: FP('Inspire_Love.png'),
-    source: { type: 'skilling', detail: 'Complete the Zamorakian IV collection (Infernal Source Dig Site)', region: 'misthalin' },
+    source: {
+      type: 'skilling',
+      detail: 'Complete the Zamorakian IV collection (Infernal Source Dig Site)',
+      region: [
+        'asgarnia',
+        { anyOf: ['misthalin'], artefact: true, note: 'Region required to obtain artefacts - needs the Infernal Source dig site materials for the Zamorakian IV collection.' },
+      ],
+      note: 'The Zamorakian IV collection is handed in to Isura, in the Black Knights\' Base within Taverley Dungeon.',
+    },
   },
   {
     name: 'Inspire Effort',
@@ -380,7 +448,10 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail: 'Complete the Saradominist IV collection (Everlight Dig Site) and hand it in at its collector in Asgarnia',
-      region: ['morytania', 'asgarnia'],
+      region: [
+        'asgarnia',
+        { anyOf: ['morytania'], artefact: true, note: 'Region required to obtain artefacts - needs the Everlight dig site materials for the Saradominist IV collection.' },
+      ],
     },
   },
   {
@@ -416,8 +487,13 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail:
-        'Complete the Knowledge is Power collection (artefacts spread across Infernal Source, Stormguard Citadel, Kharid-et, Everlight, and Warforge Dig Sites)',
-      region: ['morytania', 'kharidianDesert', 'kandarin'],
+        'Complete the Knowledge is Power collection (artefacts spread across Infernal Source, Stormguard Citadel, Kharid-et, Everlight, and Warforge Dig Sites), handed in to the Wise Old Man in Draynor Village',
+      region: [
+        'misthalin',
+        { anyOf: ['morytania'], artefact: true, note: 'Region required to obtain artefacts - needs the Everlight dig site materials for the Knowledge is Power collection.' },
+        { anyOf: ['kharidianDesert'], artefact: true, note: 'Region required to obtain artefacts - needs the Kharid-et dig site materials for the Knowledge is Power collection.' },
+        { anyOf: ['kandarin'], artefact: true, note: 'Region required to obtain artefacts - needs the Stormguard Citadel and Warforge dig site materials for the Knowledge is Power collection.' },
+      ],
     },
   },
   {
@@ -430,7 +506,10 @@ export const RELICS = [
       type: 'combination',
       detail:
         'Combine Helm of Terror (inside) with Helm of Terror (outside) (Red Rum Relics III and Green Gobbo Goodies III collections, both Warforge Dig Site) and hand them in at their collector in Asgarnia',
-      region: ['kandarin', 'asgarnia'],
+      region: [
+        'asgarnia',
+        { anyOf: ['kandarin'], artefact: true, note: 'Region required to obtain artefacts - needs the Warforge dig site materials for the Red Rum Relics III / Green Gobbo Goodies III collections.' },
+      ],
     },
   },
 ];

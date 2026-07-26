@@ -29,7 +29,7 @@ export default function RelicRow({ relic, available, isUnlocked, selected, selec
         type="button"
         className="gear-item-main ability-row-main relic-row-main"
         onClick={() => canClick && onToggleSelect(relic)}
-        onContextMenu={wikiContextMenuHandler(relic.relicName)}
+        onContextMenu={wikiContextMenuHandler(relic.wikiName ?? relic.relicName)}
         aria-disabled={!canClick}
         aria-pressed={selected}
       >
