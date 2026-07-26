@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import BossRow from './BossRow';
-import { BOSSES, FIXED_REGIONS, REGIONS, REGION_IDS } from '../data/regions';
+import { ACTIVITIES, BOSSES, FIXED_REGIONS, REGIONS, REGION_IDS } from '../data/regions';
 
 // Purely a local display preference (which regions' unlock lists are
 // collapsed) - persisted so it survives reloads, but deliberately kept out
@@ -46,6 +46,7 @@ export default function UnlocksList({ isUnlocked }) {
       {unlockedIds.map((id) => {
         const region = REGIONS[id];
         const bosses = BOSSES.filter((b) => b.region === id && !b.quest);
+        const activities = ACTIVITIES.filter((a) => a.region === id);
         const isMinimised = minimised.has(id);
         return (
           <div key={id} className="unlock-region">
@@ -74,7 +75,17 @@ export default function UnlocksList({ isUnlocked }) {
                     ))}
                   </ul>
                 ) : (
-                  <p className="region-empty">No boss data added for this region yet.</p>
+                  activities.length === 0 && <p className="region-empty">No boss data added for this region yet.</p>
+                )}
+                {activities.length > 0 && (
+                  <>
+                    <h4 className="unlock-region-subheading">Other unlocks</h4>
+                    <ul className="boss-list">
+                      {activities.map((a) => (
+                        <BossRow key={a.name} boss={a} />
+                      ))}
+                    </ul>
+                  </>
                 )}
               </>
             )}

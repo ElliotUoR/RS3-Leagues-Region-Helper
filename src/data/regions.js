@@ -970,3 +970,29 @@ export const BOSSES = [
     ],
   },
 ];
+
+// Non-boss region-locked activities (heists, thieving vaults, etc.) whose
+// unique rewards are worth showing alongside the boss lists - same shape as
+// BOSSES (name/region/subLocation/drops) so UnlocksList can render both with
+// the same BossRow component.
+export const ACTIVITIES = [
+  {
+    name: 'Asuran Arsenal Heist',
+    region: 'anachronia',
+    subLocation: '108 Thieving',
+    drops: [
+      { name: 'Nodon spike harness', icon: 'icons/Nodon_spike_harness.png' },
+      { name: "Varanus's Mercy", icon: "icons/Varanus's_Mercy.png" },
+    ],
+  },
+  {
+    name: 'Vault of Hereditas',
+    region: 'kharidianDesert',
+    subLocation: 'Kharid-et Dig Site, 95 Thieving',
+    drops: [
+      { name: 'Gloomfire Bow', icon: 'icons/Gloomfire_bow.png' },
+      { name: "Legatus's Emberstaff", icon: "icons/Legatus's_Emberstaff.png" },
+      { name: "Misalionar's death mask", icon: "icons/Misalionar's_death_mask.png" },
+    ],
+  },
+];
