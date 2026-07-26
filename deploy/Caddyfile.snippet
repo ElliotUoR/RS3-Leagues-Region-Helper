@@ -1,0 +1,25 @@
+# Append this block to the EXISTING production Caddyfile that already
+# serves livekit.yourdomain.com (The Garage's .prodserver/livekit/Caddyfile,
+# deployed on the server at /opt/livekit/Caddyfile). Do not create a second
+# standalone Caddy instance - only one process can bind ports 80/443.
+#
+# Replace rs3.yourdomain.example with the real domain once it's registered,
+# and point an A record at this server's IP before relying on the TLS cert
+# (ACME's HTTP challenge needs DNS to already resolve here).
+
+rs3.yourdomain.example {
+	# Short link redirects and the two write endpoints -> Node service.
+	@backend path /s/* /api/*
+	reverse_proxy @backend rs3_node:3000
+
+	# Public PostgREST API (anon insert-only + the short-link RPC) -
+	# stripped of the /rest prefix so e.g. /rest/page_events maps to
+	# PostgREST's own /page_events route.
+	handle_path /rest/* {
+		reverse_proxy rs3_postgrest:3000
+	}
+
+	# Everything else -> the static build (hash-routed SPA, so no extra
+	# rewrite rules are needed - there's only ever one real path, "/").
+	reverse_proxy rs3_frontend:80
+}

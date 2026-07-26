@@ -1,0 +1,85 @@
+# RS3 Leagues Region Helper - backend stack.
+#
+# Runs alongside the existing LiveKit/Caddy stack on the same Hetzner box.
+# Deliberately does NOT run its own Caddy - the existing production Caddy
+# (from The Garage's .prodserver/livekit setup) is extended with a new site
+# block (see deploy/Caddyfile.snippet) that reverse-proxies to the
+# containers here by name, over the shared external `web` network.
+# See docs/deployment.md for the full one-time setup steps.
+#
+# Usage (from this directory, on the server):
+#   cp .env.example .env              # fill in real secrets first
+#   docker compose up -d
+#   docker compose logs -f
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rs3_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rs3
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD}
+    volumes:
+      - rs3_postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - internal
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgrest:
+    image: postgrest/postgrest:v14.5
+    container_name: rs3_postgrest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_AUTHENTICATOR_PASSWORD}@postgres:5432/rs3
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+    networks:
+      - internal
+      - web
+
+  node:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    container_name: rs3_node
+    restart: unless-stopped
+    depends_on:
+      - postgrest
+    environment:
+      PORT: 3000
+      POSTGREST_URL: http://postgrest:3000
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_REPO: ${GITHUB_REPO}
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL}
+      ANALYTICS_SALT_SECRET: ${ANALYTICS_SALT_SECRET}
+    networks:
+      - internal
+      - web
+
+  frontend:
+    image: nginx:alpine
+    container_name: rs3_frontend
+    restart: unless-stopped
+    volumes:
+      - ../dist:/usr/share/nginx/html:ro
+    networks:
+      - web
+
+networks:
+  internal:
+    name: rs3_internal
+  web:
+    external: true
+
+volumes:
+  rs3_postgres_data:
+    name: rs3_postgres_data
