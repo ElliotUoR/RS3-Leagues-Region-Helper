@@ -2990,6 +2990,23 @@ export const GEAR = {
         icon: "icons/Obliteration.png",
         source: { type: 'boss', boss: 'Wilderness Slayer cave reward chest', region: 'wilderness', note: '87 Slayer required; magic counterpart to Annihilation (melee).' },
       },
+      {
+        name: 'Polypore staff',
+        slot: 'weapon',
+        twoHanded: true,
+        level: { skill: 'Magic', level: 75 },
+        stats: {
+          attack: { stab: 0, slash: 0, crush: 0, magic: 1694, ranged: 0 },
+          defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 },
+          damage: 1080, accuracy: 1694, lifeBonus: 0, prayerBonus: 0,
+          setEffect: 'Degrades over 3,000 charges (unusually short; frequent recharging needed).',
+        },
+        icon: "icons/Polypore_staff.png",
+        source: { type: 'combination', region: 'misthalin', note: '95 Slayer required. Made (80 Farming) by combining a polypore stick (Ganodermic beast drop, Polypore Dungeon) with polypore spores and fire runes.', softRegions: [
+          { region: 'kharidianDesert', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Al Kharid, so it could plausibly be Kharidian Desert instead." },
+          { region: 'morytania', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Mort Myre Swamp, so it could plausibly be Morytania instead." },
+        ] },
+      },
     ],
     offhand: [
       {
@@ -3170,6 +3187,13 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 196.6, slash: 196.6, crush: 196.6, magic: 196.6, ranged: 196.6 }, damage: 15.0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: null },
         icon: "icons/Lunar_helm.png",
         source: { type: 'quest', quest: 'Lunar Diplomacy', region: 'fremennikProvince', note: 'repurchasable from Oneiromancer (Lunar Isle) after' } },
+      { name: 'Ganodermic visor', slot: 'head', level: { skill: 'Defence', level: 75 },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 338.8, slash: 338.8, crush: 338.8, magic: 338.8, ranged: 338.8 }, damage: 0, accuracy: 0, lifeBonus: 750, prayerBonus: 0, setEffect: null },
+        icon: "icons/Ganodermic_visor.png",
+        source: { type: 'combination', region: 'misthalin', note: '95 Slayer required. Crafted from ganodermic flakes + a mycelium visor web, or dropped directly by ganodermic creatures - Polypore Dungeon.', softRegions: [
+          { region: 'kharidianDesert', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Al Kharid, so it could plausibly be Kharidian Desert instead." },
+          { region: 'morytania', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Mort Myre Swamp, so it could plausibly be Morytania instead." },
+        ] } },
     ],
     torso: [
       { name: 'Virtus robe top', slot: 'torso', level: { skill: 'Defence', level: 80 },
@@ -3213,6 +3237,13 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 226.0, slash: 226.0, crush: 226.0, magic: 226.0, ranged: 226.0 }, damage: 22.5, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: null },
         icon: "icons/Lunar_torso.png",
         source: { type: 'quest', quest: 'Lunar Diplomacy', region: 'fremennikProvince', note: 'repurchasable from Oneiromancer (Lunar Isle) after' } },
+      { name: 'Ganodermic poncho', slot: 'torso', level: { skill: 'Defence', level: 75 },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 389.6, slash: 389.6, crush: 389.6, magic: 389.6, ranged: 389.6 }, damage: 0, accuracy: 0, lifeBonus: 1125, prayerBonus: 0, setEffect: null },
+        icon: "icons/Ganodermic_poncho.png",
+        source: { type: 'combination', region: 'misthalin', note: '95 Slayer required. Crafted from ganodermic flakes + a mycelium web body, or dropped directly by ganodermic creatures - Polypore Dungeon.', softRegions: [
+          { region: 'kharidianDesert', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Al Kharid, so it could plausibly be Kharidian Desert instead." },
+          { region: 'morytania', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Mort Myre Swamp, so it could plausibly be Morytania instead." },
+        ] } },
     ],
     legs: [
       { name: 'Virtus robe legs', slot: 'legs', level: { skill: 'Defence', level: 80 },
@@ -3256,6 +3287,13 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 216.2, slash: 216.2, crush: 216.2, magic: 216.2, ranged: 216.2 }, damage: 18.7, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: null },
         icon: "icons/Lunar_legs.png",
         source: { type: 'quest', quest: 'Lunar Diplomacy', region: 'fremennikProvince', note: 'repurchasable from Oneiromancer (Lunar Isle) after' } },
+      { name: 'Ganodermic leggings', slot: 'legs', level: { skill: 'Defence', level: 75 },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 372.6, slash: 372.6, crush: 372.6, magic: 372.6, ranged: 372.6 }, damage: 0, accuracy: 0, lifeBonus: 1125, prayerBonus: 0, setEffect: null },
+        icon: "icons/Ganodermic_leggings.png",
+        source: { type: 'combination', region: 'misthalin', note: '95 Slayer required. Crafted from ganodermic flakes + a mycelium web bottoms, or dropped directly by ganodermic creatures - Polypore Dungeon.', softRegions: [
+          { region: 'kharidianDesert', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Al Kharid, so it could plausibly be Kharidian Desert instead." },
+          { region: 'morytania', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Mort Myre Swamp, so it could plausibly be Morytania instead." },
+        ] } },
     ],
     hands: [
       { name: 'Virtus gloves', slot: 'hands', level: { skill: 'Defence', level: 80 },
@@ -3296,6 +3334,13 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 49.1, slash: 49.1, crush: 49.1, magic: 49.1, ranged: 49.1 }, damage: 9.3, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: null },
         icon: "icons/Lunar_gloves.png",
         source: { type: 'quest', quest: 'Lunar Diplomacy', region: 'fremennikProvince', note: 'repurchasable from Oneiromancer (Lunar Isle) after' } },
+      { name: 'Ganodermic gloves', slot: 'hands', level: { skill: 'Defence', level: 75 },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 84.7, slash: 84.7, crush: 84.7, magic: 84.7, ranged: 84.7 }, damage: 0, accuracy: 0, lifeBonus: 375, prayerBonus: 0, setEffect: "Doesn't degrade; cannot be crafted, only obtained as a rare drop." },
+        icon: "icons/Ganodermic_gloves.png",
+        source: { type: 'boss', boss: 'Ganodermic runt / Ganodermic beast', region: 'misthalin', note: '95 Slayer required - Polypore Dungeon.', softRegions: [
+          { region: 'kharidianDesert', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Al Kharid, so it could plausibly be Kharidian Desert instead." },
+          { region: 'morytania', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Mort Myre Swamp, so it could plausibly be Morytania instead." },
+        ] } },
     ],
     feet: [
       { name: 'Virtus boots', slot: 'feet', level: { skill: 'Defence', level: 80 },
@@ -3336,6 +3381,13 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 49.1, slash: 49.1, crush: 49.1, magic: 49.1, ranged: 49.1 }, damage: 9.3, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: null },
         icon: "icons/Lunar_boots.png",
         source: { type: 'quest', quest: 'Lunar Diplomacy', region: 'fremennikProvince', note: 'repurchasable from Oneiromancer (Lunar Isle) after' } },
+      { name: 'Ganodermic boots', slot: 'feet', level: { skill: 'Defence', level: 75 },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 84.7, slash: 84.7, crush: 84.7, magic: 84.7, ranged: 84.7 }, damage: 0, accuracy: 0, lifeBonus: 375, prayerBonus: 0, setEffect: "Doesn't degrade; cannot be crafted, only obtained as a rare drop." },
+        icon: "icons/Ganodermic_boots.png",
+        source: { type: 'boss', boss: 'Ganodermic runt / Ganodermic beast', region: 'misthalin', note: '95 Slayer required - Polypore Dungeon.', softRegions: [
+          { region: 'kharidianDesert', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Al Kharid, so it could plausibly be Kharidian Desert instead." },
+          { region: 'morytania', note: "Polypore Dungeon's own League region isn't clearly confirmed - treated as misthalin for now. Its entrance sits on a River Salve island near Mort Myre Swamp, so it could plausibly be Morytania instead." },
+        ] } },
     ],
     back: [],
     neck: [],

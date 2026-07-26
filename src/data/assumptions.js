@@ -47,6 +47,14 @@ export const ASSUMPTION_GROUPS = [
         title: 'Relic region traced to component origin, not just the dig site',
         detail: "When a relic combines parts from multiple sources (e.g. a ring needing both a dig-site find and a separate boss-dropped component), the region tag traces every component's real origin rather than just the relic's own collection site. Prerequisite relics (e.g. the Hand of Glory ring chain) also pull in whatever regions the earlier relic in the chain needed.",
       },
+      {
+        title: 'Zanaris -> Misthalin',
+        detail: "Jukat's Dragon Sword Shop (Dragon dagger, Dragon 2h sword, Dragon longsword) is reached via the Lumbridge Swamp Caves, so Zanaris is folded into Misthalin - same reasoning as Tormented demons' Ancient Guthix Temple.",
+      },
+      {
+        title: 'Polypore Dungeon -> Misthalin (disputed)',
+        detail: "The dungeon entrance sits on a River Salve island roughly between Morytania and Kharidian Desert, with no confirmed League region tag of its own. Treated as Misthalin for now; the Ganodermic armour set, Ganodermic gloves/boots, and the Polypore staff all carry both a 'Possibly Kharidian Desert' and a 'Possibly Morytania' soft tag alongside their hard Misthalin requirement.",
+      },
     ],
   },
   {
@@ -118,6 +126,14 @@ export const ASSUMPTION_GROUPS = [
       {
         title: '"Awkward without Fremennik" caveats that stop short of being a hard gate',
         detail: 'A few Masterwork armour recipes also call for dagannoth hide, which the note flags as "awkward to obtain without Fremennik access" - but since it isn\'t strictly impossible without Fremennik, this is left as a caveat in the notes rather than an actual region requirement.',
+      },
+      {
+        title: 'Glacor Cave -> Fremennik Province (user-confirmed)',
+        detail: 'Steadfast/Glaiven/Ragefire boots (and their Emberkeen/Flarefrost/Hailfire upgrades) are obtainable from Glacors in the EGWD Glacor Front (misthalin), the Wilderness, or Glacor Cave - the latter folded to Fremennik Province for now',
+      },
+      {
+        title: 'Nightmare gauntlets / Enhanced Nightmare gauntlets -> Kandarin (unconfirmed)',
+        detail: 'The wiki has no confirmed League region tag for the Freneskae/World Gate content these drop from. As the world gate, kandarin is assumed - but could require quests from other regions.',
       },
     ],
   },

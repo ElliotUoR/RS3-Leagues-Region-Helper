@@ -75,6 +75,11 @@ export default function RegionTags({ item, isUnlocked }) {
           Possibly {REGION_SHORT_LABELS[item.source.softRegion] ?? item.source.softRegion}
         </TagTooltip>
       )}
+      {item.source?.softRegions?.map(({ region, note }) => (
+        <TagTooltip key={region} className="region-tag region-tag-soft" tooltip={note}>
+          Possibly {REGION_SHORT_LABELS[region] ?? region}
+        </TagTooltip>
+      ))}
     </span>
   );
 }
