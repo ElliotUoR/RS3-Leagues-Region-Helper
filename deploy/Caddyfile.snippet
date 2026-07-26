@@ -1,25 +1,33 @@
-# Append this block to the EXISTING production Caddyfile that already
-# serves livekit.yourdomain.com (The Garage's .prodserver/livekit/Caddyfile,
-# deployed on the server at /opt/livekit/Caddyfile). Do not create a second
-# standalone Caddy instance - only one process can bind ports 80/443.
+# Routing fragment for jellyflow.xyz/Leagues - NOT a standalone site block.
+# jellyflow.xyz hosts multiple independent projects (this one lives under
+# /Leagues; a separate JellyFlow landing-page repo owns "/" and anything
+# else), so no single project can own the whole `jellyflow.xyz { }` block.
 #
-# Replace rs3.yourdomain.example with the real domain once it's registered,
-# and point an A record at this server's IP before relying on the TLS cert
-# (ACME's HTTP challenge needs DNS to already resolve here).
+# Deploy this file to /opt/caddy-shared/conf.d/leagues.caddy on the server
+# (one-time shared setup below) and reload Caddy - do NOT wrap it in its own
+# "jellyflow.xyz { }" block, and do not append it directly into the
+# livekit.yourdomain.com Caddyfile the way earlier versions of this file
+# said to.
 
-rs3.yourdomain.example {
+redir /Leagues /Leagues/
+
+handle_path /Leagues/* {
 	# Short link redirects and the two write endpoints -> Node service.
+	# Paths here have already had the /Leagues prefix stripped, so they
+	# match exactly what the Node service's own routes expect (/s/:code,
+	# /api/shorten, etc).
 	@backend path /s/* /api/*
 	reverse_proxy @backend rs3_node:3000
 
 	# Public PostgREST API (anon insert-only + the short-link RPC) -
-	# stripped of the /rest prefix so e.g. /rest/page_events maps to
-	# PostgREST's own /page_events route.
+	# stripped of the /rest prefix too, so e.g. /Leagues/rest/page_events
+	# maps to PostgREST's own /page_events route.
 	handle_path /rest/* {
 		reverse_proxy rs3_postgrest:3000
 	}
 
-	# Everything else -> the static build (hash-routed SPA, so no extra
-	# rewrite rules are needed - there's only ever one real path, "/").
+	# Everything else under /Leagues/* -> the static build (hash-routed
+	# SPA, so no extra rewrite rules needed - there's only ever one real
+	# path per the app itself, "/Leagues/").
 	reverse_proxy rs3_frontend:80
 }

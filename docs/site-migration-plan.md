@@ -8,7 +8,7 @@ running as a pointer to the new canonical site.
 ## Goals
 
 - Replace the long `lz-string`-compressed `?share=` URLs with short,
-  RS3-themed links like `yourdomain.com/s/torva-seismic-vengeance`.
+  RS3-themed links like `jellyflow.xyz/Leagues/s/torva-seismic-vengeance`.
 - Let visitors report site issues without a GitHub account, landing in this
   repo's GitHub Issues for triage.
 - Track pageviews and visitor journeys without cookies or persistent
@@ -105,11 +105,13 @@ A small Express/Fastify app, containerized, sitting behind Caddy for two
 routes that need real HTTP semantics or a hidden secret (things PostgREST
 alone can't do):
 
-**`GET /s/:code`**
+**`GET /s/:code`** (reachable at `jellyflow.xyz/Leagues/s/:code` - Caddy
+strips the `/Leagues` prefix before proxying, see `deploy/Caddyfile.snippet`)
 - Look up `code` in `short_links` (via PostgREST or a direct DB connection).
 - Not found → 404 page. Found → `302` redirect to
-  `yourdomain.com/?share=<payload>#gear` (today's existing share-link format,
-  unchanged) so the rest of the app doesn't need to know shortlinks exist.
+  `jellyflow.xyz/Leagues/?share=<payload>#gear` (today's existing share-link
+  format, unchanged) so the rest of the app doesn't need to know shortlinks
+  exist.
 
 **`POST /api/shorten`**
 - Body: the same `{ regions, equippedNamesByStyle, eofWeaponNamesByStyle, relics, defaultStyle }`
@@ -137,7 +139,8 @@ alone can't do):
 
 - Add a "Copy short link" action next to the existing share-link UI in
   [shareBuild.js](../src/utils/shareBuild.js)'s consumer(s) - calls
-  `POST /api/shorten` and shows the returned `yourdomain.com/s/<code>` URL.
+  `POST /api/shorten` and shows the returned `jellyflow.xyz/Leagues/s/<code>`
+  URL.
 - Add a "Report an issue" form/modal - calls `POST /api/report-issue`.
 - No change needed to `decodeShareBuild`/`parseShareParam` - shortlinks
   resolve server-side into the exact same `?share=` URL shape the app
