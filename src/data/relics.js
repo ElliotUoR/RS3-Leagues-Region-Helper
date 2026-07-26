@@ -56,7 +56,7 @@ export const RELICS = [
     source: {
       type: 'skilling',
       detail:
-        'Combine a hand of glory (Dungeon of Disorder, Infernal Source Dig Site) with a Ring of Luck (Grand Exchange)',
+        'Combine a hand of glory (Dungeon of Disorder, Infernal Source Dig Site) with a Ring of Luck',
       region: 'misthalin',
     },
   },
@@ -103,7 +103,7 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail:
-        'Combine a lock of hair (Saradomin I collection, Everlight Dig Site) with an amulet of the forsaken (Barrows, or Grand Exchange)',
+        'Combine a lock of hair (Saradomin I collection, Everlight Dig Site) with an amulet of the forsaken (Barrows)',
       region: 'morytania',
     },
   },

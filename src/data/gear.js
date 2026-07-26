@@ -1677,7 +1677,7 @@ export const GEAR = {
           setEffect: 'Deals typeless bonus melee damage equal to current Smithing level per hit; doubled with a shield, +50% with a defender',
         },
         icon: 'icons/Armour_spikes.png',
-        source: { type: 'shop', shop: 'Smithing (90 Smithing, 1 elder rune bar at an anvil) or Grand Exchange', region: { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' }, note: 'Elder rune ore/bar (the crafting input) is only minable/smithable via these regions in Leagues.' },
+        source: { type: 'shop', shop: 'Smithing (90 Smithing, 1 elder rune bar at an anvil)', region: { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' }, note: 'Elder rune ore/bar (the crafting input) is only minable/smithable via these regions in Leagues.' },
       },
       {
         name: 'Abyssal armour spikes',
@@ -2245,7 +2245,7 @@ export const GEAR = {
         },
         specialAttack: 'Descent of Darkness (65% adrenaline): 2 hits for 190-230% ability damage each (380-460% total, ~420% average).',
         icon: "icons/Dark_bow.png",
-        source: { type: 'shop', shop: 'Grand Exchange - common tradeable, dropped by numerous monsters', region: 'global' },
+        source: { type: 'boss', boss: 'Dark beast', region: { anyOf: ['morytania', 'kandarin', 'wilderness'] }, note: 'Not GE-tradeable in Leagues - dark beasts spawn in the Morytania Slayer Tower dungeon or Mourner tunnels (morytania), Kuradal\'s Dungeon (kandarin), or the Forinthry Dungeon/Forgotten Cemetery (wilderness).' },
       },
       {
         name: 'Zamorak Bow',
@@ -2348,7 +2348,7 @@ export const GEAR = {
         icon: 'icons/Elder_rune_arrow.png', source: { type: 'shop', shop: 'Smithing + Fletching (elder rune ore/bars smithed to heads, then fletched to shafts)', region: { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' } } },
       { name: 'Rune arrow', slot: 'ammo', level: { skill: 'Ranged', level: 50, note: '50 Fletching to make' },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 480.0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 720, accuracy: null, lifeBonus: 0, prayerBonus: 0, setEffect: null },
-        icon: 'icons/Rune_arrow.png', source: { type: 'shop', shop: 'Fletching (rune arrowheads + shafts) or Grand Exchange', region: 'global' } },
+        icon: 'icons/Rune_arrow.png', source: { type: 'shop', shop: 'Fletching (rune arrowheads + shafts)', region: 'global' } },
       { name: 'Wild arrow', slot: 'ammo', level: { skill: 'Ranged', level: 85 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 816.0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 1224, accuracy: null, lifeBonus: 0, prayerBonus: 0, setEffect: null },
         icon: 'icons/Wild_arrow.png', source: { type: 'boss', boss: 'Wilderness monster drop', region: 'wilderness' } },
