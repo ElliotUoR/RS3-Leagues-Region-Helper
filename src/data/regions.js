@@ -608,6 +608,8 @@ export const BOSSES = [
       { name: 'Phylactery', icon: 'icons/Phylactery.png' },
       { name: 'Key to the Crossing', icon: 'icons/Key_to_the_Crossing.png' },
       { name: 'Gloves of passage', icon: 'icons/Gloves_of_passage.png' },
+      { name: 'Khopesh of Tumeken', icon: 'icons/Khopesh_of_Tumeken.png' },
+      { name: 'Khopesh of Elidinis', icon: 'icons/Khopesh_of_Elidinis.png' },
     ],
   },
 
@@ -1057,6 +1059,12 @@ export const MONSTERS = [
     drops: [{ name: 'Abyssal Scourge', icon: 'icons/Abyssal_scourge.png' }],
   },
   {
+    name: 'Abyssal Beast',
+    region: 'misthalin',
+    subLocation: 'Senntisten Asylum',
+    drops: [{ name: 'Jaws of the Abyss', icon: 'icons/Jaws_of_the_Abyss.png' }],
+  },
+  {
     name: 'Tormented demons',
     region: 'misthalin',
     drops: [{ name: 'Dragon Claws', icon: 'icons/Dragon_claw.png' }],
@@ -1134,6 +1142,10 @@ export const MONSTERS = [
     drops: [
       { name: 'Ganodermic gloves', icon: 'icons/Ganodermic_gloves.png' },
       { name: 'Ganodermic boots', icon: 'icons/Ganodermic_boots.png' },
+      { name: 'Ganodermic visor', icon: 'icons/Ganodermic_visor.png' },
+      { name: 'Ganodermic poncho', icon: 'icons/Ganodermic_poncho.png' },
+      { name: 'Ganodermic leggings', icon: 'icons/Ganodermic_leggings.png' },
+      { name: 'Polypore staff', icon: 'icons/Polypore_staff.png' },
     ],
   },
   {
