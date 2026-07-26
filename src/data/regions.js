@@ -1067,7 +1067,11 @@ export const MONSTERS = [
   {
     name: 'Tormented demons',
     region: 'misthalin',
-    drops: [{ name: 'Dragon Claws', icon: 'icons/Dragon_claw.png' }],
+    drops: [
+      { name: 'Dragon Claws', icon: 'icons/Dragon_claw.png' },
+      { name: 'Dragon crossbow', icon: 'icons/Dragon_crossbow.png' },
+      { name: 'Off-hand dragon crossbow', icon: 'icons/Off-hand_dragon_crossbow.png' },
+    ],
   },
   {
     name: 'Rex Matriarchs',
@@ -1094,6 +1098,12 @@ export const MONSTERS = [
     name: 'Dagannoth Kings',
     region: 'fremennikProvince',
     drops: [{ name: 'Dragon Hatchet', icon: 'icons/Dragon_hatchet.png' }],
+  },
+  {
+    name: 'Chaos dwarf hand cannoneer',
+    region: 'fremennikProvince',
+    subLocation: 'Chaos Dwarf Battlefield',
+    drops: [{ name: 'Hand cannon', icon: 'icons/Hand_cannon.png' }],
   },
   {
     name: 'Sanguine Crawler',
@@ -1187,6 +1197,15 @@ export const MONSTERS = [
   {
     name: 'Ripper demons / Slasher demons',
     region: 'wilderness',
+    drops: [
+      { name: 'Ripper Claw', icon: 'icons/Ripper_claw.png' },
+      { name: 'Off-hand Ripper Claw', icon: 'icons/Off-hand_ripper_claw.png' },
+    ],
+  },
+  {
+    name: 'Ripper demons / Slasher demons',
+    region: 'kharidianDesert',
+    subLocation: 'near Al Kharid',
     drops: [
       { name: 'Ripper Claw', icon: 'icons/Ripper_claw.png' },
       { name: 'Off-hand Ripper Claw', icon: 'icons/Off-hand_ripper_claw.png' },
