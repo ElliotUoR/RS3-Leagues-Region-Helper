@@ -9,6 +9,13 @@ import { REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelect
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
 import { parseShareParam, stripShareParam } from './utils/shareBuild';
+import versionInfo from './data/version.json';
+
+function formatUpdatedAt(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+}
 
 function currentRoute() {
   if (window.location.hash === '#gear') return 'gear';
@@ -142,7 +149,13 @@ function App() {
         onExitShared={exitSharedView}
         onAdopted={() => setSharedBuild(null)}
       />
-      <footer className="site-footer">Fan made site - not affiliated with Jagex</footer>
+      <footer className="site-footer">
+        <span>Fan made site - not affiliated with Jagex</span>
+        <span className="site-version">
+          {`· v${versionInfo.version}`}
+          {formatUpdatedAt(versionInfo.updatedAt) && ` · Updated ${formatUpdatedAt(versionInfo.updatedAt)}`}
+        </span>
+      </footer>
     </div>
   );
 }

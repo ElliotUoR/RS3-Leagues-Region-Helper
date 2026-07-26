@@ -1,0 +1,5 @@
+#!/bin/sh
+# Bumps src/data/version.json (site version + last-updated timestamp) and
+# stages it so the bump is included in the commit being made.
+node scripts/bump-version.mjs || exit 1
+git add src/data/version.json

@@ -103,6 +103,10 @@ h1, h2, h3 {
   opacity: 0.7;
 }
 
+.site-version {
+  margin-left: 6px;
+}
+
 header h1 {
   font-size: 32px;
   margin-bottom: 8px;
