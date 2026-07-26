@@ -1030,6 +1030,12 @@ export const ACTIVITIES = [
     ],
   },
   {
+    name: 'Big Game Hunter',
+    region: 'anachronia',
+    subLocation: '96 Hunter / 76 Slayer to hunt, 93 Crafting/Smithing to craft',
+    drops: [{ name: 'Terrasaur Maul', icon: 'icons/Terrasaur_maul.png' }],
+  },
+  {
     name: 'Vault of Hereditas',
     region: 'kharidianDesert',
     subLocation: 'Kharid-et Dig Site, 95 Thieving',
