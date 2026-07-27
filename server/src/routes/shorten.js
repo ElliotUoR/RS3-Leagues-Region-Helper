@@ -43,35 +43,47 @@ shortenRouter.post('/api/shorten', async (req, res) => {
     return res.status(400).json({ error: 'invalid payload' });
   }
 
-  // Re-sharing the exact same build (no changes) shouldn't mint a new code
-  // every time - look up by a hash of the payload first (see
-  // deploy/migrations/004_short_link_dedup.sql for why it's hashed rather
-  // than matched on the raw payload) and hand back the existing link if
-  // one's already there.
-  const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
-  const existingCode = await callScalarRpc('get_short_code_for_payload_hash', { p_hash: payloadHash });
-  if (existingCode) {
-    return res.status(200).json({ code: existingCode });
-  }
-
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
-    const code = generateShortCode();
-    const { conflict } = await insertRow('short_links', { code, payload, payload_hash: payloadHash });
-    if (!conflict) {
-      return res.status(201).json({ code });
+  // Everything below talks to PostgREST - wrapped in one try/catch (same
+  // pattern as reportIssue.js) so a PostgREST/network failure (e.g. a
+  // migration not applied yet, so an RPC function doesn't exist) becomes a
+  // normal error response instead of an unhandled promise rejection, which
+  // crashes this entire Node process on modern Node by default and takes
+  // every route down with it - not just this one.
+  try {
+    // Re-sharing the exact same build (no changes) shouldn't mint a new
+    // code every time - look up by a hash of the payload first (see
+    // deploy/migrations/004_short_link_dedup.sql for why it's hashed
+    // rather than matched on the raw payload) and hand back the existing
+    // link if one's already there.
+    const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
+    const existingCode = await callScalarRpc('get_short_code_for_payload_hash', { p_hash: payloadHash });
+    if (existingCode) {
+      return res.status(200).json({ code: existingCode });
     }
 
-    // payload_hash isn't a unique index (see 004_short_link_dedup.sql for
-    // why - some pre-existing rows already share a payload), so a conflict
-    // here can only be a plain `code` collision. Re-checking for a raced
-    // duplicate is technically no longer reachable via a genuine race on
-    // this exact payload (nothing would 409 on payload_hash alone), but
-    // it's a cheap no-op in the common case and still correct, so it stays.
-    const racedCode = await callScalarRpc('get_short_code_for_payload_hash', { p_hash: payloadHash });
-    if (racedCode) {
-      return res.status(200).json({ code: racedCode });
-    }
-  }
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+      const code = generateShortCode();
+      const { conflict } = await insertRow('short_links', { code, payload, payload_hash: payloadHash });
+      if (!conflict) {
+        return res.status(201).json({ code });
+      }
 
-  res.status(503).json({ error: 'could not generate a unique short code, try again' });
+      // payload_hash isn't a unique index (see 004_short_link_dedup.sql
+      // for why - some pre-existing rows already share a payload), so a
+      // conflict here can only be a plain `code` collision. Re-checking
+      // for a raced duplicate is technically no longer reachable via a
+      // genuine race on this exact payload (nothing would 409 on
+      // payload_hash alone), but it's a cheap no-op in the common case
+      // and still correct, so it stays.
+      const racedCode = await callScalarRpc('get_short_code_for_payload_hash', { p_hash: payloadHash });
+      if (racedCode) {
+        return res.status(200).json({ code: racedCode });
+      }
+    }
+
+    res.status(503).json({ error: 'could not generate a unique short code, try again' });
+  } catch (err) {
+    console.error('shorten failed:', err);
+    res.status(502).json({ error: 'could not create a short link right now, try again later' });
+  }
 });
