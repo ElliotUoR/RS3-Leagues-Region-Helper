@@ -147,6 +147,15 @@ into the static-file container.
 
 ## 8. Bring up the new stack
 
+The Postgres data volume is declared `external` (so a project-name change,
+like the one that caused the `deploy`-directory collision below, can never
+silently orphan real data) - on a brand new server it won't exist yet, so
+create it once before the first `up`:
+
+```bash
+docker volume create rs3_postgres_data
+```
+
 ```bash
 cd /opt/rs3-site/deploy
 docker compose up -d --build

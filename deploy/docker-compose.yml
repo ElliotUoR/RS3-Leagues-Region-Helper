@@ -12,6 +12,14 @@
 #   docker compose up -d
 #   docker compose logs -f
 
+# Explicit project name - without this, Compose defaults to the current
+# directory's basename ("deploy"), which collides with any other project
+# whose compose file also lives in a directory named "deploy" (e.g.
+# JellyFlow's). That collision previously caused `docker compose up` here to
+# recreate/disrupt JellyFlow's containers since Compose tracks containers by
+# project+service label, not by container_name.
+name: rs3-leagues
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -83,3 +91,4 @@ networks:
 volumes:
   rs3_postgres_data:
     name: rs3_postgres_data
+    external: true
