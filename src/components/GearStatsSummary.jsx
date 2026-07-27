@@ -12,10 +12,18 @@ const WEAPON_SLOTS = new Set(['weapon', 'offhand', 'ammo']);
 // minimise state) - persisted so it survives reloads.
 const MINIMISED_STORAGE_KEY = 'rs3-leagues-gear-stats-minimised';
 
+// Same "mobile" cutoff already used site-wide (see .app's padding/.site-nav
+// breakpoint in index.css) - only used as the *fallback* default below, so
+// an explicit stored preference (once the player's toggled it themselves)
+// always wins regardless of viewport.
+const MOBILE_BREAKPOINT_QUERY = '(max-width: 700px)';
+
 function loadInitialMinimised() {
   if (typeof window === 'undefined') return false;
   try {
-    return window.localStorage.getItem(MINIMISED_STORAGE_KEY) === 'true';
+    const stored = window.localStorage.getItem(MINIMISED_STORAGE_KEY);
+    if (stored !== null) return stored === 'true';
+    return window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches;
   } catch {
     return false;
   }
