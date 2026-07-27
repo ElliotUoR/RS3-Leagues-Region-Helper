@@ -1027,18 +1027,32 @@ main.gear-page {
   margin-bottom: 20px;
 }
 
-/* Gear Planner only: constrained to the equip-grid's own width (see
-   .gear-layout-left) so the 4 style tabs wrap into two even rows of two,
-   instead of running wide above both columns like every other page's
-   style-tabs row still does. */
+/* Gear Planner only: styled as a tab strip fused onto the top of the
+   equip-grid panel below (see .gear-layout-left / .equip-grid), rather than
+   the free-floating pill row every other page's style-tabs still use. The
+   `gap: 1px` + `background: var(--border)` combo draws the 1px dividers
+   between cells (each cell paints over the rest with its own background),
+   so no per-cell border bookkeeping is needed. The container's own border
+   forms the outer edge; its bottom is left open so it merges seamlessly
+   into the equip-grid's top border immediately below with no doubled line. */
 .gear-layout-left .style-tabs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  margin-bottom: 3px;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  margin-bottom: 0;
 }
 
 .gear-layout-left .style-tab {
   text-align: center;
+  border: none;
+  border-radius: 0;
+  padding: 7px 4px;
+  font-size: 12.5px;
 }
 
 .default-style-row {
@@ -1094,48 +1108,47 @@ main.gear-page {
 }
 
 /* Gear Planner only (each style-tab also carries a style-tab-<style> modifier,
-   see GearPage.jsx): subtle per-style tint so Melee/Ranged/Magic/Necromancy
-   are visually distinguishable at a glance, matching their in-game colours. */
+   see GearPage.jsx): a faint per-style tint - just enough to hint at
+   Melee/Ranged/Magic/Necromancy's in-game colours without standing out from
+   the panel it's fused to. The active tab gets a slightly stronger tint plus
+   a coloured underline (rather than a solid fill) so it still reads as
+   "selected" without breaking the blended, low-contrast look. */
 .style-tab-melee {
-  border-color: color-mix(in srgb, var(--style-melee) 55%, var(--border));
-  background: color-mix(in srgb, var(--style-melee) 12%, var(--panel-bg));
-  color: var(--style-melee);
+  background: color-mix(in srgb, var(--style-melee) 7%, var(--panel-bg));
+  color: color-mix(in srgb, var(--style-melee) 65%, var(--text));
 }
 .style-tab-ranged {
-  border-color: color-mix(in srgb, var(--style-ranged) 55%, var(--border));
-  background: color-mix(in srgb, var(--style-ranged) 12%, var(--panel-bg));
-  color: var(--style-ranged);
+  background: color-mix(in srgb, var(--style-ranged) 7%, var(--panel-bg));
+  color: color-mix(in srgb, var(--style-ranged) 65%, var(--text));
 }
 .style-tab-magic {
-  border-color: color-mix(in srgb, var(--style-magic) 55%, var(--border));
-  background: color-mix(in srgb, var(--style-magic) 12%, var(--panel-bg));
-  color: var(--style-magic);
+  background: color-mix(in srgb, var(--style-magic) 7%, var(--panel-bg));
+  color: color-mix(in srgb, var(--style-magic) 65%, var(--text));
 }
 .style-tab-necromancy {
-  border-color: color-mix(in srgb, var(--style-necromancy) 55%, var(--border));
-  background: color-mix(in srgb, var(--style-necromancy) 12%, var(--panel-bg));
-  color: var(--style-necromancy);
+  background: color-mix(in srgb, var(--style-necromancy) 7%, var(--panel-bg));
+  color: color-mix(in srgb, var(--style-necromancy) 65%, var(--text));
 }
 
 .style-tab-melee.active {
-  background: var(--style-melee);
-  border-color: var(--style-melee);
-  color: #fff;
+  background: color-mix(in srgb, var(--style-melee) 18%, var(--panel-bg));
+  color: var(--style-melee);
+  box-shadow: inset 0 -2px 0 var(--style-melee);
 }
 .style-tab-ranged.active {
-  background: var(--style-ranged);
-  border-color: var(--style-ranged);
-  color: #fff;
+  background: color-mix(in srgb, var(--style-ranged) 18%, var(--panel-bg));
+  color: var(--style-ranged);
+  box-shadow: inset 0 -2px 0 var(--style-ranged);
 }
 .style-tab-magic.active {
-  background: var(--style-magic);
-  border-color: var(--style-magic);
-  color: #fff;
+  background: color-mix(in srgb, var(--style-magic) 18%, var(--panel-bg));
+  color: var(--style-magic);
+  box-shadow: inset 0 -2px 0 var(--style-magic);
 }
 .style-tab-necromancy.active {
-  background: var(--style-necromancy);
-  border-color: var(--style-necromancy);
-  color: #fff;
+  background: color-mix(in srgb, var(--style-necromancy) 18%, var(--panel-bg));
+  color: var(--style-necromancy);
+  box-shadow: inset 0 -2px 0 var(--style-necromancy);
 }
 
 .gear-layout {
@@ -1148,6 +1161,14 @@ main.gear-page {
 @media (max-width: 700px) {
   .gear-layout {
     grid-template-columns: 1fr;
+  }
+
+  /* .gear-layout-left has a fixed 236px width (see below) so it doesn't
+     stretch to the mobile column's full width - centre it, and everything
+     inside it (style tabs, equip-grid, default-style row, Loadout panel)
+     centres along with it. */
+  .gear-layout-left {
+    margin: 0 auto;
   }
 }
 
@@ -1170,7 +1191,11 @@ main.gear-page {
   gap: 6px;
   background: var(--panel-bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  /* Square top corners: the style-tabs strip directly above (see
+     .gear-layout-left .style-tabs) supplies the rounded top and its open
+     bottom border merges with this top border, so the two read as one
+     continuous panel. */
+  border-radius: 0 0 8px 8px;
   padding: 16px;
   margin-bottom: 24px;
 }
