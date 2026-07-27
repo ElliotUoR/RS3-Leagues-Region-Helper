@@ -117,7 +117,13 @@ Edit `.env`:
   the `analytics` Postgres role (daily rollup job + admin stats API, see
   `deploy/migrations/002_analytics_rollup.sql`)
 - `ADMIN_PASSWORD_HASH` - a bcrypt hash of the JellyFlow admin dashboard
-  password: `cd /opt/rs3-site/server && node -e "console.log(require('bcryptjs').hashSync('yourpassword', 10))"`
+  password: `cd /opt/rs3-site/server && node -e "console.log(require('bcryptjs').hashSync('yourpassword', 10))"`.
+  **Double every `$` to `$$` when pasting the hash into `.env`** (e.g.
+  `$2a$10$abc...` becomes `$$2a$$10$$abc...`) - Compose treats a bare `$` in
+  an env file as the start of variable interpolation, which silently mangles
+  bcrypt hashes otherwise. Verify with `docker compose config | grep
+  ADMIN_PASSWORD_HASH` - it should print your hash byte-for-byte, `$` signs
+  and all (no `$$` in the resolved output, those only belong in `.env` itself).
 - `ADMIN_SESSION_SECRET` - `openssl rand -hex 32`
 
 Then open `migrations/001_init.sql` and replace
@@ -217,12 +223,23 @@ cd deploy
 docker compose up -d postgres postgrest
 docker compose run --rm --no-deps --build node node scripts/migrate.js
 docker compose up -d --build           # rebuilds/restarts everything else
+cp Caddyfile.snippet /opt/caddy-shared/conf.d/leagues.caddy
+cd /opt/livekit
+docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
 The migration step applies any new `deploy/migrations/*.sql` files (tracked
 in a `schema_migrations` table so already-applied ones are skipped) against
 the live database *before* the new code that might depend on them starts -
 see `server/scripts/migrate.js`. It's a no-op if nothing's changed.
+
+The Caddy copy+reload step re-syncs the *live* routing fragment with
+whatever's actually in this repo's `Caddyfile.snippet` right now - skipping
+it is exactly what caused a real incident: a `/s/:code` routing change
+landed in the repo and in Node's code, but the server's copy of the
+fragment (and Caddy's loaded config) stayed on the old routing forever,
+since nothing ever re-copied it. Safe to run even when the fragment hasn't
+changed - `cp` + `caddy reload` are both no-ops in that case.
 
 ## 11. Auto-deploy (CI/CD)
 
@@ -241,6 +258,20 @@ admin SSH key for automation):
 sudo adduser --disabled-password --gecos "" deploy
 sudo usermod -aG docker deploy
 sudo chown -R deploy:deploy /opt/rs3-site /opt/jellyflow-base
+```
+
+**Also needed** (only once) so the automated Caddy copy+reload step in
+step 10 above can actually run as this unprivileged user:
+
+```bash
+# deploy needs to write its own project's fragment into the shared conf.d -
+# safe since this is the same shared deploy user used by every project.
+sudo chown -R deploy:deploy /opt/caddy-shared
+
+# `docker compose exec caddy ...` needs to read /opt/livekit's compose file
+# to resolve the "caddy" service name - deploy just needs read+traverse,
+# not ownership, of the LiveKit project itself.
+sudo setfacl -R -m u:deploy:rX /opt/livekit
 ```
 
 **Generate a dedicated key pair for CI** (on your own machine - no
