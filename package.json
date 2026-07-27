@@ -14,7 +14,6 @@
     "shortlink-words": "node scripts/extract-shortlink-words.mjs"
   },
   "dependencies": {
-    "@oxlint/binding-win32-x64-msvc": "^1.76.0",
     "lz-string": "^1.5.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
