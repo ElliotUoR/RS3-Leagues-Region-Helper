@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import BossRow from './BossRow';
 import {
   ACTIVITIES,
@@ -10,23 +10,6 @@ import {
   OPTIONAL_REGIONS,
   REGIONS,
 } from '../data/regions';
-
-// Purely a local display preference (which regions' unlock lists are
-// collapsed) - persisted so it survives reloads, but deliberately kept out
-// of shareBuild.js's payload since it's not part of the build being shared.
-const MINIMISED_STORAGE_KEY = 'rs3-leagues-unlocks-minimised';
-
-function loadInitialMinimised() {
-  if (typeof window === 'undefined') return new Set();
-  try {
-    const raw = window.localStorage.getItem(MINIMISED_STORAGE_KEY);
-    if (!raw) return new Set();
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? new Set(parsed) : new Set();
-  } catch {
-    return new Set();
-  }
-}
 
 // A gateway region that's currently toggled off has nothing to expand (no
 // regional content is actually reachable) - shown as a plain faded row with
@@ -122,12 +105,14 @@ function RegionCard({ id, badge, isMinimised, toggleMinimised }) {
 
 export default function RegionPicker({ selected, isUnlocked, overLimit, clearRegions }) {
   const [openWarningId, setOpenWarningId] = useState(null);
-  const [minimised, setMinimised] = useState(loadInitialMinimised);
+  // Which region cards are expanded - deliberately in-memory only and always
+  // starts empty (everything minimised by default), rather than restored
+  // from storage. RegionPicker unmounts whenever you navigate to another tab
+  // (see App.jsx's route === 'home' check) and remounts fresh when you come
+  // back, so this naturally resets on every visit and for every newly
+  // unlocked region without any extra reset logic being needed.
+  const [expanded, setExpanded] = useState(() => new Set());
   const unlockedOptional = OPTIONAL_REGIONS.filter((id) => isUnlocked(id));
-
-  useEffect(() => {
-    window.localStorage.setItem(MINIMISED_STORAGE_KEY, JSON.stringify([...minimised]));
-  }, [minimised]);
 
   // Animates the card list's height whenever a region is added or removed
   // (a card mounts/unmounts) instead of the panel snapping straight to its
@@ -192,8 +177,8 @@ export default function RegionPicker({ selected, isUnlocked, overLimit, clearReg
     setOpenWarningId((prev) => (prev === id ? null : id));
   }
 
-  function toggleMinimised(id) {
-    setMinimised((prev) => {
+  function toggleExpanded(id) {
+    setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -240,8 +225,8 @@ export default function RegionPicker({ selected, isUnlocked, overLimit, clearReg
             key={id}
             id={id}
             badge={<span className="badge">always unlocked</span>}
-            isMinimised={minimised.has(id)}
-            toggleMinimised={toggleMinimised}
+            isMinimised={!expanded.has(id)}
+            toggleMinimised={toggleExpanded}
           />
         ))}
         {GATEWAY_REGIONS.map((id) =>
@@ -250,8 +235,8 @@ export default function RegionPicker({ selected, isUnlocked, overLimit, clearReg
               key={id}
               id={id}
               badge={<span className="badge badge-gateway">unlocked second</span>}
-              isMinimised={minimised.has(id)}
-              toggleMinimised={toggleMinimised}
+              isMinimised={!expanded.has(id)}
+              toggleMinimised={toggleExpanded}
             />
           ) : (
             <OffGatewayRow
@@ -267,8 +252,8 @@ export default function RegionPicker({ selected, isUnlocked, overLimit, clearReg
           <RegionCard
             key={id}
             id={id}
-            isMinimised={minimised.has(id)}
-            toggleMinimised={toggleMinimised}
+            isMinimised={!expanded.has(id)}
+            toggleMinimised={toggleExpanded}
           />
         ))}
       </div>
