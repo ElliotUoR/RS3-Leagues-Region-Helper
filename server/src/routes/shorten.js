@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { insertRow } from '../lib/postgrest.js';
+import crypto from 'node:crypto';
+import { callScalarRpc, insertRow } from '../lib/postgrest.js';
 import { generateShortCode } from '../lib/shortCode.js';
 
 const MAX_PAYLOAD_LENGTH = 10_000;
@@ -42,11 +43,32 @@ shortenRouter.post('/api/shorten', async (req, res) => {
     return res.status(400).json({ error: 'invalid payload' });
   }
 
+  // Re-sharing the exact same build (no changes) shouldn't mint a new code
+  // every time - look up by a hash of the payload first (see
+  // deploy/migrations/004_short_link_dedup.sql for why it's hashed rather
+  // than matched on the raw payload) and hand back the existing link if
+  // one's already there.
+  const payloadHash = crypto.createHash('sha256').update(payload).digest('hex');
+  const existingCode = await callScalarRpc('get_short_code_for_payload_hash', { p_hash: payloadHash });
+  if (existingCode) {
+    return res.status(200).json({ code: existingCode });
+  }
+
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
     const code = generateShortCode();
-    const { conflict } = await insertRow('short_links', { code, payload });
+    const { conflict } = await insertRow('short_links', { code, payload, payload_hash: payloadHash });
     if (!conflict) {
       return res.status(201).json({ code });
+    }
+
+    // The conflict could be a plain code collision (retry with a new
+    // code, same as always) or another request for this exact same
+    // payload winning a race against the lookup above - re-check rather
+    // than assuming, otherwise a genuine race would retry forever against
+    // the unique payload_hash index instead of ever succeeding.
+    const racedCode = await callScalarRpc('get_short_code_for_payload_hash', { p_hash: payloadHash });
+    if (racedCode) {
+      return res.status(200).json({ code: racedCode });
     }
   }
 

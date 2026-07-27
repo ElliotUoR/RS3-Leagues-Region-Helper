@@ -31,7 +31,7 @@ async function rollUpDay(client, day) {
   const { rowCount } = await client.query(
     `
     with ranked as (
-      select session_id, path, referrer, created_at,
+      select session_id, path, referrer, browser, os, device_type, created_at,
              row_number() over (partition by session_id order by created_at) as rn
       from public.page_events
       where created_at >= $1::date and created_at < ($1::date + interval '1 day')
@@ -42,7 +42,7 @@ async function rollUpDay(client, day) {
       group by session_id
     ),
     entry as (
-      select session_id, path as entry_path, referrer
+      select session_id, path as entry_path, referrer, browser, os, device_type
       from ranked
       where rn = 1
     ),
@@ -53,8 +53,8 @@ async function rollUpDay(client, day) {
       where rn <= $2
       group by session_id
     )
-    insert into public.daily_sessions (day, session_id, started_at, ended_at, event_count, entry_path, referrer, path_sequence)
-    select $1::date, t.session_id, t.started_at, t.ended_at, t.event_count, e.entry_path, e.referrer, s.path_sequence
+    insert into public.daily_sessions (day, session_id, started_at, ended_at, event_count, entry_path, referrer, browser, os, device_type, path_sequence)
+    select $1::date, t.session_id, t.started_at, t.ended_at, t.event_count, e.entry_path, e.referrer, e.browser, e.os, e.device_type, s.path_sequence
     from totals t
     join entry e using (session_id)
     join sequence s using (session_id)
@@ -64,6 +64,9 @@ async function rollUpDay(client, day) {
         event_count = excluded.event_count,
         entry_path = excluded.entry_path,
         referrer = excluded.referrer,
+        browser = excluded.browser,
+        os = excluded.os,
+        device_type = excluded.device_type,
         path_sequence = excluded.path_sequence
     `,
     [day, MAX_PATH_SEQUENCE_LENGTH],

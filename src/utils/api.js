@@ -76,11 +76,29 @@ export async function submitIssueReport(body) {
 // Fire-and-forget - deliberately swallows every failure so a missing/
 // unreachable backend can never surface as a broken page. session_id is
 // derived server-side from the request's real IP, never computed here -
-// see server/src/lib/session.js for why.
+// see server/src/lib/session.js for why. The server itself skips recording
+// anything for a logged-in admin (see server/src/routes/track.js) - this
+// call still fires either way, it's just a no-op there.
 export function trackPageview(path) {
   fetch(`${APP_BASE_PATH}api/track`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ event_type: 'pageview', path, referrer: document.referrer || undefined }),
   }).catch(() => {});
+}
+
+// The admin session cookie is httpOnly (can't be read from JS directly, by
+// design), so this is the only way the frontend can know "is the current
+// visitor logged in as admin" - used only to show a "logged in as admin"
+// badge (see useIsAdmin.js), never to gate anything security-sensitive.
+// Returns false on any failure (offline, GitHub Pages with no backend, etc).
+export async function fetchIsAdmin() {
+  try {
+    const res = await fetch(`${APP_BASE_PATH}api/admin/whoami`, { credentials: 'include' });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.isAdmin === true;
+  } catch {
+    return false;
+  }
 }

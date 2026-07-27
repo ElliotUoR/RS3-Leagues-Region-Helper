@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { insertRow } from '../lib/postgrest.js';
 import { sessionIdFor } from '../lib/session.js';
+import { parseUserAgent } from '../lib/userAgent.js';
+import { isAdminSession, ADMIN_COOKIE_NAME } from '../lib/adminAuth.js';
 
 export const trackRouter = Router();
 
@@ -23,7 +25,17 @@ trackRouter.post('/api/track', async (req, res) => {
     return res.status(400).json({ error: 'invalid path' });
   }
 
-  const sessionId = sessionIdFor(req.ip ?? 'unknown', req.get('user-agent') ?? 'unknown');
+  // Don't record the admin's own browsing - the admin session cookie
+  // (httpOnly, sent automatically) is the signal, checked the same way
+  // requireAdmin does (see lib/adminAuth.js). Still returns 204 either way
+  // so this is invisible from the frontend's perspective.
+  if (isAdminSession(req.cookies?.[ADMIN_COOKIE_NAME])) {
+    return res.status(204).end();
+  }
+
+  const userAgent = req.get('user-agent') ?? 'unknown';
+  const sessionId = sessionIdFor(req.ip ?? 'unknown', userAgent);
+  const { browser, os, deviceType } = parseUserAgent(userAgent);
 
   try {
     await insertRow('page_events', {
@@ -31,6 +43,9 @@ trackRouter.post('/api/track', async (req, res) => {
       event_type: eventType,
       path,
       referrer: typeof referrer === 'string' ? referrer.slice(0, MAX_PATH_LENGTH) : null,
+      browser,
+      os,
+      device_type: deviceType,
     });
   } catch (err) {
     console.error('track insert failed:', err);

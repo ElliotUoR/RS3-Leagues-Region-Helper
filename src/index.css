@@ -1747,3 +1747,17 @@ main.abilities-page .gear-item-rows {
   opacity: 0.85;
   line-height: 1.5;
 }
+
+.admin-badge {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+}

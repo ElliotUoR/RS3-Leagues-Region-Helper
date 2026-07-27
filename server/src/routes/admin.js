@@ -6,6 +6,7 @@ import { ROLLUP_LAG_DAYS } from '../lib/analyticsRollup.js';
 import { utcDateDaysAgo } from '../lib/dates.js';
 import {
   requireAdmin,
+  isAdminSession,
   createSessionCookieValue,
   ADMIN_COOKIE_NAME,
   ADMIN_COOKIE_MAX_AGE_MS,
@@ -64,6 +65,16 @@ adminRouter.post('/api/admin/logout', (_req, res) => {
   res.status(204).end();
 });
 
+// GET /api/admin/whoami
+// Deliberately public (no requireAdmin) - the entire point is a cheap yes/no
+// check anyone can make. Powers the "logged in as admin" badge on both
+// JellyFlow and the RS3 Leagues app (see JellyFlow's public/adminBadge.js
+// and src/hooks/useIsAdmin.js here) - both read the httpOnly session cookie
+// indirectly through this, since neither can read it directly from JS.
+adminRouter.get('/api/admin/whoami', (req, res) => {
+  res.json({ isAdmin: isAdminSession(req.cookies?.[ADMIN_COOKIE_NAME]) });
+});
+
 function clampDays(rawValue) {
   const n = Number.parseInt(rawValue, 10);
   if (!Number.isFinite(n)) return DEFAULT_DAYS;
@@ -74,12 +85,37 @@ function maxDateStr(a, b) {
   return a > b ? a : b;
 }
 
+// Dimensions summarized per session (one row per (day, session_id) in
+// daily_sessions, first-event value - see lib/analyticsRollup.js) rather
+// than per pageview, so "top browsers" etc counts distinct sessions the
+// same way "top referrers" already did. `column`/`outputKey` are always one
+// of the hardcoded values below, never user input.
+const SESSION_DIMENSIONS = [
+  { column: 'referrer', outputKey: 'referrer', defaultLabel: '(direct)' },
+  { column: 'browser', outputKey: 'browser', defaultLabel: 'Unknown' },
+  { column: 'os', outputKey: 'os', defaultLabel: 'Unknown' },
+  { column: 'device_type', outputKey: 'deviceType', defaultLabel: 'Unknown' },
+];
+
+async function queryTopSessionDimension(pool, { column, outputKey, defaultLabel }, fromInclusive, toExclusive) {
+  const { rows } = await pool.query(
+    `select coalesce(${column}, $3) as "${outputKey}", count(*)::int as count
+     from public.daily_sessions
+     where day >= $1::date and day < $2::date
+     group by ${column}
+     order by count desc
+     limit $4`,
+    [fromInclusive, toExclusive, defaultLabel, PARTIAL_TOP_N],
+  );
+  return rows;
+}
+
 // Days strictly before ROLLUP_LAG_DAYS ago are read from the compact
 // daily_path_stats/daily_sessions rollup tables. More recent days aren't
 // guaranteed to have been rolled up yet, so they're queried live from raw
 // page_events instead - see lib/analyticsRollup.js for why the lag exists.
 async function queryRolledStats(pool, fromInclusive, toExclusive) {
-  const [dailyPageviews, dailyUnique, pathTotals, referrerTotals, sessionTotals] = await Promise.all([
+  const [dailyPageviews, dailyUnique, pathTotals, dimensionTotals, sessionTotals] = await Promise.all([
     pool.query(
       `select day::text as day, sum(pageview_count)::int as pageviews
        from public.daily_path_stats
@@ -103,15 +139,7 @@ async function queryRolledStats(pool, fromInclusive, toExclusive) {
        limit $3`,
       [fromInclusive, toExclusive, PARTIAL_TOP_N],
     ),
-    pool.query(
-      `select coalesce(referrer, '(direct)') as referrer, count(*)::int as count
-       from public.daily_sessions
-       where day >= $1::date and day < $2::date
-       group by referrer
-       order by count desc
-       limit $3`,
-      [fromInclusive, toExclusive, PARTIAL_TOP_N],
-    ),
+    Promise.all(SESSION_DIMENSIONS.map((dim) => queryTopSessionDimension(pool, dim, fromInclusive, toExclusive))),
     pool.query(
       `select count(*)::int as total_sessions,
               coalesce(sum(extract(epoch from (ended_at - started_at))), 0)::float8 as total_seconds
@@ -121,11 +149,16 @@ async function queryRolledStats(pool, fromInclusive, toExclusive) {
     ),
   ]);
 
+  const [referrerTotals, browserTotals, osTotals, deviceTypeTotals] = dimensionTotals;
+
   return {
     dailyPageviews: dailyPageviews.rows,
     dailyUnique: dailyUnique.rows,
     pathTotals: pathTotals.rows,
-    referrerTotals: referrerTotals.rows,
+    referrerTotals,
+    browserTotals,
+    osTotals,
+    deviceTypeTotals,
     totalSessions: sessionTotals.rows[0].total_sessions,
     totalSeconds: sessionTotals.rows[0].total_seconds,
   };
@@ -159,16 +192,23 @@ async function queryRawStats(pool, fromTs, toTs) {
          select session_id,
                 min(created_at) as started_at,
                 max(created_at) as ended_at,
-                (array_agg(referrer order by created_at))[1] as referrer
+                (array_agg(referrer order by created_at))[1] as referrer,
+                (array_agg(browser order by created_at))[1] as browser,
+                (array_agg(os order by created_at))[1] as os,
+                (array_agg(device_type order by created_at))[1] as device_type
          from public.page_events
          where created_at >= $1::timestamptz and created_at < $2::timestamptz
          group by session_id
        )
        select
          (select coalesce(json_agg(json_build_object('referrer', coalesce(referrer, '(direct)'), 'count', cnt)), '[]')
-          from (
-            select referrer, count(*) as cnt from per_session group by referrer order by cnt desc limit $3
-          ) top_referrers) as referrer_totals,
+          from (select referrer, count(*) as cnt from per_session group by referrer order by cnt desc limit $3) t) as referrer_totals,
+         (select coalesce(json_agg(json_build_object('browser', coalesce(browser, 'Unknown'), 'count', cnt)), '[]')
+          from (select browser, count(*) as cnt from per_session group by browser order by cnt desc limit $3) t) as browser_totals,
+         (select coalesce(json_agg(json_build_object('os', coalesce(os, 'Unknown'), 'count', cnt)), '[]')
+          from (select os, count(*) as cnt from per_session group by os order by cnt desc limit $3) t) as os_totals,
+         (select coalesce(json_agg(json_build_object('deviceType', coalesce(device_type, 'Unknown'), 'count', cnt)), '[]')
+          from (select device_type, count(*) as cnt from per_session group by device_type order by cnt desc limit $3) t) as device_type_totals,
          count(*)::int as total_sessions,
          coalesce(sum(extract(epoch from (ended_at - started_at))), 0)::float8 as total_seconds
        from per_session`,
@@ -182,6 +222,9 @@ async function queryRawStats(pool, fromTs, toTs) {
     dailyUnique: daily.rows.map((r) => ({ day: r.day, unique_sessions: r.unique_sessions })),
     pathTotals: pathTotals.rows,
     referrerTotals: aggRow.referrer_totals,
+    browserTotals: aggRow.browser_totals,
+    osTotals: aggRow.os_totals,
+    deviceTypeTotals: aggRow.device_type_totals,
     totalSessions: aggRow.total_sessions,
     totalSeconds: aggRow.total_seconds,
   };
@@ -239,6 +282,9 @@ adminRouter.get('/api/admin/summary', requireAdmin, async (req, res) => {
     const dailySeries = mergeDailySeries(rolled, raw);
     const topPaths = mergeTotals(rolled.pathTotals, raw.pathTotals, 'path');
     const topReferrers = mergeTotals(rolled.referrerTotals, raw.referrerTotals, 'referrer');
+    const topBrowsers = mergeTotals(rolled.browserTotals, raw.browserTotals, 'browser');
+    const topOperatingSystems = mergeTotals(rolled.osTotals, raw.osTotals, 'os');
+    const topDeviceTypes = mergeTotals(rolled.deviceTypeTotals, raw.deviceTypeTotals, 'deviceType');
     const totalSessions = rolled.totalSessions + raw.totalSessions;
     const totalSeconds = rolled.totalSeconds + raw.totalSeconds;
     const totalPageviews = dailySeries.reduce((sum, d) => sum + d.pageviews, 0);
@@ -251,9 +297,69 @@ adminRouter.get('/api/admin/summary', requireAdmin, async (req, res) => {
       dailySeries,
       topPaths,
       topReferrers,
+      topBrowsers,
+      topOperatingSystems,
+      topDeviceTypes,
     });
   } catch (err) {
     console.error('admin summary query failed:', err);
     res.status(502).json({ error: 'could not load analytics right now' });
+  }
+});
+
+const MIN_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 100;
+const DEFAULT_PAGE_SIZE = 25;
+
+function clampPage(rawValue) {
+  const n = Number.parseInt(rawValue, 10);
+  return Number.isFinite(n) && n >= 1 ? n : 1;
+}
+
+function clampPageSize(rawValue) {
+  const n = Number.parseInt(rawValue, 10);
+  if (!Number.isFinite(n)) return DEFAULT_PAGE_SIZE;
+  return Math.min(MAX_PAGE_SIZE, Math.max(MIN_PAGE_SIZE, n));
+}
+
+// GET /api/admin/shortlinks?page=1&pageSize=25
+// Newest-created first - every loadout that's been turned into a share
+// link (see routes/shorten.js), with how much it's actually being clicked
+// (click_count/last_clicked_at, incremented inside get_short_link_payload -
+// see deploy/migrations/005_shortlink_clicks_and_ua.sql). No payload/build
+// details here - the admin dashboard links each code out to the live share
+// URL to inspect it, rather than duplicating the frontend's decode logic
+// server-side.
+adminRouter.get('/api/admin/shortlinks', requireAdmin, async (req, res) => {
+  const page = clampPage(req.query.page);
+  const pageSize = clampPageSize(req.query.pageSize);
+  const pool = getAnalyticsPool();
+
+  try {
+    const [{ rows }, { rows: countRows }] = await Promise.all([
+      pool.query(
+        `select code, created_at, click_count, last_clicked_at
+         from public.short_links
+         order by created_at desc
+         limit $1 offset $2`,
+        [pageSize, (page - 1) * pageSize],
+      ),
+      pool.query('select count(*)::int as total from public.short_links'),
+    ]);
+
+    res.json({
+      page,
+      pageSize,
+      total: countRows[0].total,
+      items: rows.map((r) => ({
+        code: r.code,
+        createdAt: r.created_at,
+        clickCount: r.click_count,
+        lastClickedAt: r.last_clicked_at,
+      })),
+    });
+  } catch (err) {
+    console.error('admin shortlinks query failed:', err);
+    res.status(502).json({ error: 'could not load short links right now' });
   }
 });

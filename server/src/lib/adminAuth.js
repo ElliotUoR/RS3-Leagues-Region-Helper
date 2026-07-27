@@ -30,7 +30,12 @@ export function createSessionCookieValue() {
   return `${payloadB64}.${sign(payloadB64)}`;
 }
 
-function isValidSession(cookieValue) {
+// Exported (not just used internally by requireAdmin) so other routes can
+// make a soft yes/no check without needing the "401 if not admin" behavior
+// of the middleware below - see routes/admin.js's /whoami (powers the
+// "logged in as admin" badge on both sites) and routes/track.js (skips
+// recording the admin's own pageviews/journeys).
+export function isAdminSession(cookieValue) {
   if (typeof cookieValue !== 'string') return false;
   const [payloadB64, signature] = cookieValue.split('.');
   if (!payloadB64 || !signature) return false;
@@ -53,7 +58,7 @@ function isValidSession(cookieValue) {
 // Express middleware - 401s unless a valid, unexpired session cookie is
 // present. Mount only on /api/admin/* routes that need it (not login).
 export function requireAdmin(req, res, next) {
-  if (!isValidSession(req.cookies?.[ADMIN_COOKIE_NAME])) {
+  if (!isAdminSession(req.cookies?.[ADMIN_COOKIE_NAME])) {
     return res.status(401).json({ error: 'unauthorized' });
   }
   next();

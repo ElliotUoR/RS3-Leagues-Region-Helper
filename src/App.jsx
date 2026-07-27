@@ -12,6 +12,7 @@ import PagesMigrationModal from './components/PagesMigrationModal';
 import { REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
+import { useIsAdmin } from './hooks/useIsAdmin';
 import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
 import { resolveShortCode, trackPageview } from './utils/api';
 import { IS_PAGES_BUILD, PAGES_MIGRATION_DISMISSED_KEY } from './utils/deployTarget';
@@ -165,6 +166,7 @@ function App() {
   const [migrationOpen, setMigrationOpen] = useState(
     () => IS_PAGES_BUILD && !window.localStorage.getItem(PAGES_MIGRATION_DISMISSED_KEY),
   );
+  const isAdmin = useIsAdmin();
 
   function dismissMigration(remember) {
     if (remember) window.localStorage.setItem(PAGES_MIGRATION_DISMISSED_KEY, '1');
@@ -221,6 +223,7 @@ function App() {
 
   return (
     <div className="app">
+      {isAdmin && <div className="admin-badge">Logged in as admin</div>}
       <AppContent
         key={sharedBuild ? 'shared' : 'own'}
         route={route}

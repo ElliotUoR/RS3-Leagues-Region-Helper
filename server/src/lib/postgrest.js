@@ -26,3 +26,30 @@ export async function insertRow(table, row) {
   }
   return { conflict: false };
 }
+
+// Calls a single-value-returning Postgres function exposed by PostgREST as
+// POST /rpc/<name>, and unwraps the result down to that scalar value.
+//
+// NOTE: PostgREST's exact JSON shape for a scalar-returning function varies
+// by version/config - it may come back as a bare value (`"foo"` / `null`),
+// a single object (`{"fn_name": "foo"}`), or an array of one such object.
+// This normalizes all three so callers just get the value or `null`. Worth
+// double-checking against your actual PostgREST version's real response
+// shape when testing this for the first time.
+export async function callScalarRpc(name, args) {
+  const res = await fetch(`${POSTGREST_URL}/rpc/${name}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  if (!res.ok) {
+    throw new Error(`PostgREST rpc ${name} failed: ${res.status} ${await res.text()}`);
+  }
+  const data = await res.json();
+  if (data === null || data === undefined) return null;
+  if (typeof data !== 'object') return data;
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return null;
+  const values = Object.values(row);
+  return values.length ? values[0] : null;
+}
