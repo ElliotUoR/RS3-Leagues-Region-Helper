@@ -9,6 +9,10 @@
   --accent-bg: rgba(122, 59, 214, 0.1);
   --locked-bg: #ded8ea;
   --warning: #b5480a;
+  --style-melee: #dc2626;
+  --style-ranged: #16a34a;
+  --style-magic: #2563eb;
+  --style-necromancy: #9333ea;
 
   font: 16px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
   color-scheme: light dark;
@@ -28,6 +32,10 @@
     --accent-bg: rgba(192, 132, 252, 0.15);
     --locked-bg: #35263f;
     --warning: #ff8f5c;
+    --style-melee: #f87171;
+    --style-ranged: #4ade80;
+    --style-magic: #60a5fa;
+    --style-necromancy: #c084fc;
   }
 }
 
@@ -1019,17 +1027,25 @@ main.gear-page {
   margin-bottom: 20px;
 }
 
-.style-tabs-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
+/* Gear Planner only: constrained to the equip-grid's own width (see
+   .gear-layout-left) so the 4 style tabs wrap into two even rows of two,
+   instead of running wide above both columns like every other page's
+   style-tabs row still does. */
+.gear-layout-left .style-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 3px;
 }
 
-.style-tabs-row .style-tabs {
-  margin-bottom: 0;
+.gear-layout-left .style-tab {
+  text-align: center;
+}
+
+.default-style-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
 }
 
 .default-style-toggle {
@@ -1041,6 +1057,23 @@ main.gear-page {
   color: var(--text);
   cursor: pointer;
   white-space: nowrap;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
 }
 
 .style-tab {
@@ -1057,6 +1090,51 @@ main.gear-page {
 .style-tab.active {
   background: var(--accent);
   border-color: var(--accent);
+  color: #fff;
+}
+
+/* Gear Planner only (each style-tab also carries a style-tab-<style> modifier,
+   see GearPage.jsx): subtle per-style tint so Melee/Ranged/Magic/Necromancy
+   are visually distinguishable at a glance, matching their in-game colours. */
+.style-tab-melee {
+  border-color: color-mix(in srgb, var(--style-melee) 55%, var(--border));
+  background: color-mix(in srgb, var(--style-melee) 12%, var(--panel-bg));
+  color: var(--style-melee);
+}
+.style-tab-ranged {
+  border-color: color-mix(in srgb, var(--style-ranged) 55%, var(--border));
+  background: color-mix(in srgb, var(--style-ranged) 12%, var(--panel-bg));
+  color: var(--style-ranged);
+}
+.style-tab-magic {
+  border-color: color-mix(in srgb, var(--style-magic) 55%, var(--border));
+  background: color-mix(in srgb, var(--style-magic) 12%, var(--panel-bg));
+  color: var(--style-magic);
+}
+.style-tab-necromancy {
+  border-color: color-mix(in srgb, var(--style-necromancy) 55%, var(--border));
+  background: color-mix(in srgb, var(--style-necromancy) 12%, var(--panel-bg));
+  color: var(--style-necromancy);
+}
+
+.style-tab-melee.active {
+  background: var(--style-melee);
+  border-color: var(--style-melee);
+  color: #fff;
+}
+.style-tab-ranged.active {
+  background: var(--style-ranged);
+  border-color: var(--style-ranged);
+  color: #fff;
+}
+.style-tab-magic.active {
+  background: var(--style-magic);
+  border-color: var(--style-magic);
+  color: #fff;
+}
+.style-tab-necromancy.active {
+  background: var(--style-necromancy);
+  border-color: var(--style-necromancy);
   color: #fff;
 }
 
@@ -1083,7 +1161,6 @@ main.gear-page {
   flex-direction: column;
   width: 236px;
   flex-shrink: 0;
-  gap: 24px;
 }
 
 .equip-grid {
@@ -1095,6 +1172,7 @@ main.gear-page {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px;
+  margin-bottom: 24px;
 }
 
 .equip-slot {
@@ -1262,6 +1340,7 @@ main.gear-page {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     padding-right: 6px;
   }
 }

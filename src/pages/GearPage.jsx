@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import EquipmentSlot from '../components/EquipmentSlot';
 import GearItemRow from '../components/GearItemRow';
 import GearStatsSummary from '../components/GearStatsSummary';
+import TagTooltip from '../components/TagTooltip';
 import { COMBAT_STYLES, GEAR } from '../data/gear';
 import { isGearItemAvailable } from '../data/gearAvailability';
 import { getArmourRating } from '../utils/gearStats';
@@ -255,45 +256,26 @@ export default function GearPage({
             )}
           </div>
         </div>
-        <p>
-          Pick a combat style, then click a slot to see the best-in-slot gear for it. Each item
-          shows the region(s) it needs - greyed-out items are locked until you select those
-          regions on the Regions page.
-        </p>
       </header>
 
       <main className="gear-page">
-        <div className="style-tabs-row">
-          <div className="style-tabs" role="tablist">
-            {COMBAT_STYLES.map((s) => (
-              <button
-                key={s}
-                type="button"
-                role="tab"
-                aria-selected={style === s}
-                className={`style-tab${style === s ? ' active' : ''}`}
-                onClick={() => setStyle(s)}
-              >
-                {STYLE_LABELS[s]}
-              </button>
-            ))}
-          </div>
-
-          <label
-            className="default-style-toggle"
-            title="The style shown first when you open the planner or a shared link."
-          >
-            <input
-              type="checkbox"
-              checked={style === defaultStyle}
-              onChange={(e) => e.target.checked && setDefaultStyle(style)}
-            />
-            <span>Default: {STYLE_LABELS[defaultStyle]}</span>
-          </label>
-        </div>
-
         <div className="gear-layout">
           <div className="gear-layout-left">
+            <div className="style-tabs" role="tablist">
+              {COMBAT_STYLES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  role="tab"
+                  aria-selected={style === s}
+                  className={`style-tab style-tab-${s}${style === s ? ' active' : ''}`}
+                  onClick={() => setStyle(s)}
+                >
+                  {STYLE_LABELS[s]}
+                </button>
+              ))}
+            </div>
+
             <div className="equip-grid" style={{ gridTemplateAreas: SLOT_GRID_AREAS }}>
               {eofVisible && (
                 <EquipmentSlot
@@ -316,6 +298,23 @@ export default function GearPage({
                   disabled={slotId === 'offhand' && offhandBlocked}
                 />
               ))}
+            </div>
+
+            <div className="default-style-row">
+              <label className="default-style-toggle">
+                <input
+                  type="checkbox"
+                  checked={style === defaultStyle}
+                  onChange={(e) => e.target.checked && setDefaultStyle(style)}
+                />
+                <span>Default: {STYLE_LABELS[defaultStyle]}</span>
+              </label>
+              <TagTooltip
+                className="info-icon"
+                tooltip="The style shown first when you open the planner or a shared link."
+              >
+                ?
+              </TagTooltip>
             </div>
 
             <GearStatsSummary equipped={equipped} />
