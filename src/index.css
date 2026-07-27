@@ -5,6 +5,7 @@
   --border: #dcdbe0;
   --panel-bg: #f6f5f2;
   --accent: #7a3bd6;
+  --accent-2: #4c1d95;
   --accent-bg: rgba(122, 59, 214, 0.1);
   --locked-bg: #ded8ea;
   --warning: #b5480a;
@@ -23,6 +24,7 @@
     --border: #2e303a;
     --panel-bg: #1f2028;
     --accent: #c084fc;
+    --accent-2: #9333ea;
     --accent-bg: rgba(192, 132, 252, 0.15);
     --locked-bg: #35263f;
     --warning: #ff8f5c;
@@ -166,12 +168,6 @@ header h1 {
   cursor: not-allowed;
 }
 
-.report-issue {
-  margin-top: 12px;
-  display: flex;
-  justify-content: center;
-}
-
 .report-issue-toggle {
   padding: 4px 12px;
   border-radius: 999px;
@@ -187,20 +183,258 @@ header h1 {
   color: var(--accent);
 }
 
-.report-issue-panel {
-  max-width: 420px;
-  margin: 10px auto 0;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--panel-bg);
-  text-align: left;
-  font-size: 13px;
+.report-issue-toggle.open {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
 }
 
-.report-issue-panel textarea {
+.site-nav-report {
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  margin-left: auto;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.site-nav-report:hover {
+  color: var(--accent);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 16, 0.6);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+  animation: modal-overlay-in 0.18s ease-out;
+}
+
+.modal-panel {
   width: 100%;
-  resize: vertical;
+  max-width: 440px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  text-align: left;
+  font-size: 13px;
+  animation: modal-panel-in 0.18s ease-out;
+}
+
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+}
+
+.modal-panel h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.modal-close:hover {
+  color: var(--accent);
+}
+
+/* Shared by PagesMigrationModal and ReportIssueUnavailableModal - both are
+   "here's a thing that only works on the live site" notices, so they use
+   the same icon/lede/CTA/secondary-actions visual language. */
+.notice-modal {
+  padding: 28px 26px 24px;
+  text-align: center;
+}
+
+.notice-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.notice-modal h2 {
+  font-size: 19px;
+  margin: 0 0 8px;
+}
+
+.notice-lede {
+  margin: 0 0 4px;
+  opacity: 0.85;
+  line-height: 1.55;
+}
+
+.notice-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+
+.notice-link:hover {
+  text-decoration-color: currentColor;
+}
+
+.notice-primary-button {
+  display: block;
+  margin: 20px 0 12px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.notice-primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.notice-secondary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.notice-secondary-actions button {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  opacity: 0.65;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: opacity 0.15s ease, color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.notice-secondary-actions button:hover {
+  opacity: 1;
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+.notice-dot {
+  opacity: 0.4;
+  font-size: 12px;
+}
+
+.migration-why-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 2px 0 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  opacity: 0.85;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.migration-why-toggle:hover {
+  opacity: 1;
+}
+
+.migration-why-chevron {
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.migration-why-chevron.open {
+  transform: rotate(180deg);
+}
+
+.migration-why-body {
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-bg);
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.report-issue-field {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.report-issue-field span {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.report-issue-field select,
+.report-issue-field textarea {
+  width: 100%;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
@@ -209,12 +443,21 @@ header h1 {
   padding: 8px;
 }
 
+.report-issue-field textarea {
+  resize: vertical;
+}
+
+.report-issue-field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .report-issue-hint {
   margin: 6px 0;
   opacity: 0.8;
 }
 
-.report-issue-panel button[type='submit'] {
+.modal-panel button[type='submit'] {
   margin-top: 6px;
   padding: 6px 14px;
   border-radius: 999px;
@@ -225,12 +468,12 @@ header h1 {
   cursor: pointer;
 }
 
-.report-issue-panel button[type='submit']:hover:not(:disabled) {
+.modal-panel button[type='submit']:hover:not(:disabled) {
   background: var(--accent);
   color: #fff;
 }
 
-.report-issue-panel button[type='submit']:disabled {
+.modal-panel button[type='submit']:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }

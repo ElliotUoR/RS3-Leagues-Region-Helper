@@ -6,11 +6,15 @@ import HomePage from './pages/HomePage';
 import RelicsPage from './pages/RelicsPage';
 import SpellbooksPage from './pages/SpellbooksPage';
 import ReportIssueButton from './components/ReportIssueButton';
+import ReportIssueModal from './components/ReportIssueModal';
+import ReportIssueUnavailableModal from './components/ReportIssueUnavailableModal';
+import PagesMigrationModal from './components/PagesMigrationModal';
 import { REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
 import { parseShareParam, stripShareParam } from './utils/shareBuild';
 import { trackPageview } from './utils/api';
+import { IS_PAGES_BUILD, PAGES_MIGRATION_DISMISSED_KEY } from './utils/deployTarget';
 import versionInfo from './data/version.json';
 
 // Always renders in GMT/UTC (not the visitor's local timezone) so the
@@ -44,7 +48,7 @@ function currentRoute() {
 // fully remounts this subtree - the hooks re-run their seed logic from
 // scratch (re-reading real localStorage on exit, or re-seeding from the
 // shared payload on entry) instead of carrying over stale in-memory state.
-function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
+function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportIssue }) {
   const { selected, toggleRegion, isUnlocked, overLimit, clearRegions } = useRegionSelection({
     initialSelection: sharedBuild?.regions,
     persist: !sharedBuild,
@@ -114,6 +118,9 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
         <a href="#assumptions" className={route === 'assumptions' ? 'active' : ''}>
           Assumptions
         </a>
+        <button type="button" className="site-nav-report" onClick={onOpenReportIssue}>
+          Report Issue
+        </button>
       </nav>
 
       {route === 'gear' && (
@@ -141,6 +148,15 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted }) {
 function App() {
   const [route, setRoute] = useState(currentRoute);
   const [sharedBuild, setSharedBuild] = useState(parseShareParam);
+  const [reportIssueOpen, setReportIssueOpen] = useState(false);
+  const [migrationOpen, setMigrationOpen] = useState(
+    () => IS_PAGES_BUILD && !window.localStorage.getItem(PAGES_MIGRATION_DISMISSED_KEY),
+  );
+
+  function dismissMigration(remember) {
+    if (remember) window.localStorage.setItem(PAGES_MIGRATION_DISMISSED_KEY, '1');
+    setMigrationOpen(false);
+  }
 
   useEffect(() => {
     const onHashChange = () => setRoute(currentRoute());
@@ -168,6 +184,7 @@ function App() {
         sharedBuild={sharedBuild}
         onExitShared={exitSharedView}
         onAdopted={() => setSharedBuild(null)}
+        onOpenReportIssue={() => setReportIssueOpen(true)}
       />
       <footer className="site-footer">
         <span>Fan made site - not affiliated with Jagex</span>
@@ -175,8 +192,14 @@ function App() {
           {`· v${versionInfo.version}`}
           {formatUpdatedAt(versionInfo.updatedAt) && ` · Updated ${formatUpdatedAt(versionInfo.updatedAt)}`}
         </span>
-        <ReportIssueButton />
+        <ReportIssueButton open={reportIssueOpen} onToggle={() => setReportIssueOpen((prev) => !prev)} />
       </footer>
+      {IS_PAGES_BUILD ? (
+        <ReportIssueUnavailableModal open={reportIssueOpen} onClose={() => setReportIssueOpen(false)} />
+      ) : (
+        <ReportIssueModal open={reportIssueOpen} onClose={() => setReportIssueOpen(false)} />
+      )}
+      {IS_PAGES_BUILD && <PagesMigrationModal open={migrationOpen} onDismiss={dismissMigration} />}
     </div>
   );
 }

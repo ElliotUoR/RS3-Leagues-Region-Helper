@@ -7,6 +7,7 @@ import { isGearItemAvailable } from '../data/gearAvailability';
 import { getArmourRating } from '../utils/gearStats';
 import { buildShareUrl, encodeShareBuild } from '../utils/shareBuild';
 import { createShortLink } from '../utils/api';
+import { IS_PAGES_BUILD } from '../utils/deployTarget';
 
 const SLOT_LABELS = {
   head: 'Head',
@@ -200,11 +201,11 @@ export default function GearPage({
 
   const SHARE_LABELS = { copied: 'Link copied!', manual: 'Link ready', idle: 'Share build' };
   const SHORTEN_LABELS = {
-    idle: 'Short link',
+    idle: 'Share build',
     working: 'Creating…',
-    copied: 'Short link copied!',
-    manual: 'Short link ready',
-    error: 'Short links unavailable',
+    copied: 'Link copied!',
+    manual: 'Link ready',
+    error: 'Share unavailable',
   };
   const hasEquippedItems = Object.keys(equipped).length > 0;
   const slotHasAnyItems =
@@ -234,17 +235,20 @@ export default function GearPage({
             >
               Clear loadout
             </button>
-            <button type="button" className="share-button" onClick={handleShare}>
-              {SHARE_LABELS[shareStatus]}
-            </button>
-            <button
-              type="button"
-              className="share-button"
-              onClick={handleShorten}
-              disabled={shortenStatus === 'working'}
-            >
-              {SHORTEN_LABELS[shortenStatus]}
-            </button>
+            {IS_PAGES_BUILD ? (
+              <button type="button" className="share-button" onClick={handleShare}>
+                {SHARE_LABELS[shareStatus]}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="share-button"
+                onClick={handleShorten}
+                disabled={shortenStatus === 'working'}
+              >
+                {SHORTEN_LABELS[shortenStatus]}
+              </button>
+            )}
           </div>
         </div>
         <p>

@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite --mode live --port 5173",
+    "dev:pages": "vite --mode pages --port 5174",
+    "build": "vite build --mode live",
+    "build:pages": "vite build --mode pages",
     "lint": "oxlint",
     "preview": "vite preview",
     "fetch-icons": "node scripts/download-icons.mjs",
