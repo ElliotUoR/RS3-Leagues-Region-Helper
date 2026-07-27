@@ -44,6 +44,15 @@ jobs:
       # immediately: the currently-running containers are left untouched,
       # so a broken migration degrades to "still running yesterday's code"
       # rather than "half-deployed and broken".
+      #
+      # The `docker compose restart postgrest` after migrate.js is required,
+      # not cosmetic: PostgREST loads its schema into memory once at
+      # startup and has no way to know migrate.js just added a column/
+      # function directly against Postgres, underneath it. Skipping this
+      # is exactly what caused a real outage - every request touching a
+      # post-migration-004/005 column or function (short link creation,
+      # analytics tracking) failed with PGRST202/PGRST204 "not found in
+      # the schema cache" until postgrest was manually restarted.
       - name: Run database migrations
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -55,6 +64,7 @@ jobs:
             cd /opt/rs3-site/deploy
             docker compose up -d postgres postgrest
             docker compose run --rm --no-deps --build node node scripts/migrate.js
+            docker compose restart postgrest
 
       - name: Deploy updated stack
         uses: appleboy/ssh-action@v1.2.0

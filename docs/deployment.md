@@ -222,6 +222,7 @@ npm run build                          # refresh dist/ for the frontend containe
 cd deploy
 docker compose up -d postgres postgrest
 docker compose run --rm --no-deps --build node node scripts/migrate.js
+docker compose restart postgrest       # see note below - do not skip this
 docker compose up -d --build           # rebuilds/restarts everything else
 cp Caddyfile.snippet /opt/caddy-shared/conf.d/leagues.caddy
 cd /opt/livekit
@@ -232,6 +233,18 @@ The migration step applies any new `deploy/migrations/*.sql` files (tracked
 in a `schema_migrations` table so already-applied ones are skipped) against
 the live database *before* the new code that might depend on them starts -
 see `server/scripts/migrate.js`. It's a no-op if nothing's changed.
+
+The `docker compose restart postgrest` right after it is required, not
+optional - this is exactly what caused a real outage: PostgREST loads its
+schema into memory once at startup and has no way to know migrate.js just
+added a column/function directly against Postgres, underneath it. Skipping
+this step meant every request touching a newly-migrated column or function
+(short link creation, analytics tracking) failed with a `PGRST202`/`PGRST204`
+"not found in the schema cache" error until postgrest was manually
+restarted - even though the migration itself had applied successfully.
+Safe to run even when nothing actually changed schema-wise - PostgREST just
+reloads the same schema in that case, a few hundred ms of restart, nothing
+else affected.
 
 The Caddy copy+reload step re-syncs the *live* routing fragment with
 whatever's actually in this repo's `Caddyfile.snippet` right now - skipping
