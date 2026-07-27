@@ -4,63 +4,84 @@
 
 export const MAX_OPTIONAL = 3;
 
+// `color` is the region's own hex color from the hand-traced boundary image
+// (see scripts/extract-region-boundaries.mjs) - used for that region's
+// shape outline/highlight on the map, so the app's colors match the same
+// reference the boundaries themselves were traced against.
 export const REGIONS = {
   misthalin: {
     name: 'Misthalin',
     fixed: true,
+    color: '#C912E4',
     includes: ['Underworld', 'Fort Forinthry'],
     hotspot: { x: 53, y: 44 },
   },
   karamja: {
     name: 'Karamja',
-    fixed: true,
+    // Not truly "fixed" - you unlock it second by default, but you *can*
+    // toggle it off. Doing so doesn't free up an extra optional pick
+    // though, it just locks you out of unlocking anything further - so it's
+    // its own independent default-on toggle (see `gateway` below), not part
+    // of the fixed-3 or the pick-3 optional pool.
+    fixed: false,
+    gateway: true,
+    color: '#A88830',
     hotspot: { x: 41, y: 68 },
   },
   havenhythe: {
     name: 'Havenhythe',
     fixed: true,
+    color: '#F37CE5',
     hotspot: { x: 92, y: 56 },
   },
   morytania: {
     name: 'Morytania',
     fixed: false,
+    color: '#810856',
     hotspot: { x: 67, y: 46 },
   },
   anachronia: {
     name: 'Anachronia',
     fixed: false,
+    color: '#2C185C',
     hotspot: { x: 81, y: 20 },
   },
   kharidianDesert: {
     name: 'Kharidian Desert',
     fixed: false,
+    color: '#B8D240',
     includes: ['Mazcab'],
     hotspot: { x: 58, y: 76 },
   },
   asgarnia: {
     name: 'Asgarnia',
     fixed: false,
+    color: '#1A29BF',
     includes: ['The Arc'],
     hotspot: { x: 45, y: 38 },
   },
   wilderness: {
     name: 'Wilderness',
     fixed: false,
+    color: '#080808',
     hotspot: { x: 53, y: 20 },
   },
   fremennikProvince: {
     name: 'Fremennik Province',
     fixed: false,
+    color: '#3885C9',
     hotspot: { x: 30, y: 15 },
   },
   kandarin: {
     name: 'Kandarin',
     fixed: false,
+    color: '#C53335',
     hotspot: { x: 30, y: 47 },
   },
   tirannwn: {
     name: 'Tirannwn',
     fixed: false,
+    color: '#35CC4B',
     includes: ['Lost Grove'],
     hotspot: { x: 20, y: 47 },
   },
@@ -68,7 +89,8 @@ export const REGIONS = {
 
 export const REGION_IDS = Object.keys(REGIONS);
 export const FIXED_REGIONS = REGION_IDS.filter((id) => REGIONS[id].fixed);
-export const OPTIONAL_REGIONS = REGION_IDS.filter((id) => !REGIONS[id].fixed);
+export const GATEWAY_REGIONS = REGION_IDS.filter((id) => REGIONS[id].gateway);
+export const OPTIONAL_REGIONS = REGION_IDS.filter((id) => !REGIONS[id].fixed && !REGIONS[id].gateway);
 
 // Boss -> region mappings, sourced from runescape.wiki (location/infobox pages)
 // and cross-checked against the region-folding rules confirmed with the user:
@@ -1017,7 +1039,7 @@ export const BOSSES = [
 
 // Non-boss region-locked activities (heists, thieving vaults, etc.) whose
 // unique rewards are worth showing alongside the boss lists - same shape as
-// BOSSES (name/region/subLocation/drops) so UnlocksList can render both with
+// BOSSES (name/region/subLocation/drops) so RegionPicker can render both with
 // the same BossRow component.
 export const ACTIVITIES = [
   {
@@ -1057,7 +1079,7 @@ export const ACTIVITIES = [
 // kept separate from BOSSES because these aren't a single named boss
 // encounter (a monster family with several variants, a minigame NPC, a
 // location-wide "any monster here" drop, etc.). Same shape as BOSSES so
-// UnlocksList can render both with the same BossRow component.
+// RegionPicker can render both with the same BossRow component.
 export const MONSTERS = [
   {
     name: 'Abyssal lords',
@@ -1168,7 +1190,8 @@ export const MONSTERS = [
     ],
   },
   {
-    name: 'Ganodermic runt / Ganodermic beast',
+    name: 'Ganodermic creatures',
+    wikiName: 'Ganodermic beast',
     region: 'morytania',
     subLocation: 'Polypore Dungeon',
     drops: [

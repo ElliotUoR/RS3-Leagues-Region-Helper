@@ -12,7 +12,7 @@ export default function BossRow({ boss }) {
         type="button"
         className="boss-row-header"
         onClick={() => setExpanded((prev) => !prev)}
-        onContextMenu={wikiContextMenuHandler(boss.name)}
+        onContextMenu={wikiContextMenuHandler(boss.wikiName ?? boss.name)}
         aria-expanded={expanded}
         aria-disabled={!hasDrops}
       >

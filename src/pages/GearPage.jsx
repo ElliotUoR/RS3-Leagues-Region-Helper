@@ -66,6 +66,7 @@ function sortItems(items, sortBy, style) {
 export default function GearPage({
   isUnlocked,
   selected,
+  gatewaySelected,
   selectedRelics,
   style,
   setStyle,
@@ -88,6 +89,7 @@ export default function GearPage({
   const [shareStatus, setShareStatus] = useState('idle'); // idle | copied | manual
   const [shortenStatus, setShortenStatus] = useState('idle'); // idle | working | copied | manual | error
   const [hideLocked, setHideLocked] = useState(false);
+  const [compactMode, setCompactMode] = useState(false);
 
   // An item outside the player's picked regions still counts as "available"
   // once it's the item actually equipped in this slot - that's the whole
@@ -155,6 +157,7 @@ export default function GearPage({
   async function handleShare() {
     const url = buildShareUrl({
       regions: selected,
+      gatewaySelected,
       equippedNamesByStyle,
       eofWeaponNamesByStyle,
       relics: selectedRelics,
@@ -180,6 +183,7 @@ export default function GearPage({
     try {
       const payload = encodeShareBuild({
         regions: selected,
+        gatewaySelected,
         equippedNamesByStyle,
         eofWeaponNamesByStyle,
         relics: selectedRelics,
@@ -344,14 +348,24 @@ export default function GearPage({
                 </button>
               ))}
             </div>
-            <label className="hide-locked-toggle">
-              <input
-                type="checkbox"
-                checked={hideLocked}
-                onChange={(e) => setHideLocked(e.target.checked)}
-              />
-              <span>Hide locked items</span>
-            </label>
+            <div className="gear-item-list-toggles">
+              <label className="hide-locked-toggle">
+                <input
+                  type="checkbox"
+                  checked={hideLocked}
+                  onChange={(e) => setHideLocked(e.target.checked)}
+                />
+                <span>Hide region-locked items</span>
+              </label>
+              <label className="compact-mode-toggle">
+                <input
+                  type="checkbox"
+                  checked={compactMode}
+                  onChange={(e) => setCompactMode(e.target.checked)}
+                />
+                <span>Compact mode</span>
+              </label>
+            </div>
           </div>
 
           {activeSlot === 'offhand' && offhandBlocked && (
@@ -359,7 +373,7 @@ export default function GearPage({
           )}
 
           {displayItems.length > 0 && (
-            <div className="gear-item-rows">
+            <div className={`gear-item-rows${compactMode ? ' compact' : ''}`}>
               {displayItems.map((item) => (
                 <GearItemRow
                   key={item.name}
@@ -374,6 +388,7 @@ export default function GearPage({
                   isUnlocked={isUnlocked}
                   onToggle={activeSlot === 'eof' ? toggleEofWeapon : toggleItem}
                   showSpecialAttack={activeSlot === 'eof'}
+                  compact={compactMode}
                 />
               ))}
             </div>
@@ -381,7 +396,7 @@ export default function GearPage({
           {displayItems.length === 0 && hideLocked && slotHasAnyItems && (
             <p className="gear-empty">
               All {STYLE_LABELS[style].toLowerCase()} items for this slot are locked. Turn off
-              "Hide locked items" to see them.
+              "Hide region-locked items" to see them.
             </p>
           )}
           {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && activeSlot === 'eof' && (

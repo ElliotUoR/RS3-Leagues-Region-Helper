@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Only one <url> entry, deliberately: this is a hash-routed single-page app
+  (#gear, #relics, etc. are all the same document, not separate pages a
+  crawler could index independently), and the canonical URL always points
+  at the live site regardless of which mirror serves this file - see
+  index.html's <link rel="canonical"> and docs/deployment.md.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://jellyflow.xyz/Leagues/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

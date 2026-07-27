@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 const ATTACK_STYLES = ['stab', 'slash', 'crush', 'magic', 'ranged'];
 
 // `damage`/`accuracy` are flat rating numbers on every item type, not
@@ -5,6 +7,19 @@ const ATTACK_STYLES = ['stab', 'slash', 'crush', 'magic', 'ranged'];
 // scale than armour/accessory ratings, so they're still tracked separately
 // to keep the totals readable - but neither is a "%".
 const WEAPON_SLOTS = new Set(['weapon', 'offhand', 'ammo']);
+
+// Purely a local display preference (mirrors RegionPicker's per-region
+// minimise state) - persisted so it survives reloads.
+const MINIMISED_STORAGE_KEY = 'rs3-leagues-gear-stats-minimised';
+
+function loadInitialMinimised() {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem(MINIMISED_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
 
 function sumStats(equipped) {
   const totals = {
@@ -38,65 +53,92 @@ function sumStats(equipped) {
 }
 
 export default function GearStatsSummary({ equipped }) {
+  const [minimised, setMinimised] = useState(loadInitialMinimised);
+
+  useEffect(() => {
+    window.localStorage.setItem(MINIMISED_STORAGE_KEY, String(minimised));
+  }, [minimised]);
+
+  function toggleMinimised() {
+    setMinimised((prev) => !prev);
+  }
+
   const totals = sumStats(equipped);
   const itemCount = Object.keys(equipped).length;
 
   return (
     <div className="gear-stats-summary">
-      <h3>Loadout totals</h3>
-      <p className="gear-stats-count">{itemCount} item{itemCount === 1 ? '' : 's'} equipped</p>
+      <h3>
+        <button
+          type="button"
+          className="unlock-region-toggle"
+          onClick={toggleMinimised}
+          aria-expanded={!minimised}
+          aria-label={`${minimised ? 'Expand' : 'Minimise'} Loadout`}
+        >
+          {minimised ? '+' : '−'}
+        </button>
+        <button type="button" className="gear-stats-title-text" onClick={toggleMinimised}>
+          Loadout
+        </button>
+      </h3>
+      {!minimised && (
+        <>
+          <p className="gear-stats-count">{itemCount} item{itemCount === 1 ? '' : 's'} equipped</p>
 
-      <div className="gear-stats-row">
-        <span>Armour damage</span>
-        <strong>{totals.armourDamage.toFixed(1)}</strong>
-      </div>
-      <div className="gear-stats-row">
-        <span>Armour accuracy</span>
-        <strong>{totals.armourAccuracy.toFixed(1)}</strong>
-      </div>
-      <div className="gear-stats-row">
-        <span>Weapon damage rating</span>
-        <strong>{totals.weaponDamageRating.toFixed(1)}</strong>
-      </div>
-      <div className="gear-stats-row">
-        <span>Weapon accuracy rating</span>
-        <strong>{totals.weaponAccuracyRating.toFixed(1)}</strong>
-      </div>
-      <div className="gear-stats-row">
-        <span>Life points</span>
-        <strong>+{totals.lifeBonus}</strong>
-      </div>
-      <div className="gear-stats-row">
-        <span>Prayer bonus</span>
-        <strong>+{totals.prayerBonus}</strong>
-      </div>
+          <div className="gear-stats-row">
+            <span>Armour damage</span>
+            <strong>{totals.armourDamage.toFixed(1)}</strong>
+          </div>
+          <div className="gear-stats-row">
+            <span>Armour accuracy</span>
+            <strong>{totals.armourAccuracy.toFixed(1)}</strong>
+          </div>
+          <div className="gear-stats-row">
+            <span>Weapon damage rating</span>
+            <strong>{totals.weaponDamageRating.toFixed(1)}</strong>
+          </div>
+          <div className="gear-stats-row">
+            <span>Weapon accuracy rating</span>
+            <strong>{totals.weaponAccuracyRating.toFixed(1)}</strong>
+          </div>
+          <div className="gear-stats-row">
+            <span>Life points</span>
+            <strong>+{totals.lifeBonus}</strong>
+          </div>
+          <div className="gear-stats-row">
+            <span>Prayer bonus</span>
+            <strong>+{totals.prayerBonus}</strong>
+          </div>
 
-      <table className="gear-stats-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Stab</th>
-            <th>Slash</th>
-            <th>Crush</th>
-            <th>Magic</th>
-            <th>Ranged</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Attack</td>
-            {ATTACK_STYLES.map((k) => (
-              <td key={k}>{totals.attack[k].toFixed(1)}</td>
-            ))}
-          </tr>
-          <tr>
-            <td>Defence</td>
-            {ATTACK_STYLES.map((k) => (
-              <td key={k}>{totals.defence[k].toFixed(1)}</td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
+          <table className="gear-stats-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Stab</th>
+                <th>Slash</th>
+                <th>Crush</th>
+                <th>Magic</th>
+                <th>Ranged</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Attack</td>
+                {ATTACK_STYLES.map((k) => (
+                  <td key={k}>{totals.attack[k].toFixed(1)}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>Defence</td>
+                {ATTACK_STYLES.map((k) => (
+                  <td key={k}>{totals.defence[k].toFixed(1)}</td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </>
+      )}
     </div>
   );
 }

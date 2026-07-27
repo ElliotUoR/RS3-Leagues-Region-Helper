@@ -9,7 +9,7 @@ import ReportIssueButton from './components/ReportIssueButton';
 import ReportIssueModal from './components/ReportIssueModal';
 import ReportIssueUnavailableModal from './components/ReportIssueUnavailableModal';
 import PagesMigrationModal from './components/PagesMigrationModal';
-import { REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
+import { GATEWAY_STORAGE_KEY, REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
 import { useIsAdmin } from './hooks/useIsAdmin';
@@ -63,8 +63,9 @@ function currentRoute() {
 // scratch (re-reading real localStorage on exit, or re-seeding from the
 // shared payload on entry) instead of carrying over stale in-memory state.
 function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportIssue }) {
-  const { selected, toggleRegion, isUnlocked, overLimit, clearRegions } = useRegionSelection({
+  const { selected, gatewaySelected, toggleRegion, isUnlocked, overLimit, clearRegions } = useRegionSelection({
     initialSelection: sharedBuild?.regions,
+    initialGatewaySelection: sharedBuild?.gatewaySelected,
     persist: !sharedBuild,
   });
   const gear = useGearLoadout({
@@ -80,6 +81,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
 
   function handleAdopt() {
     window.localStorage.setItem(REGIONS_STORAGE_KEY, JSON.stringify(selected));
+    window.localStorage.setItem(GATEWAY_STORAGE_KEY, JSON.stringify(gatewaySelected));
     window.localStorage.setItem(
       GEAR_STORAGE_KEY,
       JSON.stringify({
@@ -138,7 +140,13 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
       </nav>
 
       {route === 'gear' && (
-        <GearPage isUnlocked={isUnlocked} selected={selected} selectedRelics={selectedRelics} {...gear} />
+        <GearPage
+          isUnlocked={isUnlocked}
+          selected={selected}
+          gatewaySelected={gatewaySelected}
+          selectedRelics={selectedRelics}
+          {...gear}
+        />
       )}
       {route === 'abilities' && <AbilitiesPage isUnlocked={isUnlocked} />}
       {route === 'relics' && (

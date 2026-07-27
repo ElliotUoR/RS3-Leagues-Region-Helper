@@ -57,6 +57,10 @@ h1, h2, h3 {
   padding: 24px 20px 64px;
 }
 
+.site-title-short {
+  display: none;
+}
+
 @media (max-width: 700px) {
   .app {
     padding: 16px 12px 48px;
@@ -114,6 +118,10 @@ header h1 {
   margin-bottom: 8px;
 }
 
+.home-header {
+  text-align: center;
+}
+
 .gear-page-heading {
   display: flex;
   align-items: center;
@@ -142,6 +150,7 @@ header h1 {
   color: var(--accent);
   font-weight: 600;
   font-size: 14px;
+  text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -514,23 +523,67 @@ header h1 {
   color: #fff;
 }
 
+/* The map/countdown/notes/picker areas below are direct grid children of
+   <main> (not nested in one another) purely so their relative order can
+   flip between desktop and mobile via grid-template-areas alone - on
+   desktop the countdown sits beside the notes text under the map, on
+   mobile it drops to the very bottom below the Regions picker, and no
+   component needs to be rendered twice to achieve that. */
 main {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 24px;
+  grid-template-columns: 1.1fr 1.3fr minmax(180px, 1fr);
+  grid-template-areas:
+    'map map picker'
+    'countdown notes picker';
+  gap: 16px 24px;
   margin-top: 24px;
+}
+
+.region-map-notes {
+  grid-area: notes;
+  align-self: center;
 }
 
 @media (max-width: 900px) {
   main {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'map'
+      'notes'
+      'picker'
+      'countdown';
   }
+
+  header h1 {
+    /* Scales continuously with viewport width instead of one fixed size -
+       a single fixed value still overflowed on the narrowest phones. Floor
+       of 14px plus the ellipsis fallback below means it degrades gracefully
+       even on a viewport narrower than anticipated, rather than visually
+       overflowing/cropping. Triggered from 900px rather than 700px - the
+       full title is already too long for anything under ~1000px at the
+       default 32px size, so it was still overflowing between 700-900px. */
+    font-size: clamp(14px, 3.2vw, 22px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .site-title-full {
+    display: none;
+  }
+
+  .site-title-short {
+    display: inline;
+  }
+}
+
+.region-map-column {
+  grid-area: map;
+  align-self: start;
 }
 
 .region-map {
   position: relative;
-  grid-column: 1 / 2;
-  align-self: start;
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
@@ -542,61 +595,157 @@ main {
   display: block;
 }
 
-.region-hotspot {
+.region-map-overlay {
   position: absolute;
-  transform: translate(-50%, -50%);
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid #fff;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* --region-color is set inline per <path> from data/regions.js's `color`
+   field - the same hex each region was hand-traced in (see
+   scripts/extract-region-boundaries.mjs), so the map's outlines and
+   "locked in" highlights always match that original color key rather than
+   one generic accent color for every region. */
+.region-shape {
+  stroke: var(--region-color);
+  stroke-width: 1.5;
+  fill: var(--region-color);
   cursor: pointer;
-  padding: 0;
+  transition: fill-opacity 0.15s ease, stroke-width 0.15s ease;
 }
 
-.region-hotspot.fixed {
-  background: var(--locked-bg);
-  border-color: var(--accent);
-  cursor: default;
+.region-shape.fixed,
+.region-shape.selected {
+  fill-opacity: 0.55;
 }
 
-.region-hotspot.selected {
-  background: var(--accent);
+.region-shape.fixed:hover,
+.region-shape.selected:hover,
+.region-shape.selected.hovered {
+  fill-opacity: 0.75;
 }
 
-.region-hotspot.unselected {
-  background: rgba(0, 0, 0, 0.35);
+.region-shape.unselected {
+  fill-opacity: 0.12;
 }
 
-.region-hotspot-label {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  font-size: 11px;
-  background: rgba(0, 0, 0, 0.7);
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.1s;
+.region-shape.unselected:hover,
+.region-shape.unselected.hovered {
+  fill-opacity: 0.32;
 }
 
-.region-hotspot:hover .region-hotspot-label {
-  opacity: 1;
+.region-shape:focus-visible {
+  outline: none;
+  stroke-width: 3;
 }
 
-.region-picker,
-.unlocks-list {
+.region-picker {
+  grid-area: picker;
+  align-self: start;
   background: var(--panel-bg);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px 20px;
 }
 
-.unlocks-list {
-  grid-column: 1 / -1;
+/* Hidden by default via max-height (not display/conditional mounting) so it
+   can transition in/out - the animated max-height is what makes mobile's
+   single-column stack smoothly push the Regions panel down/up below it,
+   since that's normal document flow there. On desktop, Regions sits in its
+   own grid column/row and never needed to move for this in the first
+   place - the same transition just happens to be a no-op for it. Visibility
+   flips (with a delay on the way out) so the hidden link isn't reachable by
+   keyboard/tab while faded out. */
+.unlocks-list-heading-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  max-height: 0;
+  margin-top: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.25s ease, visibility 0s linear 0.3s;
+}
+
+.unlocks-list-heading-note.visible {
+  max-height: 60px;
+  margin-top: 8px;
+  opacity: 1;
+  visibility: visible;
+  transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.25s ease, visibility 0s linear 0s;
+}
+
+/* Same collapse-via-max-height technique as .unlocks-list-heading-note
+   above, so this and the "All regions unlocked" note below it never
+   overlap (only one is ever really visible - this hides at 1-2 regions
+   picked, that one only shows at the max) - and so whichever one that
+   leaves the other animates smoothly into the vacated space via normal
+   flex reflow, rather than the layout jumping. */
+.pick-regions-hint {
+  margin: 0;
+  max-height: 0;
+  margin-top: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-size: 12px;
+  color: var(--text);
+  text-align: center;
+  transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.25s ease, visibility 0s linear 0.3s;
+}
+
+.pick-regions-hint.visible {
+  max-height: 24px;
+  margin-top: 8px;
+  opacity: 0.6;
+  visibility: visible;
+  transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.25s ease, visibility 0s linear 0s;
+}
+
+.all-regions-note {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.all-regions-arrow {
+  display: inline-block;
+  color: var(--accent);
+  font-weight: 700;
+  opacity: 1;
+  animation: all-regions-arrow-nudge 1.4s ease-in-out infinite;
+}
+
+@keyframes all-regions-arrow-nudge {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.gear-planner-cta {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.gear-planner-cta:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .region-picker-heading {
@@ -604,6 +753,22 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.region-picker-heading h2 {
+  font-size: 17px;
+  margin: 0;
+}
+
+.region-picker-count {
+  font-weight: 400;
+  opacity: 0.7;
+  font-size: 15px;
+}
+
+.region-picker-count + .region-warning-icon {
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
 .clear-regions-button {
@@ -628,23 +793,43 @@ main {
   cursor: not-allowed;
 }
 
-.region-group {
-  border: none;
-  padding: 0;
-  margin: 0 0 16px;
+.region-name-faded {
+  opacity: 0.5;
 }
 
-.region-group legend {
-  font-weight: 600;
-  padding: 0;
-  margin-bottom: 6px;
-}
-
-.region-checkbox {
-  display: flex;
+.region-warning-icon {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--warning);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.region-warning-tooltip {
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 5;
 }
 
 .region-limit-note {
@@ -654,34 +839,40 @@ main {
   margin-top: 8px;
 }
 
+/* This whole block (through .boss-drop) lives exclusively in the narrow
+   RegionPicker sidebar now - sized tight on purpose (see RegionPicker.jsx,
+   which folds in what used to be the separate full-width UnlocksList). */
 .unlocks-list-body {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 12px;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .unlock-region {
-  flex: 1 1 260px;
-  min-width: 220px;
-  max-width: 100%;
-  padding: 10px 14px;
+  width: 100%;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: color-mix(in srgb, var(--panel-bg) 60%, transparent);
 }
 
+.unlock-region-off {
+  padding: 5px 10px;
+}
+
 .unlock-region h3 {
-  margin: 0 0 4px;
-  font-size: 16px;
+  margin: 0 0 3px;
+  font-size: 13px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .unlock-region-subheading {
-  margin: 10px 0 2px;
-  font-size: 12px;
+  margin: 8px 0 2px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -689,26 +880,48 @@ main {
 }
 
 .badge {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   background: var(--accent-bg);
   color: var(--accent);
-  padding: 2px 8px;
+  padding: 1px 6px;
   border-radius: 999px;
+}
+
+/* A visibly different purple from the "always unlocked" badge's --accent,
+   so Karamja's "unlocked second" reads as a related-but-distinct status
+   rather than a duplicate of the fixed-3 regions' badge. */
+.badge.badge-gateway {
+  background: color-mix(in srgb, var(--accent-2) 18%, transparent);
+  color: var(--accent-2);
+}
+
+.unlock-region-name {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.unlock-region-name:hover {
+  color: var(--accent);
 }
 
 .unlock-region-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   flex: none;
   background: var(--accent-bg);
   color: var(--accent);
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 5px;
+  font-size: 11px;
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -716,30 +929,31 @@ main {
 
 .region-includes,
 .region-empty {
-  font-size: 13px;
-  margin: 4px 0;
+  font-size: 11px;
+  margin: 3px 0;
   color: var(--text);
   opacity: 0.8;
 }
 
 .boss-list {
   list-style: none;
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   padding: 0;
 }
 
 .boss-row-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   flex-wrap: wrap;
   width: 100%;
   background: none;
   border: none;
   font: inherit;
+  font-size: 12px;
   color: inherit;
   text-align: left;
-  padding: 5px 0;
+  padding: 3px 0;
   cursor: pointer;
 }
 
@@ -749,8 +963,8 @@ main {
 
 .boss-row-chevron {
   display: inline-block;
-  width: 10px;
-  font-size: 11px;
+  width: 9px;
+  font-size: 10px;
   color: var(--accent);
   transition: transform 0.15s;
 }
@@ -760,35 +974,35 @@ main {
 }
 
 .sub-location-tag {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   background: var(--panel-bg);
   border: 1px solid var(--border);
   color: var(--text);
   opacity: 0.85;
-  padding: 1px 7px;
+  padding: 1px 6px;
   border-radius: 999px;
 }
 
 .boss-drops {
   list-style: none;
-  margin: 0 0 8px;
-  padding: 6px 0 6px 18px;
+  margin: 0 0 6px;
+  padding: 4px 0 4px 14px;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 5px 10px;
 }
 
 .boss-drop {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 4px;
+  font-size: 11px;
 }
 
 .boss-drop .retry-image {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
@@ -955,6 +1169,23 @@ main.gear-page {
 .gear-stats-summary h3 {
   margin: 0 0 4px;
   font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gear-stats-title-text {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.gear-stats-title-text:hover {
+  color: var(--accent);
 }
 
 .gear-stats-count {
@@ -1037,7 +1268,15 @@ main.gear-page {
   gap: 4px;
 }
 
-.hide-locked-toggle {
+.gear-item-list-toggles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.hide-locked-toggle,
+.compact-mode-toggle {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1069,7 +1308,22 @@ main.gear-page {
   gap: 8px;
 }
 
+.gear-item-rows.compact {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 700px) {
+  .compact-mode-toggle {
+    display: none;
+  }
+
+  .gear-item-rows.compact {
+    grid-template-columns: 1fr;
+  }
+}
+
 .gear-item-row {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -1110,6 +1364,25 @@ main.gear-page {
   cursor: not-allowed;
 }
 
+/* Placed after the base .gear-item-main rule on purpose - both classes
+   apply to the same element, and with equal specificity the later rule in
+   the file wins any overlapping property, so this has to come second to
+   actually take effect. */
+.gear-item-main-compact {
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 14px 10px;
+}
+
+.gear-item-main-compact .gear-item-name {
+  justify-content: center;
+}
+
+.gear-item-main-compact .region-tags {
+  justify-content: center;
+}
+
 .gear-item-override {
   width: 100%;
   padding: 6px 12px;
@@ -1124,6 +1397,23 @@ main.gear-page {
 
 .gear-item-override:hover {
   background: color-mix(in srgb, var(--warning) 22%, transparent);
+}
+
+/* Absolutely positioned (relative to .gear-item-row) rather than sitting in
+   the flex flow next to the icon/name - its presence must never shift the
+   centered icon/name/tags, since only locked items have this button, and a
+   layout-affecting element would misalign unlocked cards against locked
+   ones sitting right next to them in the grid. */
+.gear-item-override-compact {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: auto;
+  padding: 3px 10px;
+  border: 1px solid var(--warning);
+  border-radius: 999px;
+  font-size: 11px;
+  z-index: 1;
 }
 
 .gear-item-top {
@@ -1143,6 +1433,13 @@ main.gear-page {
   width: 32px;
   height: 32px;
   flex-shrink: 0;
+}
+
+/* After the base .gear-item-row .retry-image rule on purpose - equal
+   specificity, so this has to come second in the file to actually win. */
+.gear-item-main-compact .retry-image {
+  width: 40px;
+  height: 40px;
 }
 
 /* Abilities page */
@@ -1369,6 +1666,35 @@ main.abilities-page .gear-item-rows {
   line-height: 1.4;
   text-align: left;
   white-space: normal;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+/* Compact mode's stand-in for the level/source/stat detail a normal-mode
+   card shows inline - tracks the cursor (see GearItemRow's onMouseMove)
+   and sits above it, rendered through the same document.body portal
+   pattern as .tag-tooltip-bubble so it's never clipped by this card's own
+   `overflow: hidden`. Fixed black/white regardless of theme (not the
+   theme-aware --text-h/--bg inversion .tag-tooltip-bubble uses) - the
+   .gear-stat-* colour-coded spans inside still show their own explicit
+   colour either way, since an explicit `color` always wins over this
+   container's inherited one. */
+.gear-item-stats-tooltip {
+  position: fixed;
+  z-index: 1000;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: left;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   pointer-events: none;
 }
@@ -1760,4 +2086,108 @@ main.abilities-page .gear-item-rows {
   font-size: 12px;
   font-weight: 600;
   pointer-events: none;
+}
+
+/* Sized small by default since desktop now tucks this into the row below
+   the map, beside the "pick a region"/"all unlocked" notes (see main's
+   grid-template-areas) rather than as its own full-width banner - the
+   900px breakpoint below scales it back up once it drops to being a
+   full-width block of its own at the bottom of the page on mobile. */
+.league-countdown {
+  grid-area: countdown;
+  align-self: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--panel-bg), color-mix(in srgb, var(--accent) 10%, var(--panel-bg)));
+  text-align: center;
+}
+
+.league-countdown-heading {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.league-countdown-units {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.league-countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 46px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  border: 2px solid var(--unit-color);
+  background: color-mix(in srgb, var(--unit-color) 14%, var(--panel-bg));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--unit-color) 35%, transparent);
+}
+
+.league-countdown-value {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--unit-color);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.league-countdown-label {
+  margin-top: 1px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+.league-countdown-live {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .league-countdown {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .league-countdown-heading {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .league-countdown-units {
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .league-countdown-unit {
+    min-width: 64px;
+    padding: 10px 6px;
+  }
+
+  .league-countdown-value {
+    font-size: 26px;
+  }
+
+  .league-countdown-label {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 700px) {
+  .league-countdown-unit {
+    min-width: 52px;
+    padding: 8px 4px;
+  }
+
+  .league-countdown-value {
+    font-size: 20px;
+  }
 }

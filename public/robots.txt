@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Same canonical URL as index.html's <link rel="canonical"> - this file is
+# copied verbatim into both the live and GitHub Pages builds (see
+# vite.config.js), so it always points crawlers at the one canonical site
+# regardless of which mirror served it.
+Sitemap: https://jellyflow.xyz/Leagues/sitemap.xml

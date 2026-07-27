@@ -1,49 +1,283 @@
-import { FIXED_REGIONS, MAX_OPTIONAL, OPTIONAL_REGIONS, REGIONS } from '../data/regions';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import BossRow from './BossRow';
+import {
+  ACTIVITIES,
+  BOSSES,
+  FIXED_REGIONS,
+  GATEWAY_REGIONS,
+  MAX_OPTIONAL,
+  MONSTERS,
+  OPTIONAL_REGIONS,
+  REGIONS,
+} from '../data/regions';
 
-export default function RegionPicker({ selected, isUnlocked, toggleRegion, overLimit, clearRegions }) {
+// Purely a local display preference (which regions' unlock lists are
+// collapsed) - persisted so it survives reloads, but deliberately kept out
+// of shareBuild.js's payload since it's not part of the build being shared.
+const MINIMISED_STORAGE_KEY = 'rs3-leagues-unlocks-minimised';
+
+function loadInitialMinimised() {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = window.localStorage.getItem(MINIMISED_STORAGE_KEY);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? new Set(parsed) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+// A gateway region that's currently toggled off has nothing to expand (no
+// regional content is actually reachable) - shown as a plain faded row with
+// the same "!" warning affordance the old compact list used, instead of an
+// expandable card.
+function OffGatewayRow({ id, openWarningId, toggleWarning, setOpenWarningId }) {
+  const region = REGIONS[id];
+  return (
+    <div className="unlock-region unlock-region-off">
+      <h3>
+        <span className="region-name-faded">{region.name}</span>
+        <button
+          type="button"
+          className="region-warning-icon"
+          title={`${region.name} not unlocked yet`}
+          aria-label={`${region.name} not unlocked yet`}
+          onClick={() => toggleWarning(id)}
+          onBlur={() => setOpenWarningId((prev) => (prev === id ? null : prev))}
+        >
+          !
+          {openWarningId === id && (
+            <span className="region-warning-tooltip" role="tooltip">
+              {region.name} not unlocked yet
+            </span>
+          )}
+        </button>
+      </h3>
+    </div>
+  );
+}
+
+function RegionCard({ id, badge, isMinimised, toggleMinimised }) {
+  const region = REGIONS[id];
+  const bosses = BOSSES.filter((b) => b.region === id && !b.quest);
+  const activities = ACTIVITIES.filter((a) => a.region === id);
+  const monsters = MONSTERS.filter((m) => m.region === id);
+
+  return (
+    <div className="unlock-region">
+      <h3>
+        <button
+          type="button"
+          className="unlock-region-toggle"
+          onClick={() => toggleMinimised(id)}
+          aria-expanded={!isMinimised}
+          aria-label={`${isMinimised ? 'Expand' : 'Minimise'} ${region.name} unlocks`}
+        >
+          {isMinimised ? '+' : '−'}
+        </button>
+        <button type="button" className="unlock-region-name" onClick={() => toggleMinimised(id)}>
+          {region.name}
+        </button>
+        {badge}
+      </h3>
+      {!isMinimised && (
+        <>
+          {region.includes && <p className="region-includes">Includes: {region.includes.join(', ')}</p>}
+          {bosses.length > 0 ? (
+            <ul className="boss-list">
+              {bosses.map((b) => (
+                <BossRow key={b.name} boss={b} />
+              ))}
+            </ul>
+          ) : (
+            activities.length === 0 &&
+            monsters.length === 0 && <p className="region-empty">No boss data added for this region yet.</p>
+          )}
+          {activities.length > 0 && (
+            <>
+              <h4 className="unlock-region-subheading">Other unlocks</h4>
+              <ul className="boss-list">
+                {activities.map((a) => (
+                  <BossRow key={a.name} boss={a} />
+                ))}
+              </ul>
+            </>
+          )}
+          {monsters.length > 0 && (
+            <>
+              <h4 className="unlock-region-subheading">Monster drops</h4>
+              <ul className="boss-list">
+                {monsters.map((m) => (
+                  <BossRow key={m.name} boss={m} />
+                ))}
+              </ul>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function RegionPicker({ selected, isUnlocked, overLimit, clearRegions }) {
+  const [openWarningId, setOpenWarningId] = useState(null);
+  const [minimised, setMinimised] = useState(loadInitialMinimised);
+  const unlockedOptional = OPTIONAL_REGIONS.filter((id) => isUnlocked(id));
+
+  useEffect(() => {
+    window.localStorage.setItem(MINIMISED_STORAGE_KEY, JSON.stringify([...minimised]));
+  }, [minimised]);
+
+  // Animates the card list's height whenever a region is added or removed
+  // (a card mounts/unmounts) instead of the panel snapping straight to its
+  // new size - there's no CSS way to transition between two "auto" heights,
+  // so this is a small manual FLIP: measure, jump to the old height, force a
+  // reflow, then transition to the new one. Only fires on membership
+  // changes (tracked via `cardSignature`), not when a card is individually
+  // expanded/collapsed - the height is still re-measured every render so it
+  // never uses a stale start point once one of those did change things.
+  const bodyRef = useRef(null);
+  const prevSignatureRef = useRef(null);
+  const prevHeightRef = useRef(null);
+  const cleanupRef = useRef(null);
+  const gatewaySignature = GATEWAY_REGIONS.map((id) => (isUnlocked(id) ? '1' : '0')).join('');
+  const cardSignature = `${unlockedOptional.join(',')}|${gatewaySignature}`;
+
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+
+    const newHeight = el.scrollHeight;
+    const signatureChanged = prevSignatureRef.current !== null && prevSignatureRef.current !== cardSignature;
+
+    if (signatureChanged && prevHeightRef.current !== null && prevHeightRef.current !== newHeight) {
+      if (cleanupRef.current) {
+        cleanupRef.current();
+        cleanupRef.current = null;
+      }
+
+      el.style.height = `${prevHeightRef.current}px`;
+      el.style.overflow = 'hidden';
+      // Reading offsetHeight (assigned to nothing on purpose) forces the
+      // browser to flush the height change above before continuing, so the
+      // transition below animates from that value instead of skipping it.
+      // eslint-disable-next-line no-unused-expressions
+      el.offsetHeight;
+      el.style.transition = 'height 0.3s ease';
+      el.style.height = `${newHeight}px`;
+
+      const onEnd = (event) => {
+        if (event.propertyName !== 'height') return;
+        el.style.transition = '';
+        el.style.height = '';
+        el.style.overflow = '';
+        el.removeEventListener('transitionend', onEnd);
+        cleanupRef.current = null;
+      };
+      el.addEventListener('transitionend', onEnd);
+      cleanupRef.current = () => {
+        el.removeEventListener('transitionend', onEnd);
+        el.style.transition = '';
+        el.style.height = '';
+        el.style.overflow = '';
+      };
+    }
+
+    prevSignatureRef.current = cardSignature;
+    prevHeightRef.current = newHeight;
+  });
+
+  function toggleWarning(id) {
+    setOpenWarningId((prev) => (prev === id ? null : id));
+  }
+
+  function toggleMinimised(id) {
+    setMinimised((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   return (
     <div className="region-picker">
       <div className="region-picker-heading">
-        <h2>Regions</h2>
+        <h2>
+          Regions <span className="region-picker-count">- {selected.length}/{MAX_OPTIONAL}</span>
+          {overLimit && (
+            <button
+              type="button"
+              className="region-warning-icon"
+              title="Region limit exceeded"
+              aria-label="Region limit exceeded"
+              onClick={() => toggleWarning('regionLimit')}
+              onBlur={() => setOpenWarningId((prev) => (prev === 'regionLimit' ? null : prev))}
+            >
+              !
+              {openWarningId === 'regionLimit' && (
+                <span className="region-warning-tooltip" role="tooltip">
+                  Region limit exceeded
+                </span>
+              )}
+            </button>
+          )}
+        </h2>
         <button
           type="button"
           className="clear-regions-button"
           onClick={clearRegions}
           disabled={selected.length === 0}
         >
-          Clear regions
+          Clear
         </button>
       </div>
 
-      <fieldset className="region-group">
-        <legend>Always unlocked</legend>
+      <div className="unlocks-list-body" ref={bodyRef}>
         {FIXED_REGIONS.map((id) => (
-          <label key={id} className="region-checkbox fixed">
-            <input type="checkbox" checked disabled readOnly />
-            {REGIONS[id].name}
-          </label>
+          <RegionCard
+            key={id}
+            id={id}
+            badge={<span className="badge">always unlocked</span>}
+            isMinimised={minimised.has(id)}
+            toggleMinimised={toggleMinimised}
+          />
         ))}
-      </fieldset>
-
-      <fieldset className="region-group">
-        <legend>
-          Pick {MAX_OPTIONAL} ({selected.length}/{MAX_OPTIONAL} selected)
-        </legend>
-        {OPTIONAL_REGIONS.map((id) => {
-          const unlocked = isUnlocked(id);
-          return (
-            <label key={id} className="region-checkbox">
-              <input type="checkbox" checked={unlocked} onChange={() => toggleRegion(id)} />
-              {REGIONS[id].name}
-            </label>
-          );
-        })}
-        {overLimit && (
-          <p className="region-limit-note">
-            You've selected more than {MAX_OPTIONAL} regions - that's over the Leagues limit.
-          </p>
+        {GATEWAY_REGIONS.map((id) =>
+          isUnlocked(id) ? (
+            <RegionCard
+              key={id}
+              id={id}
+              badge={<span className="badge badge-gateway">unlocked second</span>}
+              isMinimised={minimised.has(id)}
+              toggleMinimised={toggleMinimised}
+            />
+          ) : (
+            <OffGatewayRow
+              key={id}
+              id={id}
+              openWarningId={openWarningId}
+              toggleWarning={toggleWarning}
+              setOpenWarningId={setOpenWarningId}
+            />
+          ),
         )}
-      </fieldset>
+        {unlockedOptional.map((id) => (
+          <RegionCard
+            key={id}
+            id={id}
+            isMinimised={minimised.has(id)}
+            toggleMinimised={toggleMinimised}
+          />
+        ))}
+      </div>
+
+      {overLimit && (
+        <p className="region-limit-note">
+          You've selected more than {MAX_OPTIONAL} regions - that's over the Leagues limit.
+        </p>
+      )}
     </div>
   );
 }

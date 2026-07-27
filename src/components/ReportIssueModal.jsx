@@ -21,6 +21,13 @@ const ISSUE_TYPES = [
 // bug report or "other" note doesn't need the page/detail cascade at all.
 const NEEDS_PAGE = new Set(['missing', 'incorrect', 'wrongRegion']);
 
+const DEFAULT_PLACEHOLDER = 'What went wrong? Include what you expected to happen.';
+const PLACEHOLDER_BY_ISSUE_TYPE = {
+  wrongRegion: 'What regions are wrong? What should the correct regions be?',
+  missing: 'What data is missing?',
+  incorrect: 'What data is incorrect? What is the correct data?',
+};
+
 const PAGES = [
   { value: 'regions', label: 'Regions' },
   { value: 'gear', label: 'Gear Planner' },
@@ -290,7 +297,7 @@ export default function ReportIssueModal({ open, onClose }) {
               <textarea
                 value={form.message}
                 maxLength={MAX_LENGTH}
-                placeholder="What went wrong? Include what you expected to happen."
+                placeholder={PLACEHOLDER_BY_ISSUE_TYPE[form.issueType] ?? DEFAULT_PLACEHOLDER}
                 onChange={(event) => update({ message: event.target.value })}
                 rows={4}
               />

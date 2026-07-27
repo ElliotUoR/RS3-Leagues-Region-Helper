@@ -14,6 +14,7 @@
     "shortlink-words": "node scripts/extract-shortlink-words.mjs"
   },
   "dependencies": {
+    "@oxlint/binding-win32-x64-msvc": "^1.76.0",
     "lz-string": "^1.5.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
@@ -22,7 +23,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
-    "oxlint": "^1.71.0",
+    "oxlint": "^1.76.0",
     "vite": "^6.3.5"
   }
 }

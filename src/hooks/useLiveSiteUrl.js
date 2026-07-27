@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { LIVE_SITE_URL } from '../utils/deployTarget';
 import { encodeShareBuild } from '../utils/shareBuild';
-import { REGIONS_STORAGE_KEY, sanitizeRegionSelection } from './useRegionSelection';
+import { GATEWAY_STORAGE_KEY, REGIONS_STORAGE_KEY, sanitizeGatewaySelection, sanitizeRegionSelection } from './useRegionSelection';
 import { GEAR_STORAGE_KEY } from './useGearLoadout';
 import { sanitizeEofWeaponNames, sanitizeEquippedNames, sanitizeStyle } from '../data/gearShape';
 import { RELICS_STORAGE_KEY, sanitizeRelicSelection } from './useRelicSelection';
+import { GATEWAY_REGIONS } from '../data/regions';
 
 // Reads the visitor's saved loadout straight from localStorage - this only
 // ever runs on the GitHub Pages build (see callers), outside the normal
@@ -15,6 +16,9 @@ import { RELICS_STORAGE_KEY, sanitizeRelicSelection } from './useRelicSelection'
 function readSavedBuild() {
   try {
     const regions = sanitizeRegionSelection(JSON.parse(window.localStorage.getItem(REGIONS_STORAGE_KEY) ?? '[]'));
+    const gatewaySelected = sanitizeGatewaySelection(
+      JSON.parse(window.localStorage.getItem(GATEWAY_STORAGE_KEY) ?? 'null'),
+    );
     const relics = sanitizeRelicSelection(JSON.parse(window.localStorage.getItem(RELICS_STORAGE_KEY) ?? '[]'));
     const gearRaw = JSON.parse(window.localStorage.getItem(GEAR_STORAGE_KEY) ?? '{}');
     const equippedNamesByStyle = sanitizeEquippedNames(gearRaw.equippedNames);
@@ -22,9 +26,10 @@ function readSavedBuild() {
     const defaultStyle = sanitizeStyle(gearRaw.defaultStyle ?? gearRaw.style);
 
     const hasGear = Object.values(equippedNamesByStyle).some((bySlot) => Object.keys(bySlot ?? {}).length > 0);
-    if (regions.length === 0 && relics.length === 0 && !hasGear) return null;
+    const hasNonDefaultGateway = gatewaySelected.length !== GATEWAY_REGIONS.length;
+    if (regions.length === 0 && relics.length === 0 && !hasGear && !hasNonDefaultGateway) return null;
 
-    return { regions, equippedNamesByStyle, eofWeaponNamesByStyle, relics, defaultStyle };
+    return { regions, gatewaySelected, equippedNamesByStyle, eofWeaponNamesByStyle, relics, defaultStyle };
   } catch {
     return null;
   }

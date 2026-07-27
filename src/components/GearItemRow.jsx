@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import RegionTags from './RegionTags';
 import RetryImage from './RetryImage';
 import { getArmourRating } from '../utils/gearStats';
@@ -44,7 +46,14 @@ function keyStats(item, style) {
   return bits;
 }
 
-export default function GearItemRow({ item, style, equipped, available, isUnlocked, onToggle, showSpecialAttack }) {
+// How far above the cursor the tooltip's bottom edge sits - large enough
+// that the cursor itself never overlaps the text.
+const TOOLTIP_CURSOR_GAP = 18;
+const TOOLTIP_MAX_WIDTH = 220;
+const VIEWPORT_MARGIN = 8;
+
+export default function GearItemRow({ item, style, equipped, available, isUnlocked, onToggle, showSpecialAttack, compact }) {
+  const [hoverPos, setHoverPos] = useState(null);
   const classes = [
     'gear-item-row',
     equipped ? 'equipped' : '',
@@ -52,6 +61,7 @@ export default function GearItemRow({ item, style, equipped, available, isUnlock
   ]
     .filter(Boolean)
     .join(' ');
+
   const stats = keyStats(item, style);
 
   let bottomInfo = item.stats?.setEffect && (
@@ -68,6 +78,72 @@ export default function GearItemRow({ item, style, equipped, available, isUnlock
           </span>
         ))}
       </span>
+    );
+  }
+
+  // Compact mode drops the level/source/stat detail (but keeps the icon) so
+  // 3 columns' worth fit on screen at once - see the "Compact mode"
+  // checkbox in GearPage (hidden on mobile, where there's no spare
+  // horizontal width for extra columns anyway). That detail isn't gone
+  // though - hovering shows it in a tooltip that tracks the cursor,
+  // rendered through a portal so it's never clipped by this card's own
+  // `overflow: hidden` (needed for its rounded corners).
+  if (compact) {
+    function handleMouseMove(event) {
+      const left = Math.min(
+        Math.max(event.clientX, VIEWPORT_MARGIN + TOOLTIP_MAX_WIDTH / 2),
+        window.innerWidth - VIEWPORT_MARGIN - TOOLTIP_MAX_WIDTH / 2,
+      );
+      setHoverPos({ top: event.clientY - TOOLTIP_CURSOR_GAP, left });
+    }
+
+    return (
+      <div className={classes}>
+        <button
+          type="button"
+          className="gear-item-main gear-item-main-compact"
+          onClick={() => available && onToggle(item)}
+          onContextMenu={wikiContextMenuHandler(item.name)}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => setHoverPos(null)}
+          aria-disabled={!available}
+        >
+          <RetryImage src={item.icon} alt="" loading="eager" />
+          <span className="gear-item-name">
+            {equipped && <span className="gear-item-check">✓</span>}
+            {item.name}
+            {item.twoHanded && <span className="gear-item-tag-2h">2H</span>}
+          </span>
+          <RegionTags item={item} isUnlocked={isUnlocked} />
+        </button>
+        {!available && (
+          <button
+            type="button"
+            className="gear-item-override gear-item-override-compact"
+            onClick={() => onToggle(item)}
+            title="Equip this item anyway, ignoring its region requirement"
+          >
+            Ignore
+          </button>
+        )}
+        {hoverPos &&
+          createPortal(
+            <div
+              className="gear-item-stats-tooltip"
+              role="tooltip"
+              style={{ top: hoverPos.top, left: hoverPos.left }}
+            >
+              {item.level && (
+                <span className="gear-item-level">
+                  {item.level.skill} {item.level.level}
+                </span>
+              )}
+              <span className="gear-item-source">{describeSource(item.source)}</span>
+              {bottomInfo}
+            </div>,
+            document.body,
+          )}
+      </div>
     );
   }
 
