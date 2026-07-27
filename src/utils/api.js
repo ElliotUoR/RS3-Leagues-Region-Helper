@@ -26,6 +26,41 @@ export async function createShortLink(payload) {
   return `${window.location.origin}${APP_BASE_PATH}s/${code}`;
 }
 
+// Resolves a short code back to its compressed build payload by calling
+// PostgREST's get_short_link_payload RPC directly (see
+// deploy/migrations/001_init.sql) - not the Node service. The Node service
+// no longer owns /s/:code at all (see App.jsx's short-link handling): the
+// short URL is served the SPA itself now, so the address bar keeps showing
+// the short link instead of expanding into a long `?share=` one, and this
+// is what resolves the code into an actual build once the app loads.
+// Returns null on any failure (unknown code, offline, backend down).
+//
+// PostgREST's exact JSON shape for a scalar-returning function varies by
+// version/config - a bare string (`"abc123"`), a single object
+// (`{"get_short_link_payload": "abc123"}`), or an array of one such object -
+// normalized down to the plain string (or null) here, mirroring what the
+// now-removed server-side callScalarRpc used to do.
+export async function resolveShortCode(code) {
+  try {
+    const res = await fetch(`${APP_BASE_PATH}rest/rpc/get_short_link_payload`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_code: code }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data === null || data === undefined) return null;
+    if (typeof data === 'string') return data;
+    if (typeof data !== 'object') return null;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return null;
+    const value = Object.values(row)[0];
+    return typeof value === 'string' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function submitIssueReport(body) {
   const res = await fetch(`${APP_BASE_PATH}api/report-issue`, {
     method: 'POST',

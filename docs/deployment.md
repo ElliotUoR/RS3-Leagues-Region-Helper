@@ -6,12 +6,14 @@ already runs The Garage's LiveKit server. Written for you to run yourself on
 the server - nothing here runs automatically.
 
 The domain is `jellyflow.xyz`, hosting multiple projects - this one lives
-under `/Leagues` (a future landing page owns `/` itself, not built yet). One
-placeholder still needs a real value (search for this exact string before
+under `/Leagues` (the JellyFlow landing page owns `/` itself). Two
+placeholders still need real values (search for these exact strings before
 going live):
 
 - `CHANGE_ME_AUTHENTICATOR_PASSWORD` - a real secret in `deploy/.env` and
   `deploy/migrations/001_init.sql`
+- `CHANGE_ME_ANALYTICS_PASSWORD` - a real secret in `deploy/.env`
+  (`ANALYTICS_DB_PASSWORD`) and `deploy/migrations/002_analytics_rollup.sql`
 
 ## 1. One-time: shared Docker network
 
@@ -106,8 +108,17 @@ Edit `.env`:
 - `POSTGRES_SUPERUSER_PASSWORD` - generate another
 - `GITHUB_TOKEN` - a fine-grained PAT scoped to just this repo, `issues:write`
 - `GITHUB_REPO` - `<you>/RS3-Leagues-Region-Helper`
-- `PUBLIC_SITE_URL` - `https://jellyflow.xyz/Leagues` (no trailing slash)
 - `ANALYTICS_SALT_SECRET` - `openssl rand -hex 32`
+- `PAGES_ORIGIN` - `https://<you>.github.io` (no path) - allows the static
+  GitHub Pages mirror to call `/api/shorten` cross-origin so it can turn a
+  visitor's saved loadout into a live-site short link (see
+  `src/hooks/useLiveSiteUrl.js`)
+- `ANALYTICS_DB_PASSWORD` - generate one (`openssl rand -hex 24`) - used by
+  the `analytics` Postgres role (daily rollup job + admin stats API, see
+  `deploy/migrations/002_analytics_rollup.sql`)
+- `ADMIN_PASSWORD_HASH` - a bcrypt hash of the JellyFlow admin dashboard
+  password: `cd /opt/rs3-site/server && node -e "console.log(require('bcryptjs').hashSync('yourpassword', 10))"`
+- `ADMIN_SESSION_SECRET` - `openssl rand -hex 32`
 
 Then open `migrations/001_init.sql` and replace
 `CHANGE_ME_AUTHENTICATOR_PASSWORD` with the **same** value you just put in
@@ -115,6 +126,10 @@ Then open `migrations/001_init.sql` and replace
 agree on this password, and it's only set on Postgres's first boot (the
 `/docker-entrypoint-initdb.d` scripts run once against an empty data
 volume), so this has to be right before the first `docker compose up`.
+Likewise open `migrations/002_analytics_rollup.sql` and replace
+`CHANGE_ME_ANALYTICS_PASSWORD` with the same value as `ANALYTICS_DB_PASSWORD`
+above - unlike `001_init.sql` this one isn't tied to first boot (see step
+10), but it still needs to match before it's applied.
 
 ## 5. DNS
 
@@ -180,7 +195,10 @@ curl -X POST https://jellyflow.xyz/Leagues/api/shorten \
   -d '{"payload":"test-payload"}'
 # -> {"code":"some-random-words"}
 
-# Resolve it - should 302 to /Leagues/?share=test-payload#gear
+# Resolve it - should 200 (the SPA itself, not a redirect - the frontend's
+# nginx SPA fallback serves index.html here, and the app resolves the code
+# client-side against PostgREST so the address bar keeps showing the short
+# link instead of expanding into a long ?share= URL - see App.jsx)
 curl -i https://jellyflow.xyz/Leagues/s/some-random-words
 
 # Report an issue (only run this once you actually want a test issue filed!)
@@ -194,16 +212,24 @@ curl -X POST https://jellyflow.xyz/Leagues/api/report-issue \
 ```bash
 cd /opt/rs3-site
 git pull
-npm run build                     # refresh dist/ for the frontend container
+npm run build                          # refresh dist/ for the frontend container
 cd deploy
-docker compose up -d --build      # rebuilds the node image if server/ changed
+docker compose up -d postgres postgrest
+docker compose run --rm --no-deps --build node node scripts/migrate.js
+docker compose up -d --build           # rebuilds/restarts everything else
 ```
+
+The migration step applies any new `deploy/migrations/*.sql` files (tracked
+in a `schema_migrations` table so already-applied ones are skipped) against
+the live database *before* the new code that might depend on them starts -
+see `server/scripts/migrate.js`. It's a no-op if nothing's changed.
 
 ## 11. Auto-deploy (CI/CD)
 
 Once the manual steps above work, [`​.github/workflows/deploy-hetzner.yml`](../.github/workflows/deploy-hetzner.yml)
-automates step 10 on every push to `main` - it SSHes in and re-runs exactly
-those commands. This is shared, one-time setup: the same dedicated deploy
+automates step 10 (including the migration step) on every push to `main` -
+it SSHes in and re-runs exactly those commands. This is shared, one-time
+setup: the same dedicated deploy
 user and SSH key work for both this repo and the JellyFlow repo (and any
 future project on this domain) - do this once, not per-project.
 

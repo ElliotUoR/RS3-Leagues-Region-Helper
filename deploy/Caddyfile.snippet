@@ -12,22 +12,28 @@
 redir /Leagues /Leagues/
 
 handle_path /Leagues/* {
-	# Short link redirects and the two write endpoints -> Node service.
-	# Paths here have already had the /Leagues prefix stripped, so they
-	# match exactly what the Node service's own routes expect (/s/:code,
-	# /api/shorten, etc).
-	@backend path /s/* /api/*
+	# The two write endpoints -> Node service. Paths here have already had
+	# the /Leagues prefix stripped, so they match exactly what the Node
+	# service's own routes expect (/api/shorten, /api/report-issue, etc).
+	# NOTE: /s/:code short links deliberately do NOT go here anymore - see
+	# below, they're served by the static frontend instead.
+	@backend path /api/*
 	reverse_proxy @backend rs3_node:3000
 
 	# Public PostgREST API (anon insert-only + the short-link RPC) -
 	# stripped of the /rest prefix too, so e.g. /Leagues/rest/page_events
-	# maps to PostgREST's own /page_events route.
+	# maps to PostgREST's own /page_events route. The frontend calls
+	# /rest/rpc/get_short_link_payload directly from here to resolve a
+	# short code client-side (utils/api.js resolveShortCode) - the address
+	# bar keeps showing the short link the whole time instead of ever
+	# expanding into a long `?share=` URL.
 	handle_path /rest/* {
 		reverse_proxy rs3_postgrest:3000
 	}
 
-	# Everything else under /Leagues/* -> the static build (hash-routed
-	# SPA, so no extra rewrite rules needed - there's only ever one real
-	# path per the app itself, "/Leagues/").
+	# Everything else under /Leagues/* -> the static build, including
+	# /s/:code short links - the frontend's nginx has a SPA fallback
+	# (deploy/nginx.conf) that serves index.html for any unknown path, and
+	# the app itself resolves the code from there (see App.jsx).
 	reverse_proxy rs3_frontend:80
 }

@@ -67,8 +67,18 @@ services:
       POSTGREST_URL: http://postgrest:3000
       GITHUB_TOKEN: ${GITHUB_TOKEN}
       GITHUB_REPO: ${GITHUB_REPO}
-      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL}
       ANALYTICS_SALT_SECRET: ${ANALYTICS_SALT_SECRET}
+      PAGES_ORIGIN: ${PAGES_ORIGIN}
+      # Low-privilege role for the daily analytics rollup job + admin stats
+      # API (see docs/deployment.md and deploy/migrations/002_analytics_rollup.sql).
+      ANALYTICS_DATABASE_URL: postgres://analytics:${ANALYTICS_DB_PASSWORD}@postgres:5432/rs3
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET}
+      # Superuser connection, only actually used when this container is run
+      # as a one-off via `docker compose run ... node scripts/migrate.js`
+      # (see .github/workflows/deploy-hetzner.yml) - harmless to always set,
+      # the long-running server process itself never reads it.
+      DATABASE_URL: postgres://postgres:${POSTGRES_SUPERUSER_PASSWORD}@postgres:5432/rs3
     networks:
       - internal
       - web
@@ -79,6 +89,7 @@ services:
     restart: unless-stopped
     volumes:
       - ../dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - web
 

@@ -12,10 +12,23 @@ import PagesMigrationModal from './components/PagesMigrationModal';
 import { REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
-import { parseShareParam, stripShareParam } from './utils/shareBuild';
-import { trackPageview } from './utils/api';
+import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
+import { resolveShortCode, trackPageview } from './utils/api';
 import { IS_PAGES_BUILD, PAGES_MIGRATION_DISMISSED_KEY } from './utils/deployTarget';
 import versionInfo from './data/version.json';
+
+// Matches the short-link path Caddy now routes straight to this static app
+// instead of through the Node service (see deploy/Caddyfile.snippet) -
+// e.g. "/Leagues/s/torva-seismic-vengeance". Never matches on the GitHub
+// Pages build, which has no backend to resolve a code against in the first
+// place (see deployTarget.js).
+const SHORT_LINK_PATH_RE = /\/s\/([a-z0-9-]+)\/?$/i;
+
+function matchShortLinkCode() {
+  if (IS_PAGES_BUILD) return null;
+  const match = SHORT_LINK_PATH_RE.exec(window.location.pathname);
+  return match ? match[1] : null;
+}
 
 // Always renders in GMT/UTC (not the visitor's local timezone) so the
 // timestamp reads the same for everyone, with the zone spelled out rather
@@ -170,6 +183,36 @@ function App() {
   useEffect(() => {
     trackPageview(window.location.hash || '#home');
   }, [route]);
+
+  // Resolves a /s/CODE short link client-side, entirely in the background -
+  // the address bar keeps showing the short link the whole time instead of
+  // ever expanding into a long `?share=` URL (see matchShortLinkCode/
+  // resolveShortCode). Skipped outright if a `?share=` link somehow already
+  // won (can't happen from a real link, just a defensive ordering).
+  useEffect(() => {
+    if (sharedBuild) return undefined;
+    const code = matchShortLinkCode();
+    if (!code) return undefined;
+
+    let cancelled = false;
+    (async () => {
+      const payload = await resolveShortCode(code);
+      const decoded = payload ? decodeShareBuild(payload) : null;
+      if (cancelled || !decoded) return;
+      setSharedBuild(decoded);
+      // history.replaceState never fires 'hashchange' (unlike a real
+      // navigation or a direct `location.hash =` assignment), so `route`
+      // has to be updated explicitly here too - otherwise the visible tab
+      // would silently stay stuck on 'home' despite the hash now saying
+      // #gear.
+      window.history.replaceState(null, '', `${window.location.pathname}#gear`);
+      setRoute('gear');
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function exitSharedView() {
     stripShareParam();

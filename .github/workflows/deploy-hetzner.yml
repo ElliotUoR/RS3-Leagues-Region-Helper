@@ -31,4 +31,6 @@ jobs:
             npm ci
             npm run build
             cd deploy
+            docker compose up -d postgres postgrest
+            docker compose run --rm --no-deps --build node node scripts/migrate.js
             docker compose up -d --build
