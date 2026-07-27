@@ -26,23 +26,29 @@ export async function createShortLink(payload) {
   return `${window.location.origin}${APP_BASE_PATH}s/${code}`;
 }
 
-// Resolves a short code back to its compressed build payload by calling
-// PostgREST's get_short_link_payload RPC directly (see
-// deploy/migrations/001_init.sql) - not the Node service. The Node service
-// no longer owns /s/:code at all (see App.jsx's short-link handling): the
-// short URL is served the SPA itself now, so the address bar keeps showing
-// the short link instead of expanding into a long `?share=` one, and this
-// is what resolves the code into an actual build once the app loads.
-// Returns null on any failure (unknown code, offline, backend down).
+// Resolves a short code back to its compressed build payload by calling one
+// of two PostgREST RPCs directly (see deploy/migrations/001_init.sql and
+// .../006_shortlink_untracked_lookup.sql) - not the Node service. The Node
+// service no longer owns /s/:code at all (see App.jsx's short-link
+// handling): the short URL is served the SPA itself now, so the address bar
+// keeps showing the short link instead of expanding into a long `?share=`
+// one, and this is what resolves the code into an actual build once the app
+// loads. Returns null on any failure (unknown code, offline, backend down).
+//
+// `untracked: true` (App.jsx passes this when fetchIsAdmin() says so) calls
+// the read-only variant that never touches click_count/last_clicked_at -
+// browsing your own share links from the admin panel shouldn't count as a
+// click (see 005_shortlink_clicks_and_ua.sql).
 //
 // PostgREST's exact JSON shape for a scalar-returning function varies by
 // version/config - a bare string (`"abc123"`), a single object
 // (`{"get_short_link_payload": "abc123"}`), or an array of one such object -
 // normalized down to the plain string (or null) here, mirroring what the
 // now-removed server-side callScalarRpc used to do.
-export async function resolveShortCode(code) {
+export async function resolveShortCode(code, { untracked = false } = {}) {
+  const rpcName = untracked ? 'get_short_link_payload_untracked' : 'get_short_link_payload';
   try {
-    const res = await fetch(`${APP_BASE_PATH}rest/rpc/get_short_link_payload`, {
+    const res = await fetch(`${APP_BASE_PATH}rest/rpc/${rpcName}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ p_code: code }),
@@ -89,8 +95,11 @@ export function trackPageview(path) {
 
 // The admin session cookie is httpOnly (can't be read from JS directly, by
 // design), so this is the only way the frontend can know "is the current
-// visitor logged in as admin" - used only to show a "logged in as admin"
-// badge (see useIsAdmin.js), never to gate anything security-sensitive.
+// visitor logged in as admin" - used to show a "logged in as admin" badge
+// (see useIsAdmin.js) and to pick the untracked short-link lookup in App.jsx
+// (see resolveShortCode above). Never used to gate anything
+// security-sensitive - worst case of a false answer either way is a wrong
+// badge or one extra/missing click-count tick, nothing access-controlled.
 // Returns false on any failure (offline, GitHub Pages with no backend, etc).
 export async function fetchIsAdmin() {
   try {

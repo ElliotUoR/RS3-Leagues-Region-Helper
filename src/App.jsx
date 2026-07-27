@@ -14,7 +14,7 @@ import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
-import { resolveShortCode, trackPageview } from './utils/api';
+import { fetchIsAdmin, resolveShortCode, trackPageview } from './utils/api';
 import { IS_PAGES_BUILD, PAGES_MIGRATION_DISMISSED_KEY } from './utils/deployTarget';
 import versionInfo from './data/version.json';
 
@@ -198,7 +198,13 @@ function App() {
 
     let cancelled = false;
     (async () => {
-      const payload = await resolveShortCode(code);
+      // Checked here (rather than reusing the isAdmin badge state above)
+      // so this effect doesn't have to wait on that separate one settling -
+      // browsing your own share links from the admin panel shouldn't bump
+      // their click_count (see utils/api.js's resolveShortCode).
+      const untracked = await fetchIsAdmin();
+      if (cancelled) return;
+      const payload = await resolveShortCode(code, { untracked });
       const decoded = payload ? decodeShareBuild(payload) : null;
       if (cancelled || !decoded) return;
       setSharedBuild(decoded);
