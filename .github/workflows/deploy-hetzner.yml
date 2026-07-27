@@ -4,6 +4,13 @@ name: Deploy to Hetzner
 # self-hosted jellyflow.xyz/Leagues instance. See docs/deployment.md
 # section 11 for the one-time server-side setup this depends on (a
 # dedicated `deploy` user + SSH key, shared with the JellyFlow repo).
+#
+# Split into separate named steps (rather than one big SSH script) so a
+# failure is immediately visible as *which* stage broke in the Actions UI,
+# and so GitHub Actions stops automatically before any later, dependent
+# step runs (each `uses: appleboy/ssh-action` step below fails the job on
+# a non-zero exit from its script - `set -e` inside each script ensures the
+# first failing command is what actually produces that exit code).
 
 on:
   push:
@@ -18,7 +25,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH in and re-deploy
+      - name: Pull latest code and build frontend
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.HETZNER_HOST }}
@@ -30,10 +37,44 @@ jobs:
             git pull
             npm ci
             npm run build
-            cd deploy
+
+      # Runs before the stack is rebuilt, on purpose - new application code
+      # that depends on a new column/table must never start against a
+      # database that doesn't have it yet. A failure here stops the job
+      # immediately: the currently-running containers are left untouched,
+      # so a broken migration degrades to "still running yesterday's code"
+      # rather than "half-deployed and broken".
+      - name: Run database migrations
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_DEPLOY_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/rs3-site/deploy
             docker compose up -d postgres postgrest
             docker compose run --rm --no-deps --build node node scripts/migrate.js
+
+      - name: Deploy updated stack
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_DEPLOY_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/rs3-site/deploy
             docker compose up -d --build
-            cp Caddyfile.snippet /opt/caddy-shared/conf.d/leagues.caddy
+
+      - name: Reload Caddy routing
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_DEPLOY_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -e
+            cp /opt/rs3-site/deploy/Caddyfile.snippet /opt/caddy-shared/conf.d/leagues.caddy
             cd /opt/livekit
             docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile

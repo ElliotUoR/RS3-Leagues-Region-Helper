@@ -61,11 +61,12 @@ shortenRouter.post('/api/shorten', async (req, res) => {
       return res.status(201).json({ code });
     }
 
-    // The conflict could be a plain code collision (retry with a new
-    // code, same as always) or another request for this exact same
-    // payload winning a race against the lookup above - re-check rather
-    // than assuming, otherwise a genuine race would retry forever against
-    // the unique payload_hash index instead of ever succeeding.
+    // payload_hash isn't a unique index (see 004_short_link_dedup.sql for
+    // why - some pre-existing rows already share a payload), so a conflict
+    // here can only be a plain `code` collision. Re-checking for a raced
+    // duplicate is technically no longer reachable via a genuine race on
+    // this exact payload (nothing would 409 on payload_hash alone), but
+    // it's a cheap no-op in the common case and still correct, so it stays.
     const racedCode = await callScalarRpc('get_short_code_for_payload_hash', { p_hash: payloadHash });
     if (racedCode) {
       return res.status(200).json({ code: racedCode });
