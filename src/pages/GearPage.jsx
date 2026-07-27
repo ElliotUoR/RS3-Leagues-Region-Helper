@@ -293,122 +293,126 @@ export default function GearPage({
         </div>
 
         <div className="gear-layout">
-          <div className="equip-grid" style={{ gridTemplateAreas: SLOT_GRID_AREAS }}>
-            {eofVisible && (
-              <EquipmentSlot
-                slotId="eof"
-                label="EOF"
-                item={eofWeapon}
-                isActive={activeSlot === 'eof'}
-                onSelect={selectSlot}
-                miniIcon={equipped.neck?.icon}
+          <div className="gear-layout-left">
+            <div className="equip-grid" style={{ gridTemplateAreas: SLOT_GRID_AREAS }}>
+              {eofVisible && (
+                <EquipmentSlot
+                  slotId="eof"
+                  label="EOF"
+                  item={eofWeapon}
+                  isActive={activeSlot === 'eof'}
+                  onSelect={selectSlot}
+                  miniIcon={equipped.neck?.icon}
+                />
+              )}
+              {Object.keys(SLOT_LABELS).map((slotId) => (
+                <EquipmentSlot
+                  key={slotId}
+                  slotId={slotId}
+                  label={SLOT_LABELS[slotId]}
+                  item={equipped[slotId]}
+                  isActive={activeSlot === slotId}
+                  onSelect={selectSlot}
+                  disabled={slotId === 'offhand' && offhandBlocked}
+                />
+              ))}
+            </div>
+
+            <GearStatsSummary equipped={equipped} />
+          </div>
+
+          <div className="gear-item-list">
+            <div className="gear-item-list-header">
+              <h3>{activeSlotLabel} - {STYLE_LABELS[style]}</h3>
+              <input
+                type="search"
+                className="gear-search"
+                placeholder="Search items…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                disabled={activeSlot === 'offhand' && offhandBlocked}
               />
+            </div>
+
+            <div className="gear-item-list-controls">
+              <div className="sort-tabs" role="tablist" aria-label="Sort by">
+                {visibleSortOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={sortBy === opt.id}
+                    className={`sort-tab${sortBy === opt.id ? ' active' : ''}`}
+                    onClick={() => setSortBy(opt.id)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <div className="gear-item-list-toggles">
+                <label className="hide-locked-toggle">
+                  <input
+                    type="checkbox"
+                    checked={hideLocked}
+                    onChange={(e) => setHideLocked(e.target.checked)}
+                  />
+                  <span>Hide region-locked items</span>
+                </label>
+                <label className="compact-mode-toggle">
+                  <input
+                    type="checkbox"
+                    checked={compactMode}
+                    onChange={(e) => setCompactMode(e.target.checked)}
+                  />
+                  <span>Compact mode</span>
+                </label>
+              </div>
+            </div>
+
+            {activeSlot === 'offhand' && offhandBlocked && (
+              <p className="gear-notice">Your two-handed weapon blocks the off-hand slot.</p>
             )}
-            {Object.keys(SLOT_LABELS).map((slotId) => (
-              <EquipmentSlot
-                key={slotId}
-                slotId={slotId}
-                label={SLOT_LABELS[slotId]}
-                item={equipped[slotId]}
-                isActive={activeSlot === slotId}
-                onSelect={selectSlot}
-                disabled={slotId === 'offhand' && offhandBlocked}
-              />
-            ))}
-          </div>
 
-          <GearStatsSummary equipped={equipped} />
-        </div>
-
-        <div className="gear-item-list">
-          <div className="gear-item-list-header">
-            <h3>{activeSlotLabel} - {STYLE_LABELS[style]}</h3>
-            <input
-              type="search"
-              className="gear-search"
-              placeholder="Search items…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              disabled={activeSlot === 'offhand' && offhandBlocked}
-            />
-          </div>
-
-          <div className="gear-item-list-controls">
-            <div className="sort-tabs" role="tablist" aria-label="Sort by">
-              {visibleSortOptions.map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={sortBy === opt.id}
-                  className={`sort-tab${sortBy === opt.id ? ' active' : ''}`}
-                  onClick={() => setSortBy(opt.id)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-            <div className="gear-item-list-toggles">
-              <label className="hide-locked-toggle">
-                <input
-                  type="checkbox"
-                  checked={hideLocked}
-                  onChange={(e) => setHideLocked(e.target.checked)}
-                />
-                <span>Hide region-locked items</span>
-              </label>
-              <label className="compact-mode-toggle">
-                <input
-                  type="checkbox"
-                  checked={compactMode}
-                  onChange={(e) => setCompactMode(e.target.checked)}
-                />
-                <span>Compact mode</span>
-              </label>
+            <div className="gear-item-list-scroll">
+              {displayItems.length > 0 && (
+                <div className={`gear-item-rows${compactMode ? ' compact' : ''}`}>
+                  {displayItems.map((item) => (
+                    <GearItemRow
+                      key={item.name}
+                      item={item}
+                      style={style}
+                      equipped={
+                        activeSlot === 'eof'
+                          ? eofWeapon?.name === item.name
+                          : equipped[activeSlot]?.name === item.name
+                      }
+                      available={isItemAvailable(item)}
+                      isUnlocked={isUnlocked}
+                      onToggle={activeSlot === 'eof' ? toggleEofWeapon : toggleItem}
+                      showSpecialAttack={activeSlot === 'eof'}
+                      compact={compactMode}
+                    />
+                  ))}
+                </div>
+              )}
+              {displayItems.length === 0 && hideLocked && slotHasAnyItems && (
+                <p className="gear-empty">
+                  All {STYLE_LABELS[style].toLowerCase()} items for this slot are locked. Turn off
+                  "Hide region-locked items" to see them.
+                </p>
+              )}
+              {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && activeSlot === 'eof' && (
+                <p className="gear-empty">
+                  No {STYLE_LABELS[style].toLowerCase()} weapons with a special attack exist for this slot.
+                </p>
+              )}
+              {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && activeSlot !== 'eof' && (
+                <p className="gear-empty">
+                  No {STYLE_LABELS[style].toLowerCase()} items exist for this slot.
+                </p>
+              )}
             </div>
           </div>
-
-          {activeSlot === 'offhand' && offhandBlocked && (
-            <p className="gear-notice">Your two-handed weapon blocks the off-hand slot.</p>
-          )}
-
-          {displayItems.length > 0 && (
-            <div className={`gear-item-rows${compactMode ? ' compact' : ''}`}>
-              {displayItems.map((item) => (
-                <GearItemRow
-                  key={item.name}
-                  item={item}
-                  style={style}
-                  equipped={
-                    activeSlot === 'eof'
-                      ? eofWeapon?.name === item.name
-                      : equipped[activeSlot]?.name === item.name
-                  }
-                  available={isItemAvailable(item)}
-                  isUnlocked={isUnlocked}
-                  onToggle={activeSlot === 'eof' ? toggleEofWeapon : toggleItem}
-                  showSpecialAttack={activeSlot === 'eof'}
-                  compact={compactMode}
-                />
-              ))}
-            </div>
-          )}
-          {displayItems.length === 0 && hideLocked && slotHasAnyItems && (
-            <p className="gear-empty">
-              All {STYLE_LABELS[style].toLowerCase()} items for this slot are locked. Turn off
-              "Hide region-locked items" to see them.
-            </p>
-          )}
-          {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && activeSlot === 'eof' && (
-            <p className="gear-empty">
-              No {STYLE_LABELS[style].toLowerCase()} weapons with a special attack exist for this slot.
-            </p>
-          )}
-          {displayItems.length === 0 && !(hideLocked && slotHasAnyItems) && activeSlot !== 'eof' && (
-            <p className="gear-empty">
-              No {STYLE_LABELS[style].toLowerCase()} items exist for this slot.
-            </p>
-          )}
         </div>
       </main>
     </>

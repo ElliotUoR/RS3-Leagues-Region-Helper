@@ -1073,6 +1073,19 @@ main.gear-page {
   }
 }
 
+/* Equip-grid width: 3 * 64px slots + 2 * 6px gaps + 2 * 16px padding = 236px.
+   Fixed here (rather than left to shrink-wrap) so the Loadout panel below it
+   is forced to the same width regardless of its own content (the stats
+   table would otherwise want to be wider) - "same horizontal length as gear
+   slots" per the gear-planning-revamp brief. */
+.gear-layout-left {
+  display: flex;
+  flex-direction: column;
+  width: 236px;
+  flex-shrink: 0;
+  gap: 24px;
+}
+
 .equip-grid {
   display: grid;
   grid-template-columns: repeat(3, 64px);
@@ -1201,17 +1214,25 @@ main.gear-page {
   padding: 3px 0;
 }
 
+.gear-stats-table-scroll {
+  /* Safety net, not the primary fit strategy - the table's own sizing
+     below is meant to fit the panel's fixed 236px width outright, this
+     just prevents a hard clip if it doesn't quite make it (e.g. unusual
+     font metrics). */
+  overflow-x: auto;
+}
+
 .gear-stats-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 12px;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .gear-stats-table th,
 .gear-stats-table td {
   text-align: right;
-  padding: 3px 4px;
+  padding: 3px 2px;
   border-top: 1px solid var(--border);
 }
 
@@ -1222,7 +1243,27 @@ main.gear-page {
 }
 
 .gear-item-list {
-  margin-top: 24px;
+  min-width: 0;
+}
+
+/* Self-contained scrollbox: the header/controls/notice stay pinned in normal
+   flow, only .gear-item-list-scroll grows a scrollbar once its content
+   exceeds the fixed viewport-relative height. Desktop only, per the
+   gear-planning-revamp brief - mobile (<=700px) keeps the pre-revamp
+   behaviour untouched: the whole page just scrolls normally. */
+@media (min-width: 701px) {
+  .gear-item-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 78vh;
+  }
+
+  .gear-item-list-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
 }
 
 .gear-item-list-header {

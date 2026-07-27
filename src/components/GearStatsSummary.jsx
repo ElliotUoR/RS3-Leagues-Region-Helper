@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 
 const ATTACK_STYLES = ['stab', 'slash', 'crush', 'magic', 'ranged'];
 
+// Abbreviated so the table fits the panel's narrow fixed width (matches the
+// equip-grid's width, per the gear-planning-revamp brief) without wrapping
+// or clipping the last column.
+const ATTACK_STYLE_LABELS = { stab: 'Stb', slash: 'Sla', crush: 'Cru', magic: 'Mag', ranged: 'Rng' };
+
 // `damage`/`accuracy` are flat rating numbers on every item type, not
 // percentages. Weapon/offhand/ammo ratings are on a much larger numeric
 // scale than armour/accessory ratings, so they're still tracked separately
@@ -119,32 +124,32 @@ export default function GearStatsSummary({ equipped }) {
             <strong>+{totals.prayerBonus}</strong>
           </div>
 
-          <table className="gear-stats-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Stab</th>
-                <th>Slash</th>
-                <th>Crush</th>
-                <th>Magic</th>
-                <th>Ranged</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Attack</td>
-                {ATTACK_STYLES.map((k) => (
-                  <td key={k}>{totals.attack[k].toFixed(1)}</td>
-                ))}
-              </tr>
-              <tr>
-                <td>Defence</td>
-                {ATTACK_STYLES.map((k) => (
-                  <td key={k}>{totals.defence[k].toFixed(1)}</td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+          <div className="gear-stats-table-scroll">
+            <table className="gear-stats-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  {ATTACK_STYLES.map((k) => (
+                    <th key={k} title={k}>{ATTACK_STYLE_LABELS[k]}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Attack</td>
+                  {ATTACK_STYLES.map((k) => (
+                    <td key={k}>{totals.attack[k].toFixed(1)}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td>Defence</td>
+                  {ATTACK_STYLES.map((k) => (
+                    <td key={k}>{totals.defence[k].toFixed(1)}</td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </div>
