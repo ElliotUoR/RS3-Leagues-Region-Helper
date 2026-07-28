@@ -4,6 +4,7 @@ import AssumptionsPage from './pages/AssumptionsPage';
 import GearPage from './pages/GearPage';
 import HomePage from './pages/HomePage';
 import RelicsPage from './pages/RelicsPage';
+import LeagueRelicsPage from './pages/LeagueRelicsPage';
 import SpellbooksPage from './pages/SpellbooksPage';
 import ReportIssueButton from './components/ReportIssueButton';
 import ReportIssueModal from './components/ReportIssueModal';
@@ -12,6 +13,7 @@ import PagesMigrationModal from './components/PagesMigrationModal';
 import { GATEWAY_STORAGE_KEY, REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
+import { LEAGUE_RELICS_STORAGE_KEY, useLeagueRelicSelection } from './hooks/useLeagueRelicSelection';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
 import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
@@ -53,6 +55,7 @@ function currentRoute() {
   if (window.location.hash === '#gear') return 'gear';
   if (window.location.hash === '#abilities') return 'abilities';
   if (window.location.hash === '#relics') return 'relics';
+  if (window.location.hash === '#league-relics') return 'leagueRelics';
   if (window.location.hash === '#spellbooks') return 'spellbooks';
   if (window.location.hash === '#assumptions') return 'assumptions';
   return 'home';
@@ -79,6 +82,10 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
     initialSelection: sharedBuild?.relics,
     persist: !sharedBuild,
   });
+  const { selected: selectedLeagueRelics, toggleLeagueRelic } = useLeagueRelicSelection({
+    initialSelection: sharedBuild?.leagueRelics,
+    persist: !sharedBuild,
+  });
 
   function handleAdopt() {
     window.localStorage.setItem(REGIONS_STORAGE_KEY, JSON.stringify(selected));
@@ -93,6 +100,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
       }),
     );
     window.localStorage.setItem(RELICS_STORAGE_KEY, JSON.stringify(selectedRelics));
+    window.localStorage.setItem(LEAGUE_RELICS_STORAGE_KEY, JSON.stringify(selectedLeagueRelics));
     stripShareParam();
     onAdopted();
   }
@@ -123,11 +131,17 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
         <a href="#gear" className={route === 'gear' ? 'active' : ''}>
           Gear Planner
         </a>
+        <a
+          href="#league-relics"
+          className={`league-relics-tab${route === 'leagueRelics' ? ' active' : ''}`}
+        >
+          League Relics
+        </a>
         <a href="#abilities" className={route === 'abilities' ? 'active' : ''}>
           Abilities
         </a>
         <a href="#relics" className={route === 'relics' ? 'active' : ''}>
-          Relics
+          Arch Relics
         </a>
         <a href="#spellbooks" className={route === 'spellbooks' ? 'active' : ''}>
           Spellbooks & Prayers
@@ -146,6 +160,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
           selected={selected}
           gatewaySelected={gatewaySelected}
           selectedRelics={selectedRelics}
+          selectedLeagueRelics={selectedLeagueRelics}
           {...gear}
         />
       )}
@@ -153,7 +168,15 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
       {route === 'relics' && (
         <RelicsPage isUnlocked={isUnlocked} selected={selectedRelics} toggleRelic={toggleRelic} />
       )}
-      {route === 'spellbooks' && <SpellbooksPage isUnlocked={isUnlocked} />}
+      {route === 'leagueRelics' && (
+        <LeagueRelicsPage selected={selectedLeagueRelics} toggleLeagueRelic={toggleLeagueRelic} />
+      )}
+      {route === 'spellbooks' && (
+        <SpellbooksPage
+          isUnlocked={isUnlocked}
+          hasCrystalGrace={selectedLeagueRelics.includes('Crystal Grace')}
+        />
+      )}
       {route === 'assumptions' && <AssumptionsPage />}
       {route === 'home' && (
         <HomePage

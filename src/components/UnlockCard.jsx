@@ -12,8 +12,18 @@ import { wikiContextMenuHandler } from '../utils/wiki';
 // marks a card rendered under a parent by UnlockCardGroup - shrinks it
 // slightly and adds an "Extends {parent}" badge instead of repeating the
 // parent's own region tags.
-export default function UnlockCard({ entry, isUnlocked, extension }) {
-  const available = isGearItemAvailable(entry, isUnlocked);
+//
+// `hasCrystalGrace` (spellbooks only - SpellbooksPage passes `undefined` on
+// the Prayers tab, never `false`) is a second, region-independent unlock
+// path: the Crystal Grace league relic's own effect text is "Unlocks all
+// Magic spells across all spellbooks", so any card that isn't already
+// globally available gets an extra "Crystal Grace" tag alongside its region
+// tags - unlit until the relic is actually picked, at which point it also
+// bypasses the region gate entirely (see `available` below).
+export default function UnlockCard({ entry, isUnlocked, extension, hasCrystalGrace }) {
+  const regionAvailable = isGearItemAvailable(entry, isUnlocked);
+  const showCrystalGraceTag = hasCrystalGrace !== undefined && entry.source?.region !== 'global';
+  const available = regionAvailable || Boolean(hasCrystalGrace);
   const multiIcon = entry.icons.length > 1;
   const classes = ['unlock-card', extension ? 'unlock-card-extension' : '', available ? '' : 'locked']
     .filter(Boolean)
@@ -30,7 +40,17 @@ export default function UnlockCard({ entry, isUnlocked, extension }) {
             </TagTooltip>
           )}
         </span>
-        <RegionTags item={entry} isUnlocked={isUnlocked} />
+        <span className="unlock-card-tags">
+          <RegionTags item={entry} isUnlocked={isUnlocked} />
+          {showCrystalGraceTag && (
+            <TagTooltip
+              className={`region-tag region-tag-crystal-grace${hasCrystalGrace ? ' region-tag-crystal-grace-unlocked' : ''}`}
+              tooltip="Crystal Grace (League Relic) unlocks every spellbook and spell, bypassing the usual region requirement."
+            >
+              Crystal Grace
+            </TagTooltip>
+          )}
+        </span>
       </div>
 
       <div className={`unlock-card-icons${multiIcon ? ' multi' : ''}`}>

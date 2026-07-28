@@ -1,5 +1,8 @@
 // Pseudo-region tags that are always considered "unlocked" regardless of
-// which real regions the player has selected.
+// which real regions the player has selected. 'relic' only falls back to
+// this for an item that doesn't say which specific league relic grants it -
+// see the `leagueRelic` field/isGearItemAvailable's `selectedLeagueRelics`
+// option below for the two (Seren's Crystal Tiara, Goldenhawk boots) that do.
 const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
 
 // Splits an item's `source.region` into an ordered list of AND-groups, where
@@ -22,10 +25,14 @@ const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
 // them as automatically satisfied. Artefact groups are always single-region
 // and carry an optional `note` with item-specific tooltip text (e.g. "skips
 // the Everlight dig site materials") instead of a hand-written `label` - the
-// UI derives the "Artefacts: X" label itself from the region id. Mirrors the
-// `region` conventions documented in gear.js:
+// UI derives the "Artefacts: X" label itself from the region id. A `region:
+// 'relic'` item additionally carries `source.leagueRelic` (e.g. 'Golden
+// Touch') when it's known which specific League Relic grants it - that
+// group then gates on `isGearItemAvailable`'s `selectedLeagueRelics` option
+// instead of the blanket-unlocked fallback every other 'relic' item still
+// gets. Mirrors the `region` conventions documented in gear.js:
 //   - undefined/null/'global' -> [{ regions: ['global'] }]
-//   - 'relic'                 -> [{ regions: ['relic'] }]
+//   - 'relic'                 -> [{ regions: ['relic'], leagueRelic? }]
 //   - a single region id      -> [{ regions: [regionId] }]
 //   - a plain array of region ids (combination item, AND) ->
 //       [{ regions: [id1] }, { regions: [id2] }, ...] - one single-region
@@ -40,7 +47,7 @@ const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
 export function normalizeRegionGroups(item) {
   const region = item.source?.region;
   if (!region || region === 'global') return [{ regions: ['global'] }];
-  if (region === 'relic') return [{ regions: ['relic'] }];
+  if (region === 'relic') return [{ regions: ['relic'], leagueRelic: item.source?.leagueRelic }];
   if (Array.isArray(region)) {
     return region.map((entry) => {
       if (typeof entry === 'string') return { regions: [entry] };
@@ -89,10 +96,18 @@ export function isGearItemImpossible(item) {
 // that dig-site artefact collection can be done remotely via Research
 // without visiting the dig site's own region, while a relic's collector
 // hand-in location (and any non-Archaeology component) still gates.
+//
+// `options.selectedLeagueRelics` (default []) is the player's current League
+// Relic picks (see hooks/useLeagueRelicSelection.js) - a group whose
+// `leagueRelic` is set is satisfied only by that exact pick being present,
+// regardless of region state (only GearPage.jsx passes this option; every
+// other caller's items are never tagged with `leagueRelic`, so this is a
+// no-op elsewhere).
 export function isGearItemAvailable(item, isUnlocked, options = {}) {
-  const { ignoreComponents = false, ignoreArtefactRegions = false } = options;
+  const { ignoreComponents = false, ignoreArtefactRegions = false, selectedLeagueRelics = [] } = options;
   if (isGearItemImpossible(item)) return false;
   return normalizeRegionGroups(item).every((group) => {
+    if (group.leagueRelic) return selectedLeagueRelics.includes(group.leagueRelic);
     if (ignoreComponents && group.component) return true;
     if (ignoreArtefactRegions && group.artefact) return true;
     return group.regions.some((r) => ALWAYS_UNLOCKED.has(r) || isUnlocked(r));

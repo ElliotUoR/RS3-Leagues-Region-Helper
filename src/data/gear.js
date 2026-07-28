@@ -538,13 +538,13 @@ const UNIVERSAL_ACCESSORIES = [
   { name: "Seren's Crystal Tiara", wikiName: 'Crystal grace', slot: 'head', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
     stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats - passive-only item: acts as an omni-tiara and demonhorn necklace.' },
     icon: "icons/Seren's_Crystal_Tiara.png",
-    source: { type: 'shop', shop: 'Obtained from picking Crystal Grace relic', region: 'relic' } },
+    source: { type: 'shop', shop: 'Obtained from picking Crystal Grace relic', region: 'relic', leagueRelic: 'Crystal Grace' } },
 
   // FEET
   { name: 'Goldenhawk boots', slot: 'feet', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
     stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats - passive-only item: grants Agility XP periodically while running, skilling, or using ultimate abilities.' },
     icon: 'icons/Goldenhawk_boots.png',
-    source: { type: 'shop', shop: '"Golden Footed" Tier 1 Leagues relic', region: 'relic' } },
+    source: { type: 'shop', shop: '"Golden Touch" Tier 1 Leagues relic', region: 'relic', leagueRelic: 'Golden Touch' } },
   { name: 'Max cape', slot: 'back', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: { skill: 'All skills', level: 99, note: 'Requires level 99 in all 29 skills (2,871 total level) to unlock the ability to buy/wear it.' },
     stats: { damage: 30, accuracy: 0, lifeBonus: 100, prayerBonus: 5, setEffect: 'Armour 44.5. True all-style hybrid: the +30.0 damage bonus applies simultaneously to melee, ranged, magic, and necromancy (unlike the Igneous Kal-Zuk pattern, no separate per-style variants exist). Also grants 3 equippable Max Guild perk slots and cosmetic emotes/overrides.' },
     icon: 'icons/Max_cape.png',

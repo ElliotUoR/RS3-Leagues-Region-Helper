@@ -52,7 +52,17 @@ const TOOLTIP_CURSOR_GAP = 18;
 const TOOLTIP_MAX_WIDTH = 220;
 const VIEWPORT_MARGIN = 8;
 
-export default function GearItemRow({ item, style, equipped, available, isUnlocked, onToggle, showSpecialAttack, compact }) {
+export default function GearItemRow({
+  item,
+  style,
+  equipped,
+  available,
+  isUnlocked,
+  selectedLeagueRelics,
+  onToggle,
+  showSpecialAttack,
+  compact,
+}) {
   const [hoverPos, setHoverPos] = useState(null);
   const classes = [
     'gear-item-row',
@@ -114,7 +124,7 @@ export default function GearItemRow({ item, style, equipped, available, isUnlock
             {item.name}
             {item.twoHanded && <span className="gear-item-tag-2h">2H</span>}
           </span>
-          <RegionTags item={item} isUnlocked={isUnlocked} />
+          <RegionTags item={item} isUnlocked={isUnlocked} selectedLeagueRelics={selectedLeagueRelics} />
         </button>
         {!available && (
           <button
@@ -162,7 +172,7 @@ export default function GearItemRow({ item, style, equipped, available, isUnlock
             {item.name}
             {item.twoHanded && <span className="gear-item-tag-2h">2H</span>}
           </span>
-          <RegionTags item={item} isUnlocked={isUnlocked} />
+          <RegionTags item={item} isUnlocked={isUnlocked} selectedLeagueRelics={selectedLeagueRelics} />
         </div>
         <div className="gear-item-bottom">
           <RetryImage src={item.icon} alt="" loading="eager" />

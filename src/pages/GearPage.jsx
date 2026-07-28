@@ -69,6 +69,7 @@ export default function GearPage({
   selected,
   gatewaySelected,
   selectedRelics,
+  selectedLeagueRelics,
   style,
   setStyle,
   defaultStyle,
@@ -104,10 +105,10 @@ export default function GearPage({
     if (activeSlot === 'offhand' && offhandBlocked) return false;
     if (activeSlot === 'eof') {
       if (eofWeapon?.name === item.name) return true;
-      return isGearItemAvailable(item, isUnlocked);
+      return isGearItemAvailable(item, isUnlocked, { selectedLeagueRelics });
     }
     if (equipped[activeSlot]?.name === item.name) return true;
-    return isGearItemAvailable(item, isUnlocked);
+    return isGearItemAvailable(item, isUnlocked, { selectedLeagueRelics });
   }
 
   const displayItems = useMemo(() => {
@@ -126,7 +127,7 @@ export default function GearPage({
     const available = matched.filter((item) => isItemAvailable(item));
     const locked = hideLocked ? [] : matched.filter((item) => !isItemAvailable(item));
     return [...sortItems(available, sortBy, style), ...sortItems(locked, sortBy, style)];
-  }, [style, activeSlot, search, sortBy, isUnlocked, offhandBlocked, equipped, eofWeapon, hideLocked]);
+  }, [style, activeSlot, search, sortBy, isUnlocked, offhandBlocked, equipped, eofWeapon, hideLocked, selectedLeagueRelics]);
 
   // Only offer sort tabs for stats this slot's items actually carry (e.g. no
   // "Acc" tab for a pure armour slot where every item's accuracy is 0) -
@@ -162,6 +163,7 @@ export default function GearPage({
       equippedNamesByStyle,
       eofWeaponNamesByStyle,
       relics: selectedRelics,
+      leagueRelics: selectedLeagueRelics,
       defaultStyle,
     });
     try {
@@ -204,6 +206,7 @@ export default function GearPage({
         equippedNamesByStyle,
         eofWeaponNamesByStyle,
         relics: selectedRelics,
+        leagueRelics: selectedLeagueRelics,
         defaultStyle: effectiveDefaultStyle,
       });
       const url = await createShortLink(payload);
@@ -403,6 +406,7 @@ export default function GearPage({
                       }
                       available={isItemAvailable(item)}
                       isUnlocked={isUnlocked}
+                      selectedLeagueRelics={selectedLeagueRelics}
                       onToggle={activeSlot === 'eof' ? toggleEofWeapon : toggleItem}
                       showSpecialAttack={activeSlot === 'eof'}
                       compact={compactMode}

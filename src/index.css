@@ -107,6 +107,29 @@ h1, h2, h3 {
   border-bottom-color: var(--accent);
 }
 
+/* League Relics gets its own gold-bordered "featured" look instead of the
+   plain underline every other tab uses - `border` (not just border-bottom)
+   overrides the base rule's bottom-only border on every side, so this is a
+   real pill/box, not an underline. */
+.site-nav a.league-relics-tab {
+  border: 1px solid #d4af37;
+  border-radius: 6px;
+  margin-bottom: 0;
+  color: #a9791a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .site-nav a.league-relics-tab {
+    color: #e0c15c;
+  }
+}
+
+.site-nav a.league-relics-tab.active {
+  background: color-mix(in srgb, #d4af37 18%, transparent);
+  color: var(--text-h);
+  border-color: #d4af37;
+}
+
 .site-footer {
   margin-top: 48px;
   padding-top: 16px;
@@ -1654,10 +1677,67 @@ main.abilities-page .gear-item-rows {
   border-color: color-mix(in srgb, #2f7dd6 45%, var(--border));
 }
 
+/* League Relics only (more specific than the shared rule above, so this
+   wins for anything carrying both classes) - gold selection matches the
+   nav tab's own gold treatment, kept distinct from Arch relics' blue. */
+.league-relic-row.selected {
+  background: color-mix(in srgb, #d4af37 10%, var(--panel-bg));
+  border-color: color-mix(in srgb, #d4af37 55%, var(--border));
+}
+
 .relic-pick-count {
   font-size: 13px;
   opacity: 0.7;
   margin: 12px 0;
+}
+
+/* League Relic page */
+
+.league-relic-tier-group {
+  margin-bottom: 28px;
+}
+
+.league-relic-tier-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.league-relic-tier-note {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.65;
+}
+
+.league-relic-row .gear-item-bottom {
+  align-items: flex-start;
+}
+
+.league-relic-icon-placeholder {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.league-relic-effects {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--relic-effect-color, #2f7dd6);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .league-relic-effects {
+    color: var(--relic-effect-color, #7fb3f0);
+  }
 }
 
 .retry-image {
@@ -1942,6 +2022,45 @@ main.abilities-page .gear-item-rows {
   border: 1px dashed color-mix(in srgb, var(--artefact-color) 55%, transparent);
 }
 
+/* Gear granted by a specific League Relic (Seren's Crystal Tiara,
+   Goldenhawk boots - see the `leagueRelic` field in gear.js) - same gold as
+   the generic "★ Relic" tag color, since this is still fundamentally a
+   relic-sourced item, just naming exactly which one. */
+.region-tag-league-relic {
+  background: var(--bg);
+  color: var(--text);
+  opacity: 0.5;
+  border: 1px dashed var(--border);
+  cursor: help;
+}
+
+.region-tag-league-relic-unlocked {
+  --league-relic-color: #c9962e;
+  opacity: 1;
+  background: color-mix(in srgb, var(--league-relic-color) 18%, transparent);
+  color: var(--league-relic-color);
+  border: 1px dashed color-mix(in srgb, var(--league-relic-color) 55%, transparent);
+}
+
+/* Crystal Grace tag (Spellbooks tab only - see UnlockCard.jsx) - a second,
+   region-independent unlock path, so styled distinctly from the region tags
+   it sits alongside rather than reusing a region's own color. */
+.region-tag-crystal-grace {
+  background: var(--bg);
+  color: var(--text);
+  opacity: 0.5;
+  border: 1px dashed var(--border);
+  cursor: help;
+}
+
+.region-tag-crystal-grace-unlocked {
+  --crystal-grace-color: #2dd4bf;
+  opacity: 1;
+  background: color-mix(in srgb, var(--crystal-grace-color) 18%, transparent);
+  color: var(--crystal-grace-color);
+  border: 1px dashed color-mix(in srgb, var(--crystal-grace-color) 55%, transparent);
+}
+
 .region-tag-impossible {
   font-size: 10px;
   font-weight: 600;
@@ -1980,6 +2099,18 @@ main.abilities-page .gear-item-rows {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+}
+
+/* Wraps RegionTags plus the optional Crystal Grace tag as one flex item, so
+   justify-content: space-between above always sees exactly two children
+   (name, tags) regardless of how many tags end up inside this one. */
+.unlock-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .unlock-card-name {

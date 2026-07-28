@@ -24,8 +24,9 @@ const gearFile = path.join(root, 'src', 'data', 'gear.js');
 const regionsFile = path.join(root, 'src', 'data', 'regions.js');
 const abilitiesFile = path.join(root, 'src', 'data', 'abilities.js');
 const relicsFile = path.join(root, 'src', 'data', 'relics.js');
+const leagueRelicsFile = path.join(root, 'src', 'data', 'leagueRelics.js');
 const spellbooksFile = path.join(root, 'src', 'data', 'spellbooks.js');
-const dataFiles = [gearFile, regionsFile, abilitiesFile, relicsFile, spellbooksFile];
+const dataFiles = [gearFile, regionsFile, abilitiesFile, relicsFile, leagueRelicsFile, spellbooksFile];
 
 // Note: apostrophes are intentionally allowed in the URL body - some entries
 // are double-quoted strings with a literal (unescaped) apostrophe in the URL

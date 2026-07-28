@@ -54,7 +54,26 @@ function ArtefactPill({ regionId, note, isUnlocked }) {
   );
 }
 
-function RegionGroupPill({ group, isUnlocked }) {
+// A `region: 'relic'` item that names the specific League Relic that grants
+// it (see the `leagueRelic` field docs in gearAvailability.js) - gates on
+// that exact pick rather than always showing unlocked, unlike a plain
+// 'relic' item with no relic named.
+function LeagueRelicPill({ relicName, selectedLeagueRelics }) {
+  const unlocked = selectedLeagueRelics.includes(relicName);
+  return (
+    <TagTooltip
+      className={`region-tag region-tag-league-relic${unlocked ? ' region-tag-league-relic-unlocked' : ''}`}
+      tooltip={`Requires picking the ${relicName} League Relic.`}
+    >
+      ★ {relicName}
+    </TagTooltip>
+  );
+}
+
+function RegionGroupPill({ group, isUnlocked, selectedLeagueRelics }) {
+  if (group.leagueRelic) {
+    return <LeagueRelicPill relicName={group.leagueRelic} selectedLeagueRelics={selectedLeagueRelics} />;
+  }
   if (group.artefact) {
     return <ArtefactPill regionId={group.regions[0]} note={group.note} isUnlocked={isUnlocked} />;
   }
@@ -69,7 +88,7 @@ function RegionGroupPill({ group, isUnlocked }) {
   ));
 }
 
-export default function RegionTags({ item, isUnlocked }) {
+export default function RegionTags({ item, isUnlocked, selectedLeagueRelics = [] }) {
   if (isGearItemImpossible(item)) {
     return (
       <span className="region-tags">
@@ -91,7 +110,7 @@ export default function RegionTags({ item, isUnlocked }) {
         // eslint-disable-next-line react/no-array-index-key
         <span className="region-tag-group" key={groupIndex}>
           {groupIndex > 0 && <span className="region-tag-and">+</span>}
-          <RegionGroupPill group={group} isUnlocked={isUnlocked} />
+          <RegionGroupPill group={group} isUnlocked={isUnlocked} selectedLeagueRelics={selectedLeagueRelics} />
         </span>
       ))}
       {item.source?.softRegion && (
