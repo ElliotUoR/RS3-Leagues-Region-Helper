@@ -5,18 +5,25 @@ import GearPage from './pages/GearPage';
 import HomePage from './pages/HomePage';
 import RelicsPage from './pages/RelicsPage';
 import LeagueRelicsPage from './pages/LeagueRelicsPage';
+import RelicImportDocsPage from './pages/RelicImportDocsPage';
 import SpellbooksPage from './pages/SpellbooksPage';
 import ReportIssueButton from './components/ReportIssueButton';
 import ReportIssueModal from './components/ReportIssueModal';
 import ReportIssueUnavailableModal from './components/ReportIssueUnavailableModal';
 import PagesMigrationModal from './components/PagesMigrationModal';
+import ImportRelicsModal from './components/ImportRelicsModal';
 import { GATEWAY_STORAGE_KEY, REGIONS_STORAGE_KEY, useRegionSelection } from './hooks/useRegionSelection';
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
-import { LEAGUE_RELICS_STORAGE_KEY, useLeagueRelicSelection } from './hooks/useLeagueRelicSelection';
+import {
+  LEAGUE_RELICS_STORAGE_KEY,
+  sanitizeLeagueRelicSelectionLoose,
+  useLeagueRelicSelection,
+} from './hooks/useLeagueRelicSelection';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
 import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
+import { parseImportRelicsParam, stripImportRelicsParam } from './utils/importRelics';
 import { fetchIsAdmin, resolveShortCode, trackPageview } from './utils/api';
 import { IS_PAGES_BUILD, PAGES_MIGRATION_DISMISSED_KEY } from './utils/deployTarget';
 import versionInfo from './data/version.json';
@@ -56,6 +63,7 @@ function currentRoute() {
   if (window.location.hash === '#abilities') return 'abilities';
   if (window.location.hash === '#relics') return 'relics';
   if (window.location.hash === '#league-relics') return 'leagueRelics';
+  if (window.location.hash === '#relic-import-docs') return 'relicImportDocs';
   if (window.location.hash === '#spellbooks') return 'spellbooks';
   if (window.location.hash === '#assumptions') return 'assumptions';
   return 'home';
@@ -66,7 +74,7 @@ function currentRoute() {
 // fully remounts this subtree - the hooks re-run their seed logic from
 // scratch (re-reading real localStorage on exit, or re-seeding from the
 // shared payload on entry) instead of carrying over stale in-memory state.
-function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportIssue }) {
+function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, onAdopted, onOpenReportIssue }) {
   const { selected, gatewaySelected, toggleRegion, isUnlocked, overLimit, clearRegions } = useRegionSelection({
     initialSelection: sharedBuild?.regions,
     initialGatewaySelection: sharedBuild?.gatewaySelected,
@@ -82,8 +90,16 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
     initialSelection: sharedBuild?.relics,
     persist: !sharedBuild,
   });
+  // `importedLeagueRelics` (a ?import-relics= import, see App()'s effect
+  // below) is threaded in as an initial value exactly like `sharedBuild`'s
+  // fields are, rather than written to localStorage and read back after a
+  // remount - reading back through storage raced this same hook's own
+  // persist-effect on the *previous* AppContent instance, which could still
+  // fire once more (with its stale, pre-import `selected`) before that old
+  // instance actually unmounted, clobbering the import. Handing the value
+  // straight to the fresh instance's initial state has no such window.
   const { selected: selectedLeagueRelics, toggleLeagueRelic } = useLeagueRelicSelection({
-    initialSelection: sharedBuild?.leagueRelics,
+    initialSelection: sharedBuild?.leagueRelics ?? importedLeagueRelics,
     persist: !sharedBuild,
   });
 
@@ -171,6 +187,7 @@ function AppContent({ route, sharedBuild, onExitShared, onAdopted, onOpenReportI
       {route === 'leagueRelics' && (
         <LeagueRelicsPage selected={selectedLeagueRelics} toggleLeagueRelic={toggleLeagueRelic} />
       )}
+      {route === 'relicImportDocs' && <RelicImportDocsPage />}
       {route === 'spellbooks' && (
         <SpellbooksPage
           isUnlocked={isUnlocked}
@@ -198,6 +215,18 @@ function App() {
   const [migrationOpen, setMigrationOpen] = useState(
     () => IS_PAGES_BUILD && !window.localStorage.getItem(PAGES_MIGRATION_DISMISSED_KEY),
   );
+  const [importedRelicsCount, setImportedRelicsCount] = useState(null);
+  // Set by a ?import-relics= import (see the effect below) and threaded into
+  // AppContent as an initial value, same as sharedBuild's fields - see the
+  // comment on useLeagueRelicSelection's call in AppContent for why this
+  // isn't just written to localStorage directly.
+  const [importedLeagueRelics, setImportedLeagueRelics] = useState(null);
+  // Bumped alongside importedLeagueRelics to force AppContent to remount -
+  // its hooks only ever consult their `initialSelection` prop once, on their
+  // own initial mount, so a prop change alone wouldn't otherwise be picked
+  // up. Folded into AppContent's `key` alongside the existing shared/own
+  // toggle rather than replacing it.
+  const [contentGeneration, setContentGeneration] = useState(0);
   const isAdmin = useIsAdmin();
   // Called once here rather than inside each modal that displays it - see
   // useLiveSiteUrl.js for why that used to create duplicate short links.
@@ -257,6 +286,30 @@ function App() {
     };
   }, []);
 
+  // Cross-site League Relics import (see utils/importRelics.js) - entirely
+  // synchronous and client-side, unlike short-link resolution above: there's
+  // no backend round-trip, since the imported names are already the whole
+  // payload. Writes straight into this visitor's real, persisted League
+  // Relics selection rather than staging a `sharedBuild`-style preview -
+  // that's the whole point of this API being different from `?share=` (see
+  // the file header comment there). Skipped if a `?share=` link somehow
+  // already won, same defensive ordering as short-link resolution above.
+  useEffect(() => {
+    if (sharedBuild) return;
+    const names = parseImportRelicsParam();
+    if (!names) return;
+
+    const sanitized = sanitizeLeagueRelicSelectionLoose(names);
+    stripImportRelicsParam();
+    if (sanitized.length === 0) return;
+
+    setImportedLeagueRelics(sanitized);
+    setContentGeneration((prev) => prev + 1);
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#league-relics`);
+    setRoute('leagueRelics');
+    setImportedRelicsCount(sanitized.length);
+  }, []);
+
   function exitSharedView() {
     stripShareParam();
     setSharedBuild(null);
@@ -266,9 +319,10 @@ function App() {
     <div className="app">
       {isAdmin && <div className="admin-badge">Logged in as admin</div>}
       <AppContent
-        key={sharedBuild ? 'shared' : 'own'}
+        key={`${sharedBuild ? 'shared' : 'own'}-${contentGeneration}`}
         route={route}
         sharedBuild={sharedBuild}
+        importedLeagueRelics={importedLeagueRelics}
         onExitShared={exitSharedView}
         onAdopted={() => setSharedBuild(null)}
         onOpenReportIssue={() => setReportIssueOpen(true)}
@@ -287,6 +341,7 @@ function App() {
         <ReportIssueModal open={reportIssueOpen} onClose={() => setReportIssueOpen(false)} />
       )}
       {IS_PAGES_BUILD && <PagesMigrationModal open={migrationOpen} onDismiss={dismissMigration} liveUrl={liveUrl} />}
+      <ImportRelicsModal count={importedRelicsCount} onClose={() => setImportedRelicsCount(null)} />
     </div>
   );
 }

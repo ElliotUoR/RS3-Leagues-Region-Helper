@@ -17,7 +17,7 @@ export const ASSUMPTION_GROUPS = [
       },
       {
         title: 'The Arc -> Asgarnia',
-        detail: 'The Arc (Aminishi/Bonfire Isle content, e.g. Masuta the Ascended, Seiryu) is folded into Asgarnia rather than treated as its own region.',
+        detail: "JMods have confirmed the Arc is part of Asgarnia - Masuta the Ascended, Seiryu, and the rest of the Aminishi/Bonfire Isle content are tagged Asgarnia rather than treated as their own region.",
       },
       {
         title: 'Mazcab -> Kharidian Desert',

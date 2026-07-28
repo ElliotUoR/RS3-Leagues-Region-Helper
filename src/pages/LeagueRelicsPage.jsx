@@ -51,6 +51,15 @@ export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
             </div>
           </section>
         ))}
+
+        <section className="dev-note">
+          <p>
+            For developers: relics support deep-link import from other sites -{' '}
+            <a className="notice-link" href="#relic-import-docs">
+              see the docs
+            </a>.
+          </p>
+        </section>
       </main>
     </>
   );

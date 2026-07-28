@@ -4,6 +4,7 @@ import { LEAGUE_RELICS } from '../data/leagueRelics';
 export const LEAGUE_RELICS_STORAGE_KEY = 'rs3-leagues-league-relics';
 
 const LEAGUE_RELICS_BY_NAME = new Map(LEAGUE_RELICS.map((r) => [r.name, r]));
+const LEAGUE_RELICS_BY_NAME_LOWER = new Map(LEAGUE_RELICS.map((r) => [r.name.toLowerCase(), r]));
 
 // Validates an arbitrary array (from localStorage or a decoded share link)
 // down to known league relic names, collapsing any duplicate pick within
@@ -13,11 +14,30 @@ const LEAGUE_RELICS_BY_NAME = new Map(LEAGUE_RELICS.map((r) => [r.name, r]));
 // unknown tier (`tier: null`) have no such constraint - any number of those
 // are kept as-is.
 export function sanitizeLeagueRelicSelection(raw) {
+  return sanitizeLeagueRelicNames(raw, LEAGUE_RELICS_BY_NAME);
+}
+
+// Same validation, but matched case-insensitively (and whitespace-trimmed) -
+// used only for the ?import-relics= API (see utils/importRelics.js). Exact
+// matching is right for this app's own share links (it only ever produces
+// exact-cased names itself), but a third-party site importing relics by
+// name is much more likely to get casing slightly wrong, and there's no
+// reason to punish that when relic names aren't ambiguous case-insensitively.
+export function sanitizeLeagueRelicSelectionLoose(raw) {
+  if (!Array.isArray(raw)) return [];
+  const canonicalNames = raw
+    .filter((name) => typeof name === 'string')
+    .map((name) => LEAGUE_RELICS_BY_NAME_LOWER.get(name.trim().toLowerCase())?.name)
+    .filter(Boolean);
+  return sanitizeLeagueRelicNames(canonicalNames, LEAGUE_RELICS_BY_NAME);
+}
+
+function sanitizeLeagueRelicNames(raw, byName) {
   if (!Array.isArray(raw)) return [];
   const seenTiers = new Set();
   const result = [];
   for (const name of raw) {
-    const relic = LEAGUE_RELICS_BY_NAME.get(name);
+    const relic = byName.get(name);
     if (!relic) continue;
     if (relic.tier != null) {
       if (seenTiers.has(relic.tier)) continue;
