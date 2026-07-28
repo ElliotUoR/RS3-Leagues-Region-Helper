@@ -11,7 +11,10 @@ function describeSource(source) {
   if (type === 'boss') return source.boss;
   if (type === 'quest') return `Quest: ${source.quest}`;
   if (type === 'shop') return source.shop;
-  if (type === 'skilling' || type === 'skill') return source.detail || source.skill || 'Skilling';
+  if (type === 'skilling' || type === 'skill') {
+    const base = source.detail || source.skill || 'Skilling';
+    return source.note ? `${base} - ${source.note}` : base;
+  }
   if (type === 'combination') return source.note || 'Combined sources';
   if (type === 'treasure trail') return `Treasure Trail: ${source.detail || ''}`;
   return '';

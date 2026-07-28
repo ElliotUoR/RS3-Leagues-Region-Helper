@@ -57,7 +57,12 @@ export const LEAGUE_RELICS = [
     effects: [
       'Doubles the resources obtained for Archaeology, Fishing, Mining and Woodcutting.',
       "Grants the Survivalist's Bag, an enhanced storage container capable of holding up to 150 of three different types of logs, ores, or fish at once.",
-      'Provides powerful gathering tools for Mining, Fishing, and Woodcutting, improving efficiency.',
+      'Provides the highest tier tools for Mining (Pickaxe of the Faithful), Fishing (Harpoon of the Pious), and Woodcutting (Hatchet of Devotion), improving efficiency.',
+      'Rockertunities and critical swings deal double damage.',
+      'Rockertunities immediately provide an ore.',
+      'Time sprite focus gain is doubled.',
+      'Upon discovering artefacts or lore pages, immediately gain 100% sprite focus.',
+      "Upon discovering artefacts, there is a 50% chance they are automatically restored as well as providing the XP that would've been gained from the restoration.",
     ],
     icon: FP('Survivalist.png'),
   },
