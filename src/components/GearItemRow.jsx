@@ -103,7 +103,7 @@ export default function GearItemRow({ item, style, equipped, available, isUnlock
           type="button"
           className="gear-item-main gear-item-main-compact"
           onClick={() => available && onToggle(item)}
-          onContextMenu={wikiContextMenuHandler(item.name)}
+          onContextMenu={wikiContextMenuHandler(item.wikiName ?? item.name)}
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setHoverPos(null)}
           aria-disabled={!available}
@@ -153,7 +153,7 @@ export default function GearItemRow({ item, style, equipped, available, isUnlock
         type="button"
         className="gear-item-main"
         onClick={() => available && onToggle(item)}
-        onContextMenu={wikiContextMenuHandler(item.name)}
+        onContextMenu={wikiContextMenuHandler(item.wikiName ?? item.name)}
         aria-disabled={!available}
       >
         <div className="gear-item-top">
