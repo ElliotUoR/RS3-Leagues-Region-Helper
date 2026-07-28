@@ -9,11 +9,20 @@
 // (Vite/Rollup does its own, more lenient CJS interop). This service runs
 // as plain `node src/index.js`, so it needs the default-import + destructure
 // form instead.
+//
+// IMPORTANT: SUPPORTED_VERSIONS has to be bumped in lockstep with
+// SHARE_VERSION over in src/utils/shareBuild.js every time that changes -
+// there's no shared constant between the two copies to keep this in sync
+// automatically. Falling behind doesn't error loudly: it just makes
+// decodeShareBuildForImage silently return null for every new share link,
+// which routes/ogImage.js treats as "unknown code" (404) - this is exactly
+// what happened when SHARE_VERSION bumped to 7 for league relics but this
+// Set was never updated to match.
 import LZString from 'lz-string';
 import { COMBAT_STYLES, ESSENCE_OF_FINALITY_NAMES, GEAR_SLOTS } from '../../../src/data/gear.js';
 import { GATEWAY_REGIONS, OPTIONAL_REGIONS, REGIONS } from '../../../src/data/regions.js';
 
-const SUPPORTED_VERSIONS = new Set([2, 3, 4, 5, 6]);
+const SUPPORTED_VERSIONS = new Set([2, 3, 4, 5, 6, 7]);
 
 function sanitizeRegionSelection(raw) {
   if (!Array.isArray(raw)) return [];
