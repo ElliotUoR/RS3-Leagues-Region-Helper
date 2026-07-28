@@ -36,6 +36,21 @@ export async function insertRow(table, row) {
 // This normalizes all three so callers just get the value or `null`. Worth
 // double-checking against your actual PostgREST version's real response
 // shape when testing this for the first time.
+// Calls a `returns void` Postgres function (e.g. increment_usage_counter) -
+// PostgREST returns 204 No Content with an empty body for these, so unlike
+// callScalarRpc this never tries to parse a response body (attempting
+// res.json() on an empty 204 body throws).
+export async function callVoidRpc(name, args) {
+  const res = await fetch(`${POSTGREST_URL}/rpc/${name}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  if (!res.ok) {
+    throw new Error(`PostgREST rpc ${name} failed: ${res.status} ${await res.text()}`);
+  }
+}
+
 export async function callScalarRpc(name, args) {
   const res = await fetch(`${POSTGREST_URL}/rpc/${name}`, {
     method: 'POST',

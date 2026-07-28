@@ -42,6 +42,8 @@ export default function SpellbooksPage({ isUnlocked, hasCrystalGrace }) {
           ))}
         </div>
 
+        {crystalGraceProp && <p className="crystal-grace-banner">Crystal Grace unlocks all spellbooks</p>}
+
         <div className={`unlock-panels unlock-panels-${groups.length}`}>
           {groups.map((group) => (
             <div className="unlock-panel" key={group.id}>

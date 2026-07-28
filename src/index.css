@@ -2080,6 +2080,21 @@ main.abilities-page .gear-item-rows {
 
 /* Spellbooks & Prayers page */
 
+/* Blue ties to --style-magic (the same blue used for the Magic style tab
+   elsewhere) - Crystal Grace's own effect text is specifically "Unlocks all
+   Magic spells across all spellbooks", so this reuses that association
+   rather than an arbitrary blue. Only ever rendered on the Spellbooks tab
+   while the relic is actually selected - see SpellbooksPage.jsx. */
+.crystal-grace-banner {
+  text-align: center;
+  color: var(--style-magic);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  margin: 4px 0 20px;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--style-magic) 40%, transparent);
+}
+
 .unlock-card {
   display: flex;
   flex-direction: column;

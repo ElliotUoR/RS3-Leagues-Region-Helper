@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AbilitiesPage from './pages/AbilitiesPage';
 import AssumptionsPage from './pages/AssumptionsPage';
 import GearPage from './pages/GearPage';
@@ -24,8 +24,9 @@ import { useIsAdmin } from './hooks/useIsAdmin';
 import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
 import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
 import { parseImportRelicsParam, stripImportRelicsParam } from './utils/importRelics';
-import { fetchIsAdmin, resolveShortCode, trackPageview } from './utils/api';
+import { fetchIsAdmin, resolveShortCode, trackPageview, trackUsage } from './utils/api';
 import { IS_PAGES_BUILD, PAGES_MIGRATION_DISMISSED_KEY } from './utils/deployTarget';
+import { MAX_OPTIONAL } from './data/regions';
 import versionInfo from './data/version.json';
 
 // Matches the short-link path Caddy now routes straight to this static app
@@ -34,6 +35,12 @@ import versionInfo from './data/version.json';
 // Pages build, which has no backend to resolve a code against in the first
 // place (see deployTarget.js).
 const SHORT_LINK_PATH_RE = /\/s\/([a-z0-9-]+)\/?$/i;
+
+// sessionStorage (not localStorage) - deliberately resets for a genuinely
+// new visit (new tab/window, or after the browser's fully closed), but
+// survives a same-tab reload, matching how "session" is meant here - see
+// the region-combo tracking effect in AppContent.
+const LAST_TRACKED_COMBO_KEY = 'rs3-leagues-last-tracked-combo';
 
 function matchShortLinkCode() {
   if (IS_PAGES_BUILD) return null;
@@ -102,6 +109,38 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
     initialSelection: sharedBuild?.leagueRelics ?? importedLeagueRelics,
     persist: !sharedBuild,
   });
+
+  // Tracks region picks + combos once they're "locked in" - the moment the
+  // visitor navigates away from the Regions tab with exactly MAX_OPTIONAL
+  // regions selected - rather than on every individual toggle, so idle
+  // clicking back and forth while still deciding doesn't inflate the
+  // counts. `selected` is read from this render's closure (the value at
+  // the instant `route` actually changed), and prevRouteRef survives across
+  // ordinary tab navigation since AppContent doesn't remount for that (only
+  // sharedBuild/import transitions bump its key - see App()).
+  //
+  // Also deduped per browser session (sessionStorage, not state - it must
+  // survive this exact remount case too): repeatedly bouncing home <-> gear
+  // with the *same* 3 regions still selected would otherwise re-fire the
+  // same combo every single time. Only skips an exact repeat of the last
+  // combo tracked this session - actually changing picks and later
+  // switching back still counts as a second real decision, not noise.
+  const prevRouteRef = useRef(route);
+  useEffect(() => {
+    const prevRoute = prevRouteRef.current;
+    prevRouteRef.current = route;
+    if (sharedBuild) return;
+    if (prevRoute === 'home' && route !== 'home' && selected.length === MAX_OPTIONAL) {
+      const comboKey = [...selected].sort((a, b) => a.localeCompare(b)).join(',');
+      if (window.sessionStorage.getItem(LAST_TRACKED_COMBO_KEY) === comboKey) return;
+      window.sessionStorage.setItem(LAST_TRACKED_COMBO_KEY, comboKey);
+      trackUsage([
+        ...selected.map((regionId) => ({ category: 'region_pick', key: regionId })),
+        { category: 'region_combo', key: comboKey },
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route]);
 
   function handleAdopt() {
     window.localStorage.setItem(REGIONS_STORAGE_KEY, JSON.stringify(selected));
@@ -308,6 +347,7 @@ function App() {
     window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#league-relics`);
     setRoute('leagueRelics');
     setImportedRelicsCount(sanitized.length);
+    trackUsage([{ category: 'feature', key: 'import_relics_used' }]);
   }, []);
 
   function exitSharedView() {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
+import { trackUsage } from '../utils/api';
 
 export const LEAGUE_RELICS_STORAGE_KEY = 'rs3-leagues-league-relics';
 
@@ -74,14 +75,20 @@ export function useLeagueRelicSelection({ initialSelection, persist = true } = {
   // player to manually deselect it first (there's no overall pick cap the
   // way Arch relics have one, so a click is never simply blocked). Relics
   // with an unknown tier just toggle freely alongside anything else.
-  const toggleLeagueRelic = useCallback((relic) => {
-    setSelected((prev) => {
-      if (prev.includes(relic.name)) return prev.filter((n) => n !== relic.name);
-      if (relic.tier == null) return [...prev, relic.name];
-      const withoutSameTier = prev.filter((n) => LEAGUE_RELICS_BY_NAME.get(n)?.tier !== relic.tier);
-      return [...withoutSameTier, relic.name];
-    });
-  }, []);
+  const toggleLeagueRelic = useCallback(
+    (relic) => {
+      setSelected((prev) => {
+        if (prev.includes(relic.name)) return prev.filter((n) => n !== relic.name);
+        // Only track a real pick, not exploring someone else's shared build
+        // (persist: false there - see useLeagueRelicSelection's callers).
+        if (persist) trackUsage([{ category: 'league_relic_pick', key: relic.name }]);
+        if (relic.tier == null) return [...prev, relic.name];
+        const withoutSameTier = prev.filter((n) => LEAGUE_RELICS_BY_NAME.get(n)?.tier !== relic.tier);
+        return [...withoutSameTier, relic.name];
+      });
+    },
+    [persist],
+  );
 
   return { selected, toggleLeagueRelic };
 }

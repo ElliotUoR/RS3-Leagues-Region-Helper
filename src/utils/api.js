@@ -93,6 +93,20 @@ export function trackPageview(path) {
   }).catch(() => {});
 }
 
+// Ever-incrementing usage counters (see server/routes/trackCounter.js) for
+// product questions pageviews don't answer - "how often is each region
+// picked", "how many people used the import-relics API", etc. `increments`
+// is an array of { category, key } pairs so one user action (e.g. locking
+// in a 3-region combo) is one request, not several. Same fire-and-forget
+// philosophy as trackPageview - never surfaces a failure to the visitor.
+export function trackUsage(increments) {
+  fetch(`${APP_BASE_PATH}api/track-counter`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ increments }),
+  }).catch(() => {});
+}
+
 // The admin session cookie is httpOnly (can't be read from JS directly, by
 // design), so this is the only way the frontend can know "is the current
 // visitor logged in as admin" - used to show a "logged in as admin" badge

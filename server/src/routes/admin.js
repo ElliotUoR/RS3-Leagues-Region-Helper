@@ -11,6 +11,7 @@ import {
   ADMIN_COOKIE_NAME,
   ADMIN_COOKIE_MAX_AGE_MS,
 } from '../lib/adminAuth.js';
+import { REGIONS } from '../../../src/data/regions.js';
 
 export const adminRouter = Router();
 
@@ -361,5 +362,55 @@ adminRouter.get('/api/admin/shortlinks', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('admin shortlinks query failed:', err);
     res.status(502).json({ error: 'could not load short links right now' });
+  }
+});
+
+function regionLabel(id) {
+  return REGIONS[id]?.name ?? id;
+}
+
+// "asgarnia,kandarin,morytania" (see App.jsx's region-combo tracking, sorted
+// so the same 3 regions always produce the same key regardless of pick
+// order) -> "Asgarnia + Kandarin + Morytania".
+function comboLabel(key) {
+  return key.split(',').map(regionLabel).join(' + ');
+}
+
+// GET /api/admin/usage
+// Ever-incrementing product-usage counters (see deploy/migrations/008_usage_counters.sql
+// and routes/trackCounter.js) - distinct from /api/admin/summary's
+// pageview/session stats, which are day-bucketed, rolled up, and pruned
+// after a week. These have no time dimension at all, just a running total
+// per (category, key) since the counter was first hit.
+adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
+  const pool = getAnalyticsPool();
+
+  try {
+    const [regionPicks, regionCombos, leagueRelicPicks, featureCounters] = await Promise.all([
+      pool.query(
+        `select key, count from public.usage_counters where category = 'region_pick' order by count desc`,
+      ),
+      pool.query(
+        `select key, count from public.usage_counters where category = 'region_combo' order by count desc limit $1`,
+        [TOP_N],
+      ),
+      pool.query(
+        `select key, count from public.usage_counters where category = 'league_relic_pick' order by count desc`,
+      ),
+      pool.query(`select key, count from public.usage_counters where category = 'feature'`),
+    ]);
+
+    const featureCountFor = (key) => featureCounters.rows.find((r) => r.key === key)?.count ?? 0;
+
+    res.json({
+      regionPicks: regionPicks.rows.map((r) => ({ region: regionLabel(r.key), count: r.count })),
+      regionCombos: regionCombos.rows.map((r) => ({ combo: comboLabel(r.key), count: r.count })),
+      leagueRelicPicks: leagueRelicPicks.rows.map((r) => ({ relic: r.key, count: r.count })),
+      karamjaToggledOffCount: featureCountFor('karamja_toggled_off'),
+      importRelicsUsedCount: featureCountFor('import_relics_used'),
+    });
+  } catch (err) {
+    console.error('admin usage query failed:', err);
+    res.status(502).json({ error: 'could not load usage stats right now' });
   }
 });

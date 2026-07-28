@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FIXED_REGIONS, GATEWAY_REGIONS, MAX_OPTIONAL, REGIONS } from '../data/regions';
+import { trackUsage } from '../utils/api';
 
 export const REGIONS_STORAGE_KEY = 'rs3-leagues-regions';
 export const GATEWAY_STORAGE_KEY = 'rs3-leagues-gateway-regions';
@@ -69,7 +70,17 @@ export function useRegionSelection({ initialSelection, initialGatewaySelection, 
   const toggleRegion = useCallback((id) => {
     if (FIXED_REGIONS.includes(id)) return;
     if (GATEWAY_REGIONS.includes(id)) {
-      setGatewaySelected((prev) => (prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]));
+      setGatewaySelected((prev) => {
+        const wasOn = prev.includes(id);
+        // Only the off-toggle is interesting to track - a gateway region is
+        // on by default, so "how often does someone actually turn Karamja
+        // off" is the real product question, not every toggle either way.
+        // Keyed off `id` (not hardcoded to "karamja") so this stays correct
+        // if a second gateway region is ever added - GATEWAY_REGIONS only
+        // has Karamja today, so this produces exactly 'karamja_toggled_off'.
+        if (wasOn) trackUsage([{ category: 'feature', key: `${id}_toggled_off` }]);
+        return wasOn ? prev.filter((r) => r !== id) : [...prev, id];
+      });
       return;
     }
     setSelected((prev) =>
