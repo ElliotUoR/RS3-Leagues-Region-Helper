@@ -182,13 +182,29 @@ export default function GearPage({
   async function handleShorten() {
     setShortenStatus('working');
     try {
+      // The default style is baked into the short link, so a build whose
+      // default style has nothing equipped (easy to end up with - not
+      // everyone re-checks "Default" after switching styles) would hand
+      // the recipient an empty tab first. Fall back to the first style
+      // (in melee/ranged/magic/necromancy order) that actually has gear,
+      // and adopt it as the real default too rather than only patching the
+      // link's payload.
+      let effectiveDefaultStyle = defaultStyle;
+      const styleHasGear = (s) => Object.keys(equippedNamesByStyle[s] ?? {}).length > 0;
+      if (!styleHasGear(defaultStyle)) {
+        const fallbackStyle = COMBAT_STYLES.find(styleHasGear);
+        if (fallbackStyle) {
+          effectiveDefaultStyle = fallbackStyle;
+          setDefaultStyle(fallbackStyle);
+        }
+      }
       const payload = encodeShareBuild({
         regions: selected,
         gatewaySelected,
         equippedNamesByStyle,
         eofWeaponNamesByStyle,
         relics: selectedRelics,
-        defaultStyle,
+        defaultStyle: effectiveDefaultStyle,
       });
       const url = await createShortLink(payload);
       try {
