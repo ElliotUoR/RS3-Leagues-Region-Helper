@@ -535,6 +535,10 @@ const UNIVERSAL_ACCESSORIES = [
     stats: { damage: 0, accuracy: 0, lifeBonus: 100, prayerBonus: 0, setEffect: 'Armour 40.4; -32 ranged accuracy, -60 magic/necromancy accuracy; passive melee-only "Slayer Spirit": +12.5% accuracy and +7.5% damage against Slayer-task monsters.' },
     icon: 'icons/Slayer_helmet.png',
     source: { type: 'boss', boss: "Black mask (Mos Le'Harmless)", region: 'morytania' } },
+  { name: "Seren's Crystal Tiara", wikiName: 'Crystal grace', slot: 'head', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
+    stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'No combat stats - passive-only item: acts as an omni-tiara and demonhorn necklace.' },
+    icon: "icons/Seren's_Crystal_Tiara.png",
+    source: { type: 'shop', shop: 'Obtained from picking Crystal Grace relic', region: 'relic' } },
 
   // FEET
   { name: 'Goldenhawk boots', slot: 'feet', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
