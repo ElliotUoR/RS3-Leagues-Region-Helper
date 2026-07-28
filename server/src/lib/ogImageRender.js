@@ -147,6 +147,36 @@ export async function renderShareImage({ unlockedRegionIds, equippedNames, eofWe
     if (iconPath) {
       await drawIconCentered(ctx, path.join(path.dirname(ICONS_DIR), iconPath), x, y, SLOT_BOX, 10);
     }
+
+    // Mirrors EquipmentSlot.jsx's `miniIcon` - a small badge of the actual
+    // equipped necklace (regular or (or) variant both have their own icon)
+    // overlaid in the corner, so it's clear which necklace this spirit
+    // belongs to rather than just "a weapon icon floating top-left".
+    if (slot === 'eof') {
+      const neckIconPath = findItemIcon(defaultStyle, 'neck', equippedNames.neck);
+      if (neckIconPath) {
+        const badgeSize = 30;
+        const badgeCx = x + SLOT_BOX - badgeSize / 2 + 3;
+        const badgeCy = y + SLOT_BOX - badgeSize / 2 + 3;
+
+        ctx.fillStyle = BG;
+        ctx.beginPath();
+        ctx.arc(badgeCx, badgeCy, badgeSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = BORDER;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        await drawIconCentered(
+          ctx,
+          path.join(path.dirname(ICONS_DIR), neckIconPath),
+          badgeCx - badgeSize / 2,
+          badgeCy - badgeSize / 2,
+          badgeSize,
+          5,
+        );
+      }
+    }
   }
 
   // Right - unlocked region icons.
