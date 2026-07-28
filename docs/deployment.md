@@ -201,11 +201,17 @@ curl -X POST https://jellyflow.xyz/Leagues/api/shorten \
   -d '{"payload":"test-payload"}'
 # -> {"code":"some-random-words"}
 
-# Resolve it - should 200 (the SPA itself, not a redirect - the frontend's
-# nginx SPA fallback serves index.html here, and the app resolves the code
-# client-side against PostgREST so the address bar keeps showing the short
-# link instead of expanding into a long ?share= URL - see App.jsx)
+# Resolve it - should 200 (the SPA itself, not a redirect - Node serves this
+# now, with a per-build og:image tag injected, see
+# server/src/routes/shareLinkPage.js - but the app still resolves the code
+# client-side against PostgREST once it loads, so the address bar keeps
+# showing the short link instead of expanding into a long ?share= URL - see
+# App.jsx). Check the response body for the code's own og:image URL, not
+# the generic region-map-nodes.png default, to confirm this actually worked.
 curl -i https://jellyflow.xyz/Leagues/s/some-random-words
+
+# Confirm the preview image itself renders (should be a PNG, not a 404)
+curl -i https://jellyflow.xyz/Leagues/api/og-image/some-random-words.png
 
 # Report an issue (only run this once you actually want a test issue filed!)
 curl -X POST https://jellyflow.xyz/Leagues/api/report-issue \

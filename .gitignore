@@ -25,3 +25,5 @@ dist-ssr
 *.sw?
 /todo notes
 /extracted-gear
+export-example.pdn
+export-example.png

@@ -15,10 +15,19 @@ handle_path /Leagues/* {
 	# The two write endpoints -> Node service. Paths here have already had
 	# the /Leagues prefix stripped, so they match exactly what the Node
 	# service's own routes expect (/api/shorten, /api/report-issue, etc).
-	# NOTE: /s/:code short links deliberately do NOT go here anymore - see
-	# below, they're served by the static frontend instead.
 	@backend path /api/*
 	reverse_proxy @backend rs3_node:3000
+
+	# /s/:code short links -> Node too (see server/src/routes/shareLinkPage.js),
+	# NOT the static frontend anymore. Node injects a per-build og:image
+	# meta tag into the same index.html the frontend would have served
+	# unchanged, so Discord/Twitter/etc. (which read <meta> tags straight
+	# off the raw HTML response and never run JS) show the right preview
+	# image. A real browser gets byte-identical HTML otherwise - App.jsx's
+	# client-side code-resolution is untouched and still runs exactly as
+	# before once the page loads.
+	@shortlink path /s/*
+	reverse_proxy @shortlink rs3_node:3000
 
 	# Public PostgREST API (anon insert-only + the short-link RPC) -
 	# stripped of the /rest prefix too, so e.g. /Leagues/rest/page_events
@@ -31,9 +40,8 @@ handle_path /Leagues/* {
 		reverse_proxy rs3_postgrest:3000
 	}
 
-	# Everything else under /Leagues/* -> the static build, including
-	# /s/:code short links - the frontend's nginx has a SPA fallback
-	# (deploy/nginx.conf) that serves index.html for any unknown path, and
-	# the app itself resolves the code from there (see App.jsx).
+	# Everything else under /Leagues/* -> the static build. The frontend's
+	# nginx has a SPA fallback (deploy/nginx.conf) that serves index.html
+	# for any unknown path.
 	reverse_proxy rs3_frontend:80
 }

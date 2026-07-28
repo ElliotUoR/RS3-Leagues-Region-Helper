@@ -4,6 +4,8 @@ import { shortenRouter } from './routes/shorten.js';
 import { reportIssueRouter } from './routes/reportIssue.js';
 import { trackRouter } from './routes/track.js';
 import { adminRouter } from './routes/admin.js';
+import { ogImageRouter } from './routes/ogImage.js';
+import { shareLinkPageRouter } from './routes/shareLinkPage.js';
 import { scheduleAnalyticsRollup } from './lib/analyticsRollup.js';
 
 const PORT = process.env.PORT ?? 3000;
@@ -23,6 +25,8 @@ app.use(shortenRouter);
 app.use(reportIssueRouter);
 app.use(trackRouter);
 app.use(adminRouter);
+app.use(ogImageRouter);
+app.use(shareLinkPageRouter);
 
 app.listen(PORT, () => {
   console.log(`rs3-leagues-server listening on :${PORT}`);
