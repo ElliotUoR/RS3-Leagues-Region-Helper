@@ -1,18 +1,12 @@
 import { useState } from 'react';
 import { LIVE_SITE_URL } from '../utils/deployTarget';
-import { useLiveSiteUrl } from '../hooks/useLiveSiteUrl';
 
 // Only ever rendered on the GitHub Pages build (see App.jsx) - shown once
 // per browser unless dismissed with "don't ask again" (localStorage,
 // PAGES_MIGRATION_DISMISSED_KEY). "Continue on old site" closes it for this
 // visit only; it'll show again next time.
-export default function PagesMigrationModal({ open, onDismiss }) {
+export default function PagesMigrationModal({ open, onDismiss, liveUrl }) {
   const [showWhy, setShowWhy] = useState(false);
-  // The displayed URL text always stays the plain live site address (so it
-  // doesn't visibly shift under the visitor once resolved) - only the link
-  // targets get upgraded to a short link carrying their saved loadout, if
-  // there is one (see useLiveSiteUrl).
-  const liveUrl = useLiveSiteUrl();
 
   if (!open) return null;
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LIVE_SITE_URL } from '../utils/deployTarget';
+import { IS_PAGES_BUILD, LIVE_SITE_URL } from '../utils/deployTarget';
 import { encodeShareBuild } from '../utils/shareBuild';
 import { GATEWAY_STORAGE_KEY, REGIONS_STORAGE_KEY, sanitizeGatewaySelection, sanitizeRegionSelection } from './useRegionSelection';
 import { GEAR_STORAGE_KEY } from './useGearLoadout';
@@ -43,10 +43,24 @@ function readSavedBuild() {
 // cross-origin /api/shorten call resolves - falls back to the plain URL on
 // any failure (nothing saved, offline, CORS/backend down), never blocks or
 // breaks the link either way.
+//
+// Called exactly once, from App.jsx, and threaded down as a prop to both
+// modals that display it - each used to call this hook independently, which
+// meant both mounted their own effect and both fired their own /api/shorten
+// POST for the identical saved build on every single page load. That raced
+// the backend's payload-hash dedup check (see
+// deploy/migrations/004_short_link_dedup.sql, which deliberately accepts
+// this race as rare/harmless) and reliably produced two different short
+// codes for the same build instead of the intended one. The IS_PAGES_BUILD
+// guard below means this is also now safe to call unconditionally (the
+// rule of hooks requires that anyway) even outside the Pages build, where
+// it's simply a no-op.
 export function useLiveSiteUrl() {
   const [url, setUrl] = useState(LIVE_SITE_URL);
 
   useEffect(() => {
+    if (!IS_PAGES_BUILD) return undefined;
+
     const build = readSavedBuild();
     if (!build) return undefined;
 

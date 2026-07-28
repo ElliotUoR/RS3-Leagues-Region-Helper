@@ -13,6 +13,7 @@ import { GATEWAY_STORAGE_KEY, REGIONS_STORAGE_KEY, useRegionSelection } from './
 import { GEAR_STORAGE_KEY, useGearLoadout } from './hooks/useGearLoadout';
 import { RELICS_STORAGE_KEY, useRelicSelection } from './hooks/useRelicSelection';
 import { useIsAdmin } from './hooks/useIsAdmin';
+import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
 import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
 import { fetchIsAdmin, resolveShortCode, trackPageview } from './utils/api';
 import { IS_PAGES_BUILD, PAGES_MIGRATION_DISMISSED_KEY } from './utils/deployTarget';
@@ -175,6 +176,9 @@ function App() {
     () => IS_PAGES_BUILD && !window.localStorage.getItem(PAGES_MIGRATION_DISMISSED_KEY),
   );
   const isAdmin = useIsAdmin();
+  // Called once here rather than inside each modal that displays it - see
+  // useLiveSiteUrl.js for why that used to create duplicate short links.
+  const liveUrl = useLiveSiteUrl();
 
   function dismissMigration(remember) {
     if (remember) window.localStorage.setItem(PAGES_MIGRATION_DISMISSED_KEY, '1');
@@ -255,11 +259,11 @@ function App() {
         <ReportIssueButton open={reportIssueOpen} onToggle={() => setReportIssueOpen((prev) => !prev)} />
       </footer>
       {IS_PAGES_BUILD ? (
-        <ReportIssueUnavailableModal open={reportIssueOpen} onClose={() => setReportIssueOpen(false)} />
+        <ReportIssueUnavailableModal open={reportIssueOpen} onClose={() => setReportIssueOpen(false)} liveUrl={liveUrl} />
       ) : (
         <ReportIssueModal open={reportIssueOpen} onClose={() => setReportIssueOpen(false)} />
       )}
-      {IS_PAGES_BUILD && <PagesMigrationModal open={migrationOpen} onDismiss={dismissMigration} />}
+      {IS_PAGES_BUILD && <PagesMigrationModal open={migrationOpen} onDismiss={dismissMigration} liveUrl={liveUrl} />}
     </div>
   );
 }

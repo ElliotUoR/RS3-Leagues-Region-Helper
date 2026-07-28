@@ -1191,7 +1191,12 @@ export const GEAR = {
         source: { type: 'shop', shop: 'Smithing (90 Smithing, 2 elder rune bars at any anvil)', region: { anyOf: ['anachronia', 'tirannwn', 'kharidianDesert'], label: 'Light animica ore' }, note: 'Elder rune ore/bar (the crafting input) is only minable/smithable via these regions in Leagues.' },
       },
       {
-        name: 'Sunspear (melee)',
+        // Not to be confused with the genuinely distinct tier-78 two-handed
+        // "Sunspear (melee)" (River of Blood quest reward) - this is the
+        // plain tier-75 one-handed "Sunspear" from The Lord of Vampyrium,
+        // previously misnamed here with the "(melee)" suffix that belongs to
+        // the other item.
+        name: 'Sunspear',
         slot: 'weapon',
         twoHanded: false,
         level: { skill: 'Attack', level: 75 },

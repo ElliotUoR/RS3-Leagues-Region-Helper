@@ -1,16 +1,9 @@
 import { LIVE_SITE_URL } from '../utils/deployTarget';
-import { useLiveSiteUrl } from '../hooks/useLiveSiteUrl';
 
 // Shown instead of the real ReportIssueModal on the GitHub Pages build,
 // which has no backend to file a report against. Same "only works on the
 // live site" visual language as PagesMigrationModal (.notice-* classes).
-export default function ReportIssueUnavailableModal({ open, onClose }) {
-  // The displayed URL text always stays the plain live site address (so it
-  // doesn't visibly shift under the visitor once resolved) - only the link
-  // targets get upgraded to a short link carrying their saved loadout, if
-  // there is one (see useLiveSiteUrl).
-  const liveUrl = useLiveSiteUrl();
-
+export default function ReportIssueUnavailableModal({ open, onClose, liveUrl }) {
   if (!open) return null;
 
   return (
