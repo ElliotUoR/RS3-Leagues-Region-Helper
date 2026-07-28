@@ -10,7 +10,7 @@
 // as plain `node src/index.js`, so it needs the default-import + destructure
 // form instead.
 import LZString from 'lz-string';
-import { COMBAT_STYLES, GEAR_SLOTS } from '../../../src/data/gear.js';
+import { COMBAT_STYLES, ESSENCE_OF_FINALITY_NAMES, GEAR_SLOTS } from '../../../src/data/gear.js';
 import { GATEWAY_REGIONS, OPTIONAL_REGIONS, REGIONS } from '../../../src/data/regions.js';
 
 const SUPPORTED_VERSIONS = new Set([2, 3, 4, 5, 6]);
@@ -42,10 +42,19 @@ function sanitizeStyle(style) {
   return COMBAT_STYLES.includes(style) ? style : 'melee';
 }
 
+function sanitizeEofWeaponNames(raw) {
+  const names = Object.fromEntries(COMBAT_STYLES.map((style) => [style, null]));
+  if (!raw || typeof raw !== 'object') return names;
+  for (const style of COMBAT_STYLES) {
+    if (typeof raw[style] === 'string') names[style] = raw[style];
+  }
+  return names;
+}
+
 // Decodes a `share`/short-link payload string down to just what the og-image
 // renderer needs (regions + gateway picks + the default style's equipped
-// items) - relics/EOF weapons aren't part of the thumbnail, so they're not
-// carried through here.
+// items, including its EOF-slotted weapon if any) - relics aren't part of
+// the thumbnail, so they're not carried through here.
 export function decodeShareBuildForImage(payload) {
   if (!payload) return null;
   try {
@@ -58,6 +67,7 @@ export function decodeShareBuildForImage(payload) {
     const regions = sanitizeRegionSelection(parsed.r);
     const gatewaySelected = sanitizeGatewaySelection(parsed.t);
     const equippedNamesByStyle = sanitizeEquippedNames(parsed.g);
+    const eofWeaponNamesByStyle = sanitizeEofWeaponNames(parsed.f);
 
     const unlockedRegionIds = [
       ...Object.keys(REGIONS).filter((id) => REGIONS[id].fixed),
@@ -65,9 +75,19 @@ export function decodeShareBuildForImage(payload) {
       ...OPTIONAL_REGIONS.filter((id) => regions.includes(id)),
     ];
 
+    const equippedNames = equippedNamesByStyle[defaultStyle];
+    // Mirrors useGearLoadout.js's eofVisible/eofWeapon: the EOF slot only
+    // exists (and only ever renders) while an Essence of Finality necklace
+    // is actually worn in 'neck' - a remembered eof weapon name from before
+    // the necklace was unequipped shouldn't render as if it were still on.
+    const eofWeaponName = ESSENCE_OF_FINALITY_NAMES.includes(equippedNames.neck)
+      ? eofWeaponNamesByStyle[defaultStyle]
+      : null;
+
     return {
       unlockedRegionIds,
-      equippedNames: equippedNamesByStyle[defaultStyle],
+      equippedNames,
+      eofWeaponName,
       defaultStyle,
     };
   } catch {

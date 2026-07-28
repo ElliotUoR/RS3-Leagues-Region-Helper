@@ -23,6 +23,7 @@ ogImageRouter.get('/api/og-image/:code.png', async (req, res) => {
     const png = await renderShareImage({
       unlockedRegionIds: decoded.unlockedRegionIds,
       equippedNames: decoded.equippedNames,
+      eofWeaponName: decoded.eofWeaponName,
       defaultStyle: decoded.defaultStyle ?? 'melee',
     });
 

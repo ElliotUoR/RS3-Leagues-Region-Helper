@@ -207,7 +207,7 @@ curl -X POST https://jellyflow.xyz/Leagues/api/shorten \
 # client-side against PostgREST once it loads, so the address bar keeps
 # showing the short link instead of expanding into a long ?share= URL - see
 # App.jsx). Check the response body for the code's own og:image URL, not
-# the generic region-map-nodes.png default, to confirm this actually worked.
+# the generic LeaguesSiteImage.png default, to confirm this actually worked.
 curl -i https://jellyflow.xyz/Leagues/s/some-random-words
 
 # Confirm the preview image itself renders (should be a PNG, not a 404)

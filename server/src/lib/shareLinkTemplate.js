@@ -23,7 +23,7 @@ const APP_BASE_PATH = '/Leagues/';
 
 const template = readFileSync(TEMPLATE_PATH, 'utf8');
 
-const DEFAULT_IMAGE = `${SITE_ORIGIN}${APP_BASE_PATH}region-map-nodes.png`;
+const DEFAULT_IMAGE = `${SITE_ORIGIN}${APP_BASE_PATH}LeaguesSiteImage.png`;
 const DEFAULT_URL = `${SITE_ORIGIN}${APP_BASE_PATH}`;
 
 function replaceMetaContent(html, matchAttr, oldValue, newValue) {

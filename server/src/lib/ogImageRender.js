@@ -25,8 +25,11 @@ const ACCENT = '#c084fc';
 
 // Classic RS worn-equipment screen shape (3 columns x 5 rows, some cells
 // empty) - not a literal pixel copy of the in-game interface, just the same
-// familiar arrangement so the slot grid reads at a glance.
+// familiar arrangement so the slot grid reads at a glance. Matches
+// GearPage.jsx's own SLOT_GRID_AREAS exactly, including 'eof' top-left -
+// see the drawing loop below for why that one's conditional.
 const SLOT_GRID = {
+  eof: [0, 0],
   head: [1, 0],
   pocket: [2, 0],
   back: [0, 1],
@@ -86,7 +89,7 @@ function findItemIcon(style, slot, itemName) {
   return items.find((item) => item.name === itemName)?.icon ?? null;
 }
 
-export async function renderShareImage({ unlockedRegionIds, equippedNames, defaultStyle }) {
+export async function renderShareImage({ unlockedRegionIds, equippedNames, eofWeaponName, defaultStyle }) {
   const gearGridWidth = SLOT_COLS * SLOT_BOX + (SLOT_COLS - 1) * SLOT_GAP;
   const gearGridHeight = SLOT_ROWS * SLOT_BOX + (SLOT_ROWS - 1) * SLOT_GAP;
 
@@ -116,8 +119,14 @@ export async function renderShareImage({ unlockedRegionIds, equippedNames, defau
   ctx.font = '600 17px sans-serif';
   ctx.fillText('Regional PVM Unlock Planner', MARGIN, 70);
 
-  // Left - equipped gear grid.
+  // Left - equipped gear grid. 'eof' isn't a real GEAR_SLOTS slot (it's the
+  // weapon spirit slotted inside an equipped Essence of Finality necklace,
+  // see useGearLoadout.js) and, like on the actual Gear Planner, only
+  // renders at all while that necklace is worn - skipped entirely rather
+  // than drawn as a permanently-empty box otherwise.
   for (const [slot, [col, row]] of Object.entries(SLOT_GRID)) {
+    if (slot === 'eof' && !eofWeaponName) continue;
+
     const x = gearGridLeft + col * (SLOT_BOX + SLOT_GAP);
     const y = gearGridTop + row * (SLOT_BOX + SLOT_GAP);
 
@@ -129,7 +138,12 @@ export async function renderShareImage({ unlockedRegionIds, equippedNames, defau
     roundRect(ctx, x, y, SLOT_BOX, SLOT_BOX, 10);
     ctx.stroke();
 
-    const iconPath = findItemIcon(defaultStyle, slot, equippedNames[slot]);
+    // The EOF weapon is a real weapon-slot item (its spirit, not the
+    // necklace) - always looked up in GEAR[style].weapon regardless of the
+    // 'eof' grid slot it's drawn in, same as findItemIcon(..., 'weapon', ...)
+    // would for the actual weapon slot.
+    const iconPath =
+      slot === 'eof' ? findItemIcon(defaultStyle, 'weapon', eofWeaponName) : findItemIcon(defaultStyle, slot, equippedNames[slot]);
     if (iconPath) {
       await drawIconCentered(ctx, path.join(path.dirname(ICONS_DIR), iconPath), x, y, SLOT_BOX, 10);
     }
