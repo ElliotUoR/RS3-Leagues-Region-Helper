@@ -1073,6 +1073,15 @@ export const ACTIVITIES = [
     subLocation: 'minigame treasure chests',
     drops: [{ name: 'Off-hand Khopesh of the Kharidian', icon: 'icons/Off-hand_khopesh_of_the_Kharidian.png' }],
   },
+  {
+    name: 'Tzhaar-Hur Traders',
+    region: 'karamja',
+    subLocation: 'TzHaar City, Thieving',
+    drops: [
+      { name: 'Am-zi', icon: 'icons/Am-zi.png' },
+      { name: 'Am-hej', icon: 'icons/Am-hej.png' },
+    ],
+  },
 ];
 
 // Region-locked drops from generic monster types/families - deliberately
