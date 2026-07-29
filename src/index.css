@@ -1740,6 +1740,13 @@ main.abilities-page .gear-item-rows {
   }
 }
 
+.league-relic-tag-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
 .retry-image {
   position: relative;
   display: inline-block;

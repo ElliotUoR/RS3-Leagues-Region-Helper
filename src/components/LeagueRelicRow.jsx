@@ -53,6 +53,21 @@ export default function LeagueRelicRow({ relic, selected, onToggleSelect }) {
             {relic.effects.map((effect) => (
               <li key={effect}>{effect}</li>
             ))}
+            {/* App-added (not wiki-verbatim, see data/leagueRelics.js) - the
+                tags rendered here are the exact same pill styling gear items
+                use for these labels (see RegionTags.jsx's ResourcePill), so
+                picking this relic visibly reads as "unlocking" them. */}
+            {relic.regionTagNote && (
+              <li className="league-relic-tag-note">
+                {relic.regionTagNote.prefix}{' '}
+                {relic.regionTagNote.tags.map((tag) => (
+                  <span key={tag} className="region-tag region-tag-resource region-tag-resource-unlocked">
+                    {tag}
+                  </span>
+                ))}{' '}
+                {relic.regionTagNote.suffix}
+              </li>
+            )}
           </ul>
         </div>
       </button>

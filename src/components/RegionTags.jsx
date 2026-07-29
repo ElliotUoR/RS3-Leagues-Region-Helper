@@ -22,14 +22,23 @@ function RegionPill({ regionId, unlocked }) {
 // Collapses a wide OR-group (e.g. 5 regions that all yield the same ore)
 // into a single named tag, so listing every alternative doesn't blow out the
 // card layout. Lights up if any underlying region is unlocked; the tooltip
-// spells out which regions actually satisfy it.
-function ResourcePill({ label, regions, isUnlocked }) {
-  const unlocked = regions.some((r) => isRegionUnlocked(r, isUnlocked));
+// spells out which regions actually satisfy it. A group can also carry a
+// `leagueRelic` alongside its regions (see gearAvailability.js) - Endless
+// Harvest's Mining tier-upgrade chance genuinely produces Luminate/
+// Oricalchite/Light animica ore without visiting any of the listed regions,
+// so that relic being picked lights the tag up too, with its own tooltip
+// explanation.
+function ResourcePill({ label, regions, isUnlocked, leagueRelic, selectedLeagueRelics = [] }) {
+  const relicSatisfied = Boolean(leagueRelic) && selectedLeagueRelics.includes(leagueRelic);
+  const unlocked = relicSatisfied || regions.some((r) => isRegionUnlocked(r, isUnlocked));
   const regionNames = regions.map((r) => REGION_SHORT_LABELS[r] ?? r).join(' / ');
+  const tooltip = leagueRelic
+    ? `Requires: ${regionNames} (or the "${leagueRelic}" League Relic - its Mining resource upgrades can produce this ore directly)`
+    : `Requires: ${regionNames}`;
   return (
     <TagTooltip
       className={`region-tag region-tag-resource${unlocked ? ' region-tag-resource-unlocked' : ''}`}
-      tooltip={`Requires: ${regionNames}`}
+      tooltip={tooltip}
     >
       {label}
     </TagTooltip>
@@ -71,14 +80,28 @@ function LeagueRelicPill({ relicName, selectedLeagueRelics }) {
 }
 
 function RegionGroupPill({ group, isUnlocked, selectedLeagueRelics }) {
-  if (group.leagueRelic) {
+  // A pure `region: 'relic'` group (no real region alternative) always
+  // renders as the dedicated relic pill. A group that carries a
+  // `leagueRelic` *alongside* real regions (e.g. the ore-upgrade tags) falls
+  // through to the normal label/region rendering below instead, just with
+  // the relic wired in as an extra way to light up.
+  const isPureRelicGroup = group.leagueRelic && group.regions.length === 1 && group.regions[0] === 'relic';
+  if (isPureRelicGroup) {
     return <LeagueRelicPill relicName={group.leagueRelic} selectedLeagueRelics={selectedLeagueRelics} />;
   }
   if (group.artefact) {
     return <ArtefactPill regionId={group.regions[0]} note={group.note} isUnlocked={isUnlocked} />;
   }
   if (group.label) {
-    return <ResourcePill label={group.label} regions={group.regions} isUnlocked={isUnlocked} />;
+    return (
+      <ResourcePill
+        label={group.label}
+        regions={group.regions}
+        isUnlocked={isUnlocked}
+        leagueRelic={group.leagueRelic}
+        selectedLeagueRelics={selectedLeagueRelics}
+      />
+    );
   }
   return group.regions.map((regionId, altIndex) => (
     <span className="region-tag-or-item" key={regionId}>

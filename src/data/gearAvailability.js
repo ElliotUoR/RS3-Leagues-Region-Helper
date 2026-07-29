@@ -28,9 +28,15 @@ const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
 // UI derives the "Artefacts: X" label itself from the region id. A `region:
 // 'relic'` item additionally carries `source.leagueRelic` (e.g. 'Golden
 // Touch') when it's known which specific League Relic grants it - that
-// group then gates on `isGearItemAvailable`'s `selectedLeagueRelics` option
-// instead of the blanket-unlocked fallback every other 'relic' item still
-// gets. Mirrors the `region` conventions documented in gear.js:
+// group then gates PURELY on `isGearItemAvailable`'s `selectedLeagueRelics`
+// option instead of the blanket-unlocked fallback every other 'relic' item
+// still gets (there's no real region alternative for these). An `anyOf`
+// entry can ALSO carry its own `leagueRelic` alongside real regions (e.g.
+// the "Luminate ore"/"Oricalchite ore"/"Light animica ore" labelled groups
+// tagged `leagueRelic: 'Endless Harvest'`) - there the relic is an
+// *additional* OR-alternative on top of the regions, not a replacement for
+// them (see isGearItemAvailable for how the two `leagueRelic` shapes are
+// told apart). Mirrors the `region` conventions documented in gear.js:
 //   - undefined/null/'global' -> [{ regions: ['global'] }]
 //   - 'relic'                 -> [{ regions: ['relic'], leagueRelic? }]
 //   - a single region id      -> [{ regions: [regionId] }]
@@ -38,11 +44,11 @@ const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
 //       [{ regions: [id1] }, { regions: [id2] }, ...] - one single-region
 //       group per entry
 //   - an array that also contains `{ anyOf: [...], label?, component?,
-//       artefact?, note? }` entries -> each anyOf entry becomes its own
-//       OR-group, e.g. ['asgarnia', { anyOf: ['wilderness', 'kandarin'] }]
+//       artefact?, note?, leagueRelic? }` entries -> each anyOf entry
+//       becomes its own OR-group, e.g. ['asgarnia', { anyOf: ['wilderness', 'kandarin'] }]
 //       becomes [{ regions: ['asgarnia'] }, { regions: ['wilderness', 'kandarin'] }]
 //       (asgarnia AND (wilderness OR kandarin))
-//   - a bare `{ anyOf: [...], label?, component?, artefact?, note? }` (no
+//   - a bare `{ anyOf: [...], label?, component?, artefact?, note?, leagueRelic? }` (no
 //       surrounding array) -> [{ regions: [...anyOf], label, component, artefact, note }]
 export function normalizeRegionGroups(item) {
   const region = item.source?.region;
@@ -52,13 +58,13 @@ export function normalizeRegionGroups(item) {
     return region.map((entry) => {
       if (typeof entry === 'string') return { regions: [entry] };
       if (Array.isArray(entry?.anyOf)) {
-        return { regions: entry.anyOf, label: entry.label, component: entry.component, artefact: entry.artefact, note: entry.note };
+        return { regions: entry.anyOf, label: entry.label, component: entry.component, artefact: entry.artefact, note: entry.note, leagueRelic: entry.leagueRelic };
       }
       return { regions: [] };
     });
   }
   if (typeof region === 'object' && Array.isArray(region.anyOf)) {
-    return [{ regions: region.anyOf, label: region.label, component: region.component, artefact: region.artefact, note: region.note }];
+    return [{ regions: region.anyOf, label: region.label, component: region.component, artefact: region.artefact, note: region.note, leagueRelic: region.leagueRelic }];
   }
   return [{ regions: [region] }];
 }
@@ -98,16 +104,26 @@ export function isGearItemImpossible(item) {
 // hand-in location (and any non-Archaeology component) still gates.
 //
 // `options.selectedLeagueRelics` (default []) is the player's current League
-// Relic picks (see hooks/useLeagueRelicSelection.js) - a group whose
-// `leagueRelic` is set is satisfied only by that exact pick being present,
-// regardless of region state (only GearPage.jsx passes this option; every
-// other caller's items are never tagged with `leagueRelic`, so this is a
-// no-op elsewhere).
+// Relic picks (see hooks/useLeagueRelicSelection.js). A group whose
+// `leagueRelic` is set is satisfied by that exact pick being present - for a
+// pure `region: 'relic'` group (e.g. Golden Touch's own reward item, which
+// has no real region alternative) that's the *only* way it's satisfied,
+// regardless of region state. But a group can also carry a `leagueRelic`
+// alongside real regions (e.g. the "Luminate ore"/"Oricalchite ore"/"Light
+// animica ore" labelled groups, which Endless Harvest's Mining
+// tier-upgrade chance genuinely lets you obtain without visiting any of the
+// listed regions - see https://runescape.wiki/w/Polishing#Mining for the
+// underlying tier-upgrade mechanic) - there, the relic is an *additional*
+// alternative on top of the normal region check, not a replacement for it.
 export function isGearItemAvailable(item, isUnlocked, options = {}) {
   const { ignoreComponents = false, ignoreArtefactRegions = false, selectedLeagueRelics = [] } = options;
   if (isGearItemImpossible(item)) return false;
   return normalizeRegionGroups(item).every((group) => {
-    if (group.leagueRelic) return selectedLeagueRelics.includes(group.leagueRelic);
+    if (group.leagueRelic && selectedLeagueRelics.includes(group.leagueRelic)) return true;
+    // A pure relic-gated group (no real region alternative) stops here -
+    // falling through to the region check below would trivially pass
+    // regardless of the relic pick, since 'relic' is itself in ALWAYS_UNLOCKED.
+    if (group.leagueRelic && group.regions.length === 1 && group.regions[0] === 'relic') return false;
     if (ignoreComponents && group.component) return true;
     if (ignoreArtefactRegions && group.artefact) return true;
     return group.regions.some((r) => ALWAYS_UNLOCKED.has(r) || isUnlocked(r));

@@ -24,7 +24,9 @@
 // `effects` is the relic's full list of effect bullets - shown as a list
 // rather than one run-on paragraph since several of these (Golden Touch,
 // Crystal Grace, Superheated especially) stack up quite a few distinct
-// effects.
+// effects. Every bullet is wiki-verbatim EXCEPT Endless Harvest's last one,
+// which is an app-added clarification (not something Jagex wrote) - see the
+// note on that entry below.
 //
 // Icon note: Golden Touch's relic icon is `Golden_Touch_(relic).png`, NOT
 // `Golden_Touch.png` - that plain filename is already used by the unrelated,
@@ -39,6 +41,19 @@ const FP = (file) => `icons/${file}`;
 
 export const LEAGUE_RELICS = [
   {
+    // The Mining resource-upgrade effect below genuinely lets a player reach
+    // Luminate/Oricalchite/Light animica ore from common lower-tier ores
+    // without visiting any of those ores' normal source regions (confirmed
+    // via https://runescape.wiki/w/Polishing#Mining's tier-upgrade table -
+    // e.g. mithril ore -> luminite, runite ore -> oricalchite) - so gear.js
+    // tags every "Luminate ore"/"Oricalchite ore"/"Light animica ore"
+    // labelled region group with `leagueRelic: 'Endless Harvest'` as an
+    // alternative to the real regions (see gearAvailability.js/
+    // isGearItemAvailable and RegionTags.jsx's ResourcePill). `regionTagNote`
+    // (app-added, not a wiki-verbatim `effects` bullet - see LeagueRelicRow.jsx)
+    // surfaces that to the player directly on the relic's own row, rendering
+    // `tags` as the exact same pill component gear items use for these
+    // labels rather than just naming them in prose.
     name: 'Endless Harvest',
     tier: 1,
     effects: [
@@ -49,6 +64,11 @@ export const LEAGUE_RELICS = [
       'Grants permanently full stamina when mining.',
       'Grants an always-active time sprite when excavating.',
     ],
+    regionTagNote: {
+      prefix: 'Allows you to obtain',
+      tags: ['Luminate ore', 'Oricalchite ore', 'Light animica ore'],
+      suffix: 'regardless of region.',
+    },
     icon: FP('Endless_Harvest.png'),
   },
   {
