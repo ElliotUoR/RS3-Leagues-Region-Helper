@@ -6,10 +6,17 @@ import { isAdminSession, ADMIN_COOKIE_NAME } from '../lib/adminAuth.js';
 export const trackCounterRouter = Router();
 
 // Kept in sync with the CHECK constraint on usage_counters.category (see
-// deploy/migrations/008_usage_counters.sql) - validated here too so a bad
-// request 400s with a clear error instead of surfacing a raw Postgres
+// deploy/migrations/008_usage_counters.sql, widened by
+// 009_relic_drop_table_usage.sql) - validated here too so a bad request
+// 400s with a clear error instead of surfacing a raw Postgres
 // constraint-violation message.
-const VALID_CATEGORIES = new Set(['region_pick', 'region_combo', 'league_relic_pick', 'feature']);
+const VALID_CATEGORIES = new Set([
+  'region_pick',
+  'region_combo',
+  'league_relic_pick',
+  'feature',
+  'relic_drop_table',
+]);
 const MAX_KEY_LENGTH = 200;
 // A single user action can fire several increments at once (locking in a
 // 3-region combo is 3 individual region_pick increments + 1 region_combo

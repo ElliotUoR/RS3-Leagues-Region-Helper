@@ -386,7 +386,7 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
   const pool = getAnalyticsPool();
 
   try {
-    const [regionPicks, regionCombos, leagueRelicPicks, featureCounters] = await Promise.all([
+    const [regionPicks, regionCombos, leagueRelicPicks, dropTableViews, featureCounters] = await Promise.all([
       pool.query(
         `select key, count from public.usage_counters where category = 'region_pick' order by count desc`,
       ),
@@ -397,6 +397,14 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
       pool.query(
         `select key, count from public.usage_counters where category = 'league_relic_pick' order by count desc`,
       ),
+      // See deploy/migrations/009_relic_drop_table_usage.sql /
+      // components/RelicDropTablePanel.jsx - keyed by relic name, one row
+      // per relic that HAS a dropTable and has actually been opened at
+      // least once (a relic with a dropTable nobody's clicked yet just
+      // doesn't appear here - no need to pre-seed rows for it).
+      pool.query(
+        `select key, count from public.usage_counters where category = 'relic_drop_table' order by count desc`,
+      ),
       pool.query(`select key, count from public.usage_counters where category = 'feature'`),
     ]);
 
@@ -406,6 +414,7 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
       regionPicks: regionPicks.rows.map((r) => ({ region: regionLabel(r.key), count: r.count })),
       regionCombos: regionCombos.rows.map((r) => ({ combo: comboLabel(r.key), count: r.count })),
       leagueRelicPicks: leagueRelicPicks.rows.map((r) => ({ relic: r.key, count: r.count })),
+      dropTableViews: dropTableViews.rows.map((r) => ({ relic: r.key, count: r.count })),
       karamjaToggledOffCount: featureCountFor('karamja_toggled_off'),
       importRelicsUsedCount: featureCountFor('import_relics_used'),
     });

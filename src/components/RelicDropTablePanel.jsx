@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getDropTableCategoryColor } from '../data/regionColors';
+import { trackUsage } from '../utils/api';
 
 // Per-item stagger delay for AlchemyCategoryCard's expand/collapse animation,
 // scaled down as chain length grows so the whole sequence always finishes
@@ -300,7 +301,14 @@ function AlchemyChainCategories({ dropTable }) {
 // The open/closed state is deliberately local-only (useState, not lifted or
 // persisted) - this is a supplementary reference lookup, not something that
 // needs to survive a reload or be shared with anything else on the page.
-export default function RelicDropTablePanel({ dropTable }) {
+//
+// `relicName` is only used for the trackUsage() call below ("relic_drop_table"
+// usage counter, keyed by relic name - see deploy/migrations/009_relic_drop_table_usage.sql
+// and the admin dashboard's "Drop table views" panel) - tracked here, in the
+// one component every relic's drop table toggle already goes through,
+// rather than in each caller, so a future relic with a dropTable is counted
+// individually with no extra wiring.
+export default function RelicDropTablePanel({ dropTable, relicName }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -373,9 +381,17 @@ export default function RelicDropTablePanel({ dropTable }) {
     );
   }
 
+  function handleOpen() {
+    setOpen(true);
+    // Only fires once the panel is actually opened, not on close/outside-
+    // click/Escape - "was this drop table looked at" is the question, and a
+    // close action isn't a second look.
+    if (relicName) trackUsage([{ category: 'relic_drop_table', key: relicName }]);
+  }
+
   return (
     <>
-      <button type="button" className="relic-drop-table-toggle" onClick={() => setOpen(true)}>
+      <button type="button" className="relic-drop-table-toggle" onClick={handleOpen}>
         See {dropTable.footerText}
       </button>
       {open &&
