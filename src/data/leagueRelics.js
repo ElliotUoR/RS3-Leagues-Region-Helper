@@ -214,6 +214,20 @@ export const LEAGUE_RELICS = [
     dropTable: {
       heading: 'Transmutation tables',
       footerText: 'Transmutation tables',
+      // Distinguishes this from the generic drop-table rendering path in
+      // RelicDropTablePanel.jsx - these categories are ordered tier chains
+      // (see each category's `detail` below), not flat drop-chance lists, so
+      // they get their own alchemy-themed "chain of pills" layout keyed off
+      // this literal string.
+      theme: 'alchemy',
+      // Both directions apply to every chain below - Divine Convergence walks
+      // a chain one step toward its base (left) end, Divine Divergence one
+      // step toward its refined (right) end. Rendered once as a shared
+      // legend rather than repeated per category.
+      legend: [
+        { label: 'Divine Convergence', direction: 'down', detail: 'steps a resource down toward its base tier' },
+        { label: 'Divine Divergence', direction: 'up', detail: 'steps a resource up toward its refined tier' },
+      ],
       categories: [
         { name: 'Hides', detail: 'Cowhide → Snakehide → Green Dhide → Blue Dhide → Red Dhide → Black Dhide → Royal Dhide' },
         { name: 'Runes', detail: 'Rune essence → Pure essence → Air runes through Time runes' },

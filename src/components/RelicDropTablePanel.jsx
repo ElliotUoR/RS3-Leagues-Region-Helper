@@ -72,6 +72,91 @@ function HeistDropTable({ dropTable }) {
   );
 }
 
+// Splits a Transmutation category's chain text (e.g. 'Copper ore → Tin ore →
+// ... → Primal ore (then cycles)') into its ordered tier steps. A trailing
+// parenthetical (only the Ores chain has one, noting it loops back to Copper
+// ore) is pulled out as a separate annotation instead of being left stuck
+// inside the last step's pill text.
+function parseAlchemyChain(detail) {
+  const rawSteps = detail.split(' → ').map((step) => step.trim());
+  const lastIndex = rawSteps.length - 1;
+  const cycleMatch = rawSteps[lastIndex]?.match(/^(.*)\s\((.+)\)$/);
+  if (cycleMatch) {
+    rawSteps[lastIndex] = cycleMatch[1];
+    return { steps: rawSteps, note: cycleMatch[2] };
+  }
+  return { steps: rawSteps, note: null };
+}
+
+// Transmutation's tables (see dropTable.theme === 'alchemy' in
+// data/leagueRelics.js) are tier progressions - Divine Convergence/Divergence
+// step a resource one tier down/up a fixed chain - not drop-chance
+// categories, so a flat "name: sentence" row (the generic rendering below)
+// would read as a wall of text for a 27-step chain like Raw fish. Instead
+// each category renders as its own card with the chain broken into
+// individually-styled tier pills connected by arrows, so both a 2-step chain
+// (Gems) and a 27-step one stay scannable. Each pill's fill/border/text
+// color is interpolated (via the --node-progress custom property, consumed
+// in index.css) from pale/dashed at the chain's base end to a saturated,
+// glowing fill at its most-refined end, echoing the alchemical
+// "raw material -> refined material" idea the relic's effect is built on.
+function AlchemyChainCategories({ dropTable }) {
+  return (
+    <>
+      {dropTable.legend && (
+        <ul className="drop-table-alchemy-legend">
+          {dropTable.legend.map((entry) => (
+            <li
+              key={entry.label}
+              className={`drop-table-alchemy-legend-item drop-table-alchemy-legend-${entry.direction}`}
+            >
+              <span className="drop-table-alchemy-legend-arrow" aria-hidden="true">
+                {entry.direction === 'up' ? '↑' : '↓'}
+              </span>
+              <span className="drop-table-alchemy-legend-label">{entry.label}</span>
+              <span className="drop-table-alchemy-legend-detail">{entry.detail}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <ul className="drop-table-alchemy-categories">
+        {dropTable.categories.map((category, index) => {
+          const { steps, note } = parseAlchemyChain(category.detail);
+          const color = getDropTableCategoryColor(category, index);
+          return (
+            <li key={category.name} className="drop-table-alchemy-category" style={{ '--drop-table-color': color }}>
+              <div className="drop-table-alchemy-category-header">
+                <span className="drop-table-alchemy-category-name">{category.name}</span>
+                <span className="drop-table-alchemy-category-count">
+                  {steps.length} {steps.length === 1 ? 'tier' : 'tiers'}
+                </span>
+              </div>
+              <ol className="drop-table-alchemy-chain">
+                {steps.map((step, stepIndex) => (
+                  <li key={`${category.name}-${step}`} className="drop-table-alchemy-link">
+                    {stepIndex > 0 && (
+                      <span className="drop-table-alchemy-arrow" aria-hidden="true">
+                        →
+                      </span>
+                    )}
+                    <span
+                      className="drop-table-alchemy-node"
+                      style={{ '--node-progress': steps.length > 1 ? stepIndex / (steps.length - 1) : 0 }}
+                    >
+                      {step}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              {note && <p className="drop-table-alchemy-note">↺ {note}</p>}
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
+
 // Expandable "drop table" (or, for Transmutation, resource-conversion table)
 // panel attached to a League Relic row - see data/leagueRelics.js's
 // `dropTable` field. Deliberately a sibling of LeagueRelicRow's whole-row
@@ -175,6 +260,13 @@ export default function RelicDropTablePanel({ dropTable }) {
     );
   } else if (dropTable.theme === 'heist') {
     panelContent = <HeistDropTable dropTable={dropTable} />;
+  } else if (dropTable.theme === 'alchemy') {
+    panelContent = (
+      <>
+        <h3 className="relic-drop-table-heading">{dropTable.heading}</h3>
+        <AlchemyChainCategories dropTable={dropTable} />
+      </>
+    );
   } else {
     panelContent = (
       <>
