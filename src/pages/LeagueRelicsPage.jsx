@@ -35,21 +35,26 @@ export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
           Relics chosen directly from the league's own relic tree, not tied to any region - pick one
           per tier. Relics whose tier isn't confirmed yet are listed separately with no pick limit.
         </p>
-        <button
-          type="button"
-          className="league-relic-mode-toggle"
-          onClick={() => setCompactMode((prev) => !prev)}
-        >
-          {compactMode ? 'Toggle to detailed mode' : 'Toggle to compact mode'}
-        </button>
       </header>
 
       <main className="abilities-page">
-        {tierGroups.map(([tier, relics]) => (
+        {tierGroups.map(([tier, relics], index) => (
           <section key={tier} className="league-relic-tier-group">
             <h2 className="league-relic-tier-heading">
               {tier === 'unknown' ? 'Unknown tier' : `Tier ${tier}`}
               <span className="league-relic-tier-note">{tier === 'unknown' ? 'pick any number' : 'pick one'}</span>
+              {/* Lives on the first tier heading rather than the page header
+                  so it sits inline, right-aligned, on the same row as "Tier
+                  1 - pick one" instead of stacked above it. */}
+              {index === 0 && (
+                <button
+                  type="button"
+                  className="league-relic-mode-toggle"
+                  onClick={() => setCompactMode((prev) => !prev)}
+                >
+                  {compactMode ? 'Toggle to detailed mode' : 'Toggle to compact mode'}
+                </button>
+              )}
             </h2>
             <div className={`gear-item-rows${compactMode ? ' compact' : ''}`}>
               {relics.map((relic) => (

@@ -109,34 +109,44 @@ export const LEAGUE_RELICS = [
     // each gated by a *different* combination of Heist-only vs
     // outside-of-Heist availability (per the relic's own Thieving-pickpocket
     // effects above): Tier 1 is Heist-only, Tiers 2-3 drop both inside and
-    // outside Heists, Tier 4 is outside-Heist-only. The `badge` on each line
-    // names its own availability rather than a single shared "Heist" flag,
-    // since it genuinely differs tier to tier.
+    // outside Heists, Tier 4 is outside-Heist-only. Grimy Herbs is listed
+    // first since it's not part of that Tier 1-4 sequence at all - it drops
+    // regardless of tier, both inside and outside Heists. The `badge` on
+    // each line names its own availability rather than a single shared
+    // "Heist" flag, since it genuinely differs line to line.
     //
-    // `theme: 'heist'` opts this table into RelicDropTablePanel's bespoke
-    // heist/treasure-ledger rendering branch (see that component) instead of
-    // the generic palette-cycled list used by Superheated/Transmutation.
-    // `rank`/`metal`/`clearance` are extra fields that branch reads:
-    //   - `rank` is the roman-numeral "clearance level" shown in the ledger
-    //     medallion (purely cosmetic re-statement of tier order).
-    //   - `metal` picks which precious-metal color a tier reads as (rarest/
-    //     Heist-only secondaries = gold, most common/outside-only = bronze),
-    //     independent of the badge/clearance meaning below.
+    // `theme: 'herblore'` opts this table into RelicDropTablePanel's bespoke
+    // herblore-ledger rendering branch (see that component) instead of the
+    // generic palette-cycled list used by Superheated/Transmutation. `icon`/
+    // `clearance` are extra fields that branch reads:
+    //   - `icon` is the item image shown in each line's rank medallion
+    //     (in place of a roman numeral/star) - these are runescape.wiki
+    //     "detail" renders, downscaled to ~160px max side locally (Pillow)
+    //     since the originals were 900px-1280px source images destined for a
+    //     ~28px circle.
     //   - `clearance` is the machine-readable form of `badge` ('heist' /
-    //     'both' / 'outside') that drives the lit/locked HEIST+STREET meter.
+    //     'both' / 'outside') that drives the lit/locked HEIST+OUT meter.
     //     `badge` itself is kept verbatim and still rendered as text (as
     //     "Access: <badge>") so the underlying game info isn't only conveyed
-    //     via color/icons.
+    //     via color/icons. The dark-green-to-black tint per line is assigned
+    //     positionally in CSS (nth-child), not from a data field.
     dropTable: {
       heading: 'Thieving drop table',
       footerText: 'Thieving drop table',
-      theme: 'heist',
+      theme: 'herblore',
+      icon: FP('Thieving_detail.webp'),
       categories: [
+        {
+          name: 'Grimy Herbs',
+          badge: 'Heist + Outside',
+          icon: FP('Clean_lantadyme_detail.png'),
+          clearance: 'both',
+          detail: 'Guam → Fellstalk',
+        },
         {
           name: 'Tier 1 Secondaries',
           badge: 'Heist only',
-          rank: 'I',
-          metal: 'gold',
+          icon: FP('Congealed_blood_1000_detail.png'),
           clearance: 'heist',
           detail:
             'Primal extract, bottled roar, spark chitin, poison slime, adrenaline crystal, ground wyvern bone and wyvern bonemeal, grenwall spikes, congealed blood, ground Miasma runes, dragonscale dust, phoenix feather, morchella mushroom, tombshroom, timeworn tincture, spider fang',
@@ -144,8 +154,7 @@ export const LEAGUE_RELICS = [
         {
           name: 'Tier 2 Secondaries',
           badge: 'Heist + Outside',
-          rank: 'II',
-          metal: 'electrum',
+          icon: FP('Snape_grass_detail.png'),
           clearance: 'both',
           detail:
             "Snape grass, Red spider's eggs, unicorn horn dust, limpwurt roots, white berries, wine of zamorak, crushed birds nest, cactus potato, Yew and Magic roots, Searing ashes, cockatrice egg, rabbit foot, bull horns, wine of saradomin, wine of guthix, Mycelial webbing, poison ivy berries",
@@ -153,8 +162,7 @@ export const LEAGUE_RELICS = [
         {
           name: 'Tier 3 Secondaries',
           badge: 'Heist + Outside',
-          rank: 'III',
-          metal: 'silver',
+          icon: FP('Mort_myre_fungus_detail.webp'),
           clearance: 'both',
           detail:
             "Chinchompa residue, yak milk, yak tuft, zygomite fruit, regular and enriched timber & calcified fungus, enriched fungal algae, kebbit teeth dust, mort myre mushroom, goat horn dust, toad's legs, spider venom",
@@ -162,8 +170,7 @@ export const LEAGUE_RELICS = [
         {
           name: 'Tier 4 Secondaries',
           badge: 'Outside only',
-          rank: 'IV',
-          metal: 'bronze',
+          icon: FP('Jangerberries_detail.webp'),
           clearance: 'outside',
           detail:
             'Eye of newt, jangerberries, Frog spawn, Papaya, Swordfish, Wimpy feather, redberries, ground mud runes, Nail beast nails, bull horns, Bear fur, cadava berries, chocolate dust, white, red, yellow and black beads',
@@ -225,97 +232,177 @@ export const LEAGUE_RELICS = [
       // step toward its refined (right) end. Rendered once as a shared
       // legend rather than repeated per category.
       legend: [
-        { label: 'Divine Convergence', direction: 'down', detail: 'steps a resource down toward its base tier' },
-        { label: 'Divine Divergence', direction: 'up', detail: 'steps a resource up toward its refined tier' },
+        {
+          label: 'Divine Convergence',
+          direction: 'down',
+          detail: 'steps a resource down toward its base tier',
+          icon: FP('Low_Level_Alchemy_icon.webp'),
+        },
+        {
+          label: 'Divine Divergence',
+          direction: 'up',
+          detail: 'steps a resource up toward its refined tier',
+          icon: FP('High_Level_Alchemy_icon.webp'),
+        },
       ],
+      // `icon` (one per category, added below) is a real item image
+      // representative of that category's chain, shown to the left of its
+      // name - downscaled locally from the wiki's larger "detail" renders
+      // to ~160px max side, same as every other relic's drop-table icons.
       categories: [
-        { name: 'Hides', detail: 'Cowhide → Snakehide → Green Dhide → Blue Dhide → Red Dhide → Black Dhide → Royal Dhide' },
-        { name: 'Runes', detail: 'Rune essence → Pure essence → Air runes through Time runes' },
-        { name: 'Ashes', detail: 'Impious → Accursed → Infernal → Tortured → Searing' },
+        {
+          name: 'Hides',
+          icon: FP('Cowhide_detail.webp'),
+          detail: 'Cowhide → Snakehide → Green Dhide → Blue Dhide → Red Dhide → Black Dhide → Royal Dhide',
+        },
+        // The single "Air runes through Time runes" span is 15 individual
+        // runes, not 1 - spelled out in full below (with Rune/Pure essence)
+        // for an accurate 17-tier count, in Runecrafting-level order (Air
+        // through Wrath, then Time) - Astral is excluded since it's unlocked
+        // via a separate quest-only altar, not this main sequential chain.
+        {
+          name: 'Runes',
+          color: '#4a4a52',
+          icon: FP('Blood_rune_detail.png'),
+          detail:
+            'Rune essence → Pure essence → Air runes → Mind runes → Water runes → Earth runes → Fire runes → Body runes → Cosmic runes → Chaos runes → Nature runes → Law runes → Death runes → Blood runes → Soul runes → Wrath runes → Time runes',
+        },
+        {
+          name: 'Ashes',
+          color: '#6e6e78',
+          icon: FP('Accursed_ashes_detail.png'),
+          detail: 'Impious → Accursed → Infernal → Tortured → Searing',
+        },
         {
           name: 'Bones',
+          color: '#9a9aa4',
+          icon: FP('Reinforced_dragon_bones_detail.png'),
           detail:
             'Bones → Wolf bones → Monkey bones → Bat bones → Big bones → Jogre bones → Zogre bones → Baby dragon bones → Wyvern bones → Dragon bones → Dagannoth bones → Airut bones → Ourg bones → Hardened dragon bones → Dragonkin bones → Dinosaur bones → Frost dragon bones → Reinforced dragon bones',
         },
-        { name: 'Gems', detail: 'Opal → Dragonstone' },
-        { name: 'Compost', detail: 'Compost → Supercompost → Ultracompost' },
+        {
+          name: 'Gems',
+          icon: FP('Uncut_ruby_detail.png'),
+          detail: 'Opal → Jade → Red topaz → Sapphire → Emerald → Ruby → Diamond → Dragonstone',
+        },
+        {
+          name: 'Compost',
+          icon: FP('Ultracompost_detail.png'),
+          detail: 'Compost → Supercompost → Ultracompost',
+        },
         {
           name: 'Allotment seeds',
+          icon: FP('Onion_seed_detail.png'),
           detail:
             'Potato seed → Onion seed → Cabbage seed → Tomato seed → Sweetcorn seed → Strawberry seed → Watermelon seed → Snape grass seed → Sunchoke seed → Fly trap seed',
         },
         {
           name: 'Flower seeds',
+          icon: FP('Starbloom_flower_seed_detail.png'),
           detail:
             'Marigold seed → Rosemary seed → Nasturtium seed → Woad seed → Limpwurt seed → White lily seed → Butterfly flower seed → Starbloom flower seed',
         },
         {
           name: 'Hop & vine seeds',
+          icon: FP('Godly_grapevine_seed_detail.png'),
           detail:
             'Barley seed → Hammerstone seed → Asgarnian seed → Wendlewick seed → Jute seed → Yanillian seed → Krandorian seed → Wildblood seed → Reed seed → Grapevine seed → Godly grapevine seed',
         },
         {
           name: 'Herb seeds',
+          color: '#3ddc63',
+          icon: FP('Lantadyme_seed_detail.png'),
           detail:
             'Guam seed → Marrentill seed → Tarromin seed → Harralander seed → Ranarr seed → Spirit weed seed → Toadflax seed → Irit seed → Wergali seed → Avantoe seed → Kwuarm seed → Bloodweed seed → Snapdragon seed → Cadantine seed → Lantadyme seed → Arbuck seed → Dwarf weed seed → Torstol seed → Fellstalk seed',
         },
         {
           name: 'Bush seeds',
+          icon: FP('Avocado_seed_detail.png'),
           detail:
             'Redberry seed → Cadavaberry seed → Dwellberry seed → Jangerberry seed → Whiteberry seed → Poison Ivy seed → Barberry seed → Avocado seed → Mango seed → Lychee seed',
         },
-        { name: 'Tree seeds', detail: 'Acorn → Willow seed → Maple seed → Yew seed → Magic seed → Elder seed' },
+        {
+          name: 'Tree seeds',
+          icon: FP('Magic_seed_detail.png'),
+          detail: 'Acorn → Willow seed → Maple seed → Yew seed → Magic seed → Elder seed',
+        },
         {
           name: 'Fruit tree seeds',
+          icon: FP('Palm_tree_seed_detail.png'),
           detail:
             'Apple tree seed → Banana tree seed → Orange tree seed → Curry tree seed → Pineapple seed → Papaya tree seed → Palm tree seed → Ciku seed → Guarana seed → Carambola seed',
         },
         {
           name: 'Cactus seeds',
+          color: '#d9a066',
+          icon: FP('Golden_dragonfruit_seed_detail.png'),
           detail: 'Cactus seed → Prickly pear seed → Potato cactus seed → Dragonfruit seed → Golden dragonfruit seed',
         },
         {
           name: 'Mushroom spores',
+          icon: FP('Morchella_mushroom_spore_detail.webp'),
           detail: 'Bittercap mushroom spore → Morchella mushroom spore → Stinkshroom spore → Tombshroom spore',
         },
         {
           name: 'Logs',
+          icon: FP('Magic_logs_detail.webp'),
           detail:
             'Logs → Oak logs → Willow logs → Teak logs → Maple logs → Acadia logs → Mahogany logs → Yew logs → Magic logs → Elder logs → Eternal magic logs',
         },
         {
           name: 'Ores',
+          icon: FP('Light_animica_detail.png'),
+          // "Primal ore" isn't a single tier - past Dark animica the chain
+          // continues through these 10 elder ores by name (not a loop back
+          // to Copper, despite what an earlier "(then cycles)" note here
+          // implied).
           detail:
-            'Copper ore → Tin ore → Iron ore → Coal → Mithril ore → Adamantite ore → Luminite → Runite ore → Orichalcite ore → Drakolith → Necrite ore → Phasmatite → Banite ore → Light animica → Dark animica → Primal ore (then cycles)',
+            'Copper ore → Tin ore → Iron ore → Coal → Mithril ore → Adamantite ore → Luminite → Runite ore → Orichalcite ore → Drakolith → Necrite ore → Phasmatite → Banite ore → Light animica → Dark animica → Novite ore → Bathus ore → Marmaros ore → Kratonium ore → Fractite ore → Zephyrium ore → Argonite ore → Katagon ore → Gorgonite ore → Promethium ore',
         },
-        { name: 'Precious ores & clay', detail: 'Clay → Silver ore → Gold ore → Porcelain clay → Platinum ore' },
+        {
+          name: 'Precious ores & clay',
+          icon: FP('Gold_ore_detail.webp'),
+          detail: 'Clay → Silver ore → Gold ore → Porcelain clay → Platinum ore',
+        },
         {
           name: 'Raw fish',
+          color: '#3a8fc7',
+          icon: FP('Raw_rocktail_detail.png'),
           detail:
             'Raw crayfish → Raw shrimps → Raw sardine → Raw herring → Raw anchovies → Raw mackerel → Raw trout → Raw cod → Raw pike → Raw salmon → Raw tuna → Raw lobster → Raw bass → Raw swordfish → Raw desert sole → Raw catfish → Raw monkfish → Raw green blubber jellyfish → Raw beltfish → Raw shark → Raw sea turtle → Raw great white shark → Raw manta ray → Raw giant crayfish → Raw cavefish → Raw rocktail → Raw blue blubber jellyfish → Raw sailfish',
         },
         {
           name: 'Divine energy',
+          color: '#9b59c9',
+          icon: FP('Luminous_energy_detail.webp'),
           detail:
             'Pale energy → Flickering energy → Bright energy → Glowing energy → Sparkling energy → Gleaming energy → Vibrant energy → Lustrous energy → Brilliant energy → Radiant energy → Luminous energy → Incandescent energy',
         },
         {
           name: 'Ghostly ink',
+          icon: FP('Powerful_ghostly_ink_detail.webp'),
           detail: 'Basic ghostly ink → Regular ghostly ink → Greater ghostly ink → Powerful ghostly ink',
         },
         {
           name: 'Necroplasm',
+          icon: FP('Powerful_necroplasm_detail.webp'),
           detail: 'Weak necroplasm → Lesser necroplasm → Greater necroplasm → Powerful necroplasm',
         },
         {
           name: 'Mementos',
+          icon: FP('Powerful_memento_detail.png'),
           detail: 'Broken memento → Fragile memento → Spirit memento → Robust memento → Powerful memento',
         },
         {
           name: 'Ritual candles',
+          icon: FP('Greater_ritual_candle_detail.png'),
           detail: 'Basic ritual candle → Regular ritual candle → Greater ritual candle → Greater flaming skull',
         },
-        { name: 'Necromancy runes', detail: 'Spirit rune → Bone rune → Flesh rune → Miasma rune' },
+        {
+          name: 'Necromancy runes',
+          icon: FP('Miasma_rune_detail.png'),
+          detail: 'Spirit rune → Bone rune → Flesh rune → Miasma rune',
+        },
       ],
     },
   },
@@ -365,26 +452,42 @@ export const LEAGUE_RELICS = [
     // the real drop table's own common-to-rare order, and it happens to
     // trace the classic blacksmith heat-color scale end to end (dull red ->
     // cherry red -> orange -> yellow -> white -> welding heat), so each
-    // category's `stage` name and `color` climbs that same scale rather than
-    // being an arbitrary palette pick - Coins landing on "Welding Heat" as
-    // near-white/molten gold is the intentional payoff at the end of the
-    // list, not a coincidence.
+    // category's `color` still climbs that same scale rather than being an
+    // arbitrary palette pick, even though the named stage tags (Dull Red,
+    // Welding Heat, etc.) were dropped as unnecessary - `icon` (a real item
+    // image, downscaled locally to ~160px max side from the wiki's much
+    // larger "detail" renders) replaces them instead.
     dropTable: {
       heading: 'Blessed Fire Spirits drop table',
       footerText: 'Blessed Fire Spirits drop table',
       theme: 'forge',
       categories: [
-        { name: 'Stone Spirits', detail: 'Copper → Platinum', stage: 'Dull Red', color: '#8f3a1e' },
-        { name: 'Uncut Gems', detail: 'Sapphire → Dragonstone', stage: 'Cherry Red', color: '#c8421f' },
-        { name: 'Charms', detail: 'Gold, Green, Crimson, Blue', stage: 'Orange Heat', color: '#dd6a1f' },
+        {
+          name: 'Stone Spirits',
+          detail: 'Copper → Platinum',
+          color: '#8f3a1e',
+          icon: FP('Drakolith_stone_spirit_detail.png'),
+        },
+        {
+          name: 'Uncut Gems',
+          detail: 'Sapphire → Dragonstone',
+          color: '#c8421f',
+          icon: FP('Uncut_sapphire_detail.png'),
+        },
+        { name: 'Charms', detail: 'Gold, Green, Crimson, Blue', color: '#dd6a1f', icon: FP('Gold_charm_detail.png') },
         {
           name: 'Clues',
           detail: 'Easy → Master, and Box of Clue Scrolls',
-          stage: 'Bright Yellow',
           color: '#e8a824',
+          icon: FP('Sealed_clue_scroll_(hard)_detail.webp'),
         },
-        { name: 'Flasks', detail: 'Crystal & Potion Flasks', stage: 'White Heat', color: '#f3d35a' },
-        { name: 'Coins', detail: '10k → 100k GP', stage: 'Welding Heat', color: '#fdf1c4' },
+        {
+          name: 'Flasks',
+          detail: 'Crystal & Potion Flasks',
+          color: '#f3d35a',
+          icon: FP('Crystal_flask_detail.webp'),
+        },
+        { name: 'Coins', detail: '10k → 100k GP', color: '#fdf1c4', icon: FP('Coins_1000_detail.png') },
       ],
     },
   },

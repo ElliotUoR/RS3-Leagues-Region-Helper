@@ -1,72 +1,69 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { getDropTableCategoryColor } from '../data/regionColors';
 
-// Golden Touch's bespoke "Heist Ledger" rendering (dropTable.theme ===
-// 'heist') - a treasure/heist-themed alternative to the generic palette-
-// cycled <ul> below, kept as its own component so the generic path (used by
+// Per-item stagger delay for AlchemyCategoryCard's expand/collapse animation,
+// scaled down as chain length grows so the whole sequence always finishes
+// well under 1 second even for a 27-step chain (Raw fish) - see that
+// component below for how these are used.
+const ALCHEMY_MAX_STAGGER_MS = 28;
+const ALCHEMY_STAGGER_BUDGET_MS = 650;
+const ALCHEMY_ITEM_TRANSITION_MS = 180;
+
+// Golden Touch's bespoke "Herblore Ledger" rendering (dropTable.theme ===
+// 'herblore') - kept as its own component so the generic path (used by
 // Superheated/Transmutation and any future themeless relic) stays completely
 // untouched. See src/data/leagueRelics.js's Golden Touch dropTable comment
-// for what `rank`/`metal`/`clearance` mean.
+// for what `icon`/`clearance` mean - the dark-green-to-black tint per line
+// is assigned positionally by index.css (nth-child), not read from data.
 //
-// The clearance meter is deliberately two labelled segments (HEIST / STREET)
+// The clearance meter is deliberately two labelled segments (HEIST / OUT)
 // rather than reusing the plain text badge alone: lighting up exactly the
 // segment(s) that apply reads at a glance, without having to parse "Heist +
 // Outside" vs "Heist only" as text first. The original `badge` text is still
 // printed underneath (as "Access: <badge>") so the underlying game info is
 // never conveyed by color/icon alone.
-function HeistDropTable({ dropTable }) {
+function HerbloreDropTable({ dropTable }) {
   return (
-    <div className="drop-table-heist-panel">
-      <div className="drop-table-heist-header">
-        <span className="drop-table-heist-header-icon" aria-hidden="true">💰</span>
-        <div className="drop-table-heist-header-text">
-          <span className="drop-table-heist-eyebrow">Heist Crew Ledger</span>
-          <h3 className="drop-table-heist-heading">{dropTable.heading}</h3>
-        </div>
+    <div className="drop-table-herblore-panel">
+      <div className="drop-table-herblore-header">
+        {dropTable.icon && <img className="drop-table-herblore-header-icon" src={dropTable.icon} alt="" />}
+        <h3 className="drop-table-herblore-heading">{dropTable.heading}</h3>
       </div>
-      <ol className="drop-table-heist-list">
-        {dropTable.categories.map((category, index) => {
+      <ol className="drop-table-herblore-list">
+        {dropTable.categories.map((category) => {
           const clearance = category.clearance || 'both';
           const heistLit = clearance === 'heist' || clearance === 'both';
-          const streetLit = clearance === 'outside' || clearance === 'both';
+          const outLit = clearance === 'outside' || clearance === 'both';
           return (
-            <li
-              key={category.name}
-              className={`drop-table-heist-entry drop-table-heist-metal-${category.metal || 'gold'}`}
-            >
-              <div className="drop-table-heist-rank" aria-hidden="true">
-                {category.rank || index + 1}
+            <li key={category.name} className="drop-table-herblore-entry">
+              <div className="drop-table-herblore-rank">
+                {category.icon && <img src={category.icon} alt="" />}
               </div>
-              <div className="drop-table-heist-entry-body">
-                <div className="drop-table-heist-entry-top">
-                  <span className="drop-table-heist-name">{category.name}</span>
-                  <div className="drop-table-heist-clearance">
-                    <span
-                      className={`drop-table-heist-clearance-seg ${heistLit ? 'is-lit' : 'is-locked'}`}
-                    >
-                      {!heistLit && <span aria-hidden="true">🔒</span>}
+              <div className="drop-table-herblore-entry-body">
+                <div className="drop-table-herblore-entry-top">
+                  <span className="drop-table-herblore-name">{category.name}</span>
+                  <div className="drop-table-herblore-clearance">
+                    <span className={`drop-table-herblore-clearance-seg ${heistLit ? 'is-lit' : 'is-locked'}`}>
                       Heist
                     </span>
-                    <span
-                      className={`drop-table-heist-clearance-seg ${streetLit ? 'is-lit' : 'is-locked'}`}
-                    >
-                      {!streetLit && <span aria-hidden="true">🔒</span>}
-                      Street
+                    <span className={`drop-table-herblore-clearance-seg ${outLit ? 'is-lit' : 'is-locked'}`}>
+                      Out
                     </span>
                   </div>
                 </div>
                 {category.badge && (
-                  <span className="drop-table-heist-badge-caption">Access: {category.badge}</span>
+                  <span className="drop-table-herblore-badge-caption">Access: {category.badge}</span>
                 )}
-                {category.detail && <p className="drop-table-heist-detail">{category.detail}</p>}
+                {category.detail && <p className="drop-table-herblore-detail">{category.detail}</p>}
               </div>
             </li>
           );
         })}
       </ol>
-      <p className="drop-table-heist-legend">
-        <span className="drop-table-heist-legend-key">Heist</span> = inside the Heist minigame only ·{' '}
-        <span className="drop-table-heist-legend-key">Street</span> = normal open-world pickpocketing too
+      <p className="drop-table-herblore-legend">
+        <span className="drop-table-herblore-legend-key">Heist</span> = inside the Heist minigame only ·{' '}
+        <span className="drop-table-herblore-legend-key">Out</span> = normal open-world pickpocketing too
       </p>
     </div>
   );
@@ -100,6 +97,156 @@ function parseAlchemyChain(detail) {
 // in index.css) from pale/dashed at the chain's base end to a saturated,
 // glowing fill at its most-refined end, echoing the alchemical
 // "raw material -> refined material" idea the relic's effect is built on.
+// One category's chain, in either "shrunk" (start/end item only) or
+// "expanded" (every tier) form - shrunk is the default; hovering OR clicking
+// the card expands it, per the two states below:
+//   - `hovering` alone (no click) - expands while the mouse is over the
+//     card, collapses again the moment the mouse leaves.
+//   - `locked` (set by a click) - keeps it expanded even after the mouse
+//     leaves; a second click un-locks it, reverting to hover-only behaviour.
+// `renderAll` is a THIRD, slightly-lagging piece of state: middle tiers stay
+// mounted in the DOM for `totalDuration` after collapsing starts (so their
+// exit animation can actually play) before finally being removed - without
+// this they'd just vanish instantly the moment the mouse leaves.
+//
+// Animation: middle tiers mount/unmount from the DOM (only the first/last
+// are always present), so entering ones use the `@starting-style` at-rule
+// (see index.css) to animate in from a collapsed state the instant they're
+// inserted, and leaving ones get an `.is-collapsed` class added first (while
+// still mounted) so a normal CSS transition plays before they're removed.
+// Each tier's `transitionDelay` is staggered by its position - left-to-right
+// order when expanding, right-to-left when collapsing - scaled down for long
+// chains (see the ALCHEMY_* constants above) so the whole sequence always
+// finishes in well under 1 second regardless of chain length.
+//
+// The chain's own wrapper height is FLIP-animated (see the useLayoutEffect
+// below) using a simpler variant of the technique this codebase already uses
+// elsewhere (RegionPicker.jsx, and this file's own toggle button): rather
+// than measuring the DOM immediately before mutating it (React has already
+// committed the new render by the time an effect can run), a ref just
+// remembers the previously-measured height across renders to compare
+// against. Because the card itself and its siblings are normal in-flow flex
+// children, animating just this wrapper's height is all that's needed for
+// the card to visibly grow/shrink and for every card below it in the list
+// to smoothly reflow out of the way too - that's just normal document flow.
+function AlchemyCategoryCard({ category, index }) {
+  const { steps, note } = parseAlchemyChain(category.detail);
+  const color = getDropTableCategoryColor(category, index);
+  const stagger = Math.min(ALCHEMY_MAX_STAGGER_MS, ALCHEMY_STAGGER_BUDGET_MS / Math.max(steps.length, 1));
+  const totalDuration = (steps.length - 1) * stagger + ALCHEMY_ITEM_TRANSITION_MS;
+
+  const [hovering, setHovering] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [renderAll, setRenderAll] = useState(false);
+  const collapseTimerRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const prevHeightRef = useRef(null);
+
+  const expanded = hovering || locked;
+
+  function expandNow() {
+    if (collapseTimerRef.current) {
+      clearTimeout(collapseTimerRef.current);
+      collapseTimerRef.current = null;
+    }
+    setRenderAll(true);
+  }
+
+  useEffect(() => {
+    if (expanded || !renderAll) return undefined;
+    collapseTimerRef.current = setTimeout(() => {
+      setRenderAll(false);
+      collapseTimerRef.current = null;
+    }, totalDuration);
+    return () => {
+      if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expanded]);
+
+  useLayoutEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const newHeight = wrapper.scrollHeight;
+    if (prevHeightRef.current !== null && prevHeightRef.current !== newHeight) {
+      wrapper.style.height = `${prevHeightRef.current}px`;
+      wrapper.style.overflow = 'hidden';
+      // eslint-disable-next-line no-unused-expressions
+      wrapper.offsetHeight;
+      wrapper.style.transition = `height ${totalDuration}ms ease`;
+      wrapper.style.height = `${newHeight}px`;
+      const onEnd = (event) => {
+        if (event.propertyName !== 'height') return;
+        wrapper.style.transition = '';
+        wrapper.style.height = 'auto';
+        wrapper.style.overflow = '';
+        wrapper.removeEventListener('transitionend', onEnd);
+      };
+      wrapper.addEventListener('transitionend', onEnd);
+    }
+    prevHeightRef.current = newHeight;
+  }, [renderAll, totalDuration]);
+
+  return (
+    <li
+      className="drop-table-alchemy-category"
+      style={{ '--drop-table-color': color }}
+      onMouseEnter={() => {
+        setHovering(true);
+        expandNow();
+      }}
+      onMouseLeave={() => setHovering(false)}
+      onClick={() =>
+        setLocked((prev) => {
+          const next = !prev;
+          if (next) expandNow();
+          return next;
+        })
+      }
+    >
+      <div className="drop-table-alchemy-category-header">
+        <span className="drop-table-alchemy-category-title">
+          {category.icon && <img className="drop-table-alchemy-category-icon" src={category.icon} alt="" />}
+          <span className="drop-table-alchemy-category-name">{category.name}</span>
+        </span>
+        <span className="drop-table-alchemy-category-count">
+          {steps.length} {steps.length === 1 ? 'tier' : 'tiers'}
+        </span>
+      </div>
+      <div className="drop-table-alchemy-chain-wrapper" ref={wrapperRef}>
+        <ol className="drop-table-alchemy-chain">
+          {steps.map((step, stepIndex) => {
+            const isEdge = stepIndex === 0 || stepIndex === steps.length - 1;
+            if (!isEdge && !renderAll) return null;
+            const collapsing = !isEdge && !expanded;
+            const order = expanded ? stepIndex : steps.length - 1 - stepIndex;
+            return (
+              <li
+                key={`${category.name}-${step}`}
+                className={`drop-table-alchemy-link${collapsing ? ' is-collapsed' : ''}`}
+                style={{ transitionDelay: `${order * stagger}ms` }}
+              >
+                {stepIndex > 0 && (
+                  <span className="drop-table-alchemy-arrow" aria-hidden="true">
+                    →
+                  </span>
+                )}
+                <span
+                  className="drop-table-alchemy-node"
+                  style={{ '--node-progress': steps.length > 1 ? stepIndex / (steps.length - 1) : 0 }}
+                >
+                  {step}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+      {note && <p className="drop-table-alchemy-note">↺ {note}</p>}
+    </li>
+  );
+}
+
 function AlchemyChainCategories({ dropTable }) {
   return (
     <>
@@ -113,124 +260,61 @@ function AlchemyChainCategories({ dropTable }) {
               <span className="drop-table-alchemy-legend-arrow" aria-hidden="true">
                 {entry.direction === 'up' ? '↑' : '↓'}
               </span>
+              {entry.icon && <img className="drop-table-alchemy-legend-icon" src={entry.icon} alt="" />}
               <span className="drop-table-alchemy-legend-label">{entry.label}</span>
               <span className="drop-table-alchemy-legend-detail">{entry.detail}</span>
             </li>
           ))}
         </ul>
       )}
+      <p className="drop-table-alchemy-hint">Click to expand transmutations for item categories.</p>
       <ul className="drop-table-alchemy-categories">
-        {dropTable.categories.map((category, index) => {
-          const { steps, note } = parseAlchemyChain(category.detail);
-          const color = getDropTableCategoryColor(category, index);
-          return (
-            <li key={category.name} className="drop-table-alchemy-category" style={{ '--drop-table-color': color }}>
-              <div className="drop-table-alchemy-category-header">
-                <span className="drop-table-alchemy-category-name">{category.name}</span>
-                <span className="drop-table-alchemy-category-count">
-                  {steps.length} {steps.length === 1 ? 'tier' : 'tiers'}
-                </span>
-              </div>
-              <ol className="drop-table-alchemy-chain">
-                {steps.map((step, stepIndex) => (
-                  <li key={`${category.name}-${step}`} className="drop-table-alchemy-link">
-                    {stepIndex > 0 && (
-                      <span className="drop-table-alchemy-arrow" aria-hidden="true">
-                        →
-                      </span>
-                    )}
-                    <span
-                      className="drop-table-alchemy-node"
-                      style={{ '--node-progress': steps.length > 1 ? stepIndex / (steps.length - 1) : 0 }}
-                    >
-                      {step}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              {note && <p className="drop-table-alchemy-note">↺ {note}</p>}
-            </li>
-          );
-        })}
+        {dropTable.categories.map((category, index) => (
+          <AlchemyCategoryCard key={category.name} category={category} index={index} />
+        ))}
       </ul>
     </>
   );
 }
 
-// Expandable "drop table" (or, for Transmutation, resource-conversion table)
-// panel attached to a League Relic row - see data/leagueRelics.js's
-// `dropTable` field. Deliberately a sibling of LeagueRelicRow's whole-row
-// <button> (see how it's called in that file) rather than nested inside it:
-// that row button already handles relic selection on click, and a <button>
-// inside a <button> is invalid HTML - the same trap TagTooltip.jsx's own
-// comment calls out. Because this toggle lives outside that row button
-// instead of inside it, it can safely be a real <button> (no role="button"
-// span workaround needed here).
+// Full-screen "drop table" (or, for Transmutation, resource-conversion
+// table) modal attached to a League Relic row - see data/leagueRelics.js's
+// `dropTable` field. The toggle button is deliberately a sibling of
+// LeagueRelicRow's whole-row <button> (see how it's called in that file)
+// rather than nested inside it: that row button already handles relic
+// selection on click, and a <button> inside a <button> is invalid HTML - the
+// same trap TagTooltip.jsx's own comment calls out.
+//
+// Renders via createPortal to document.body (same escape-the-clipped-
+// ancestor approach GearItemRow.jsx's stats tooltip uses) rather than inline
+// where the toggle button lives, since that button sits inside
+// .gear-item-row's `overflow: hidden` (needed for its rounded corners) - a
+// portal sidesteps having to reason about whether that clipping (or a
+// transform on some ancestor) would break a plain position:fixed overlay.
+// Reuses the site's shared .modal-overlay/.modal-panel pattern (see
+// ReportIssueModal.jsx) rather than a bespoke one, so it looks/behaves like
+// every other modal on the site (dim backdrop, click-outside-to-close, body
+// scroll lock while open) - just wider, since these tables (Transmutation's
+// especially, ~25 categories) need more room than a settings form does.
 //
 // The open/closed state is deliberately local-only (useState, not lifted or
 // persisted) - this is a supplementary reference lookup, not something that
 // needs to survive a reload or be shared with anything else on the page.
-//
-// Animation: a manual FLIP adapted from RegionPicker.jsx's card-list height
-// animation (measure the old height, jump to it, force a reflow, then
-// transition to the new height) rather than a fixed max-height guess -
-// Transmutation's eventual real table is ~25 categories long, so a max-height
-// collapse (as used for short content like .pick-regions-hint) would either
-// clip it or leave a large empty gap depending on the guess. Because the
-// panel is a normal in-flow block element (not absolutely positioned/an
-// overlay), animating its own height is all that's needed for relic rows
-// below it in the list to smoothly reflow downward too - that's just normal
-// document flow, no extra work required for that part.
 export default function RelicDropTablePanel({ dropTable }) {
   const [open, setOpen] = useState(false);
-  const wrapperRef = useRef(null);
-  const contentRef = useRef(null);
-  const isFirstRender = useRef(true);
 
-  useLayoutEffect(() => {
-    const wrapper = wrapperRef.current;
-    const content = contentRef.current;
-    if (!wrapper || !content) return undefined;
-
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      // No animation on mount - just settle into the correct static state
-      // (always closed on first render, since `open` starts false).
-      wrapper.style.height = open ? 'auto' : '0px';
-      wrapper.style.overflow = 'hidden';
-      return undefined;
-    }
-
-    // Measure the height as currently rendered (before this effect mutates
-    // anything) - if we were open, that's an 'auto' height resolving to the
-    // content's actual box; if closed, it's already 0.
-    const startHeight = wrapper.getBoundingClientRect().height;
-    const targetHeight = open ? content.scrollHeight : 0;
-
-    wrapper.style.height = `${startHeight}px`;
-    wrapper.style.overflow = 'hidden';
-    // Reading offsetHeight (assigned to nothing on purpose) forces the
-    // browser to flush the height change above before continuing, so the
-    // transition below animates from that value instead of skipping it.
-    // eslint-disable-next-line no-unused-expressions
-    wrapper.offsetHeight;
-    wrapper.style.transition = 'height 0.3s ease';
-    wrapper.style.height = `${targetHeight}px`;
-
-    const onEnd = (event) => {
-      if (event.propertyName !== 'height') return;
-      wrapper.style.transition = '';
-      wrapper.style.height = open ? 'auto' : '0px';
-      wrapper.removeEventListener('transitionend', onEnd);
+  useEffect(() => {
+    if (!open) return undefined;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
     };
-    wrapper.addEventListener('transitionend', onEnd);
-    return () => wrapper.removeEventListener('transitionend', onEnd);
   }, [open]);
 
   if (!dropTable) return null;
 
   // Each themed relic gets its own bespoke rendering (kept as sibling
-  // branches here, or as a dedicated component like HeistDropTable above,
+  // branches here, or as a dedicated component like HerbloreDropTable above,
   // rather than layering conditionals into the generic markup) so the
   // shared/generic path below stays completely untouched for any relic that
   // doesn't opt into a theme.
@@ -245,11 +329,12 @@ export default function RelicDropTablePanel({ dropTable }) {
         <ul className="drop-table-forge-grid">
           {dropTable.categories.map((category) => (
             <li key={category.name} className="drop-table-forge-item" style={{ '--forge-color': category.color }}>
-              <span className="drop-table-forge-ember" aria-hidden="true" />
+              <span className="drop-table-forge-ember">
+                {category.icon && <img src={category.icon} alt="" />}
+              </span>
               <div className="drop-table-forge-body">
                 <div className="drop-table-forge-name-row">
                   <span className="drop-table-forge-name">{category.name}</span>
-                  {category.stage && <span className="drop-table-forge-stage">{category.stage}</span>}
                 </div>
                 {category.detail && <span className="drop-table-forge-detail">{category.detail}</span>}
               </div>
@@ -258,8 +343,8 @@ export default function RelicDropTablePanel({ dropTable }) {
         </ul>
       </>
     );
-  } else if (dropTable.theme === 'heist') {
-    panelContent = <HeistDropTable dropTable={dropTable} />;
+  } else if (dropTable.theme === 'herblore') {
+    panelContent = <HerbloreDropTable dropTable={dropTable} />;
   } else if (dropTable.theme === 'alchemy') {
     panelContent = (
       <>
@@ -290,22 +375,29 @@ export default function RelicDropTablePanel({ dropTable }) {
 
   return (
     <>
-      <button
-        type="button"
-        className="relic-drop-table-toggle"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-expanded={open}
-      >
-        {open ? 'Hide' : 'See'} {dropTable.footerText} {open ? '↑' : '→'}
+      <button type="button" className="relic-drop-table-toggle" onClick={() => setOpen(true)}>
+        See {dropTable.footerText} →
       </button>
-      <div className="relic-drop-table-wrapper" ref={wrapperRef}>
-        <div
-          className={`relic-drop-table-panel${dropTable.theme === 'forge' ? ' drop-table-forge-panel' : ''}`}
-          ref={contentRef}
-        >
-          {panelContent}
-        </div>
-      </div>
+      {open &&
+        createPortal(
+          <div className="modal-overlay" onClick={() => setOpen(false)}>
+            <div
+              className={`modal-panel relic-drop-table-modal${dropTable.theme === 'forge' ? ' drop-table-forge-panel' : ''}`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="modal-close relic-drop-table-modal-close"
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+              {panelContent}
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

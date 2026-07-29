@@ -1729,7 +1729,8 @@ main.abilities-page .gear-item-rows {
 .league-relic-tier-heading {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px 10px;
   font-size: 16px;
   margin: 0 0 10px;
 }
@@ -1779,10 +1780,13 @@ main.abilities-page .gear-item-rows {
    .gear-item-rows.compact grid rule (3 columns desktop, 1 column mobile;
    see line ~1504) for the outer layout - only the card's own inner content
    changes here, swapping the full effects list for a single summarised
-   line (data/leagueRelics.js's `summary` field). */
+   line (data/leagueRelics.js's `summary` field).
+   Lives inside the first tier heading's flex row (see LeagueRelicsPage) -
+   margin-left: auto pushes it flush right on that same line, wrapping onto
+   its own row on narrow screens instead of squeezing "Tier 1 pick one". */
 .league-relic-mode-toggle {
-  align-self: flex-start;
-  margin-top: 10px;
+  margin-left: auto;
+  align-self: center;
   padding: 6px 14px;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -1833,10 +1837,11 @@ main.abilities-page .gear-item-rows {
 }
 
 /* Relic drop/resource-conversion table (see RelicDropTablePanel.jsx) - the
-   footer toggle + expandable panel are siblings of .relic-row-main, not
-   nested inside it (nested buttons are invalid HTML), so they're styled to
-   sit flush under the row's own bottom edge instead of looking like a
-   separate floating card. */
+   footer toggle is a sibling of .relic-row-main, not nested inside it
+   (nested buttons are invalid HTML), so it's styled to sit flush under the
+   row's own bottom edge instead of looking like a separate floating card -
+   the modal it opens (see RelicDropTablePanel.jsx) is a separate portal-
+   rendered element entirely and doesn't need that same treatment. */
 .relic-drop-table-toggle {
   display: block;
   width: 100%;
@@ -1856,13 +1861,19 @@ main.abilities-page .gear-item-rows {
   color: var(--text);
 }
 
-.relic-drop-table-wrapper {
-  height: 0;
-  overflow: hidden;
+/* Wider than the default .modal-panel (440px, sized for a settings form) -
+   these tables need real room, especially Transmutation's ~25 categories.
+   position: relative anchors the close button below. */
+.relic-drop-table-modal {
+  position: relative;
+  max-width: min(920px, 92vw);
 }
 
-.relic-drop-table-panel {
-  padding: 4px 14px 14px;
+.relic-drop-table-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 1;
 }
 
 .relic-drop-table-heading {
@@ -2002,12 +2013,17 @@ main.abilities-page .gear-item-rows {
   --forge-heat: 5;
 }
 
+/* Fixed 28px icon frame (was a small heat-scaled glow dot before each
+   category got a real item icon - see leagueRelics.js) - the glow/flicker
+   still scales with --forge-heat, just the frame size itself no longer
+   does, so all 6 item icons render at a consistent, legible size. */
 .drop-table-forge-ember {
   flex: 0 0 auto;
-  width: calc(9px + var(--forge-heat) * 1px);
-  height: calc(9px + var(--forge-heat) * 1px);
-  margin-top: 3px;
+  display: block;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  overflow: hidden;
   background: radial-gradient(
     circle at 35% 30%,
     color-mix(in srgb, var(--forge-color) 90%, white),
@@ -2021,6 +2037,13 @@ main.abilities-page .gear-item-rows {
     0 0 calc(10px + var(--forge-heat) * 3px) calc(3px + var(--forge-heat) * 0.6px)
       color-mix(in srgb, var(--forge-color) 35%, transparent);
   animation: drop-table-forge-flicker calc(2.6s - var(--forge-heat) * 0.2s) ease-in-out infinite;
+}
+
+.drop-table-forge-ember img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .drop-table-forge-body {
@@ -2044,18 +2067,6 @@ main.abilities-page .gear-item-rows {
   text-shadow: 0 0 10px color-mix(in srgb, var(--forge-color) 55%, transparent);
 }
 
-.drop-table-forge-stage {
-  font-size: 8.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px 6px;
-  border-radius: 999px;
-  color: var(--text-h);
-  background: color-mix(in srgb, var(--forge-color) 32%, var(--panel-bg));
-  border: 1px solid color-mix(in srgb, var(--forge-color) 65%, var(--border));
-}
-
 .drop-table-forge-detail {
   font-size: 11.5px;
   font-weight: 500;
@@ -2075,64 +2086,52 @@ main.abilities-page .gear-item-rows {
   }
 }
 
-/* Golden Touch's "Heist Ledger" drop-table theme (dropTable.theme === 'heist',
-   rendered by RelicDropTablePanel.jsx's HeistDropTable). Every new class here
-   is prefixed drop-table-heist- so it can't collide with the other 2 relics'
-   own bespoke drop-table redesigns living in the same shared component/file.
-   Each tier gets a "precious metal" identity (--heist-metal, set per
-   .drop-table-heist-metal-* modifier) standing in for rarity - gold for the
-   Heist-only tier down to bronze for the outside-only one - kept distinct
-   from the HEIST/STREET clearance meter, which instead encodes *where* a
-   tier drops. */
-.drop-table-heist-panel {
+/* Golden Touch's "Herblore Ledger" drop-table theme (dropTable.theme ===
+   'herblore', rendered by RelicDropTablePanel.jsx's HerbloreDropTable).
+   Every new class here is prefixed drop-table-herblore- so it can't collide
+   with the other 2 relics' own bespoke drop-table redesigns living in the
+   same shared component/file. Each line gets a dark-green-to-black tint
+   (--herblore-tint, assigned positionally below via nth-child - Grimy Herbs
+   is listed first in the data and reads as the richest green, Tier 4 last
+   and darkest) rather than a data-driven "metal" field, since the gradient
+   here is purely about list position, not a separate rarity concept. Kept
+   distinct from the HEIST/OUT clearance meter, which instead encodes
+   *where* a line drops. */
+.drop-table-herblore-panel {
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, #d4af37 40%, var(--border));
+  border: 1px solid color-mix(in srgb, #2f7d3f 40%, var(--border));
   border-radius: 10px;
   background:
     repeating-linear-gradient(
       135deg,
-      color-mix(in srgb, #d4af37 5%, transparent) 0px,
-      color-mix(in srgb, #d4af37 5%, transparent) 1px,
+      color-mix(in srgb, #2f7d3f 6%, transparent) 0px,
+      color-mix(in srgb, #2f7d3f 6%, transparent) 1px,
       transparent 1px,
       transparent 12px
     ),
-    linear-gradient(180deg, color-mix(in srgb, #d4af37 7%, var(--panel-bg)), var(--panel-bg));
+    linear-gradient(180deg, color-mix(in srgb, #2f7d3f 8%, var(--panel-bg)), var(--panel-bg));
   padding: 10px 12px 12px;
 }
 
-.drop-table-heist-header {
+.drop-table-herblore-header {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid color-mix(in srgb, #d4af37 30%, var(--border));
+  border-bottom: 1px solid color-mix(in srgb, #2f7d3f 30%, var(--border));
 }
 
-.drop-table-heist-header-icon {
-  font-size: 18px;
-  line-height: 1;
-  filter: drop-shadow(0 0 4px color-mix(in srgb, #d4af37 55%, transparent));
+.drop-table-herblore-header-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, #2f7d3f 60%, transparent));
 }
 
-.drop-table-heist-header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.drop-table-heist-eyebrow {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #d4af37;
-  opacity: 0.9;
-}
-
-.drop-table-heist-heading {
+.drop-table-herblore-heading {
   margin: 0;
   font-size: 13px;
   font-weight: 700;
@@ -2140,7 +2139,7 @@ main.abilities-page .gear-item-rows {
   opacity: 0.9;
 }
 
-.drop-table-heist-list {
+.drop-table-herblore-list {
   display: flex;
   flex-direction: column;
   margin: 0;
@@ -2148,41 +2147,51 @@ main.abilities-page .gear-item-rows {
   list-style: none;
 }
 
-.drop-table-heist-entry {
+.drop-table-herblore-entry {
+  --herblore-tint: #2f7d3f;
   display: flex;
   align-items: flex-start;
   gap: 10px;
   padding: 9px 2px;
 }
 
-.drop-table-heist-entry + .drop-table-heist-entry {
-  border-top: 1px dashed color-mix(in srgb, var(--heist-metal, #d4af37) 40%, var(--border));
+.drop-table-herblore-entry:nth-child(1) {
+  --herblore-tint: #3a8f4c;
+}
+.drop-table-herblore-entry:nth-child(2) {
+  --herblore-tint: #2f7d3f;
+}
+.drop-table-herblore-entry:nth-child(3) {
+  --herblore-tint: #235f30;
+}
+.drop-table-herblore-entry:nth-child(4) {
+  --herblore-tint: #183f20;
+}
+.drop-table-herblore-entry:nth-child(5) {
+  --herblore-tint: #0c2411;
 }
 
-.drop-table-heist-rank {
+.drop-table-herblore-entry + .drop-table-herblore-entry {
+  border-top: 1px dashed color-mix(in srgb, var(--herblore-tint) 45%, var(--border));
+}
+
+.drop-table-herblore-rank {
   flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-weight: 700;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.72);
-  background: radial-gradient(
-    circle at 32% 28%,
-    color-mix(in srgb, var(--heist-metal, #d4af37) 92%, white 18%),
-    color-mix(in srgb, var(--heist-metal, #d4af37) 65%, black 18%)
-  );
-  border: 1px solid color-mix(in srgb, var(--heist-metal, #d4af37) 70%, black 10%);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-.drop-table-heist-entry-body {
+.drop-table-herblore-rank img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.drop-table-herblore-entry-body {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -2190,7 +2199,7 @@ main.abilities-page .gear-item-rows {
   gap: 3px;
 }
 
-.drop-table-heist-entry-top {
+.drop-table-herblore-entry-top {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -2198,19 +2207,19 @@ main.abilities-page .gear-item-rows {
   justify-content: space-between;
 }
 
-.drop-table-heist-name {
+.drop-table-herblore-name {
   font-weight: 700;
   font-size: 12.5px;
-  color: color-mix(in srgb, var(--heist-metal, #d4af37) 75%, var(--text-h) 25%);
+  color: color-mix(in srgb, var(--herblore-tint) 70%, var(--text-h) 30%);
 }
 
-.drop-table-heist-clearance {
+.drop-table-herblore-clearance {
   display: flex;
   gap: 3px;
   flex: 0 0 auto;
 }
 
-.drop-table-heist-clearance-seg {
+.drop-table-herblore-clearance-seg {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -2224,31 +2233,31 @@ main.abilities-page .gear-item-rows {
   border: 1px solid transparent;
 }
 
-.drop-table-heist-clearance-seg.is-lit {
-  background: color-mix(in srgb, var(--heist-metal, #d4af37) 28%, transparent);
-  border-color: color-mix(in srgb, var(--heist-metal, #d4af37) 65%, transparent);
-  color: color-mix(in srgb, var(--heist-metal, #d4af37) 92%, var(--text-h) 35%);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--heist-metal, #d4af37) 40%, transparent);
+/* Fixed colour rather than var(--herblore-tint) deliberately - "included"
+   should read as the same bright green on every line regardless of that
+   line's own position-based tint, so it's a consistent signal rather than
+   just echoing whatever shade the row already happens to be. */
+.drop-table-herblore-clearance-seg.is-lit {
+  background: color-mix(in srgb, #4caf63 32%, transparent);
+  border-color: color-mix(in srgb, #4caf63 70%, transparent);
+  color: #7ee096;
+  box-shadow: 0 0 6px color-mix(in srgb, #4caf63 45%, transparent);
 }
 
-.drop-table-heist-clearance-seg.is-locked {
+.drop-table-herblore-clearance-seg.is-locked {
   background: color-mix(in srgb, var(--text) 6%, transparent);
   border-color: color-mix(in srgb, var(--text) 16%, transparent);
   color: var(--text);
   opacity: 0.5;
 }
 
-.drop-table-heist-clearance-seg.is-locked span {
-  font-size: 7px;
-}
-
-.drop-table-heist-badge-caption {
+.drop-table-herblore-badge-caption {
   font-size: 9.5px;
   font-style: italic;
   opacity: 0.6;
 }
 
-.drop-table-heist-detail {
+.drop-table-herblore-detail {
   margin: 1px 0 0;
   font-family: ui-monospace, 'SFMono-Regular', Consolas, 'Courier New', monospace;
   font-size: 11px;
@@ -2257,35 +2266,19 @@ main.abilities-page .gear-item-rows {
   opacity: 0.82;
 }
 
-.drop-table-heist-legend {
+.drop-table-herblore-legend {
   margin: 8px 0 0;
   padding-top: 7px;
-  border-top: 1px solid color-mix(in srgb, #d4af37 22%, var(--border));
+  border-top: 1px solid color-mix(in srgb, #2f7d3f 26%, var(--border));
   font-size: 9.5px;
   opacity: 0.65;
 }
 
-.drop-table-heist-legend-key {
+.drop-table-herblore-legend-key {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #d4af37;
-}
-
-.drop-table-heist-metal-gold {
-  --heist-metal: #d4af37;
-}
-
-.drop-table-heist-metal-electrum {
-  --heist-metal: #cdb26a;
-}
-
-.drop-table-heist-metal-silver {
-  --heist-metal: #a9b4c2;
-}
-
-.drop-table-heist-metal-bronze {
-  --heist-metal: #b3702f;
+  color: #4caf63;
 }
 
 /* Transmutation's "alchemy" theme (dropTable.theme === 'alchemy' - see
@@ -2309,7 +2302,7 @@ main.abilities-page .gear-item-rows {
 
 .drop-table-alchemy-legend-item {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
   font-size: 11.5px;
 }
@@ -2317,6 +2310,12 @@ main.abilities-page .gear-item-rows {
 .drop-table-alchemy-legend-arrow {
   font-weight: 700;
   font-size: 13px;
+}
+
+.drop-table-alchemy-legend-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .drop-table-alchemy-legend-down .drop-table-alchemy-legend-arrow {
@@ -2335,6 +2334,13 @@ main.abilities-page .gear-item-rows {
   opacity: 0.7;
 }
 
+.drop-table-alchemy-hint {
+  margin: 0 0 10px;
+  font-size: 10.5px;
+  font-style: italic;
+  opacity: 0.55;
+}
+
 .drop-table-alchemy-categories {
   display: flex;
   flex-direction: column;
@@ -2350,14 +2356,29 @@ main.abilities-page .gear-item-rows {
   border-radius: 10px;
   padding: 9px 12px 10px;
   background: color-mix(in srgb, var(--drop-table-color) 6%, var(--panel-bg));
+  cursor: pointer;
 }
 
 .drop-table-alchemy-category-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 7px;
+}
+
+.drop-table-alchemy-category-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.drop-table-alchemy-category-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .drop-table-alchemy-category-name {
@@ -2375,6 +2396,13 @@ main.abilities-page .gear-item-rows {
   white-space: nowrap;
 }
 
+/* FLIP-animated (see AlchemyCategoryCard's useLayoutEffect) height wrapper
+   around the chain - lets the card grow/shrink smoothly between shrunk
+   (start/end tier only) and expanded (every tier) instead of snapping. */
+.drop-table-alchemy-chain-wrapper {
+  height: auto;
+}
+
 .drop-table-alchemy-chain {
   display: flex;
   flex-wrap: wrap;
@@ -2389,6 +2417,35 @@ main.abilities-page .gear-item-rows {
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  overflow: hidden;
+  max-width: 340px;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    max-width 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+/* A middle tier mounting for the first time (expanding) starts from this
+   collapsed state and transitions to the base rule above - see the
+   `renderAll`/`is-collapsed` logic in AlchemyCategoryCard. */
+@starting-style {
+  .drop-table-alchemy-link {
+    max-width: 0;
+    opacity: 0;
+    transform: scale(0.75);
+  }
+}
+
+/* A middle tier collapsing (mouse leaves/un-clicked) gets this class added
+   while still mounted, so it animates out before AlchemyCategoryCard removes
+   it from the DOM once the transition has had time to finish. */
+.drop-table-alchemy-link.is-collapsed {
+  max-width: 0;
+  opacity: 0;
+  transform: scale(0.75);
+  pointer-events: none;
 }
 
 .drop-table-alchemy-node {
