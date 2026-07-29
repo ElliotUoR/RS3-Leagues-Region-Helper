@@ -1838,27 +1838,30 @@ main.abilities-page .gear-item-rows {
 
 /* Relic drop/resource-conversion table (see RelicDropTablePanel.jsx) - the
    footer toggle is a sibling of .relic-row-main, not nested inside it
-   (nested buttons are invalid HTML), so it's styled to sit flush under the
-   row's own bottom edge instead of looking like a separate floating card -
-   the modal it opens (see RelicDropTablePanel.jsx) is a separate portal-
-   rendered element entirely and doesn't need that same treatment. */
+   (nested buttons are invalid HTML). Styled as its own gold-bordered button
+   rather than a plain inline link, with a bit of margin below it so it
+   doesn't sit flush against the relic card's own bottom edge - the modal it
+   opens (see RelicDropTablePanel.jsx) is a separate portal-rendered element
+   entirely and doesn't need that same treatment. */
 .relic-drop-table-toggle {
   display: block;
-  width: 100%;
-  text-align: left;
-  margin-top: 8px;
-  padding: 8px 14px;
-  border: none;
-  border-top: 1px dashed var(--border);
+  width: calc(100% - 28px);
+  margin: 10px 14px 12px;
+  text-align: center;
+  padding: 7px 14px;
+  border: 1px solid #b8860b;
+  border-radius: 0;
   background: transparent;
-  color: var(--accent);
+  color: #b8860b;
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
 }
 
 .relic-drop-table-toggle:hover {
-  color: var(--text);
+  color: #d9a521;
+  border-color: #d9a521;
+  background: color-mix(in srgb, #b8860b 10%, transparent);
 }
 
 /* Wider than the default .modal-panel (440px, sized for a settings form) -

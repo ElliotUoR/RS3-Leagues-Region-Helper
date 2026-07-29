@@ -68,9 +68,15 @@ export const LEAGUE_RELICS = [
       'Grants permanently full stamina when mining.',
       'Grants an always-active time sprite when excavating.',
     ],
+    // Eternal magic logs sit one tier above Magic logs in the Woodcutting
+    // tier chain (Logs -> ... -> Magic logs -> Eternal magic logs), so the
+    // 10% resource-upgrade effect above can produce them too, not just
+    // upgraded ores/fish - tagged onto gear.js's matching groups as a second
+    // `leagueRelic` alternative alongside Transmutation (see
+    // gearAvailability.js's normalizeLeagueRelicList).
     regionTagNote: {
       prefix: 'Allows you to obtain',
-      tags: ['Luminate ore', 'Oricalchite ore', 'Light animica ore'],
+      tags: ['Luminate ore', 'Oricalchite ore', 'Light animica ore', 'Eternal magic logs'],
       suffix: 'regardless of region.',
     },
     icon: FP('Endless_Harvest.png'),

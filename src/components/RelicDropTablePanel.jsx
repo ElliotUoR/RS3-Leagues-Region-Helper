@@ -376,7 +376,7 @@ export default function RelicDropTablePanel({ dropTable }) {
   return (
     <>
       <button type="button" className="relic-drop-table-toggle" onClick={() => setOpen(true)}>
-        See {dropTable.footerText} →
+        See {dropTable.footerText}
       </button>
       {open &&
         createPortal(
