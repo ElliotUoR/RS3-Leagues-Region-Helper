@@ -1846,6 +1846,151 @@ main.abilities-page .gear-item-rows {
   border: 1px solid color-mix(in srgb, var(--drop-table-color) 55%, transparent);
 }
 
+/* Transmutation's "alchemy" theme (dropTable.theme === 'alchemy' - see
+   AlchemyChainCategories in RelicDropTablePanel.jsx). Its table is ~25 tier
+   progressions rather than flat drop-chance categories, so instead of one
+   sentence per row it renders each chain as its own card with the
+   progression broken into individual connected pills. Every new class here
+   is prefixed drop-table-alchemy- to stay clear of the shared
+   .relic-drop-table-* rules above (still used as-is by every other relic)
+   and of the other 2 relics' own drop-table redesigns. */
+.drop-table-alchemy-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  list-style: none;
+}
+
+.drop-table-alchemy-legend-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11.5px;
+}
+
+.drop-table-alchemy-legend-arrow {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.drop-table-alchemy-legend-down .drop-table-alchemy-legend-arrow {
+  color: #4f8fd6;
+}
+
+.drop-table-alchemy-legend-up .drop-table-alchemy-legend-arrow {
+  color: #d68a3d;
+}
+
+.drop-table-alchemy-legend-label {
+  font-weight: 700;
+}
+
+.drop-table-alchemy-legend-detail {
+  opacity: 0.7;
+}
+
+.drop-table-alchemy-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drop-table-alchemy-category {
+  border: 1px solid color-mix(in srgb, var(--drop-table-color) 30%, var(--border));
+  border-left: 3px solid var(--drop-table-color);
+  border-radius: 10px;
+  padding: 9px 12px 10px;
+  background: color-mix(in srgb, var(--drop-table-color) 6%, var(--panel-bg));
+}
+
+.drop-table-alchemy-category-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.drop-table-alchemy-category-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--drop-table-color) 70%, var(--text));
+}
+
+.drop-table-alchemy-category-count {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.drop-table-alchemy-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drop-table-alchemy-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.drop-table-alchemy-node {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--drop-table-color) calc(14% + (var(--node-progress, 0) * 26%)), var(--panel-bg));
+  border: 1px solid
+    color-mix(in srgb, var(--drop-table-color) calc(30% + (var(--node-progress, 0) * 45%)), var(--border));
+  color: color-mix(in srgb, var(--drop-table-color) calc(45% + (var(--node-progress, 0) * 35%)), var(--text));
+}
+
+/* First tier in a chain is the most "raw" form of the resource - dashed to
+   read as unrefined/base material. */
+.drop-table-alchemy-link:first-child .drop-table-alchemy-node {
+  border-style: dashed;
+}
+
+/* Last tier is the most refined form the relic can reach - a soft glow to
+   mark it as the "peak" of the chain. */
+.drop-table-alchemy-link:last-child .drop-table-alchemy-node {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--drop-table-color) 45%, transparent),
+    0 0 8px color-mix(in srgb, var(--drop-table-color) 35%, transparent);
+}
+
+.drop-table-alchemy-arrow {
+  font-size: 11px;
+  opacity: 0.55;
+  color: var(--drop-table-color);
+  margin: 0 1px;
+}
+
+.drop-table-alchemy-note {
+  margin: 6px 0 0;
+  font-size: 10.5px;
+  font-style: italic;
+  opacity: 0.6;
+}
+
 .retry-image {
   position: relative;
   display: inline-block;
