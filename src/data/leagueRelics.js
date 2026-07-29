@@ -107,31 +107,59 @@ export const LEAGUE_RELICS = [
     // outside Heists, Tier 4 is outside-Heist-only. The `badge` on each line
     // names its own availability rather than a single shared "Heist" flag,
     // since it genuinely differs tier to tier.
+    //
+    // `theme: 'heist'` opts this table into RelicDropTablePanel's bespoke
+    // heist/treasure-ledger rendering branch (see that component) instead of
+    // the generic palette-cycled list used by Superheated/Transmutation.
+    // `rank`/`metal`/`clearance` are extra fields that branch reads:
+    //   - `rank` is the roman-numeral "clearance level" shown in the ledger
+    //     medallion (purely cosmetic re-statement of tier order).
+    //   - `metal` picks which precious-metal color a tier reads as (rarest/
+    //     Heist-only secondaries = gold, most common/outside-only = bronze),
+    //     independent of the badge/clearance meaning below.
+    //   - `clearance` is the machine-readable form of `badge` ('heist' /
+    //     'both' / 'outside') that drives the lit/locked HEIST+STREET meter.
+    //     `badge` itself is kept verbatim and still rendered as text (as
+    //     "Access: <badge>") so the underlying game info isn't only conveyed
+    //     via color/icons.
     dropTable: {
       heading: 'Thieving drop table',
       footerText: 'Thieving drop table',
+      theme: 'heist',
       categories: [
         {
           name: 'Tier 1 Secondaries',
           badge: 'Heist only',
+          rank: 'I',
+          metal: 'gold',
+          clearance: 'heist',
           detail:
             'Primal extract, bottled roar, spark chitin, poison slime, adrenaline crystal, ground wyvern bone and wyvern bonemeal, grenwall spikes, congealed blood, ground Miasma runes, dragonscale dust, phoenix feather, morchella mushroom, tombshroom, timeworn tincture, spider fang',
         },
         {
           name: 'Tier 2 Secondaries',
           badge: 'Heist + Outside',
+          rank: 'II',
+          metal: 'electrum',
+          clearance: 'both',
           detail:
             "Snape grass, Red spider's eggs, unicorn horn dust, limpwurt roots, white berries, wine of zamorak, crushed birds nest, cactus potato, Yew and Magic roots, Searing ashes, cockatrice egg, rabbit foot, bull horns, wine of saradomin, wine of guthix, Mycelial webbing, poison ivy berries",
         },
         {
           name: 'Tier 3 Secondaries',
           badge: 'Heist + Outside',
+          rank: 'III',
+          metal: 'silver',
+          clearance: 'both',
           detail:
             "Chinchompa residue, yak milk, yak tuft, zygomite fruit, regular and enriched timber & calcified fungus, enriched fungal algae, kebbit teeth dust, mort myre mushroom, goat horn dust, toad's legs, spider venom",
         },
         {
           name: 'Tier 4 Secondaries',
           badge: 'Outside only',
+          rank: 'IV',
+          metal: 'bronze',
+          clearance: 'outside',
           detail:
             'Eye of newt, jangerberries, Frog spawn, Papaya, Swordfish, Wimpy feather, redberries, ground mud runes, Nail beast nails, bull horns, Bear fur, cadava berries, chocolate dust, white, red, yellow and black beads',
         },
