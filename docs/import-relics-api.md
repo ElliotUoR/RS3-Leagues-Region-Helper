@@ -61,7 +61,7 @@ this is a complete no-op: no write, no redirect, no modal.
 Names must match the `name` field in `src/data/leagueRelics.js` (case
 doesn't matter, exact spelling does). As of writing:
 
-`Endless Harvest`, `Survivalist`, `Golden Touch`, `Crystal Grace`, `Superheated`
+`Endless Harvest`, `Survivalist`, `Golden Touch`, `Crystal Grace`, `Superheated`, `Divine Druid`, `Transmutation`
 
 This list is expected to grow substantially before and after the league's
 10 August 2026 launch - see "Expanding as more relics are announced" below

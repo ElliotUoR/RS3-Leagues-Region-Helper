@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import AbilitiesPage from './pages/AbilitiesPage';
 import AssumptionsPage from './pages/AssumptionsPage';
 import GearPage from './pages/GearPage';
+import GearByRegionPage from './pages/GearByRegionPage';
 import HomePage from './pages/HomePage';
 import RelicsPage from './pages/RelicsPage';
 import LeagueRelicsPage from './pages/LeagueRelicsPage';
@@ -67,6 +68,7 @@ function formatUpdatedAt(raw) {
 
 function currentRoute() {
   if (window.location.hash === '#gear') return 'gear';
+  if (window.location.hash === '#gear-by-region') return 'gearByRegion';
   if (window.location.hash === '#abilities') return 'abilities';
   if (window.location.hash === '#relics') return 'relics';
   if (window.location.hash === '#league-relics') return 'leagueRelics';
@@ -186,6 +188,9 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         <a href="#gear" className={route === 'gear' ? 'active' : ''}>
           Gear Planner
         </a>
+        <a href="#gear-by-region" className={route === 'gearByRegion' ? 'active' : ''}>
+          Gear by Region
+        </a>
         <a
           href="#league-relics"
           className={`league-relics-tab${route === 'leagueRelics' ? ' active' : ''}`}
@@ -219,6 +224,7 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
           {...gear}
         />
       )}
+      {route === 'gearByRegion' && <GearByRegionPage isUnlocked={isUnlocked} />}
       {route === 'abilities' && <AbilitiesPage isUnlocked={isUnlocked} />}
       {route === 'relics' && (
         <RelicsPage isUnlocked={isUnlocked} selected={selectedRelics} toggleRelic={toggleRelic} />

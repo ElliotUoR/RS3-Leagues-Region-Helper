@@ -2562,3 +2562,118 @@ main.abilities-page .gear-item-rows {
     font-size: 20px;
   }
 }
+
+/* Gear by Region page */
+
+.gear-by-region-page {
+  display: block;
+}
+
+.region-select-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.region-select-button {
+  position: relative;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, var(--region-color) 55%, var(--border));
+  background: color-mix(in srgb, var(--region-color) 14%, var(--panel-bg));
+  color: color-mix(in srgb, var(--region-color) 75%, var(--text));
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.region-select-button.region-unlocked {
+  border-width: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--region-color) 35%, transparent);
+}
+
+.region-select-button.active {
+  background: var(--region-color);
+  border-color: var(--region-color);
+  color: #fff;
+}
+
+.region-unlocked-check {
+  font-size: 12px;
+}
+
+/* Wilderness's map colour (#080808) has essentially no contrast used the
+   same way every other region's colour is (text/border tinted against the
+   panel background) - solid dark fill with light text instead, so it still
+   reads as "the black one" without becoming illegible. */
+.region-select-button.region-wilderness {
+  background: color-mix(in srgb, var(--region-color) 85%, var(--panel-bg));
+  color: #e8e8e8;
+  border-color: color-mix(in srgb, var(--region-color) 60%, var(--border));
+}
+
+.region-select-button.region-wilderness.active {
+  background: var(--region-color);
+  color: #fff;
+}
+
+.gear-by-region-empty {
+  color: var(--text);
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.gear-by-region-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gear-by-region-slot-group h3 {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.gear-by-region-slot-group {
+  margin-bottom: 8px;
+}
+
+.gear-by-region-styles {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.gear-by-region-style-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--pill-color) 55%, var(--border));
+  background: color-mix(in srgb, var(--pill-color) 14%, transparent);
+  color: var(--pill-color);
+}
+
+.style-pill-melee {
+  --pill-color: var(--style-melee);
+}
+
+.style-pill-ranged {
+  --pill-color: var(--style-ranged);
+}
+
+.style-pill-magic {
+  --pill-color: var(--style-magic);
+}
+
+.style-pill-necromancy {
+  --pill-color: var(--style-necromancy);
+}
+
+.gear-by-region-row {
+  cursor: default;
+}

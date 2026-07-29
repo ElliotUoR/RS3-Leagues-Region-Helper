@@ -1,14 +1,14 @@
-// League relic powers reference for RS3 Leagues II: Equilibrium. All five
-// current entries (Tier 1's Endless Harvest/Survivalist/Golden Touch, and
-// the "Unknown Tier" section's Crystal Grace/Superheated) are quoted
-// verbatim from https://runescape.wiki/w/Equilibrium_League/Relics - the
-// wiki added its own "Unknown Tier" table (matching Jagex's "Relic Reveal"
-// promo images for those two) shortly after this file was first written
-// against the images alone, so it's now the source for all five, not just
-// Tier 1. Neither has an uploaded icon on the wiki itself yet (its file
-// link there is still a "please upload" placeholder) - their icons here
-// were cropped from the reveal images directly instead (see the icon note
-// below).
+// League relic powers reference for RS3 Leagues II: Equilibrium. The three
+// Tier 1 entries (Endless Harvest/Survivalist/Golden Touch) are quoted
+// verbatim from https://runescape.wiki/w/Equilibrium_League/Relics, whose
+// own "Unknown Tier" table covers Crystal Grace/Superheated the same way.
+// Divine Druid/Transmutation aren't on the wiki at all yet as of writing -
+// transcribed straight from Jagex's own "Relic Reveal" promo images instead,
+// same as Crystal Grace/Superheated originally were before the wiki caught
+// up. None of these four "Unknown Tier" relics have an uploaded icon on the
+// wiki (their file link there is still a "please upload" placeholder, where
+// they exist at all) - their icons here were cropped from the reveal images
+// directly instead (see the icon note below).
 //
 // Distinct from Archaeology relics (see relics.js, labelled "Arch Relics"
 // in the nav): these are picked directly from the league's own relic tree
@@ -32,11 +32,12 @@
 // `Golden_Touch.png` - that plain filename is already used by the unrelated,
 // long-existing Magic ability of the same name (see abilities.js). The wiki
 // disambiguates the two with this suffix; using the wrong file would show
-// the ability's icon here instead of the relic's. Crystal Grace and
-// Superheated's icons aren't on the wiki at all yet (see above) - cropped
-// directly from Jagex's reveal images instead and saved locally, so unlike
-// every other FP() reference here there's no matching runescape.wiki file
-// for scripts/download-icons.mjs to ever re-fetch for these two specifically.
+// the ability's icon here instead of the relic's. Crystal Grace, Superheated,
+// Divine Druid, and Transmutation's icons aren't on the wiki at all yet (see
+// above) - cropped directly from Jagex's reveal images instead and saved
+// locally, so unlike every other FP() reference here there's no matching
+// runescape.wiki file for scripts/download-icons.mjs to ever re-fetch for
+// these four specifically.
 const FP = (file) => `icons/${file}`;
 
 export const LEAGUE_RELICS = [
@@ -132,5 +133,48 @@ export const LEAGUE_RELICS = [
       'XP for burial sets is increased by 3x.',
     ],
     icon: FP('Superheated.png'),
+  },
+  {
+    // Transcribed from the reveal image directly (not the wiki - not
+    // published there yet), same "Unknown Tier" treatment as Crystal Grace/
+    // Superheated above.
+    name: 'Divine Druid',
+    tier: null,
+    effects: [
+      "Grants Thera's Summoning Pouch, a pouch that stores grimy herbs and charms, acts as infinite spirit shard and summoning pouches.",
+      'Cleaning grimy herbs turns them directly into unfinished potions. (Toggleable)',
+      'Grimy herbs/charms can be found frequently when mining, fishing, woodcutting, siphoning or excavating archaeology hotspots.',
+      'Grimy herbs are all cleaned at once.',
+      '50% chance to create an extra pouch per pouch created, sent directly to the bank.',
+      'All charm drops from defeating enemies are increased by 5x.',
+      'Summoning familiars which boost skills now boost them by 3x the amount.',
+      'Gain a 75% chance to save some ingredients when creating potions.',
+      "When crafting pouches, you will also make 10 of the respective familiar's scroll. Sent directly to the bank, no extra XP is awarded.",
+      'Always gather enriched memories.',
+      'Converting energies and memories together only requires half as many energies, rounded down.',
+      'Converting memories has a 10% chance to give a random porter or divine charge. Sent directly to the bank.',
+      'Memory strands are gained at x10 rate.',
+      'Chronicle fragments give 2x XP (before Leagues multipliers).',
+      'Crafting items from divine energies only requires half as many energies, rounded down.',
+      'Unlock all Meilyr potion recipes.',
+    ],
+    icon: FP('Divine_Druid.png'),
+  },
+  {
+    // Same as Divine Druid above.
+    name: 'Transmutation',
+    tier: null,
+    effects: [
+      "Grants the Deities' Transmuter.",
+      'Alchemical spells transmutes items (Toggleable).',
+      'Transmutation spells bank noted products (Toggleable).',
+      'Low alchemy and high alchemy spells transform into 2 new spells:',
+      'Divine Convergence: downgrades up to 10 of a resource into a lower tier. Divine Divergence: upgrades up to 10 of a resource into a higher tier.',
+      "The Deities' Transmuter must be in the inventory to cast these spells.",
+      "Using items on the Deities' Transmuter will display what they can turn into.",
+      'Both spells have no level requirement. The spell gives 10 Magic XP for each item transmuted (before league XP multipliers).',
+      'When cast upon a stack of noted items, these spells will automatically re-cast over time as long as the items are available in the same slot in your inventory.',
+    ],
+    icon: FP('Transmutation.png'),
   },
 ];
