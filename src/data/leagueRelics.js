@@ -315,16 +315,34 @@ export const LEAGUE_RELICS = [
     // these while Superheated is active) drop table - each entry below is a
     // range (e.g. Stone Spirits drops anywhere from Copper up to Platinum,
     // not just those two ends) rather than a fixed list of items.
+    //
+    // `theme: 'forge'` opts this table into RelicDropTablePanel.jsx's
+    // bespoke forge-themed rendering branch (see the `dropTable.theme ===
+    // 'forge'` check there) instead of the generic palette-cycling one every
+    // other relic's table still uses. The category order below is already
+    // the real drop table's own common-to-rare order, and it happens to
+    // trace the classic blacksmith heat-color scale end to end (dull red ->
+    // cherry red -> orange -> yellow -> white -> welding heat), so each
+    // category's `stage` name and `color` climbs that same scale rather than
+    // being an arbitrary palette pick - Coins landing on "Welding Heat" as
+    // near-white/molten gold is the intentional payoff at the end of the
+    // list, not a coincidence.
     dropTable: {
       heading: 'Blessed Fire Spirits drop table',
       footerText: 'Blessed Fire Spirits drop table',
+      theme: 'forge',
       categories: [
-        { name: 'Stone Spirits', detail: 'Copper → Platinum' },
-        { name: 'Uncut Gems', detail: 'Sapphire → Dragonstone' },
-        { name: 'Charms', detail: 'Gold, Green, Crimson, Blue' },
-        { name: 'Clues', detail: 'Easy → Master, and Box of Clue Scrolls' },
-        { name: 'Flasks', detail: 'Crystal & Potion Flasks' },
-        { name: 'Coins', detail: '10k → 100k GP' },
+        { name: 'Stone Spirits', detail: 'Copper → Platinum', stage: 'Dull Red', color: '#8f3a1e' },
+        { name: 'Uncut Gems', detail: 'Sapphire → Dragonstone', stage: 'Cherry Red', color: '#c8421f' },
+        { name: 'Charms', detail: 'Gold, Green, Crimson, Blue', stage: 'Orange Heat', color: '#dd6a1f' },
+        {
+          name: 'Clues',
+          detail: 'Easy → Master, and Box of Clue Scrolls',
+          stage: 'Bright Yellow',
+          color: '#e8a824',
+        },
+        { name: 'Flasks', detail: 'Crystal & Potion Flasks', stage: 'White Heat', color: '#f3d35a' },
+        { name: 'Coins', detail: '10k → 100k GP', stage: 'Welding Heat', color: '#fdf1c4' },
       ],
     },
   },

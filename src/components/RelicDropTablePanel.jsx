@@ -84,22 +84,50 @@ export default function RelicDropTablePanel({ dropTable }) {
         {open ? 'Hide' : 'See'} {dropTable.footerText} {open ? '↑' : '→'}
       </button>
       <div className="relic-drop-table-wrapper" ref={wrapperRef}>
-        <div className="relic-drop-table-panel" ref={contentRef}>
-          <h3 className="relic-drop-table-heading">{dropTable.heading}</h3>
-          <ul className="relic-drop-table-categories">
-            {dropTable.categories.map((category, index) => (
-              <li
-                key={category.name}
-                className="relic-drop-table-category"
-                style={{ '--drop-table-color': getDropTableCategoryColor(category, index) }}
-              >
-                <span className="relic-drop-table-category-name">{category.name}</span>
-                {category.badge && <span className="relic-drop-table-badge">{category.badge}</span>}
-                {category.detail && <span className="relic-drop-table-category-detail">{category.detail}</span>}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {dropTable.theme === 'forge' ? (
+          // Superheated's bespoke "forge" theme - blacksmith heat-scale
+          // ingot cards instead of the generic palette-cycling bullet list
+          // below. Kept as a fully separate branch (rather than layering
+          // conditionals into the generic markup) so the shared path stays
+          // untouched for every relic that doesn't opt into a theme.
+          <div className="relic-drop-table-panel drop-table-forge-panel" ref={contentRef}>
+            <div className="drop-table-forge-heading-row">
+              <h3 className="relic-drop-table-heading drop-table-forge-heading">{dropTable.heading}</h3>
+              <span className="drop-table-forge-spectrum" aria-hidden="true" />
+            </div>
+            <ul className="drop-table-forge-grid">
+              {dropTable.categories.map((category) => (
+                <li key={category.name} className="drop-table-forge-item" style={{ '--forge-color': category.color }}>
+                  <span className="drop-table-forge-ember" aria-hidden="true" />
+                  <div className="drop-table-forge-body">
+                    <div className="drop-table-forge-name-row">
+                      <span className="drop-table-forge-name">{category.name}</span>
+                      {category.stage && <span className="drop-table-forge-stage">{category.stage}</span>}
+                    </div>
+                    {category.detail && <span className="drop-table-forge-detail">{category.detail}</span>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="relic-drop-table-panel" ref={contentRef}>
+            <h3 className="relic-drop-table-heading">{dropTable.heading}</h3>
+            <ul className="relic-drop-table-categories">
+              {dropTable.categories.map((category, index) => (
+                <li
+                  key={category.name}
+                  className="relic-drop-table-category"
+                  style={{ '--drop-table-color': getDropTableCategoryColor(category, index) }}
+                >
+                  <span className="relic-drop-table-category-name">{category.name}</span>
+                  {category.badge && <span className="relic-drop-table-badge">{category.badge}</span>}
+                  {category.detail && <span className="relic-drop-table-category-detail">{category.detail}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </>
   );
