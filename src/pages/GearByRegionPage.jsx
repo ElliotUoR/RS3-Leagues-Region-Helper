@@ -19,6 +19,27 @@ const SLOT_LABELS = {
   pocket: 'Pocket',
 };
 
+// "Kharidian Desert" -> "Desert" applies on both desktop and mobile (it's
+// just too long a name for these pill buttons at any width) - every other
+// region keeps its full regions.js name on desktop, only switching to the
+// shorter form below `.region-name-short`/`.region-name-full`'s CSS
+// breakpoint (see index.css, same show/hide-at-700px technique as
+// site-title-full/site-title-short).
+const REGION_DISPLAY_NAME = { kharidianDesert: 'Desert' };
+const REGION_SHORT_NAME = {
+  misthalin: 'Misth',
+  karamja: 'Karam',
+  havenhythe: 'Haven',
+  morytania: 'Mory',
+  anachronia: 'Ana',
+  kharidianDesert: 'Desert',
+  asgarnia: 'Asg',
+  wilderness: 'Wildy',
+  fremennikProvince: 'Fremmy',
+  kandarin: 'Kan',
+  tirannwn: 'Tira',
+};
+
 // Region button colours match the interactive region map's own palette
 // exactly (regions.js's `color` field) rather than the separately-tuned
 // gear-tag palette (regionColors.js) - this page's buttons are meant to
@@ -36,7 +57,10 @@ function groupBySlot(items) {
   }
   return [...bySlot.entries()]
     .filter(([, list]) => list.length > 0)
-    .map(([slot, list]) => [slot, [...list].sort((a, b) => a.name.localeCompare(b.name))]);
+    .map(([slot, list]) => [
+      slot,
+      [...list].sort((a, b) => (b.level?.level ?? 0) - (a.level?.level ?? 0) || a.name.localeCompare(b.name)),
+    ]);
 }
 
 export default function GearByRegionPage({ isUnlocked }) {
@@ -83,7 +107,8 @@ export default function GearByRegionPage({ isUnlocked }) {
                 onClick={() => setSelectedRegion(id)}
               >
                 {unlocked && <span className="region-unlocked-check">✓</span>}
-                {region.name}
+                <span className="region-name-full">{REGION_DISPLAY_NAME[id] ?? region.name}</span>
+                <span className="region-name-short">{REGION_SHORT_NAME[id]}</span>
               </button>
             );
           })}

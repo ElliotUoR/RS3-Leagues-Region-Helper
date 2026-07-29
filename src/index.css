@@ -1,4 +1,30 @@
+/* Dark is the default/base palette (not tied to prefers-color-scheme) - see
+   hooks/useTheme.js and index.html's inline theme-init script. Explicitly
+   picking light applies the override block below via a `data-theme="light"`
+   attribute on <html>, set by that hook. */
 :root {
+  --text: #c7c7cf;
+  --text-h: #f3f4f6;
+  --bg: #16171d;
+  --border: #2e303a;
+  --panel-bg: #1f2028;
+  --accent: #c084fc;
+  --accent-2: #9333ea;
+  --accent-bg: rgba(192, 132, 252, 0.15);
+  --locked-bg: #35263f;
+  --warning: #ff8f5c;
+  --style-melee: #f87171;
+  --style-ranged: #4ade80;
+  --style-magic: #60a5fa;
+  --style-necromancy: #c084fc;
+
+  font: 16px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+  color: var(--text);
+  background: var(--bg);
+}
+
+:root[data-theme='light'] {
   --text: #4b4b52;
   --text-h: #16171d;
   --bg: #fff;
@@ -14,29 +40,7 @@
   --style-magic: #2563eb;
   --style-necromancy: #9333ea;
 
-  font: 16px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #c7c7cf;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --panel-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-2: #9333ea;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --locked-bg: #35263f;
-    --warning: #ff8f5c;
-    --style-melee: #f87171;
-    --style-ranged: #4ade80;
-    --style-magic: #60a5fa;
-    --style-necromancy: #c084fc;
-  }
+  color-scheme: light;
 }
 
 * {
@@ -115,13 +119,11 @@ h1, h2, h3 {
   border: 1px solid #d4af37;
   border-radius: 6px;
   margin-bottom: 0;
-  color: #a9791a;
+  color: #e0c15c;
 }
 
-@media (prefers-color-scheme: dark) {
-  .site-nav a.league-relics-tab {
-    color: #e0c15c;
-  }
+:root[data-theme='light'] .site-nav a.league-relics-tab {
+  color: #a9791a;
 }
 
 .site-nav a.league-relics-tab.active {
@@ -227,6 +229,21 @@ header h1 {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
+}
+
+.theme-toggle {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .site-nav-report {
@@ -702,8 +719,16 @@ main {
   transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.25s ease, visibility 0s linear 0.3s;
 }
 
+.unlocks-list-heading-break {
+  flex-basis: 100%;
+  height: 0;
+}
+
 .unlocks-list-heading-note.visible {
-  max-height: 60px;
+  /* Tall enough for two wrapped rows (narrow viewports/zoomed text) - this
+     note now carries two text+arrow+button groups (Gear Planner, then Gear
+     by Region), not just one. */
+  max-height: 100px;
   margin-top: 8px;
   opacity: 1;
   visibility: visible;
@@ -1655,13 +1680,11 @@ main.abilities-page .gear-item-rows {
 .relic-effect {
   font-size: 12px;
   font-weight: 500;
-  color: var(--relic-effect-color, #2f7dd6);
+  color: var(--relic-effect-color, #7fb3f0);
 }
 
-@media (prefers-color-scheme: dark) {
-  .relic-effect {
-    color: var(--relic-effect-color, #7fb3f0);
-  }
+:root[data-theme='light'] .relic-effect {
+  color: var(--relic-effect-color, #2f7dd6);
 }
 
 .relic-row-main[aria-disabled='false'] {
@@ -1728,16 +1751,14 @@ main.abilities-page .gear-item-rows {
   padding-left: 16px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--relic-effect-color, #2f7dd6);
+  color: var(--relic-effect-color, #7fb3f0);
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .league-relic-effects {
-    color: var(--relic-effect-color, #7fb3f0);
-  }
+:root[data-theme='light'] .league-relic-effects {
+  color: var(--relic-effect-color, #2f7dd6);
 }
 
 .league-relic-tag-note {
@@ -1745,6 +1766,84 @@ main.abilities-page .gear-item-rows {
   align-items: center;
   flex-wrap: wrap;
   gap: 5px;
+}
+
+/* Relic drop/resource-conversion table (see RelicDropTablePanel.jsx) - the
+   footer toggle + expandable panel are siblings of .relic-row-main, not
+   nested inside it (nested buttons are invalid HTML), so they're styled to
+   sit flush under the row's own bottom edge instead of looking like a
+   separate floating card. */
+.relic-drop-table-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-top: 8px;
+  padding: 8px 14px;
+  border: none;
+  border-top: 1px dashed var(--border);
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.relic-drop-table-toggle:hover {
+  color: var(--text);
+}
+
+.relic-drop-table-wrapper {
+  height: 0;
+  overflow: hidden;
+}
+
+.relic-drop-table-panel {
+  padding: 4px 14px 14px;
+}
+
+.relic-drop-table-heading {
+  margin: 8px 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.relic-drop-table-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.relic-drop-table-category {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--drop-table-color);
+}
+
+.relic-drop-table-category-name {
+  font-weight: 700;
+}
+
+.relic-drop-table-category-detail {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.relic-drop-table-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--drop-table-color) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--drop-table-color) 55%, transparent);
 }
 
 .retry-image {
@@ -1829,45 +1928,43 @@ main.abilities-page .gear-item-rows {
 }
 
 .gear-stat-dmg {
-  color: var(--stat-dmg-color, #c0392b);
+  color: var(--stat-dmg-color, #ff6b6b);
 }
 
 .gear-stat-lp {
-  color: var(--stat-lp-color, #2f8f5c);
+  color: var(--stat-lp-color, #6fd39a);
 }
 
 .gear-stat-armour {
-  color: var(--stat-armour-color, #5c7a94);
+  color: var(--stat-armour-color, #a8c5dd);
 }
 
 .gear-stat-prayer {
-  color: var(--stat-prayer-color, #6b6b76);
+  color: var(--stat-prayer-color, #f2f2f7);
 }
 
 .gear-stat-acc {
-  color: var(--stat-acc-color, #2f8f5c);
+  color: var(--stat-acc-color, #6fd39a);
 }
 
-@media (prefers-color-scheme: dark) {
-  .gear-stat-dmg {
-    color: var(--stat-dmg-color, #ff6b6b);
-  }
+:root[data-theme='light'] .gear-stat-dmg {
+  color: var(--stat-dmg-color, #c0392b);
+}
 
-  .gear-stat-lp {
-    color: var(--stat-lp-color, #6fd39a);
-  }
+:root[data-theme='light'] .gear-stat-lp {
+  color: var(--stat-lp-color, #2f8f5c);
+}
 
-  .gear-stat-armour {
-    color: var(--stat-armour-color, #a8c5dd);
-  }
+:root[data-theme='light'] .gear-stat-armour {
+  color: var(--stat-armour-color, #5c7a94);
+}
 
-  .gear-stat-prayer {
-    color: var(--stat-prayer-color, #f2f2f7);
-  }
+:root[data-theme='light'] .gear-stat-prayer {
+  color: var(--stat-prayer-color, #6b6b76);
+}
 
-  .gear-stat-acc {
-    color: var(--stat-acc-color, #6fd39a);
-  }
+:root[data-theme='light'] .gear-stat-acc {
+  color: var(--stat-acc-color, #2f8f5c);
 }
 
 /* Tag-style buttons whose full info previously only showed on hover (via
@@ -2619,6 +2716,23 @@ main.abilities-page .gear-item-rows {
 .region-select-button.region-wilderness.active {
   background: var(--region-color);
   color: #fff;
+}
+
+/* Same show/hide-at-700px technique as .site-title-full/.site-title-short -
+   full region names on desktop, shorter ones on mobile where 11 pill
+   buttons' worth of full names wrap into a much taller grid. */
+.region-name-short {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .region-name-full {
+    display: none;
+  }
+
+  .region-name-short {
+    display: inline;
+  }
 }
 
 .gear-by-region-empty {

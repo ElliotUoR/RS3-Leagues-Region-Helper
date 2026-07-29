@@ -9,6 +9,7 @@ import LeagueRelicsPage from './pages/LeagueRelicsPage';
 import RelicImportDocsPage from './pages/RelicImportDocsPage';
 import SpellbooksPage from './pages/SpellbooksPage';
 import ReportIssueButton from './components/ReportIssueButton';
+import ThemeToggle from './components/ThemeToggle';
 import ReportIssueModal from './components/ReportIssueModal';
 import ReportIssueUnavailableModal from './components/ReportIssueUnavailableModal';
 import PagesMigrationModal from './components/PagesMigrationModal';
@@ -22,6 +23,7 @@ import {
   useLeagueRelicSelection,
 } from './hooks/useLeagueRelicSelection';
 import { useIsAdmin } from './hooks/useIsAdmin';
+import { useTheme } from './hooks/useTheme';
 import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
 import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
 import { parseImportRelicsParam, stripImportRelicsParam } from './utils/importRelics';
@@ -273,6 +275,7 @@ function App() {
   // toggle rather than replacing it.
   const [contentGeneration, setContentGeneration] = useState(0);
   const isAdmin = useIsAdmin();
+  const { theme, toggleTheme } = useTheme();
   // Called once here rather than inside each modal that displays it - see
   // useLiveSiteUrl.js for why that used to create duplicate short links.
   const liveUrl = useLiveSiteUrl();
@@ -379,6 +382,7 @@ function App() {
           {`· v${versionInfo.version}`}
           {formatUpdatedAt(versionInfo.updatedAt) && ` · Updated ${formatUpdatedAt(versionInfo.updatedAt)}`}
         </span>
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
         <ReportIssueButton open={reportIssueOpen} onToggle={() => setReportIssueOpen((prev) => !prev)} />
       </footer>
       {IS_PAGES_BUILD ? (

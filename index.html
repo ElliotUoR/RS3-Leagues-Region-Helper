@@ -6,6 +6,26 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <title>RS3 Leagues II: Equilibrium — Region, Gear &amp; Relics Planner</title>
 
+    <!-- Sets the theme attribute before the stylesheet paints anything, so a
+    stored "light" preference doesn't flash dark-then-light on load. Plain
+    inline script (not a module) so it runs synchronously during HTML
+    parsing, ahead of the CSS link Vite injects into this file at build time.
+    The storage key here has to stay in sync with THEME_STORAGE_KEY in
+    src/hooks/useTheme.js by hand - this script can't import that constant. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('rs3-leagues-theme');
+          document.documentElement.dataset.theme = stored === 'light' ? 'light' : 'dark';
+        } catch (e) {
+          // localStorage can throw (private browsing, disabled storage) -
+          // falling back to the default theme is the whole handling here,
+          // nothing else to do with the error itself.
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
+
     <meta
       name="description"
       content="RS3 (RuneScape 3) Leagues II (Leagues 2) - Equilibrium planner. Choose region unlocks, build relic combos, and plan gear loadouts for every combat style."

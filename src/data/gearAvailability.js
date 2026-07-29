@@ -103,27 +103,38 @@ export function isGearItemImpossible(item) {
 // without visiting the dig site's own region, while a relic's collector
 // hand-in location (and any non-Archaeology component) still gates.
 //
+// `leagueRelic` is normally a single relic name, but a group can list
+// several alternative relics that each independently satisfy it (e.g.
+// Luminate/Oricalchite/Light animica ore's groups are satisfied by *either*
+// Endless Harvest's Mining tier-upgrade chance *or* Transmutation's
+// resource-conversion spells - two unrelated relics that each happen to
+// produce the same materials) - accepts either shape so single-relic
+// entries don't need to become a one-element array everywhere.
+export function normalizeLeagueRelicList(leagueRelic) {
+  if (!leagueRelic) return [];
+  return Array.isArray(leagueRelic) ? leagueRelic : [leagueRelic];
+}
+
 // `options.selectedLeagueRelics` (default []) is the player's current League
 // Relic picks (see hooks/useLeagueRelicSelection.js). A group whose
-// `leagueRelic` is set is satisfied by that exact pick being present - for a
-// pure `region: 'relic'` group (e.g. Golden Touch's own reward item, which
-// has no real region alternative) that's the *only* way it's satisfied,
-// regardless of region state. But a group can also carry a `leagueRelic`
-// alongside real regions (e.g. the "Luminate ore"/"Oricalchite ore"/"Light
-// animica ore" labelled groups, which Endless Harvest's Mining
-// tier-upgrade chance genuinely lets you obtain without visiting any of the
-// listed regions - see https://runescape.wiki/w/Polishing#Mining for the
-// underlying tier-upgrade mechanic) - there, the relic is an *additional*
-// alternative on top of the normal region check, not a replacement for it.
+// `leagueRelic` is set is satisfied by any one of those relic(s) being
+// picked - for a pure `region: 'relic'` group (e.g. Golden Touch's own
+// reward item, which has no real region alternative) that's the *only* way
+// it's satisfied, regardless of region state. But a group can also carry a
+// `leagueRelic` alongside real regions (e.g. the "Luminate ore"/"Oricalchite
+// ore"/"Light animica ore" labelled groups - see normalizeLeagueRelicList
+// above) - there, the relic(s) are an *additional* alternative on top of the
+// normal region check, not a replacement for it.
 export function isGearItemAvailable(item, isUnlocked, options = {}) {
   const { ignoreComponents = false, ignoreArtefactRegions = false, selectedLeagueRelics = [] } = options;
   if (isGearItemImpossible(item)) return false;
   return normalizeRegionGroups(item).every((group) => {
-    if (group.leagueRelic && selectedLeagueRelics.includes(group.leagueRelic)) return true;
+    const relicOptions = normalizeLeagueRelicList(group.leagueRelic);
+    if (relicOptions.some((relic) => selectedLeagueRelics.includes(relic))) return true;
     // A pure relic-gated group (no real region alternative) stops here -
     // falling through to the region check below would trivially pass
     // regardless of the relic pick, since 'relic' is itself in ALWAYS_UNLOCKED.
-    if (group.leagueRelic && group.regions.length === 1 && group.regions[0] === 'relic') return false;
+    if (relicOptions.length > 0 && group.regions.length === 1 && group.regions[0] === 'relic') return false;
     if (ignoreComponents && group.component) return true;
     if (ignoreArtefactRegions && group.artefact) return true;
     return group.regions.some((r) => ALWAYS_UNLOCKED.has(r) || isUnlocked(r));

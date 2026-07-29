@@ -35,7 +35,7 @@ function computeBubblePosition(anchorRect) {
   return { top, left, above };
 }
 
-export default function TagTooltip({ className, tooltip, children }) {
+export default function TagTooltip({ className, style, tooltip, children }) {
   const [position, setPosition] = useState(null);
   const ref = useRef(null);
 
@@ -49,7 +49,11 @@ export default function TagTooltip({ className, tooltip, children }) {
   }, [position]);
 
   if (!tooltip) {
-    return <span className={className}>{children}</span>;
+    return (
+      <span className={className} style={style}>
+        {children}
+      </span>
+    );
   }
 
   function toggle(e) {
@@ -67,6 +71,7 @@ export default function TagTooltip({ className, tooltip, children }) {
       role="button"
       tabIndex={0}
       className={`tag-tooltip-anchor ${className}`}
+      style={style}
       title={tooltip}
       onClick={toggle}
       onKeyDown={(e) => {

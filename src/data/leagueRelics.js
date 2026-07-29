@@ -100,6 +100,176 @@ export const LEAGUE_RELICS = [
       'All coins obtained via Thieving are increased by 100x the usual amount, and chests and safes can reward additional bundles of herb and potion ingredients that are sent directly to your bank.',
     ],
     icon: FP('Golden_Touch_(relic).png'),
+    // Thieving secondary-ingredient drop table - four separate tier tables,
+    // each gated by a *different* combination of Heist-only vs
+    // outside-of-Heist availability (per the relic's own Thieving-pickpocket
+    // effects above): Tier 1 is Heist-only, Tiers 2-3 drop both inside and
+    // outside Heists, Tier 4 is outside-Heist-only. The `badge` on each line
+    // names its own availability rather than a single shared "Heist" flag,
+    // since it genuinely differs tier to tier.
+    dropTable: {
+      heading: 'Thieving drop table',
+      footerText: 'Thieving drop table',
+      categories: [
+        {
+          name: 'Tier 1 Secondaries',
+          badge: 'Heist only',
+          detail:
+            'Primal extract, bottled roar, spark chitin, poison slime, adrenaline crystal, ground wyvern bone and wyvern bonemeal, grenwall spikes, congealed blood, ground Miasma runes, dragonscale dust, phoenix feather, morchella mushroom, tombshroom, timeworn tincture, spider fang',
+        },
+        {
+          name: 'Tier 2 Secondaries',
+          badge: 'Heist + Outside',
+          detail:
+            "Snape grass, Red spider's eggs, unicorn horn dust, limpwurt roots, white berries, wine of zamorak, crushed birds nest, cactus potato, Yew and Magic roots, Searing ashes, cockatrice egg, rabbit foot, bull horns, wine of saradomin, wine of guthix, Mycelial webbing, poison ivy berries",
+        },
+        {
+          name: 'Tier 3 Secondaries',
+          badge: 'Heist + Outside',
+          detail:
+            "Chinchompa residue, yak milk, yak tuft, zygomite fruit, regular and enriched timber & calcified fungus, enriched fungal algae, kebbit teeth dust, mort myre mushroom, goat horn dust, toad's legs, spider venom",
+        },
+        {
+          name: 'Tier 4 Secondaries',
+          badge: 'Outside only',
+          detail:
+            'Eye of newt, jangerberries, Frog spawn, Papaya, Swordfish, Wimpy feather, redberries, ground mud runes, Nail beast nails, bull horns, Bear fur, cadava berries, chocolate dust, white, red, yellow and black beads',
+        },
+      ],
+    },
+  },
+  {
+    // Transcribed from the reveal image directly (not the wiki - not
+    // published there yet), same "Unknown Tier" treatment as Crystal Grace/
+    // Superheated/Divine Druid below. Kept first among the Unknown Tier
+    // relics since its resource-conversion effect touches the widest range
+    // of other gear.js entries (see regionTagNote below).
+    name: 'Transmutation',
+    tier: null,
+    effects: [
+      "Grants the Deities' Transmuter.",
+      'Alchemical spells transmutes items (Toggleable).',
+      'Transmutation spells bank noted products (Toggleable).',
+      'Low alchemy and high alchemy spells transform into 2 new spells:',
+      'Divine Convergence: downgrades up to 10 of a resource into a lower tier. Divine Divergence: upgrades up to 10 of a resource into a higher tier.',
+      "The Deities' Transmuter must be in the inventory to cast these spells.",
+      "Using items on the Deities' Transmuter will display what they can turn into.",
+      'Both spells have no level requirement. The spell gives 10 Magic XP for each item transmuted (before league XP multipliers).',
+      'When cast upon a stack of noted items, these spells will automatically re-cast over time as long as the items are available in the same slot in your inventory.',
+    ],
+    // App-added (not a wiki-verbatim effects bullet), same treatment as
+    // Endless Harvest's regionTagNote above - Divine Convergence/Divergence
+    // can transmute a resource up or down a tier, which genuinely lets you
+    // reach several region-locked materials without visiting their normal
+    // source regions. Tagged onto the matching gear.js groups as an
+    // additional `leagueRelic: 'Transmutation'` alternative (see
+    // gearAvailability.js's normalizeLeagueRelicList) - Luminate/Oricalchite/
+    // Light animica ore already had Endless Harvest as an alternative, this
+    // just adds Transmutation as a second one; Eternal magic logs/Primal ore/
+    // Acadia logs are new tags that previously had no non-region path at all.
+    regionTagNote: {
+      prefix: 'Gives access to the following region restricted items (needed for PvM gear):',
+      tags: ['Luminate ore', 'Oricalchite ore', 'Light animica ore', 'Eternal magic logs', 'Primal ore', 'Acadia logs'],
+      suffix: '',
+    },
+    icon: FP('Transmutation.png'),
+    // Not a drop table - Divine Convergence/Divergence transmute a resource
+    // one tier down/up a fixed progression chain (see effects above), so
+    // each line below is that chain, not a random-roll loot list. Deliberately
+    // titled "tables" throughout, never "drop table".
+    dropTable: {
+      heading: 'Transmutation tables',
+      footerText: 'Transmutation tables',
+      categories: [
+        { name: 'Hides', detail: 'Cowhide → Snakehide → Green Dhide → Blue Dhide → Red Dhide → Black Dhide → Royal Dhide' },
+        { name: 'Runes', detail: 'Rune essence → Pure essence → Air runes through Time runes' },
+        { name: 'Ashes', detail: 'Impious → Accursed → Infernal → Tortured → Searing' },
+        {
+          name: 'Bones',
+          detail:
+            'Bones → Wolf bones → Monkey bones → Bat bones → Big bones → Jogre bones → Zogre bones → Baby dragon bones → Wyvern bones → Dragon bones → Dagannoth bones → Airut bones → Ourg bones → Hardened dragon bones → Dragonkin bones → Dinosaur bones → Frost dragon bones → Reinforced dragon bones',
+        },
+        { name: 'Gems', detail: 'Opal → Dragonstone' },
+        { name: 'Compost', detail: 'Compost → Supercompost → Ultracompost' },
+        {
+          name: 'Allotment seeds',
+          detail:
+            'Potato seed → Onion seed → Cabbage seed → Tomato seed → Sweetcorn seed → Strawberry seed → Watermelon seed → Snape grass seed → Sunchoke seed → Fly trap seed',
+        },
+        {
+          name: 'Flower seeds',
+          detail:
+            'Marigold seed → Rosemary seed → Nasturtium seed → Woad seed → Limpwurt seed → White lily seed → Butterfly flower seed → Starbloom flower seed',
+        },
+        {
+          name: 'Hop & vine seeds',
+          detail:
+            'Barley seed → Hammerstone seed → Asgarnian seed → Wendlewick seed → Jute seed → Yanillian seed → Krandorian seed → Wildblood seed → Reed seed → Grapevine seed → Godly grapevine seed',
+        },
+        {
+          name: 'Herb seeds',
+          detail:
+            'Guam seed → Marrentill seed → Tarromin seed → Harralander seed → Ranarr seed → Spirit weed seed → Toadflax seed → Irit seed → Wergali seed → Avantoe seed → Kwuarm seed → Bloodweed seed → Snapdragon seed → Cadantine seed → Lantadyme seed → Arbuck seed → Dwarf weed seed → Torstol seed → Fellstalk seed',
+        },
+        {
+          name: 'Bush seeds',
+          detail:
+            'Redberry seed → Cadavaberry seed → Dwellberry seed → Jangerberry seed → Whiteberry seed → Poison Ivy seed → Barberry seed → Avocado seed → Mango seed → Lychee seed',
+        },
+        { name: 'Tree seeds', detail: 'Acorn → Willow seed → Maple seed → Yew seed → Magic seed → Elder seed' },
+        {
+          name: 'Fruit tree seeds',
+          detail:
+            'Apple tree seed → Banana tree seed → Orange tree seed → Curry tree seed → Pineapple seed → Papaya tree seed → Palm tree seed → Ciku seed → Guarana seed → Carambola seed',
+        },
+        {
+          name: 'Cactus seeds',
+          detail: 'Cactus seed → Prickly pear seed → Potato cactus seed → Dragonfruit seed → Golden dragonfruit seed',
+        },
+        {
+          name: 'Mushroom spores',
+          detail: 'Bittercap mushroom spore → Morchella mushroom spore → Stinkshroom spore → Tombshroom spore',
+        },
+        {
+          name: 'Logs',
+          detail:
+            'Logs → Oak logs → Willow logs → Teak logs → Maple logs → Acadia logs → Mahogany logs → Yew logs → Magic logs → Elder logs → Eternal magic logs',
+        },
+        {
+          name: 'Ores',
+          detail:
+            'Copper ore → Tin ore → Iron ore → Coal → Mithril ore → Adamantite ore → Luminite → Runite ore → Orichalcite ore → Drakolith → Necrite ore → Phasmatite → Banite ore → Light animica → Dark animica → Primal ore (then cycles)',
+        },
+        { name: 'Precious ores & clay', detail: 'Clay → Silver ore → Gold ore → Porcelain clay → Platinum ore' },
+        {
+          name: 'Raw fish',
+          detail:
+            'Raw crayfish → Raw shrimps → Raw sardine → Raw herring → Raw anchovies → Raw mackerel → Raw trout → Raw cod → Raw pike → Raw salmon → Raw tuna → Raw lobster → Raw bass → Raw swordfish → Raw desert sole → Raw catfish → Raw monkfish → Raw green blubber jellyfish → Raw beltfish → Raw shark → Raw sea turtle → Raw great white shark → Raw manta ray → Raw giant crayfish → Raw cavefish → Raw rocktail → Raw blue blubber jellyfish → Raw sailfish',
+        },
+        {
+          name: 'Divine energy',
+          detail:
+            'Pale energy → Flickering energy → Bright energy → Glowing energy → Sparkling energy → Gleaming energy → Vibrant energy → Lustrous energy → Brilliant energy → Radiant energy → Luminous energy → Incandescent energy',
+        },
+        {
+          name: 'Ghostly ink',
+          detail: 'Basic ghostly ink → Regular ghostly ink → Greater ghostly ink → Powerful ghostly ink',
+        },
+        {
+          name: 'Necroplasm',
+          detail: 'Weak necroplasm → Lesser necroplasm → Greater necroplasm → Powerful necroplasm',
+        },
+        {
+          name: 'Mementos',
+          detail: 'Broken memento → Fragile memento → Spirit memento → Robust memento → Powerful memento',
+        },
+        {
+          name: 'Ritual candles',
+          detail: 'Basic ritual candle → Regular ritual candle → Greater ritual candle → Greater flaming skull',
+        },
+        { name: 'Necromancy runes', detail: 'Spirit rune → Bone rune → Flesh rune → Miasma rune' },
+      ],
+    },
   },
   {
     name: 'Crystal Grace',
@@ -133,6 +303,22 @@ export const LEAGUE_RELICS = [
       'XP for burial sets is increased by 3x.',
     ],
     icon: FP('Superheated.png'),
+    // Blessed Fire Spirits (see effects above - Fire spirits are replaced by
+    // these while Superheated is active) drop table - each entry below is a
+    // range (e.g. Stone Spirits drops anywhere from Copper up to Platinum,
+    // not just those two ends) rather than a fixed list of items.
+    dropTable: {
+      heading: 'Blessed Fire Spirits drop table',
+      footerText: 'Blessed Fire Spirits drop table',
+      categories: [
+        { name: 'Stone Spirits', detail: 'Copper → Platinum' },
+        { name: 'Uncut Gems', detail: 'Sapphire → Dragonstone' },
+        { name: 'Charms', detail: 'Gold, Green, Crimson, Blue' },
+        { name: 'Clues', detail: 'Easy → Master, and Box of Clue Scrolls' },
+        { name: 'Flasks', detail: 'Crystal & Potion Flasks' },
+        { name: 'Coins', detail: '10k → 100k GP' },
+      ],
+    },
   },
   {
     // Transcribed from the reveal image directly (not the wiki - not
@@ -159,22 +345,5 @@ export const LEAGUE_RELICS = [
       'Unlock all Meilyr potion recipes.',
     ],
     icon: FP('Divine_Druid.png'),
-  },
-  {
-    // Same as Divine Druid above.
-    name: 'Transmutation',
-    tier: null,
-    effects: [
-      "Grants the Deities' Transmuter.",
-      'Alchemical spells transmutes items (Toggleable).',
-      'Transmutation spells bank noted products (Toggleable).',
-      'Low alchemy and high alchemy spells transform into 2 new spells:',
-      'Divine Convergence: downgrades up to 10 of a resource into a lower tier. Divine Divergence: upgrades up to 10 of a resource into a higher tier.',
-      "The Deities' Transmuter must be in the inventory to cast these spells.",
-      "Using items on the Deities' Transmuter will display what they can turn into.",
-      'Both spells have no level requirement. The spell gives 10 Magic XP for each item transmuted (before league XP multipliers).',
-      'When cast upon a stack of noted items, these spells will automatically re-cast over time as long as the items are available in the same slot in your inventory.',
-    ],
-    icon: FP('Transmutation.png'),
   },
 ];

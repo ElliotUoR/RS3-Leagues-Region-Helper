@@ -1,5 +1,5 @@
-import { isGearItemImpossible, normalizeRegionGroups } from '../data/gearAvailability';
-import { REGION_COLORS, REGION_SHORT_LABELS } from '../data/regionColors';
+import { isGearItemImpossible, normalizeLeagueRelicList, normalizeRegionGroups } from '../data/gearAvailability';
+import { REGION_COLORS, REGION_SHORT_LABELS, RESOURCE_TAG_COLORS } from '../data/regionColors';
 import TagTooltip from './TagTooltip';
 
 function isRegionUnlocked(regionId, isUnlocked) {
@@ -22,22 +22,29 @@ function RegionPill({ regionId, unlocked }) {
 // Collapses a wide OR-group (e.g. 5 regions that all yield the same ore)
 // into a single named tag, so listing every alternative doesn't blow out the
 // card layout. Lights up if any underlying region is unlocked; the tooltip
-// spells out which regions actually satisfy it. A group can also carry a
-// `leagueRelic` alongside its regions (see gearAvailability.js) - Endless
-// Harvest's Mining tier-upgrade chance genuinely produces Luminate/
-// Oricalchite/Light animica ore without visiting any of the listed regions,
-// so that relic being picked lights the tag up too, with its own tooltip
-// explanation.
+// spells out which regions actually satisfy it. A group can also carry one
+// or more `leagueRelic` alternatives alongside its regions (see
+// gearAvailability.js's normalizeLeagueRelicList) - e.g. Endless Harvest's
+// Mining tier-upgrade chance AND Transmutation's resource-conversion spells
+// each independently produce Luminate/Oricalchite/Light animica ore without
+// visiting any of the listed regions, so either relic being picked lights
+// the tag up too.
 function ResourcePill({ label, regions, isUnlocked, leagueRelic, selectedLeagueRelics = [] }) {
-  const relicSatisfied = Boolean(leagueRelic) && selectedLeagueRelics.includes(leagueRelic);
+  const relicOptions = normalizeLeagueRelicList(leagueRelic);
+  const relicSatisfied = relicOptions.some((relic) => selectedLeagueRelics.includes(relic));
   const unlocked = relicSatisfied || regions.some((r) => isRegionUnlocked(r, isUnlocked));
   const regionNames = regions.map((r) => REGION_SHORT_LABELS[r] ?? r).join(' / ');
-  const tooltip = leagueRelic
-    ? `Requires: ${regionNames} (or the "${leagueRelic}" League Relic - its Mining resource upgrades can produce this ore directly)`
-    : `Requires: ${regionNames}`;
+  let tooltip = `Requires: ${regionNames}`;
+  if (relicOptions.length > 0) {
+    const relicWord = relicOptions.length > 1 ? 'Relics' : 'Relic';
+    const relicNames = relicOptions.map((r) => `"${r}"`).join(' / ');
+    tooltip = `${tooltip} (or the League ${relicWord} ${relicNames} - see its effects for how it produces this without the region)`;
+  }
+  const customColor = RESOURCE_TAG_COLORS[label];
   return (
     <TagTooltip
       className={`region-tag region-tag-resource${unlocked ? ' region-tag-resource-unlocked' : ''}`}
+      style={unlocked && customColor ? { '--resource-color': customColor } : undefined}
       tooltip={tooltip}
     >
       {label}

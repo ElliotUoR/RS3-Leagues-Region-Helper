@@ -135,6 +135,10 @@ export const ASSUMPTION_GROUPS = [
         title: 'Nightmare gauntlets / Enhanced Nightmare gauntlets -> Kandarin (unconfirmed)',
         detail: 'The wiki has no confirmed League region tag for the Freneskae/World Gate content these drop from. As the world gate, kandarin is assumed - but could require quests from other regions.',
       },
+      {
+        title: 'Will the Dragon Forge be accessible for breaking down items into Masterwork Essence if I don\'t pick Kandarin?',
+        detail: "Yes. In Leagues, you can break down items into Masterwork Essence at any anvil, so you won't need access to the Dragon Forge or the Kandarin region to use this specific feature. Confirmed from the source, so Kandarin is not required for it.",
+      },
     ],
   },
 ];

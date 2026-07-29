@@ -1,5 +1,7 @@
 import RetryImage from './RetryImage';
+import RelicDropTablePanel from './RelicDropTablePanel';
 import { wikiUrlContextMenuHandler, wikiUrlWithAnchor } from '../utils/wiki';
+import { RESOURCE_TAG_COLORS } from '../data/regionColors';
 
 const LEAGUE_RELICS_WIKI_PAGE = 'Equilibrium League/Relics';
 
@@ -55,22 +57,31 @@ export default function LeagueRelicRow({ relic, selected, onToggleSelect }) {
             ))}
             {/* App-added (not wiki-verbatim, see data/leagueRelics.js) - the
                 tags rendered here are the exact same pill styling gear items
-                use for these labels (see RegionTags.jsx's ResourcePill), so
+                use for these labels (see RegionTags.jsx's ResourcePill),
+                including any custom per-tag colour (RESOURCE_TAG_COLORS), so
                 picking this relic visibly reads as "unlocking" them. */}
             {relic.regionTagNote && (
               <li className="league-relic-tag-note">
                 {relic.regionTagNote.prefix}{' '}
-                {relic.regionTagNote.tags.map((tag) => (
-                  <span key={tag} className="region-tag region-tag-resource region-tag-resource-unlocked">
-                    {tag}
-                  </span>
-                ))}{' '}
+                {relic.regionTagNote.tags.map((tag) => {
+                  const customColor = RESOURCE_TAG_COLORS[tag];
+                  return (
+                    <span
+                      key={tag}
+                      className="region-tag region-tag-resource region-tag-resource-unlocked"
+                      style={customColor ? { '--resource-color': customColor } : undefined}
+                    >
+                      {tag}
+                    </span>
+                  );
+                })}{' '}
                 {relic.regionTagNote.suffix}
               </li>
             )}
           </ul>
         </div>
       </button>
+      {relic.dropTable && <RelicDropTablePanel dropTable={relic.dropTable} />}
     </div>
   );
 }

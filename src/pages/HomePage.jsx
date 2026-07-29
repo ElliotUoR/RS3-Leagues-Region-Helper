@@ -32,6 +32,17 @@ export default function HomePage({ selected, toggleRegion, isUnlocked, overLimit
             <a href="#gear" className="gear-planner-cta">
               Gear Planner
             </a>
+            {/* Forces the flex-wrap to break exactly here (a common
+                flex-basis:100% trick) so "Or check" + its button always
+                start together on their own line, rather than only wrapping
+                once the container happens to run out of room mid-group. */}
+            <span className="unlocks-list-heading-break" aria-hidden="true" />
+            <span className="all-regions-note">
+              Or check <span className="all-regions-arrow" aria-hidden="true">→</span>
+            </span>
+            <a href="#gear-by-region" className="gear-planner-cta">
+              Gear by Region
+            </a>
           </div>
         </div>
 
