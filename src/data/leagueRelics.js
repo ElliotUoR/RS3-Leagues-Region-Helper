@@ -57,6 +57,9 @@ export const LEAGUE_RELICS = [
     // labels rather than just naming them in prose.
     name: 'Endless Harvest',
     tier: 1,
+    // Compact-mode one-liner (app-added, see LeagueRelicRow.jsx's `compact`
+    // rendering) - summarises the `effects` bullets below, not wiki text.
+    summary: 'Auto-banks resources, upgrades gathered ores/fish/logs, and speeds up Fishing, Mining and Woodcutting.',
     effects: [
       'Automatically banks resources obtained for Archaeology, Farming, Fishing, Mining and Woodcutting.',
       'Provides a 10% chance to upgrade your Fishing, Mining, and Woodcutting resources to the next tier.',
@@ -75,6 +78,7 @@ export const LEAGUE_RELICS = [
   {
     name: 'Survivalist',
     tier: 1,
+    summary: 'Doubles Archaeology, Fishing, Mining and Woodcutting yields with top-tier tools and bonus artefact restores.',
     effects: [
       'Doubles the resources obtained for Archaeology, Fishing, Mining and Woodcutting.',
       "Grants the Survivalist's Bag, an enhanced storage container capable of holding up to 150 of three different types of logs, ores, or fish at once.",
@@ -90,6 +94,7 @@ export const LEAGUE_RELICS = [
   {
     name: 'Golden Touch',
     tier: 1,
+    summary: 'Guaranteed, tripled Thieving loot with 100x coins, plus passive Agility XP and course bonuses.',
     effects: [
       'Grants goldenhawk boots, offering passive Agility XP whilst moving, skilling, or using ultimate abilities.',
       'Gives a chance to obtain goldenhawk feathers whilst training Agility or Thieving, which can be converted into Prayer XP or alchemised.',
@@ -146,6 +151,7 @@ export const LEAGUE_RELICS = [
     // of other gear.js entries (see regionTagNote below).
     name: 'Transmutation',
     tier: null,
+    summary: 'Transmutes resources up or down a tier via two new alchemy spells, reaching region-locked materials.',
     effects: [
       "Grants the Deities' Transmuter.",
       'Alchemical spells transmutes items (Toggleable).',
@@ -274,6 +280,7 @@ export const LEAGUE_RELICS = [
   {
     name: 'Crystal Grace',
     tier: null,
+    summary: 'Unlocks all spellbooks and boosts Runecrafting, Necromancy rituals/glyphs, and bone-offering XP.',
     effects: [
       "Grants Seren's crystal tiara, which acts as an omni-tiara and offers unlimited teleports to all runecrafting altars in your unlocked regions.",
       'Unlocks all Magic spells across all spellbooks.',
@@ -289,6 +296,7 @@ export const LEAGUE_RELICS = [
   {
     name: 'Superheated',
     tier: null,
+    summary: 'Auto-burns logs and cooks fish, doubles smelted bars, and speeds up Smithing with bonus XP.',
     effects: [
       'Provides a toggleable option to burn any log automatically when Woodcutting, regardless of your Firemaking level.',
       'Provides a toggleable option to cook any fish automatically when Fishing, regardless of your Cooking level.',
@@ -326,6 +334,7 @@ export const LEAGUE_RELICS = [
     // Superheated above.
     name: 'Divine Druid',
     tier: null,
+    summary: 'Auto-cleans grimy herbs into potions and boosts Summoning familiars, charms and divine energy conversions.',
     effects: [
       "Grants Thera's Summoning Pouch, a pouch that stores grimy herbs and charms, acts as infinite spirit shard and summoning pouches.",
       'Cleaning grimy herbs turns them directly into unfinished potions. (Toggleable)',

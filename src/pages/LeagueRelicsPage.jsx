@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import LeagueRelicRow from '../components/LeagueRelicRow';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 
@@ -21,6 +21,11 @@ function groupByTier(relics) {
 
 export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
   const tierGroups = useMemo(() => groupByTier(LEAGUE_RELICS), []);
+  // Compact is the default view on both desktop and mobile (per the brief) -
+  // a plain button rather than GearPage's checkbox since there's only one
+  // relevant state here, and "toggle to X mode" reads clearer as an action
+  // than a checked/unchecked label would.
+  const [compactMode, setCompactMode] = useState(true);
 
   return (
     <>
@@ -30,6 +35,13 @@ export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
           Relics chosen directly from the league's own relic tree, not tied to any region - pick one
           per tier. Relics whose tier isn't confirmed yet are listed separately with no pick limit.
         </p>
+        <button
+          type="button"
+          className="league-relic-mode-toggle"
+          onClick={() => setCompactMode((prev) => !prev)}
+        >
+          {compactMode ? 'Toggle to detailed mode' : 'Toggle to compact mode'}
+        </button>
       </header>
 
       <main className="abilities-page">
@@ -39,13 +51,14 @@ export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
               {tier === 'unknown' ? 'Unknown tier' : `Tier ${tier}`}
               <span className="league-relic-tier-note">{tier === 'unknown' ? 'pick any number' : 'pick one'}</span>
             </h2>
-            <div className="gear-item-rows">
+            <div className={`gear-item-rows${compactMode ? ' compact' : ''}`}>
               {relics.map((relic) => (
                 <LeagueRelicRow
                   key={relic.name}
                   relic={relic}
                   selected={selected.includes(relic.name)}
                   onToggleSelect={toggleLeagueRelic}
+                  compact={compactMode}
                 />
               ))}
             </div>

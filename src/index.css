@@ -1520,6 +1520,12 @@ main.gear-page {
   display: flex;
   flex-direction: column;
   width: 100%;
+  /* Grid/flex items default to min-width: auto, which lets a card's
+     content (e.g. a wrapped row of resource-tag pills) refuse to shrink
+     below its max-content size and push the whole grid track wider than
+     the viewport instead of wrapping - this override is what actually lets
+     the content wrap to the track's real width. */
+  min-width: 0;
   background: var(--panel-bg);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -1766,6 +1772,64 @@ main.abilities-page .gear-item-rows {
   align-items: center;
   flex-wrap: wrap;
   gap: 5px;
+}
+
+/* Compact mode (default on both desktop and mobile - see the "Toggle to
+   detailed mode" button in LeagueRelicsPage). Reuses GearPage's own
+   .gear-item-rows.compact grid rule (3 columns desktop, 1 column mobile;
+   see line ~1504) for the outer layout - only the card's own inner content
+   changes here, swapping the full effects list for a single summarised
+   line (data/leagueRelics.js's `summary` field). */
+.league-relic-mode-toggle {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-bg);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.league-relic-mode-toggle:hover {
+  border-color: var(--accent);
+}
+
+.league-relic-row-main-compact {
+  gap: 4px;
+  padding: 8px 10px;
+}
+
+.league-relic-compact-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.league-relic-compact-top .retry-image,
+.league-relic-compact-top .league-relic-icon-placeholder {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.league-relic-summary {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  opacity: 0.8;
+}
+
+.league-relic-effects-compact {
+  padding-left: 0;
+  gap: 0;
+}
+
+.league-relic-effects-compact .league-relic-tag-note {
+  font-size: 11px;
 }
 
 /* Relic drop/resource-conversion table (see RelicDropTablePanel.jsx) - the
