@@ -2354,12 +2354,89 @@ main.abilities-page .gear-item-rows {
 }
 
 .drop-table-alchemy-category {
+  position: relative;
   border: 1px solid color-mix(in srgb, var(--drop-table-color) 30%, var(--border));
   border-left: 3px solid var(--drop-table-color);
   border-radius: 10px;
   padding: 9px 12px 10px;
   background: color-mix(in srgb, var(--drop-table-color) 6%, var(--panel-bg));
   cursor: pointer;
+}
+
+/* Animated "hold to expand" border (see AlchemyCategoryCard) - 4 bars, each
+   scaling in from a shared corner with a staggered transition-delay, so
+   together they trace one continuous clockwise loop around the card (top,
+   then right, then bottom, then left) rather than a single border just
+   fading in - reads as "growing around the edges" as asked for, and
+   reverses the exact same way when it closes. Each segment's own duration
+   is --alchemy-seg (a quarter of the total animation time) - set inline per
+   interaction (hover vs click use very different total speeds; see the
+   ALCHEMY_HOVER_BORDER_MS/ALCHEMY_CLICK_BORDER_MS constants), with its delay
+   a multiple of that same value so the 4 segments always chain together
+   with no gap regardless of speed. Colour comes from --drop-table-color
+   (already set per-category) rather than one fixed colour, so each
+   category's own accent grows around it. */
+.drop-table-alchemy-category-border {
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+}
+
+.drop-table-alchemy-category-border span {
+  position: absolute;
+  background: var(--drop-table-color);
+}
+
+.drop-table-alchemy-border-top,
+.drop-table-alchemy-border-bottom {
+  left: 0;
+  width: 100%;
+  height: 2px;
+}
+
+.drop-table-alchemy-border-left,
+.drop-table-alchemy-border-right {
+  top: 0;
+  height: 100%;
+  width: 2px;
+}
+
+.drop-table-alchemy-border-top {
+  top: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform var(--alchemy-seg, 150ms) linear 0s;
+}
+
+.drop-table-alchemy-border-right {
+  right: 0;
+  transform-origin: top center;
+  transform: scaleY(0);
+  transition: transform var(--alchemy-seg, 150ms) linear var(--alchemy-seg, 150ms);
+}
+
+.drop-table-alchemy-border-bottom {
+  bottom: 0;
+  transform-origin: right center;
+  transform: scaleX(0);
+  transition: transform var(--alchemy-seg, 150ms) linear calc(var(--alchemy-seg, 150ms) * 2);
+}
+
+.drop-table-alchemy-border-left {
+  bottom: 0;
+  transform-origin: bottom center;
+  transform: scaleY(0);
+  transition: transform var(--alchemy-seg, 150ms) linear calc(var(--alchemy-seg, 150ms) * 3);
+}
+
+.drop-table-alchemy-category-border.is-active .drop-table-alchemy-border-top,
+.drop-table-alchemy-category-border.is-active .drop-table-alchemy-border-bottom {
+  transform: scaleX(1);
+}
+
+.drop-table-alchemy-category-border.is-active .drop-table-alchemy-border-left,
+.drop-table-alchemy-category-border.is-active .drop-table-alchemy-border-right {
+  transform: scaleY(1);
 }
 
 .drop-table-alchemy-category-header {

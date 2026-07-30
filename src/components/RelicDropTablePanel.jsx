@@ -11,6 +11,19 @@ const ALCHEMY_MAX_STAGGER_MS = 28;
 const ALCHEMY_STAGGER_BUDGET_MS = 650;
 const ALCHEMY_ITEM_TRANSITION_MS = 180;
 
+// AlchemyCategoryCard's border-grow/shrink duration - deliberately different
+// per trigger: a hover has to feel like a considered "hold to confirm" (per
+// the original brief), but a click is an explicit, unambiguous action that
+// should respond almost immediately. Both still play the same 4-segment
+// clockwise border animation (see index.css's --alchemy-seg custom property,
+// set inline per-interaction below), just at very different speeds.
+const ALCHEMY_HOVER_BORDER_MS = 600;
+const ALCHEMY_CLICK_BORDER_MS = 100;
+const ALCHEMY_BORDER_SEGMENTS = 4;
+// Only hover-out uses this - the wait *before* a fully-opened card even
+// starts closing, giving a quick pass back over it a chance to cancel.
+const ALCHEMY_LEAVE_GRACE_MS = 300;
+
 // Golden Touch's bespoke "Herblore Ledger" rendering (dropTable.theme ===
 // 'herblore') - kept as its own component so the generic path (used by
 // Superheated/Transmutation and any future themeless relic) stays completely
@@ -99,26 +112,50 @@ function parseAlchemyChain(detail) {
 // glowing fill at its most-refined end, echoing the alchemical
 // "raw material -> refined material" idea the relic's effect is built on.
 // One category's chain, in either "shrunk" (start/end item only) or
-// "expanded" (every tier) form - shrunk is the default; hovering OR clicking
-// the card expands it, per the two states below:
-//   - `hovering` alone (no click) - expands while the mouse is over the
-//     card, collapses again the moment the mouse leaves.
-//   - `locked` (set by a click) - keeps it expanded even after the mouse
-//     leaves; a second click un-locks it, reverting to hover-only behaviour.
-// `renderAll` is a THIRD, slightly-lagging piece of state: middle tiers stay
-// mounted in the DOM for `totalDuration` after collapsing starts (so their
-// exit animation can actually play) before finally being removed - without
-// this they'd just vanish instantly the moment the mouse leaves.
+// "expanded" (every tier) form - shrunk is the default. Expanding isn't
+// instant: it needs a deliberate hover-and-hold (or a click) first, signalled
+// by a border that visibly grows clockwise around the card over
+// ALCHEMY_BORDER_GROW_MS (1.5s) - only once that border has fully drawn does
+// the content actually expand. This is deliberately slower/more considered
+// than a plain instant-on-hover response, per the brief: a quick mouse pass
+// over the list shouldn't trigger anything.
 //
-// Animation: middle tiers mount/unmount from the DOM (only the first/last
-// are always present), so entering ones use the `@starting-style` at-rule
-// (see index.css) to animate in from a collapsed state the instant they're
-// inserted, and leaving ones get an `.is-collapsed` class added first (while
-// still mounted) so a normal CSS transition plays before they're removed.
-// Each tier's `transitionDelay` is staggered by its position - left-to-right
-// order when expanding, right-to-left when collapsing - scaled down for long
-// chains (see the ALCHEMY_* constants above) so the whole sequence always
-// finishes in well under 1 second regardless of chain length.
+//   - hover alone (no click) - mouse-enter starts the border growing
+//     immediately; mouse-leave (before it locks in) reverses that with the
+//     same animation. Once fully open, leaving starts a distinct sequence:
+//     wait ALCHEMY_LEAVE_GRACE_MS (1.5s) with nothing changing yet, then the
+//     border animates shut, and only once *that* finishes does the content
+//     actually collapse - re-entering at any point before it's fully closed
+//     cancels the close and reopens instead.
+//   - a click locks it open (border stays fully drawn, content stays
+//     expanded) regardless of the mouse - a second click closes it, playing
+//     the same border-closing animation immediately (no grace wait, since a
+//     click is an unambiguous close request) before the content collapses.
+//
+// `borderActive` drives the CSS border (see .drop-table-alchemy-category-
+// border in index.css) - a pure class toggle, so the 4-segment clockwise-
+// growing border animates itself via CSS transitions with no JS beyond that.
+// `expanded` is a separate, deliberately-delayed piece of state that only
+// flips once the relevant border animation has had time to finish (tracked
+// with plain setTimeout, not tied to transitionend, since the border is 4
+// independently-delayed segments rather than one element).
+//
+// `renderAll` is a further-lagging piece of state: middle tiers stay mounted
+// in the DOM for `totalDuration` after collapsing starts (so their own exit
+// animation can play) before finally being removed - without this they'd
+// just vanish instantly.
+//
+// Tier animation: middle tiers mount/unmount from the DOM (only the first/
+// last are always present), so entering ones use the `@starting-style`
+// at-rule (see index.css) to animate in from a collapsed state the instant
+// they're inserted, and leaving ones get an `.is-collapsed` class added
+// first (while still mounted) so a normal CSS transition plays before
+// they're removed. Each tier's `transitionDelay` is staggered by its
+// position - left-to-right order when expanding, right-to-left when
+// collapsing - scaled down for long chains (see the ALCHEMY_* constants
+// above) so that sequence alone always finishes in well under 1 second
+// regardless of chain length (on top of, not instead of, the 1.5s border
+// hold before it even starts).
 //
 // The chain's own wrapper height is FLIP-animated (see the useLayoutEffect
 // below) using a simpler variant of the technique this codebase already uses
@@ -136,22 +173,89 @@ function AlchemyCategoryCard({ category, index }) {
   const stagger = Math.min(ALCHEMY_MAX_STAGGER_MS, ALCHEMY_STAGGER_BUDGET_MS / Math.max(steps.length, 1));
   const totalDuration = (steps.length - 1) * stagger + ALCHEMY_ITEM_TRANSITION_MS;
 
-  const [hovering, setHovering] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [borderActive, setBorderActive] = useState(false);
+  const [borderSegmentMs, setBorderSegmentMs] = useState(ALCHEMY_HOVER_BORDER_MS / ALCHEMY_BORDER_SEGMENTS);
+  const [expanded, setExpanded] = useState(false);
   const [renderAll, setRenderAll] = useState(false);
+  const growTimerRef = useRef(null);
+  const leaveGraceTimerRef = useRef(null);
+  const shrinkTimerRef = useRef(null);
   const collapseTimerRef = useRef(null);
   const wrapperRef = useRef(null);
   const prevHeightRef = useRef(null);
 
-  const expanded = hovering || locked;
+  function clearCloseTimers() {
+    if (leaveGraceTimerRef.current) {
+      clearTimeout(leaveGraceTimerRef.current);
+      leaveGraceTimerRef.current = null;
+    }
+    if (shrinkTimerRef.current) {
+      clearTimeout(shrinkTimerRef.current);
+      shrinkTimerRef.current = null;
+    }
+  }
 
-  function expandNow() {
+  // `durationMs` is the TOTAL border animation time (ALCHEMY_HOVER_BORDER_MS
+  // for a hover, ALCHEMY_CLICK_BORDER_MS for a click) - split evenly across
+  // the 4 segments via the --alchemy-seg custom property (see index.css), so
+  // content only actually expands once that full animation has played.
+  function startOpening(durationMs) {
+    if (growTimerRef.current) {
+      clearTimeout(growTimerRef.current);
+      growTimerRef.current = null;
+    }
+    clearCloseTimers();
     if (collapseTimerRef.current) {
       clearTimeout(collapseTimerRef.current);
       collapseTimerRef.current = null;
     }
-    setRenderAll(true);
+    setBorderSegmentMs(durationMs / ALCHEMY_BORDER_SEGMENTS);
+    setBorderActive(true);
+    growTimerRef.current = setTimeout(() => {
+      growTimerRef.current = null;
+      setExpanded(true);
+      setRenderAll(true);
+    }, durationMs);
   }
+
+  // `withGrace` - true for a plain mouse-leave (waits ALCHEMY_LEAVE_GRACE_MS
+  // before the border even starts closing, giving a quick pass back over the
+  // card a chance to cancel this first), false for an explicit click-to-close
+  // (starts closing immediately - the user has already unambiguously said
+  // they're done with it).
+  function startClosing(durationMs, withGrace) {
+    if (growTimerRef.current) {
+      clearTimeout(growTimerRef.current);
+      growTimerRef.current = null;
+    }
+    clearCloseTimers();
+    const beginShrink = () => {
+      leaveGraceTimerRef.current = null;
+      setBorderSegmentMs(durationMs / ALCHEMY_BORDER_SEGMENTS);
+      setBorderActive(false);
+      shrinkTimerRef.current = setTimeout(() => {
+        shrinkTimerRef.current = null;
+        setExpanded(false);
+      }, durationMs);
+    };
+    if (withGrace) {
+      leaveGraceTimerRef.current = setTimeout(beginShrink, ALCHEMY_LEAVE_GRACE_MS);
+    } else {
+      beginShrink();
+    }
+  }
+
+  // Every pending timer gets cancelled on unmount (e.g. the modal closing
+  // mid-animation) so none of them fire a setState after the component's
+  // gone.
+  useEffect(() => {
+    return () => {
+      [growTimerRef, leaveGraceTimerRef, shrinkTimerRef, collapseTimerRef].forEach((ref) => {
+        if (ref.current) clearTimeout(ref.current);
+      });
+    };
+  }, []);
 
   useEffect(() => {
     if (expanded || !renderAll) return undefined;
@@ -193,18 +297,44 @@ function AlchemyCategoryCard({ category, index }) {
       className="drop-table-alchemy-category"
       style={{ '--drop-table-color': color }}
       onMouseEnter={() => {
-        setHovering(true);
-        expandNow();
+        if (locked) return;
+        startOpening(ALCHEMY_HOVER_BORDER_MS);
       }}
-      onMouseLeave={() => setHovering(false)}
+      onMouseLeave={() => {
+        if (locked) return;
+        // Only a genuinely already-open card gets the brief "are you sure"
+        // grace pause before closing - a mouse that leaves while the border
+        // is still mid-grow (never actually finished opening) cancels
+        // immediately instead, so a quick pass over the list doesn't take
+        // any extra time just to recognise it already left.
+        startClosing(ALCHEMY_HOVER_BORDER_MS, expanded);
+      }}
       onClick={() =>
         setLocked((prev) => {
           const next = !prev;
-          if (next) expandNow();
+          if (next) {
+            // Always (re)start at click speed, even if a slower hover-driven
+            // grow is already under way - a click is an explicit action and
+            // should override that in-progress hover animation rather than
+            // just letting it finish out at the slower pace.
+            startOpening(ALCHEMY_CLICK_BORDER_MS);
+          } else {
+            startClosing(ALCHEMY_CLICK_BORDER_MS, false);
+          }
           return next;
         })
       }
     >
+      <span
+        className={`drop-table-alchemy-category-border${borderActive ? ' is-active' : ''}`}
+        style={{ '--alchemy-seg': `${borderSegmentMs}ms` }}
+        aria-hidden="true"
+      >
+        <span className="drop-table-alchemy-border-top" />
+        <span className="drop-table-alchemy-border-right" />
+        <span className="drop-table-alchemy-border-bottom" />
+        <span className="drop-table-alchemy-border-left" />
+      </span>
       <div className="drop-table-alchemy-category-header">
         <span className="drop-table-alchemy-category-title">
           {category.icon && <img className="drop-table-alchemy-category-icon" src={category.icon} alt="" />}
