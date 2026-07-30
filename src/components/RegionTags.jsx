@@ -1,4 +1,4 @@
-import { isGearItemImpossible, normalizeLeagueRelicList, normalizeRegionGroups } from '../data/gearAvailability';
+import { isGearItemDisabled, isGearItemImpossible, normalizeLeagueRelicList, normalizeRegionGroups } from '../data/gearAvailability';
 import { REGION_COLORS, REGION_SHORT_LABELS, RESOURCE_TAG_COLORS } from '../data/regionColors';
 import TagTooltip from './TagTooltip';
 
@@ -119,6 +119,19 @@ function RegionGroupPill({ group, isUnlocked, selectedLeagueRelics }) {
 }
 
 export default function RegionTags({ item, isUnlocked, selectedLeagueRelics = [] }) {
+  if (isGearItemDisabled(item)) {
+    return (
+      <span className="region-tags">
+        <TagTooltip
+          className="region-tag region-tag-disabled"
+          tooltip={item.source?.disabledReason ?? 'Disabled for the Leagues game mode.'}
+        >
+          Disabled
+        </TagTooltip>
+      </span>
+    );
+  }
+
   if (isGearItemImpossible(item)) {
     return (
       <span className="region-tags">

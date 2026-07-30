@@ -14,6 +14,9 @@ export default function HomePage({ selected, toggleRegion, isUnlocked, overLimit
           <span className="site-title-full">RS3 Leagues II: Equilibrium - Regional PVM Unlock Planner</span>
           <span className="site-title-short">Leagues II - Regional PVM Planner</span>
         </h1>
+        <p className="home-updated-banner">
+          <span aria-hidden="true">✨</span> Updated every day with relic and blessing releases
+        </p>
       </header>
 
       <main>

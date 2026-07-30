@@ -86,6 +86,18 @@ export function isGearItemImpossible(item) {
   return Boolean(item.source?.impossible);
 }
 
+// Distinct from `impossible` - that's about region math (needs more
+// distinct optional regions than a single run can unlock); `disabled` is
+// for items Jagex has explicitly turned off for the Leagues game mode
+// regardless of region access (e.g. Vanquish/Armour of Trials, since
+// Leagues grants Quest Points a different way than normal play). Shown as
+// its own "Disabled" tag rather than "Not obtainable" - same always-locked
+// behaviour, different reason. `source.disabledReason` is the optional
+// human-readable explanation shown in the tag's tooltip.
+export function isGearItemDisabled(item) {
+  return Boolean(item.source?.disabled);
+}
+
 // Determines whether a gear item is obtainable given the player's currently
 // unlocked regions: every AND-group must have at least one unlocked
 // OR-alternative, and the item must not be flagged `impossible`.
@@ -127,7 +139,7 @@ export function normalizeLeagueRelicList(leagueRelic) {
 // normal region check, not a replacement for it.
 export function isGearItemAvailable(item, isUnlocked, options = {}) {
   const { ignoreComponents = false, ignoreArtefactRegions = false, selectedLeagueRelics = [] } = options;
-  if (isGearItemImpossible(item)) return false;
+  if (isGearItemImpossible(item) || isGearItemDisabled(item)) return false;
   return normalizeRegionGroups(item).every((group) => {
     const relicOptions = normalizeLeagueRelicList(group.leagueRelic);
     if (relicOptions.some((relic) => selectedLeagueRelics.includes(relic))) return true;

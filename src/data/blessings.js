@@ -293,11 +293,16 @@ export const BLESSINGS = [
     analysis: {
       summary:
         'Infinite food from a single item and free eating (no -3% adrenaline). Enormous convenience and real effective survivability, but contributes zero damage.',
-      // Not a pick, a PLACEHOLDER. With Soul Split (92 Prayer, reached quickly
-      // in a Leagues run) and the damage output these blessings produce, eating
-      // is rare enough that infinite food is close to a non-effect. T3 is simply
-      // a weak slot until you have a shield build or a spec-spam setup - park
-      // this there pre-Soul Split and reset the moment either comes online.
+      // Usually a PLACEHOLDER, not a pick. With Soul Split (92 Prayer, reached
+      // quickly in a Leagues run) and the damage output these blessings produce,
+      // eating is rare enough that infinite food is close to a non-effect.
+      //
+      // The exception is the all-green immortality build (see The Undying in
+      // blessingBuilds.js): Animate Dead (~308 flat DR from 5-piece Cryptbloom
+      // at 99 Defence) plus Barkscales (~341) removes ~650 damage from every hit
+      // BEFORE Cryptbloom's 24% percentage reduction, against a Big Boned life
+      // pool of ~27,000. There, never consuming food and never losing adrenaline
+      // to eating is the point rather than a consolation.
       estimatedGain: 'No damage contribution; near-nil once Soul Split is available',
       stageRank: { early: 1, mid: 3, late: 3 },
       scalesWithSkill: false,
@@ -507,120 +512,183 @@ export const BLESSING_PACKAGES = [
   },
 ];
 
-// Recommended picks and matching loadouts per combat style, for the planned
-// "Blessing guides" page. `loadout` names match gear.js entries exactly so a UI
-// can resolve them straight out of GEAR and reuse the existing region-tag
-// components; `region` here is a short human hint only - gear.js remains the
-// source of truth for actual availability.
+// Armour rating for a gear.js item. gear.js has no `armour:` field - the rating
+// is the highest value in `stats.defence`. Verified exact against the wiki for
+// Dragon defender (113.2), Kalphite defender (245.8), Malevolent kiteshield
+// (491.6), Bandos warshield (297.2), Elder rune round shield (384.8) and Divine
+// spirit shield (338.8). Four blessings scale off total armour, so this is the
+// single most important derived stat for the planned Blessings preview page.
+export function getArmourRating(item) {
+  const defence = item?.stats?.defence;
+  if (!defence) return 0;
+  const values = Object.values(defence).filter((v) => typeof v === 'number');
+  return values.length ? Math.max(0, ...values) : 0;
+}
+
+// Armour granted by Defence level alone, before any equipment:
 //
-// Region shorthand in the notes: Misthalin / Karamja / Havenhythe are the three
-// GUARANTEED regions, everything else costs one of the 3 optional picks.
-export const STYLE_RECOMMENDATIONS = [
+//   natural = D^3/1250 + 4D + 40      (D = Defence level)
+//
+// Confirmed exact: D=90 gives 983.2, matching the figure the wiki's Cryptbloom
+// page quotes ("983.2 natural and 1843.4 from cryptbloom"). At 99 it is 1212.2.
+// Assume 99 Defence unless the player states otherwise.
+export function getNaturalArmour(defenceLevel = 99) {
+  const d = defenceLevel;
+  return (d ** 3) / 1250 + 4 * d + 40;
+}
+
+// Total armour = natural (Defence level) + sum of equipped armour ratings.
+// This is the input for all four armour-scaling blessings.
+export function getTotalArmour(items, defenceLevel = 99) {
+  const equipment = (items || []).reduce((sum, item) => sum + getArmourRating(item), 0);
+  return equipment + getNaturalArmour(defenceLevel);
+}
+
+// Recommended builds for the planned "Blessing guides" page.
+//
+// Deliberately NOT one entry per style: melee, magic and ranged all run the
+// same shield build and differ only in a single T2 swap, so repeating it three
+// times would be noise. `t2SwapRule` carries that one difference.
+//
+// Every loadout item name matches a gear.js entry exactly, so a UI can resolve
+// them straight out of GEAR and reuse the existing region-tag components.
+// gear.js remains the source of truth for actual availability.
+export const BLESSING_BUILDS = [
   {
-    style: 'melee',
-    picks: ["Teragard's Aegis", 'Striking Light', 'Steadfast Will'],
+    id: 'warden',
+    name: 'The Warden',
+    styles: ['melee', 'magic', 'ranged'],
+    // T2 is style-dependent - see t2SwapRule. Both options give 2+ blue, so the
+    // god power is Sacred Fervor either way.
+    picks: ["Teragard's Aegis", null, 'Steadfast Will'],
     godTier: 'Sacred Fervor',
-    rationale:
-      'Melee is hit-sparse (~1.5 hits/ability), so Striking Light beats Abyssal Cinders. Mono-blue means every point of armour pays into all three blessings at once.',
-    upgradePriority: 'Any shield first (it triples Aegis), then armour tier, then weapon tier.',
+    usesShield: true,
+    summary:
+      'The armour-stacking shield build. Aegis triples off any shield for ~+2,600 ability damage, Steadfast Will turns Revenge into a +100% damage buff, and Sacred Fervor plus Preparation holds it at near-permanent uptime.',
+    // The ONLY difference between the three styles. Striking Light scales off
+    // armour; Abyssal Cinders scales off ability damage x hit count. Numbers are
+    // damage per 9s window (5 GCDs) at AD ~3,950 / armour ~3,470.
+    t2SwapRule: {
+      rule: 'Take Striking Light if your rotation averages under ~2 hits per ability, Abyssal Cinders if over ~2.5.',
+      melee: { take: 'Striking Light', hitsPerAbility: 1.5, strikingLight: 10479, abyssalCinders: 6681 },
+      magic: { take: 'either', hitsPerAbility: 2.2, strikingLight: 10479, abyssalCinders: 9799 },
+      ranged: { take: 'Abyssal Cinders', hitsPerAbility: 2.5, strikingLight: 10479, abyssalCinders: 11135 },
+    },
+    // Aegis converts armour into damage, so tank armour is no longer a DPS loss:
+    // Masterwork -> Teralith gains +238 AD from Aegis and loses ~112 damage
+    // bonus, a net +126 AD plus far better survivability and a bigger LP pool.
+    armourNote:
+      'Prefer TANK armour over power. With Aegis, Teralith/Primal nets ~+126 ability damage over Masterwork AND survives far better.',
+    tradeoffs: [
+      'Melee loses Greater Flurry (dual-wield), which extends Berserk 19.8s -> 35.4s. The biggest single cost of this build.',
+      'Melee also loses Hurricane, Meteor Strike and Bladed Dive.',
+      'Magic forfeits FSOA and its crit passive; ranged forfeits Bow of the Last Guardian and Perfect Equilibrium.',
+      'Partly offset by Sacred Fervor cutting Berserk cooldown 60s -> 42s: more frequent, shorter windows.',
+    ],
     loadout: {
       late: {
-        weapon: 'Abyssal Scourge',
-        offhand: 'Elder rune round shield',
-        armour: 'Masterwork set (ore labels only - the Endless Harvest relic covers it with no region cost)',
-        back: 'Igneous Kal-Ket',
-        neck: 'Essence of Finality amulet (or)',
-        ring: "Champion's ring",
-        pocket: 'Underworld Grimoire 4',
-        eofSpec: 'Dragon claws',
-        note: "Swap the main-hand to Varanus's Mercy (anachronia) if running Avernic Rampage instead - its Final Flurry is the spec-spam target, and it is main-hand so it keeps the shield.",
+        melee: { weapon: 'Abyssal Scourge', offhand: 'Malevolent Kiteshield', back: 'Igneous Kal-Ket' },
+        magic: { weapon: 'Roar of Awakening', offhand: 'Elder rune round shield', back: 'Igneous Kal-Mej' },
+        ranged: { weapon: 'Blightbound crossbow', offhand: 'Merciless kiteshield', back: 'Igneous Kal-Xil' },
+        shared: { neck: 'Essence of Finality amulet (or)', pocket: 'Underworld Grimoire 4' },
       },
       midLate: {
-        weapon: 'Drygore Rapier',
-        offhand: 'Bandos Warshield',
-        armour: 'Malevolent or Masterwork',
+        melee: { weapon: 'Drygore Rapier', offhand: 'Bandos Warshield' },
+        magic: { weapon: 'Seismic wand', offhand: 'Arcane spirit shield' },
+        ranged: { weapon: 'Ascension crossbow', offhand: 'Elder rune round shield' },
       },
     },
+    regionNotes: [
+      'Any shield triples Aegis, so the cheapest works: Elder rune round shield needs light animica (anachronia/tirannwn/kharidianDesert) OR the Endless Harvest / Transmutation relic, i.e. no region at all.',
+      'Melee and magic main-hands are both Misthalin (Abyssal Scourge, Roar of Awakening). Ranged is the only style whose main-hand costs an optional region.',
+      'Defenders are a trap: only Dragon defender (asgarnia) is realistically reachable, it gives x2 not x3, and Revenge is only 50% effective with one.',
+    ],
   },
   {
-    style: 'ranged',
-    picks: ["Teragard's Aegis", 'Abyssal Cinders', 'Steadfast Will'],
-    godTier: 'Sacred Fervor',
-    rationale:
-      'Ranged is the most hit-dense style (Rapid Fire = 5 hits), so Abyssal Cinders out-damages Striking Light - and 2 blue still lands Sacred Fervor, so nothing is lost at god tier.',
-    upgradePriority: 'Shield first, then Elite dracolich (free - Misthalin), then main-hand.',
+    id: 'berserker',
+    name: 'The Berserker',
+    styles: ['melee', 'magic', 'ranged', 'necromancy'],
+    picks: ['Adrenaline Junkie', 'Abyssal Cinders', 'Avernic Rampage'],
+    godTier: "Demon's Mark",
+    usesShield: false,
+    summary:
+      'Keeps the standard PvME rotation completely intact - dual-wield or two-hand, whatever the meta says. Nothing changes about how you play; the blessings just make it stronger.',
+    // Adrenaline Junkie is at its best here specifically: Greater Flurry is a
+    // threshold that EXTENDS Berserk, so more adrenaline literally means longer
+    // Berserk. Cast at 150%, keep 50%, chain Greater Flurry toward 35.4s.
+    tradeoffs: [
+      'Lowest raw ceiling of the three builds - no armour scaling at all.',
+      "Demon's Mark is the weakest god power at BIS, though it does fix melee's accuracy problem and lets one style's gear cover everything.",
+    ],
     loadout: {
       late: {
-        weapon: 'Blightbound crossbow',
-        offhand: 'Merciless kiteshield',
-        armour: 'Elite dracolich set',
-        back: 'Igneous Kal-Xil',
-        neck: 'Essence of Finality amulet (or)',
-        ring: "Stalker's ring",
-        pocket: 'Underworld Grimoire 4',
-        eofSpec: 'Seren godbow',
-        // The one real region cost in the whole set of recommendations.
-        note: 'Ranged is the ONLY style whose main-hand needs an optional region - Blightbound (tirannwn), Ruinous (wilderness) or Ascension (kandarin). Weigh this before committing ranged as your main style.',
-      },
-      midLate: {
-        weapon: 'Ascension crossbow',
-        offhand: 'Elder rune round shield',
-        armour: 'Elite dracolich set',
+        melee: { weapon: 'Dark Shard of Leng', offhand: 'Dark Sliver of Leng', back: 'Igneous Kal-Ket' },
+        magic: { weapon: 'Fractured Staff of Armadyl', back: 'Igneous Kal-Mej' },
+        ranged: { weapon: 'Bow of the Last Guardian', back: 'Igneous Kal-Xil' },
+        necromancy: { weapon: 'Omni guard', offhand: 'Soulbound lantern', back: 'Igneous Kal-Mor' },
+        shared: { neck: 'Essence of Finality amulet (or)', pocket: 'Underworld Grimoire 4' },
       },
     },
+    regionNotes: [
+      'Every weapon here is Misthalin except the Leng off-hand (Misthalin + wilderness) - this build is close to region-free.',
+    ],
   },
   {
-    style: 'magic',
-    picks: ["Teragard's Aegis", 'Striking Light', 'Steadfast Will'],
-    godTier: 'Sacred Fervor',
-    rationale:
-      'Magic keeps Wild Magic with a shield, and Roar of Awakening is a Misthalin main-hand - so the shield build costs magic almost nothing in region budget. Take Abyssal Cinders instead if your rotation is Asphyxiate/Wild Magic heavy; it is within ~7%.',
-    upgradePriority: 'Shield first, then armour tier. The main-hand is already free.',
+    id: 'avalanche',
+    name: 'The Avalanche',
+    styles: ['melee', 'magic', 'ranged', 'necromancy'],
+    picks: ['Big Boned', 'Barkscales', 'Avernic Rampage'],
+    godTier: 'Splash Zone',
+    usesShield: false,
+    summary:
+      "Two-handed and AoE-focused. The coherent case for keeping a two-hander: Splash Zone's best abilities (Hurricane, Quake, Bombardment) are exactly the 2h-only ones a shield build gives up.",
+    tradeoffs: [
+      'Weakest single-target damage of the three - Avernic Rampage is in the build specifically to cover that.',
+      "Multi-target is NOT multi-hit: Splash Zone does nothing for dragon claws or Varanus's Mercy.",
+    ],
     loadout: {
       late: {
-        weapon: 'Roar of Awakening',
-        offhand: 'Elder rune round shield',
-        armour: 'Tectonic (asgarnia) or Masterwork (ore/relic)',
-        back: 'Igneous Kal-Mej',
-        neck: 'Essence of Finality amulet (or)',
-        ring: "Channeller's ring",
-        pocket: 'Underworld Grimoire 4',
-        ammo: 'Grasping rune pouch',
-      },
-      midLate: {
-        weapon: 'Seismic wand',
-        offhand: 'Arcane spirit shield',
-        armour: 'Tectonic',
+        melee: { weapon: 'Ek-ZekKil', back: 'Igneous Kal-Ket' },
+        magic: { weapon: 'Fractured Staff of Armadyl', back: 'Igneous Kal-Mej' },
+        ranged: { weapon: 'Bow of the Last Guardian', back: 'Igneous Kal-Xil' },
+        necromancy: { weapon: 'Omni guard', offhand: 'Soulbound lantern', back: 'Igneous Kal-Mor' },
+        shared: { neck: 'Essence of Finality amulet (or)', pocket: 'Underworld Grimoire 4' },
       },
     },
+    regionNotes: [
+      'EoF Seren godbow (Crystal Rain, 5 arrows) is a true multi-target spec, so Splash Zone boosts it - unlike dragon claws.',
+    ],
   },
   {
-    style: 'necromancy',
+    id: 'reaper',
+    name: 'The Reaper',
+    styles: ['necromancy'],
     picks: ['Big Boned', 'Striking Light', 'Avernic Rampage'],
     godTier: 'Splash Zone',
-    rationale:
-      "Necromancy cannot equip a shield, so the blue package collapses: Aegis caps at x1 and Steadfast Will loses both Bash and Revenge. Its best-in-tier picks land one-of-each, routing to Splash Zone - which suits necro perfectly (Death Skulls, Volley of Souls, conjures, large bosses). Big Boned beats Aegis here because necro's ~83 hits/min turns +1,350/hit into ~112k/min.",
-    upgradePriority:
-      'Armour tier (feeds Striking Light) and life points (feeds Big Boned) - neither needs a shield.',
+    usesShield: false,
+    summary:
+      'Necromancy cannot equip a shield, so The Warden was never available to it. Its best-in-tier picks land one-of-each, routing to Splash Zone - which suits necro perfectly (Death Skulls, Volley of Souls, conjures, large bosses).',
+    tradeoffs: [
+      "Abyssal Cinders actually out-damages Striking Light for necro (~83 hits/min), but taking it gives 2 red and trades Splash Zone for Demon's Mark. Swap only if you want pure single-target consistency.",
+    ],
     loadout: {
       late: {
-        weapon: 'Omni guard',
-        offhand: 'Soulbound lantern',
-        armour: 'First Necromancer set',
-        back: 'Igneous Kal-Mor',
-        neck: 'Essence of Finality amulet (or)',
-        ring: "Occultist's ring",
-        pocket: 'Underworld Grimoire 4',
-        ammo: "Zemouregal's nexus",
-        eofSpec: "Devourer's Guard",
-        // Strategically the most important line in this whole file.
-        note: 'Necromancy is nearly 100% Misthalin, so it costs ZERO optional regions - picking necro as your main frees all three optional picks for skilling/utility.',
+        necromancy: {
+          weapon: 'Omni guard',
+          offhand: 'Soulbound lantern',
+          back: 'Igneous Kal-Mor',
+          neck: 'Essence of Finality amulet (or)',
+          ring: "Occultist's ring",
+          pocket: 'Underworld Grimoire 4',
+          ammo: "Zemouregal's nexus",
+        },
       },
       midLate: {
-        weapon: 'Death guard (tier 90)',
-        offhand: 'Skull lantern (tier 90)',
-        armour: 'Deathdealer (tier 90) or Deathwarden tank',
+        necromancy: { weapon: 'Death guard (tier 90)', offhand: 'Skull lantern (tier 90)' },
       },
     },
+    regionNotes: [
+      'Necromancy is nearly 100% Misthalin, so it costs ZERO optional regions - picking necro as your main frees all three optional picks for skilling/utility.',
+    ],
   },
 ];

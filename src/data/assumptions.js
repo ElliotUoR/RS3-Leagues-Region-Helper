@@ -42,6 +42,10 @@ export const JMOD_CONFIRMATIONS = [
     title: 'Will the Dragon Forge be accessible for breaking down items into Masterwork Essence if I don\'t pick Kandarin?',
     detail: "Yes. In Leagues, you can break down items into Masterwork Essence at any anvil, so you won't need access to the Dragon Forge or the Kandarin region to use this specific feature. Confirmed from the source, so Kandarin is not required for it.",
   },
+  {
+    title: 'Quest-point rewards (Vanquish, etc.) treated as global',
+    detail: 'Since players begin Leagues with a number of Quest Points already unlocked and can earn additional Quest Points through region unlocks, some Quest Caravan rewards have been disabled. Free dice rolls and the Armour of Trials and Vanquish rewards will not be available during Leagues.',
+  },
 ];
 
 // Grouped into categories, each a list of `{ title, detail }` entries.
@@ -131,10 +135,6 @@ export const ASSUMPTION_GROUPS = [
     title: 'Other per-item judgment calls',
     intro: 'Smaller individual decisions worth surfacing, mostly cases where a drop source, component, or region choice needed some interpretation.',
     items: [
-      {
-        title: 'Quest-point rewards (Vanquish, etc.) treated as global',
-        detail: "May's Quest Caravan rewards (150 quest points) aren't gated to any single quest or region, since quest points accumulate across the whole game - tagged global rather than tied to whichever quests happen to be easiest to finish first.",
-      },
       {
         title: 'Dual-location bosses resolved to the more useful single region (or an OR-group)',
         detail: 'A few bosses/monsters spawn in two different regions (e.g. Glacors in both the EGWD Glacor Front and the Wilderness; Abyssal Beasts in both Senntisten Asylum and the Wilderness). Where one region alone was judged sufficient, only that one is tagged; where it genuinely could go either way, an OR-group tag is used instead so either region unlocks it.',

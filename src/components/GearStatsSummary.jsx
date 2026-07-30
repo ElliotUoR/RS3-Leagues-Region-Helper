@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import TagTooltip from './TagTooltip';
 import { getTotalArmour } from '../utils/gearStats';
 
 const ATTACK_STYLES = ['stab', 'slash', 'crush', 'magic', 'ranged'];
@@ -131,7 +132,12 @@ export default function GearStatsSummary({ equipped, style }) {
           <p className="gear-stats-count">{itemCount} item{itemCount === 1 ? '' : 's'} equipped</p>
 
           <div className="gear-stats-row gear-stats-defence-level-row">
-            <label htmlFor="gear-stats-defence-level">Defence level</label>
+            <span className="gear-stats-defence-level-label">
+              <label htmlFor="gear-stats-defence-level">Defence level</label>
+              <TagTooltip className="info-icon" tooltip="Defence levels add armour">
+                ?
+              </TagTooltip>
+            </span>
             <input
               id="gear-stats-defence-level"
               type="number"

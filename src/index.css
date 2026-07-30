@@ -13,6 +13,7 @@
   --accent-bg: rgba(192, 132, 252, 0.15);
   --locked-bg: #35263f;
   --warning: #ff8f5c;
+  --danger: #ff6b6b;
   --style-melee: #f87171;
   --style-ranged: #4ade80;
   --style-magic: #60a5fa;
@@ -35,6 +36,7 @@
   --accent-bg: rgba(122, 59, 214, 0.1);
   --locked-bg: #ded8ea;
   --warning: #b5480a;
+  --danger: #c81e3a;
   --style-melee: #dc2626;
   --style-ranged: #16a34a;
   --style-magic: #2563eb;
@@ -153,6 +155,24 @@ header h1 {
 
 .home-header {
   text-align: center;
+}
+
+.home-updated-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 16%, transparent),
+    color-mix(in srgb, var(--accent-2) 16%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .gear-page-heading {
@@ -1365,6 +1385,12 @@ main.gear-page {
   padding: 3px 0;
 }
 
+.gear-stats-defence-level-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .gear-stats-defence-level-row input {
   width: 48px;
   background: var(--panel-bg-2, var(--panel-bg));
@@ -1511,6 +1537,16 @@ main.gear-page {
 .gear-item-rows {
   display: grid;
   gap: 8px;
+  /* Grid items default to align-items: stretch, which forces every card in
+     a shared row to the same height (the tallest one). A card whose region
+     tags wrap onto a 2nd line is then only as tall as its own content once
+     wrapped, but its *grid cell* still stretches to match a shorter
+     neighbour's height from an earlier layout pass in some cases - the
+     wrapped tags overflow past that shorter cell and get covered by
+     whatever's positioned right after it, looking like they were clipped.
+     align-items: start makes each card exactly as tall as its own content,
+     independent of its row neighbours, which removes that overlap. */
+  align-items: start;
 }
 
 .gear-item-rows.compact {
@@ -2912,6 +2948,20 @@ main.abilities-page .gear-item-rows {
   border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
 }
 
+/* Same shape as .region-tag-impossible but its own colour (red rather than
+   warning-amber) - visually distinct since the reason is different (Jagex
+   disabled the item for Leagues, not "needs too many regions"). */
+.region-tag-disabled {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--danger) 18%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
 .gear-notice {
   font-size: 13px;
   color: var(--warning);
@@ -3545,6 +3595,47 @@ main.abilities-page .gear-item-rows {
   --pill-color: var(--style-necromancy);
 }
 
+/* Neutral (not tied to any one style's colour) since "Shared" spans all of
+   the item's applicable styles, not a single one. */
+.style-pill-shared {
+  --pill-color: var(--text);
+}
+
 .gear-by-region-row {
   cursor: default;
+}
+
+.gear-by-region-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Deliberately its own class rather than reusing .compact-mode-toggle -
+   that one is hidden on mobile (max-width: 700px, see above). This page's
+   compact-mode toggle stays visible on mobile too: its rows defer detail to
+   a tooltip like GearItemRow's compact mode, but with a tap-to-toggle
+   fallback alongside the hover (see GearByRegionRow), so it's reachable on
+   touch devices as well. */
+.gear-by-region-compact-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Same positioning approach as .gear-item-override-compact (top-right) -
+   absolute relative to .gear-item-row so it never shifts the centered
+   icon/name/tags in the button below it. */
+.gear-by-region-compact-styles {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  pointer-events: none;
 }

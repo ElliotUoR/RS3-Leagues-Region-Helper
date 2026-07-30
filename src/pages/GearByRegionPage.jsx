@@ -1,8 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import GearByRegionRow from '../components/GearByRegionRow';
 import { REGIONS, REGION_IDS } from '../data/regions';
 import { GEAR_SLOTS } from '../data/gear';
 import { getGearForRegion } from '../utils/gearByRegion';
+
+// On by default (per the brief) on both desktop and mobile - unlike
+// GearPage's own compact-mode checkbox (hidden on mobile there, since it
+// relies on a hover tooltip that touch devices can't reach), this page's
+// compact rows keep everything visible without hover (see
+// GearByRegionRow), so there's no reason to hide the toggle on small
+// screens. Persisted so the choice survives reloads.
+const COMPACT_MODE_STORAGE_KEY = 'rs3-leagues-gear-by-region-compact';
+
+function loadInitialCompactMode() {
+  if (typeof window === 'undefined') return true;
+  try {
+    const stored = window.localStorage.getItem(COMPACT_MODE_STORAGE_KEY);
+    return stored === null ? true : stored === 'true';
+  } catch {
+    return true;
+  }
+}
 
 const SLOT_LABELS = {
   weapon: 'Weapon',
@@ -66,6 +84,11 @@ function groupBySlot(items) {
 export default function GearByRegionPage({ isUnlocked }) {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [subTab, setSubTab] = useState('direct');
+  const [compactMode, setCompactMode] = useState(loadInitialCompactMode);
+
+  useEffect(() => {
+    window.localStorage.setItem(COMPACT_MODE_STORAGE_KEY, String(compactMode));
+  }, [compactMode]);
 
   const { direct, combination } = useMemo(
     () => (selectedRegion ? getGearForRegion(selectedRegion) : { direct: [], combination: [] }),
@@ -118,25 +141,35 @@ export default function GearByRegionPage({ isUnlocked }) {
           <p className="gear-by-region-empty">Select a region above to view its gear.</p>
         ) : (
           <div className="gear-by-region-detail">
-            <div className="sort-tabs" role="tablist">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={subTab === 'direct'}
-                className={`sort-tab${subTab === 'direct' ? ' active' : ''}`}
-                onClick={() => setSubTab('direct')}
-              >
-                Direct ({direct.length})
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={subTab === 'combination'}
-                className={`sort-tab${subTab === 'combination' ? ' active' : ''}`}
-                onClick={() => setSubTab('combination')}
-              >
-                Combination ({combination.length})
-              </button>
+            <div className="gear-by-region-controls">
+              <div className="sort-tabs" role="tablist">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={subTab === 'direct'}
+                  className={`sort-tab${subTab === 'direct' ? ' active' : ''}`}
+                  onClick={() => setSubTab('direct')}
+                >
+                  Direct ({direct.length})
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={subTab === 'combination'}
+                  className={`sort-tab${subTab === 'combination' ? ' active' : ''}`}
+                  onClick={() => setSubTab('combination')}
+                >
+                  Combination ({combination.length})
+                </button>
+              </div>
+              <label className="gear-by-region-compact-toggle">
+                <input
+                  type="checkbox"
+                  checked={compactMode}
+                  onChange={(e) => setCompactMode(e.target.checked)}
+                />
+                <span>Compact mode</span>
+              </label>
             </div>
 
             {activeItems.length === 0 ? (
@@ -147,9 +180,9 @@ export default function GearByRegionPage({ isUnlocked }) {
               groups.map(([slot, items]) => (
                 <div key={slot} className="gear-by-region-slot-group">
                   <h3>{SLOT_LABELS[slot] ?? slot}</h3>
-                  <div className="gear-item-rows">
+                  <div className={`gear-item-rows${compactMode ? ' compact' : ''}`}>
                     {items.map((item) => (
-                      <GearByRegionRow key={item.name} item={item} isUnlocked={isUnlocked} />
+                      <GearByRegionRow key={item.name} item={item} isUnlocked={isUnlocked} compact={compactMode} />
                     ))}
                   </div>
                 </div>
