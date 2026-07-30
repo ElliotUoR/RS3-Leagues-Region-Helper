@@ -34,12 +34,12 @@ export function keyStats(item, style) {
   if (s.damage) {
     bits.push({ type: 'dmg', text: isWeaponStat ? `${s.damage} dmg rating` : `${formatSigned(s.damage)} dmg` });
   }
-  if (isWeaponStat) {
-    if (s.accuracy) bits.push({ type: 'acc', text: `${s.accuracy} acc rating` });
-  } else {
-    const armour = getArmourRating(item, style);
-    if (armour) bits.push({ type: 'armour', text: `${armour} armour` });
-  }
+  // Not mutually exclusive: some off-hand items (defenders, repriser
+  // weapons) carry both a genuine accuracy rating *and* an armour rating,
+  // so both need to be able to show up rather than picking one branch by slot.
+  if (isWeaponStat && s.accuracy) bits.push({ type: 'acc', text: `${s.accuracy} acc rating` });
+  const armour = getArmourRating(item, style);
+  if (armour) bits.push({ type: 'armour', text: `${armour} armour` });
   if (s.lifeBonus) bits.push({ type: 'lp', text: `${formatSigned(s.lifeBonus)} LP` });
   if (s.prayerBonus) bits.push({ type: 'prayer', text: `${formatSigned(s.prayerBonus)} prayer` });
   return bits;

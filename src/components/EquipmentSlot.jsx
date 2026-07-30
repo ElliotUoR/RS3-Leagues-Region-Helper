@@ -4,7 +4,7 @@ import RetryImage from './RetryImage';
 // Finality necklace's own icon) in the corner of the slotted item's icon -
 // used by the EOF pseudo-slot to show which necklace a slotted weapon's
 // spirit belongs to.
-export default function EquipmentSlot({ slotId, label, item, isActive, onSelect, disabled, miniIcon }) {
+export default function EquipmentSlot({ slotId, label, item, isActive, onSelect, onUnequip, disabled, miniIcon }) {
   const classes = [
     'equip-slot',
     isActive ? 'active' : '',
@@ -16,7 +16,13 @@ export default function EquipmentSlot({ slotId, label, item, isActive, onSelect,
 
   let title = label;
   if (disabled) title = `${label} (blocked by two-handed weapon)`;
-  else if (item) title = item.name;
+  else if (item) title = `${item.name} (right-click to unequip)`;
+
+  function handleContextMenu(e) {
+    e.preventDefault();
+    if (!item || disabled) return;
+    onUnequip?.(slotId);
+  }
 
   let content = <span className="equip-slot-label">{label}</span>;
   if (item && miniIcon) {
@@ -36,6 +42,7 @@ export default function EquipmentSlot({ slotId, label, item, isActive, onSelect,
       className={classes}
       style={{ gridArea: slotId }}
       onClick={() => onSelect(slotId)}
+      onContextMenu={handleContextMenu}
       disabled={disabled}
       title={title}
     >

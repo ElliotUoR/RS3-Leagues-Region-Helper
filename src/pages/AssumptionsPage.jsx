@@ -1,4 +1,4 @@
-import { ASSUMPTION_GROUPS } from '../data/assumptions';
+import { ASSUMPTION_GROUPS, JMOD_CONFIRMATIONS } from '../data/assumptions';
 
 export default function AssumptionsPage() {
   return (
@@ -8,6 +8,18 @@ export default function AssumptionsPage() {
       </header>
 
       <main className="assumptions-page">
+        <section className="jmod-confirmed-callout">
+          <h2>Confirmed from JMods</h2>
+          <ul className="assumptions-list">
+            {JMOD_CONFIRMATIONS.map((item) => (
+              <li className="assumptions-item" key={item.title}>
+                <strong>{item.title}</strong>
+                <p>{item.detail}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         {ASSUMPTION_GROUPS.map((group) => (
           <section className="assumptions-group" key={group.id}>
             <h2>{group.title}</h2>

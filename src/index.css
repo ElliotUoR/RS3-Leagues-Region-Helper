@@ -1365,6 +1365,18 @@ main.gear-page {
   padding: 3px 0;
 }
 
+.gear-stats-defence-level-row input {
+  width: 48px;
+  background: var(--panel-bg-2, var(--panel-bg));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  padding: 1px 4px;
+  text-align: right;
+}
+
 .gear-stats-table-scroll {
   /* Safety net, not the primary fit strategy - the table's own sizing
      below is meant to fit the panel's fixed 236px width outright, this
@@ -3223,6 +3235,27 @@ main.abilities-page .gear-item-rows {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px 20px;
+}
+
+/* Raw JMod confirmations - deliberately louder than a regular
+   .assumptions-group (gold border/glow) since these haven't been folded
+   into the actual region/drop-table data yet, unlike everything below it. */
+.jmod-confirmed-callout {
+  background: var(--panel-bg);
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.25);
+}
+
+.jmod-confirmed-callout h2 {
+  font-size: 18px;
+  margin: 0 0 12px;
+  color: #d4af37;
+}
+
+.jmod-confirmed-callout .assumptions-item {
+  border-color: rgba(212, 175, 55, 0.35);
 }
 
 .assumptions-group h2 {

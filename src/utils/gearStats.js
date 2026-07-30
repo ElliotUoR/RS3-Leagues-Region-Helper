@@ -10,3 +10,23 @@ export const DEFENCE_KEY_BY_STYLE = { melee: 'stab', ranged: 'ranged', magic: 'm
 export function getArmourRating(item, style) {
   return item.stats?.defence?.[DEFENCE_KEY_BY_STYLE[style]] || 0;
 }
+
+// The in-game "Total Armour" figure on the Equipment Stats screen isn't just
+// worn gear - it also includes a flat, style-agnostic baseline purely from
+// the Defence skill level (D), before any armour is even worn. RS3's own
+// formula for that baseline is D^3/1250 + 4D + 40; the combined total is
+// shown ceiled to a whole number in-game (verified against a level-99
+// Defence, no-armour-equipped screenshot: formula gives 1212.24, in-game
+// shows 1213).
+export function getSkillArmour(defenceLevel) {
+  const d = defenceLevel;
+  return (d ** 3) / 1250 + 4 * d + 40;
+}
+
+export function getTotalArmour(equipped, style, defenceLevel) {
+  let gearArmour = 0;
+  for (const item of Object.values(equipped)) {
+    gearArmour += getArmourRating(item, style);
+  }
+  return Math.ceil(getSkillArmour(defenceLevel) + gearArmour);
+}

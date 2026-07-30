@@ -79,6 +79,7 @@ export default function GearPage({
   equipped,
   equippedNamesByStyle,
   toggleItem,
+  unequipSlot,
   clearLoadout,
   offhandBlocked,
   eofVisible,
@@ -303,6 +304,7 @@ export default function GearPage({
                   item={eofWeapon}
                   isActive={activeSlot === 'eof'}
                   onSelect={selectSlot}
+                  onUnequip={unequipSlot}
                   miniIcon={equipped.neck?.icon}
                 />
               )}
@@ -314,6 +316,7 @@ export default function GearPage({
                   item={equipped[slotId]}
                   isActive={activeSlot === slotId}
                   onSelect={selectSlot}
+                  onUnequip={unequipSlot}
                   disabled={slotId === 'offhand' && offhandBlocked}
                 />
               ))}
@@ -336,7 +339,7 @@ export default function GearPage({
               </TagTooltip>
             </div>
 
-            <GearStatsSummary equipped={equipped} />
+            <GearStatsSummary equipped={equipped} style={style} />
           </div>
 
           <div className="gear-item-list">

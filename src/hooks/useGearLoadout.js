@@ -138,6 +138,23 @@ export function useGearLoadout({
     }));
   }
 
+  // Right-click-to-unequip: unlike toggleItem (which only ever acts on
+  // `activeSlot`, since it's driven by clicking an item in the picker list),
+  // this removes whatever's in an arbitrary slot directly - so it works no
+  // matter which slot is currently selected/active.
+  function unequipSlot(slotId) {
+    if (slotId === 'eof') {
+      setEofWeaponNamesByStyle((prev) => ({ ...prev, [style]: null }));
+      return;
+    }
+    setEquippedNamesByStyle((prev) => {
+      if (!(slotId in (prev[style] ?? {}))) return prev;
+      const current = { ...prev[style] };
+      delete current[slotId];
+      return { ...prev, [style]: current };
+    });
+  }
+
   function selectSlot(slotId) {
     if (slotId === 'offhand' && offhandBlocked) return;
     if (slotId === 'eof' && !eofVisible) return;
@@ -162,6 +179,7 @@ export function useGearLoadout({
     equipped,
     equippedNamesByStyle,
     toggleItem,
+    unequipSlot,
     clearLoadout,
     offhandBlocked,
     eofVisible,

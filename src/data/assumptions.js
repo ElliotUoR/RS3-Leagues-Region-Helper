@@ -4,6 +4,46 @@
 // affected items already carry their own region tags (hard or soft) - this
 // page just collects the *reasoning* in one place so it's auditable.
 //
+// Raw, not-yet-actioned confirmations straight from JMods - called out
+// separately (and more prominently) from ASSUMPTION_GROUPS below because
+// their implications for region/drop-table data haven't been worked through
+// yet. Once digested, anything relevant here should fold into the normal
+// groups (or gear/drop-table data) rather than staying listed twice.
+export const JMOD_CONFIRMATIONS = [
+  {
+    title: 'Rex Matriarchs',
+    detail: 'Will drop full rings instead of the hearts.',
+  },
+  {
+    title: 'Elite Dungeon 2',
+    detail: 'Draconic energy comes with a side of Tectonic energy.',
+  },
+  {
+    title: 'Elite Dungeon 1',
+    detail: 'Ancient scales will drop alongside some Sirenic scales.',
+  },
+  {
+    title: 'The Arc -> Asgarnia',
+    detail: 'JMods have confirmed the Arc is part of Asgarnia - Masuta the Ascended, Seiryu, and the rest of the Aminishi/Bonfire Isle content are tagged Asgarnia rather than treated as their own region.',
+  },
+  {
+    title: 'Underworld -> Misthalin',
+    detail: 'The Underworld (Rasial, Hermod) is folded into Misthalin.',
+  },
+  {
+    title: 'Daemonheim / Dungeoneering content -> Wilderness',
+    detail: 'Dungeoneering rewards (Marmaros trader) and Daemonheim-sourced ores/materials (e.g. Primal bars) are tagged Wilderness throughout.',
+  },
+  {
+    title: 'Lost Grove -> Tirannwn',
+    detail: 'The Lost Grove (Cinderbane gloves, Erethdor\'s grimoire) is folded into Tirannwn.',
+  },
+  {
+    title: 'Will the Dragon Forge be accessible for breaking down items into Masterwork Essence if I don\'t pick Kandarin?',
+    detail: "Yes. In Leagues, you can break down items into Masterwork Essence at any anvil, so you won't need access to the Dragon Forge or the Kandarin region to use this specific feature. Confirmed from the source, so Kandarin is not required for it.",
+  },
+];
+
 // Grouped into categories, each a list of `{ title, detail }` entries.
 export const ASSUMPTION_GROUPS = [
   {
@@ -16,28 +56,12 @@ export const ASSUMPTION_GROUPS = [
         detail: "JMods have confirmed that it is in Misthalin, so we are operating under the assumption Vorkath is also in Misthalin.",
       },
       {
-        title: 'The Arc -> Asgarnia',
-        detail: "JMods have confirmed the Arc is part of Asgarnia - Masuta the Ascended, Seiryu, and the rest of the Aminishi/Bonfire Isle content are tagged Asgarnia rather than treated as their own region.",
-      },
-      {
         title: 'Mazcab -> Kharidian Desert',
         detail: 'Mazcab (Beastmaster Durzag, the Menaphite Pantheon raid) is folded into Kharidian Desert.',
       },
       {
-        title: 'Underworld -> Misthalin',
-        detail: 'The Underworld (Rasial, Hermod) is folded into Misthalin.',
-      },
-      {
-        title: 'Daemonheim / Dungeoneering content -> Wilderness',
-        detail: 'Dungeoneering rewards (Marmaros trader) and Daemonheim-sourced ores/materials (e.g. Primal bars) are tagged Wilderness throughout.',
-      },
-      {
         title: 'Troll Country / God Wars Dungeon -> Asgarnia',
         detail: 'The original GWD (Zilyana, Graardor, Kree\'arra, K\'ril) and Troll Country are folded into Asgarnia.',
-      },
-      {
-        title: 'Lost Grove -> Tirannwn',
-        detail: 'The Lost Grove (Cinderbane gloves, Erethdor\'s grimoire) is folded into Tirannwn.',
       },
       {
         title: 'Dig sites -> region (Archaeology relics)',
@@ -97,10 +121,6 @@ export const ASSUMPTION_GROUPS = [
         detail: 'Needs Wilderness (Abyss runecrafting) plus a fully repaired Noxious weapon plus masterworked ore spanning up to 7 different possible regions depending on route - more distinct optional regions than 3 picks can cover.',
       },
       {
-        title: 'Masterwork bow',
-        detail: "Needs Morytania (Noxious weapon), Kandarin (Ascension crossbow), Wilderness (Fletch Quest achievement, via primal bars), and Kharidian Desert (acacia logs) simultaneously - 4 distinct optional regions. Unlike Masterwork staff, this one's requirements are now listed explicitly (with normal + resource tags) rather than hidden behind a generic \"not obtainable\" badge, since the exact breakdown is useful to see even though it's still unobtainable in a single run.",
-      },
-      {
         title: "Always Adze (Seed of the Charyou Tree relic)",
         detail: 'Needs the Warforge dig site (Kandarin) plus lighting beacons across Morytania, Asgarnia, and the Wilderness for the All Fired Up quest - 4 optional regions.',
       },
@@ -134,10 +154,6 @@ export const ASSUMPTION_GROUPS = [
       {
         title: 'Nightmare gauntlets / Enhanced Nightmare gauntlets -> Kandarin (unconfirmed)',
         detail: 'The wiki has no confirmed League region tag for the Freneskae/World Gate content these drop from. As the world gate, kandarin is assumed - but could require quests from other regions.',
-      },
-      {
-        title: 'Will the Dragon Forge be accessible for breaking down items into Masterwork Essence if I don\'t pick Kandarin?',
-        detail: "Yes. In Leagues, you can break down items into Masterwork Essence at any anvil, so you won't need access to the Dragon Forge or the Kandarin region to use this specific feature. Confirmed from the source, so Kandarin is not required for it.",
       },
     ],
   },

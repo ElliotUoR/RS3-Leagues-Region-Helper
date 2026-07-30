@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getTotalArmour } from '../utils/gearStats';
 
 const ATTACK_STYLES = ['stab', 'slash', 'crush', 'magic', 'ranged'];
 
@@ -16,6 +17,24 @@ const WEAPON_SLOTS = new Set(['weapon', 'offhand', 'ammo']);
 // Purely a local display preference (mirrors RegionPicker's per-region
 // minimise state) - persisted so it survives reloads.
 const MINIMISED_STORAGE_KEY = 'rs3-leagues-gear-stats-minimised';
+
+// Defence level feeds the Total Armour formula (see getSkillArmour) - it's
+// a single account-wide setting, not per-style, so it's stored separately
+// from the per-style equipped loadout and shared across all 4 style tabs.
+const DEFENCE_LEVEL_STORAGE_KEY = 'rs3-leagues-gear-stats-defence-level';
+const MAX_SKILL_LEVEL = 99;
+
+function loadInitialDefenceLevel() {
+  if (typeof window === 'undefined') return MAX_SKILL_LEVEL;
+  try {
+    const stored = window.localStorage.getItem(DEFENCE_LEVEL_STORAGE_KEY);
+    const parsed = stored !== null ? Number(stored) : Number.NaN;
+    if (!Number.isFinite(parsed)) return MAX_SKILL_LEVEL;
+    return Math.min(MAX_SKILL_LEVEL, Math.max(1, Math.round(parsed)));
+  } catch {
+    return MAX_SKILL_LEVEL;
+  }
+}
 
 // Same "mobile" cutoff already used site-wide (see .app's padding/.site-nav
 // breakpoint in index.css) - only used as the *fallback* default below, so
@@ -65,19 +84,31 @@ function sumStats(equipped) {
   return totals;
 }
 
-export default function GearStatsSummary({ equipped }) {
+export default function GearStatsSummary({ equipped, style }) {
   const [minimised, setMinimised] = useState(loadInitialMinimised);
+  const [defenceLevel, setDefenceLevel] = useState(loadInitialDefenceLevel);
 
   useEffect(() => {
     window.localStorage.setItem(MINIMISED_STORAGE_KEY, String(minimised));
   }, [minimised]);
 
+  useEffect(() => {
+    window.localStorage.setItem(DEFENCE_LEVEL_STORAGE_KEY, String(defenceLevel));
+  }, [defenceLevel]);
+
   function toggleMinimised() {
     setMinimised((prev) => !prev);
   }
 
+  function handleDefenceLevelChange(e) {
+    const parsed = Number(e.target.value);
+    if (!Number.isFinite(parsed)) return;
+    setDefenceLevel(Math.min(MAX_SKILL_LEVEL, Math.max(1, Math.round(parsed))));
+  }
+
   const totals = sumStats(equipped);
   const itemCount = Object.keys(equipped).length;
+  const totalArmour = getTotalArmour(equipped, style, defenceLevel);
 
   return (
     <div className="gear-stats-summary">
@@ -99,13 +130,25 @@ export default function GearStatsSummary({ equipped }) {
         <>
           <p className="gear-stats-count">{itemCount} item{itemCount === 1 ? '' : 's'} equipped</p>
 
+          <div className="gear-stats-row gear-stats-defence-level-row">
+            <label htmlFor="gear-stats-defence-level">Defence level</label>
+            <input
+              id="gear-stats-defence-level"
+              type="number"
+              min={1}
+              max={MAX_SKILL_LEVEL}
+              value={defenceLevel}
+              onChange={handleDefenceLevelChange}
+            />
+          </div>
+          <div className="gear-stats-row">
+            <span>Total Armour</span>
+            <strong>{totalArmour}</strong>
+          </div>
+
           <div className="gear-stats-row">
             <span>Armour damage</span>
             <strong>{totals.armourDamage.toFixed(1)}</strong>
-          </div>
-          <div className="gear-stats-row">
-            <span>Armour accuracy</span>
-            <strong>{totals.armourAccuracy.toFixed(1)}</strong>
           </div>
           <div className="gear-stats-row">
             <span>Weapon damage rating</span>
