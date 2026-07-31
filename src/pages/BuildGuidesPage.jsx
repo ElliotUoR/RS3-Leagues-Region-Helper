@@ -146,7 +146,7 @@ export default function BuildGuidesPage() {
 
         <TierList
           title="Blessing tier list"
-          standfirst="Each blessing and god power graded on its own isolated power, deliberately ignoring the combos above. That is why Barkscales sits at C here even though it is core to the strongest package - alone, it is mostly a defensive effect."
+          standfirst="Each blessing and god power graded on its own isolated power, deliberately ignoring the combos above."
           grades={BLESSING_TIER_LIST.grades}
           entries={blessingTierEntries}
           renderBadges={BlessingBadges}
