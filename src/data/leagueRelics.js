@@ -98,6 +98,11 @@ export const LEAGUE_RELICS = [
     icon: FP('Survivalist.png'),
   },
   {
+    // Same regionTagNote mechanism as Endless Harvest above - gear.js tags
+    // every "PoF Wool" labelled region group (the necromancy Deathwarden/
+    // Deathdealer tiers plus Masterwork magic/ranged armour, all of which
+    // need wool sheared at the Player-Owned Farm in Kandarin) with
+    // `leagueRelic: 'Golden Touch'` as an alternative to visiting Kandarin.
     name: 'Golden Touch',
     tier: 1,
     summary: 'Guaranteed, tripled Thieving loot with 100x coins, plus passive Agility XP and course bonuses.',
@@ -110,6 +115,11 @@ export const LEAGUE_RELICS = [
       'Repeated Thieving actions continue automatically.',
       'All coins obtained via Thieving are increased by 100x the usual amount, and chests and safes can reward additional bundles of herb and potion ingredients that are sent directly to your bank.',
     ],
+    regionTagNote: {
+      prefix: 'Allows you to obtain',
+      tags: ['PoF Wool'],
+      suffix: 'regardless of region.',
+    },
     icon: FP('Golden_Touch_(relic).png'),
     // Thieving secondary-ingredient drop table - four separate tier tables,
     // each gated by a *different* combination of Heist-only vs

@@ -386,27 +386,37 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
   const pool = getAnalyticsPool();
 
   try {
-    const [regionPicks, regionCombos, leagueRelicPicks, dropTableViews, featureCounters] = await Promise.all([
-      pool.query(
-        `select key, count from public.usage_counters where category = 'region_pick' order by count desc`,
-      ),
-      pool.query(
-        `select key, count from public.usage_counters where category = 'region_combo' order by count desc limit $1`,
-        [TOP_N],
-      ),
-      pool.query(
-        `select key, count from public.usage_counters where category = 'league_relic_pick' order by count desc`,
-      ),
-      // See deploy/migrations/009_relic_drop_table_usage.sql /
-      // components/RelicDropTablePanel.jsx - keyed by relic name, one row
-      // per relic that HAS a dropTable and has actually been opened at
-      // least once (a relic with a dropTable nobody's clicked yet just
-      // doesn't appear here - no need to pre-seed rows for it).
-      pool.query(
-        `select key, count from public.usage_counters where category = 'relic_drop_table' order by count desc`,
-      ),
-      pool.query(`select key, count from public.usage_counters where category = 'feature'`),
-    ]);
+    const [regionPicks, regionCombos, leagueRelicPicks, dropTableViews, buildGuideViews, featureCounters] =
+      await Promise.all([
+        pool.query(
+          `select key, count from public.usage_counters where category = 'region_pick' order by count desc`,
+        ),
+        pool.query(
+          `select key, count from public.usage_counters where category = 'region_combo' order by count desc limit $1`,
+          [TOP_N],
+        ),
+        pool.query(
+          `select key, count from public.usage_counters where category = 'league_relic_pick' order by count desc`,
+        ),
+        // See deploy/migrations/009_relic_drop_table_usage.sql /
+        // components/RelicDropTablePanel.jsx - keyed by relic name, one row
+        // per relic that HAS a dropTable and has actually been opened at
+        // least once (a relic with a dropTable nobody's clicked yet just
+        // doesn't appear here - no need to pre-seed rows for it).
+        pool.query(
+          `select key, count from public.usage_counters where category = 'relic_drop_table' order by count desc`,
+        ),
+        // See deploy/migrations/010_build_guide_usage.sql /
+        // pages/BuildGuidesPage.jsx - keyed by the build's id, counting both
+        // clicking a card open and landing directly on a
+        // "#build-guides/<id>" link. Same "opened at least once" caveat as
+        // dropTableViews above - a build nobody's clicked yet just doesn't
+        // appear here.
+        pool.query(
+          `select key, count from public.usage_counters where category = 'build_guide' order by count desc`,
+        ),
+        pool.query(`select key, count from public.usage_counters where category = 'feature'`),
+      ]);
 
     const featureCountFor = (key) => featureCounters.rows.find((r) => r.key === key)?.count ?? 0;
 
@@ -415,6 +425,7 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
       regionCombos: regionCombos.rows.map((r) => ({ combo: comboLabel(r.key), count: r.count })),
       leagueRelicPicks: leagueRelicPicks.rows.map((r) => ({ relic: r.key, count: r.count })),
       dropTableViews: dropTableViews.rows.map((r) => ({ relic: r.key, count: r.count })),
+      buildGuideViews: buildGuideViews.rows.map((r) => ({ build: r.key, count: r.count })),
       karamjaToggledOffCount: featureCountFor('karamja_toggled_off'),
       importRelicsUsedCount: featureCountFor('import_relics_used'),
     });

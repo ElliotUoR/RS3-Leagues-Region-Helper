@@ -4527,18 +4527,50 @@ main.abilities-page .gear-item-rows {
   font-size: 0.7rem;
 }
 
+/* An accent rule down the left edge sets the prose apart from the dense grids
+   below it. No measure cap: the card is wide and a short reading column left
+   most of it empty, which read as a layout bug rather than as a choice. */
 .build-collapsible-body {
-  padding-bottom: 12px;
+  padding: 2px 0 16px 14px;
+  border-left: 2px solid var(--accent-bg);
 }
 
 .build-collapsible-body p {
-  margin: 0 0 8px;
+  margin: 0 0 14px;
   font-size: 0.9rem;
-  line-height: 1.55;
+  line-height: 1.72;
 }
 
 .build-collapsible-body p:last-child {
   margin-bottom: 0;
+}
+
+/* First paragraph is the thesis in both fields; the rest is supporting detail. */
+.build-prose-lead {
+  font-size: 1rem;
+  line-height: 1.62;
+  color: var(--text-h);
+}
+
+/* Emphasis is applied at render time by BuildProse - see the note there. No
+   padding or background: adjacent runs like "110" + "-130%" must read as one
+   continuous number. */
+.build-prose-stat {
+  color: var(--accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.build-prose-term {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+/* Inside the lead the term colour would be invisible - it is already --text-h -
+   so terms there lean on weight and letter-spacing instead. */
+.build-prose-lead .build-prose-term {
+  font-weight: 650;
+  letter-spacing: 0.01em;
 }
 
 /* ---- key numbers ---- */

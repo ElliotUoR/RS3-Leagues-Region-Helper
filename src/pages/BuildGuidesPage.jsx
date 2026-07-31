@@ -10,6 +10,7 @@ import {
 import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { isBuildTextEditable, isBuildVisible } from '../utils/buildTextEdit';
+import { trackUsage } from '../utils/api';
 
 const BLESSING_ICONS = new Map([...BLESSINGS, ...GOD_TIER_BLESSINGS].map((b) => [b.name, b.icon]));
 const LEAGUE_RELIC_ICONS = new Map(LEAGUE_RELICS.map((r) => [r.name, r.icon]));
@@ -76,21 +77,34 @@ export default function BuildGuidesPage() {
     return new Set(id ? [id] : []);
   });
 
+  // Loading a link straight into a build (e.g. a shared
+  // "#build-guides/teragards-bulwark" URL) counts as that build being viewed
+  // just like clicking to expand one does - tracked once here for whichever
+  // build (if any) was already open on the very first render, since toggle()
+  // below and the hashchange listener below only cover *subsequent* opens.
+  useEffect(() => {
+    const id = buildIdFromHash();
+    if (id) trackUsage([{ category: 'build_guide', key: id }]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Back/forward and hand-edited URLs both go through the hash, so listen for
   // changes rather than only reading it once on mount.
   useEffect(() => {
     function onHashChange() {
       const id = buildIdFromHash();
-      if (id) setExpanded((prev) => (prev.has(id) ? prev : new Set([...prev, id])));
+      if (!id) return;
+      setExpanded((prev) => (prev.has(id) ? prev : new Set([...prev, id])));
+      trackUsage([{ category: 'build_guide', key: id }]);
     }
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
   function toggle(id) {
+    const opening = !expanded.has(id);
     setExpanded((prev) => {
       const next = new Set(prev);
-      const opening = !next.has(id);
       if (opening) next.add(id);
       else next.delete(id);
       // replaceState rather than assigning location.hash: this should be a
@@ -99,6 +113,10 @@ export default function BuildGuidesPage() {
       window.history.replaceState(null, '', window.location.pathname + window.location.search + hash);
       return next;
     });
+    // Only fires when actually opening a build, not closing one - "was this
+    // build guide looked at" is the question, same convention as
+    // RelicDropTablePanel's trackUsage call for its own drop-table toggle.
+    if (opening) trackUsage([{ category: 'build_guide', key: id }]);
   }
 
   return (

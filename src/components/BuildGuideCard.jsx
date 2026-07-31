@@ -3,6 +3,7 @@ import RetryImage from './RetryImage';
 import ReadOnlyLoadout from './ReadOnlyLoadout';
 import TagTooltip from './TagTooltip';
 import EditableText from './EditableText';
+import BuildProse from './BuildProse';
 import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import {
   ARTEFACT_BYPASS_NOTE,
@@ -313,9 +314,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
             {editing ? (
               <EditableText editing buildId={build.id} path={['whyItsGood']} value={build.whyItsGood} as="div" />
             ) : (
-              build.whyItsGood.split('\n\n').map((paragraph) => (
-                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-              ))
+              <BuildProse text={build.whyItsGood} />
             )}
           </Collapsible>
           <Collapsible title="How to play it">
@@ -324,9 +323,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
             {editing ? (
               <EditableText editing buildId={build.id} path={['howToPlay']} value={build.howToPlay} as="div" />
             ) : (
-              build.howToPlay.split('\n\n').map((paragraph) => (
-                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-              ))
+              <BuildProse text={build.howToPlay} />
             )}
           </Collapsible>
 
