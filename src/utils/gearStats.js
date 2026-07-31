@@ -30,3 +30,30 @@ export function getTotalArmour(equipped, style, defenceLevel) {
   }
   return Math.ceil(getSkillArmour(defenceLevel) + gearArmour);
 }
+
+// Max life points at level 99 Hitpoints with no gear worn at all - RS3's own
+// figure (99 * 100), not derived from a formula the way armour's skill
+// baseline is. Gear's own `lifeBonus` stat then adds on top of this flat.
+export const BASE_LIFE_POINTS_99_HP = 9900;
+
+export function getTotalLifePoints(equipped) {
+  let bonus = 0;
+  for (const item of Object.values(equipped)) {
+    bonus += item.stats?.lifeBonus || 0;
+  }
+  return BASE_LIFE_POINTS_99_HP + bonus;
+}
+
+// Which of the two totals above a blessing actually reads its value from -
+// used to decide whether showing that total next to a user-submitted
+// build's loadout is meaningful or just clutter (see
+// pages/CreateBuildPage.jsx and components/UserBuildCard.jsx). Curated
+// builds in data/blessingBuilds.js always show armour regardless, since
+// their own hand-picked builds are chosen specifically to make it relevant.
+export const ARMOUR_SCALING_BLESSINGS = new Set([
+  "Teragard's Aegis",
+  'Striking Light',
+  'Steadfast Will',
+  'Barkscales',
+]);
+export const LIFE_SCALING_BLESSINGS = new Set(['Big Boned']);

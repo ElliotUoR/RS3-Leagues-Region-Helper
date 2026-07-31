@@ -120,6 +120,52 @@ export function trackUsage(increments) {
   }).catch(() => {});
 }
 
+// User-submitted Build Guides (see pages/CreateBuildPage.jsx and
+// pages/UserBuildsPage.jsx) - only available once the backend is deployed,
+// same as every other call in this file. Callers treat a thrown/rejected
+// promise as "feature unavailable" and show that state rather than crashing.
+// Resolves to `{ id, token }` - `token` is the edit credential, shown/stored
+// exactly once (see utils/myBuilds.js) since the server only ever keeps its
+// hash from this point on.
+export async function createUserBuild({ name, tagline, authorName, styles, payload }) {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, tagline, authorName, styles, payload }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `create build failed: ${res.status}`);
+  return data;
+}
+
+// Edits an existing build - `token` must match the one handed back at
+// creation (see utils/myBuilds.js) or this rejects with a 403-derived error.
+export async function updateUserBuild(id, token, { name, tagline, authorName, styles, payload }) {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, name, tagline, authorName, styles, payload }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `update build failed: ${res.status}`);
+  return data;
+}
+
+// The listing view (name/tagline/styles/author/created_at only, no payload -
+// see the Node route) for the "User made builds" page's cards.
+export async function listUserBuilds() {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds`);
+  if (!res.ok) throw new Error(`list user builds failed: ${res.status}`);
+  return res.json();
+}
+
+// The full row (incl. `payload`, the whole build) for one open card.
+export async function getUserBuild(id) {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds/${id}`);
+  if (!res.ok) throw new Error(`get user build failed: ${res.status}`);
+  return res.json();
+}
+
 // The admin session cookie is httpOnly (can't be read from JS directly, by
 // design), so this is the only way the frontend can know "is the current
 // visitor logged in as admin" - used to show a "logged in as admin" badge

@@ -1611,7 +1611,7 @@ export const GEAR = {
           setEffect: '6.6% chance to reduce incoming damage by 50-95% and grant next attack +20% hit chance; passive +3% hit chance',
         },
         icon: 'icons/Kalphite_defender.png',
-        source: { type: 'boss', boss: 'Kalphite King', region: ['kharidianDesert', 'asgarnia', 'wilderness', 'morytania'], note: "Crafted from perfect chitin + a drygore off-hand weapon, both KK drops. Getting the 'perfect' chitin variant requires already wielding/carrying an Ancient defender to receive the drop, which pulls in that item's own full prerequisite chain (a Dragon defender [asgarnia] as the base requirement, plus an ancient emblem and chaotic splint needing asgarnia/wilderness/morytania - see Ancient defender)." },
+        source: { type: 'boss', boss: 'Kalphite King', region: 'kharidianDesert', note: "Crafted from perfect chitin + a drygore off-hand weapon, both Kalphite King drops. JMod-confirmed: perfect chitin has a chance to drop outright regardless of what you're already carrying - no prerequisite Ancient-tier item needed to receive it." },
       },
       {
         name: 'Dragon kiteshield',
@@ -1636,7 +1636,7 @@ export const GEAR = {
           setEffect: '1/15 chance to deflect a hit (reduce damage by 50-95%, +20% accuracy next attack); flat +3% accuracy passive.',
         },
         icon: "icons/Corrupted_defender.png",
-        source: { type: 'combination', region: ['morytania', 'asgarnia'], note: "Combine a corruption sigil with a new/fully-repaired Barrows melee weapon (Guthan's warspear, Dharok's greataxe, Torag's hammer, or Verac's flail) - both from The Barrows Brothers. Also requires already wielding/carrying a Dragon defender or higher-tier defender (asgarnia, see that entry) to receive the drop." },
+        source: { type: 'combination', region: 'morytania', note: "Combine a corruption sigil with a new/fully-repaired Barrows melee weapon (Guthan's warspear, Dharok's greataxe, Torag's hammer, or Verac's flail) - both from The Barrows Brothers. JMod-confirmed: the corruption sigil has a chance to drop outright regardless of what you're already carrying - no prerequisite Dragon defender needed to receive it." },
       },
       {
         name: 'Ancient defender',
@@ -1651,8 +1651,8 @@ export const GEAR = {
         icon: "icons/Ancient_defender.png",
         source: {
           type: 'combination',
-          region: ['asgarnia', 'wilderness', 'morytania'],
-          note: "Crafted from an ancient emblem (Nex drop, asgarnia - only drops while holding a tier 70+ defender/repriser/rebounder) + a chaotic splint (Dungeoneering rewards trader, wilderness). In practice that means a Corrupted defender (morytania) - Kalphite Defender doesn't work as the qualifying item since it requires this Ancient defender as its own prerequisite. The whole defender line traces back to needing a Dragon defender (asgarnia) as the base prerequisite anyway.",
+          region: ['asgarnia', 'wilderness'],
+          note: "Crafted from an ancient emblem (Nex drop, asgarnia) + a chaotic splint (Dungeoneering rewards trader, wilderness). JMod-confirmed: the ancient emblem has a chance to drop outright regardless of what you're already carrying - no prerequisite tier-70 defender/repriser/rebounder needed to receive it. The chaotic splint is still required as normal.",
         },
       },
       {
@@ -2557,10 +2557,10 @@ export const GEAR = {
         icon: "icons/Off-hand_Armadyl_crossbow.png", source: { type: 'boss', boss: 'Commander Zilyana', region: 'asgarnia' } },
       { name: 'Tainted repriser', slot: 'offhand', level: { skill: 'Ranged', level: 70, note: 'also 70 Defence' },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1486 }, defence: { stab: 148.6, slash: 148.6, crush: 148.6, magic: 148.6, ranged: 148.6 }, damage: 168, accuracy: 1486, lifeBonus: 0, prayerBonus: 0, setEffect: '1/15 chance to deflect a hit (reduce damage by 50-95%, +20% accuracy next attack); flat +3% accuracy passive.' },
-        icon: "icons/Tainted_repriser.png", source: { type: 'combination', region: ['morytania', 'asgarnia'], note: "Combine a corruption sigil with a new/fully-repaired Karil's crossbow - both from The Barrows Brothers (Karil the Tainted). Also requires already wielding/carrying a Dragon defender or higher-tier defender (asgarnia, see that entry) to receive the drop." } },
+        icon: "icons/Tainted_repriser.png", source: { type: 'combination', region: 'morytania', note: "Combine a corruption sigil with a new/fully-repaired Karil's crossbow - both from The Barrows Brothers (Karil the Tainted). JMod-confirmed: the corruption sigil has a chance to drop outright regardless of what you're already carrying - no prerequisite Dragon defender needed to receive it." } },
       { name: 'Ancient repriser', slot: 'offhand', level: { skill: 'Ranged', level: 80, note: 'also 80 Defence' },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1924 }, defence: { stab: 192.4, slash: 192.4, crush: 192.4, magic: 192.4, ranged: 192.4 }, damage: 192, accuracy: 1924, lifeBonus: 0, prayerBonus: 0, setEffect: '1/15 chance to deflect a hit (reduce damage by 50-95%, +20% accuracy next attack); flat +3% accuracy passive.' },
-        icon: "icons/Ancient_repriser.png", source: { type: 'combination', region: ['asgarnia', 'wilderness', 'morytania'], note: "Crafted from an ancient emblem (Nex drop, asgarnia - only drops while holding a tier 70+ defender/repriser/rebounder) + a chaotic splint (Dungeoneering rewards trader, wilderness). In practice that means a Tainted repriser (morytania) - Kalphite Defender doesn't work as the qualifying item since it requires this Ancient repriser as its own prerequisite. The whole repriser/rebounder line traces back to needing a Dragon defender (asgarnia) as the base prerequisite anyway." } },
+        icon: "icons/Ancient_repriser.png", source: { type: 'combination', region: ['asgarnia', 'wilderness'], note: "Crafted from an ancient emblem (Nex drop, asgarnia) + a chaotic splint (Dungeoneering rewards trader, wilderness). JMod-confirmed: the ancient emblem has a chance to drop outright regardless of what you're already carrying - no prerequisite tier-70 defender/repriser/rebounder needed to receive it. The chaotic splint is still required as normal." } },
       { name: 'Off-hand Ruinous crossbow', slot: 'offhand', level: { skill: 'Ranged', level: 90 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 3100 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 432, accuracy: 3100, lifeBonus: 0, prayerBonus: 0, setEffect: 'Passive "Warpbane": +12% damage vs. Daemonheim creatures when both ruinous weapons equipped.' },
         icon: 'icons/Off-hand_ruinous_crossbow.png', source: { type: 'shop', shop: 'Marmaros, Dungeoneering rewards trader (included with main-hand purchase)', region: 'wilderness' } },
@@ -2616,7 +2616,7 @@ export const GEAR = {
           stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 2458 }, defence: { stab: 245.8, slash: 245.8, crush: 245.8, magic: 245.8, ranged: 245.8 }, damage: 216, accuracy: 2458, lifeBonus: 0, prayerBonus: 0, setEffect: '6.6% chance to reduce incoming damage by 50-95% and grant next attack +20% hit chance; passive +3% hit chance.' },
           specialAttack: null,
           icon: 'icons/Kalphite_repriser.png',
-          source: { type: 'combination', region: ['kharidianDesert', 'kandarin', 'asgarnia', 'wilderness', 'morytania'], note: 'Combine a perfect chitin (Kalphite King drop, kharidianDesert) with a new/fully-repaired off-hand ascension crossbow (Legio Primus drop, kandarin). Getting the \'perfect\' chitin variant requires already wielding/carrying an Ancient repriser to receive the drop, which pulls in that item\'s own full prerequisite chain (a Dragon defender [asgarnia] as the base requirement, plus an ancient emblem and chaotic splint needing asgarnia/wilderness/morytania - see Ancient repriser).' } },
+          source: { type: 'combination', region: ['kharidianDesert', 'kandarin'], note: "Combine a perfect chitin (Kalphite King drop, kharidianDesert) with a new/fully-repaired off-hand ascension crossbow (Legio Primus drop, kandarin). JMod-confirmed: perfect chitin has a chance to drop outright regardless of what you're already carrying - no prerequisite Ancient-tier item needed to receive it." } },
       {
         name: 'Dragonfire deflector', slot: 'offhand',
         level: { skill: 'Defence', level: 70 },
@@ -3490,10 +3490,10 @@ export const GEAR = {
       {
         name: 'Kalphite rebounder', slot: 'offhand',
         level: { skill: 'Magic', level: 90, note: 'also 90 Defence' },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 2458, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 },
-          damage: 216, accuracy: 2458, lifeBonus: 0, prayerBonus: 0, setEffect: null },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 2458, ranged: 0 }, defence: { stab: 245.8, slash: 245.8, crush: 245.8, magic: 245.8, ranged: 245.8 },
+          damage: 216, accuracy: 2458, lifeBonus: 0, prayerBonus: 0, setEffect: '6.6% chance to reduce incoming damage by 50-95% and grant next attack +20% hit chance; passive +3% hit chance.' },
         icon: 'icons/Kalphite_rebounder.png',
-        source: { type: 'combination', region: ['kharidianDesert', 'asgarnia', 'wilderness', 'morytania'], note: "Combine a perfect chitin (Kalphite King drop, kharidianDesert) with a new/fully-repaired Seismic singularity (Vorago drop, asgarnia). Getting the 'perfect' chitin variant requires already wielding/carrying an Ancient defender to receive the drop, which pulls in that item's own full prerequisite chain (a Dragon defender [asgarnia] as the base requirement, plus an ancient emblem and chaotic splint needing asgarnia/wilderness/morytania - see Ancient defender)." },
+        source: { type: 'combination', region: ['kharidianDesert', 'asgarnia'], note: "Combine a perfect chitin (Kalphite King drop, kharidianDesert) with a new/fully-repaired Seismic singularity (Vorago drop, asgarnia). JMod-confirmed: perfect chitin has a chance to drop outright regardless of what you're already carrying - no prerequisite Ancient-tier item needed to receive it." },
       },
       {
         name: 'Orb of the Cywir elders', slot: 'offhand',
@@ -3522,11 +3522,11 @@ export const GEAR = {
       },
       {
         name: 'Blighted rebounder', slot: 'offhand',
-        level: { skill: 'Magic', level: 70 },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 1486, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 },
-          damage: 168, accuracy: 1486, lifeBonus: 0, prayerBonus: 0, setEffect: null },
+        level: { skill: 'Magic', level: 70, note: 'also 70 Defence' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 1486, ranged: 0 }, defence: { stab: 148.6, slash: 148.6, crush: 148.6, magic: 148.6, ranged: 148.6 },
+          damage: 168, accuracy: 1486, lifeBonus: 0, prayerBonus: 0, setEffect: '1/15 chance to deflect a hit (reduce damage by 50-95%, +20% accuracy next attack); flat +3% accuracy passive.' },
         icon: 'icons/Blighted_rebounder.png',
-        source: { type: 'boss', boss: 'The Barrows Brothers', region: ['morytania', 'asgarnia'], note: "Made from a new/repaired Ahrim's staff + a corruption sigil, both Barrows drops. Also requires already wielding/carrying a Dragon defender or higher-tier defender (asgarnia, see that entry) to receive the drop." },
+        source: { type: 'boss', boss: 'The Barrows Brothers', region: 'morytania', note: "Made from a new/repaired Ahrim's staff + a corruption sigil, both Barrows drops. JMod-confirmed: the corruption sigil has a chance to drop outright regardless of what you're already carrying - no prerequisite Dragon defender needed to receive it." },
       },
       {
         name: "Ahrim's book of magic", slot: 'offhand',
@@ -3561,8 +3561,8 @@ export const GEAR = {
         icon: 'icons/Ancient_lantern.png',
         source: {
           type: 'combination',
-          region: ['asgarnia', 'wilderness', 'morytania'],
-          note: "Crafted from an ancient emblem (Nex drop, asgarnia - only drops while holding a tier 70+ defender/repriser/rebounder) + a chaotic splint (Dungeoneering rewards trader, wilderness). In practice that means a Blighted rebounder (morytania) - Kalphite Defender doesn't work as the qualifying item since it requires this Ancient lantern as its own prerequisite. The whole defender/repriser/rebounder line traces back to needing a Dragon defender (asgarnia) as the base prerequisite anyway.",
+          region: ['asgarnia', 'wilderness'],
+          note: "Crafted from an ancient emblem (Nex drop, asgarnia) + a chaotic splint (Dungeoneering rewards trader, wilderness). JMod-confirmed: the ancient emblem has a chance to drop outright regardless of what you're already carrying - no prerequisite tier-70 defender/repriser/rebounder needed to receive it. The chaotic splint is still required as normal.",
         },
       },
       {

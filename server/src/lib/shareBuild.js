@@ -95,6 +95,10 @@ function sanitizeBlessingsForImage(raw) {
   return all.filter(Boolean).map((b) => ({ icon: b.icon, colour: b.colour, name: b.name }));
 }
 
+// A relic with no artwork is skipped rather than drawn as an empty box, so a
+// share image would show fewer relics than the build picked. Every relic has an
+// icon today; this guard exists for the gap between a relic being announced and
+// its icon being cropped, which has happened for every set so far.
 function sanitizeLeagueRelicsForImage(raw) {
   if (!Array.isArray(raw)) return [];
   const seenTiers = new Set();

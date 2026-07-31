@@ -179,15 +179,31 @@ header h1 {
   text-align: center;
 }
 
-.home-updated-banner {
+/* The pair of pills under the site title. Wraps to one per line on narrow
+   screens rather than shrinking, since both read as single units. */
+.home-banners {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Shape shared by both pills - only the palette and the interactive
+   behaviour differ between them. */
+.home-banner {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 10px 0 0;
+  margin: 0;
   padding: 5px 14px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+}
+
+.home-updated-banner {
   color: var(--accent);
   background: linear-gradient(
     135deg,
@@ -195,6 +211,91 @@ header h1 {
     color-mix(in srgb, var(--accent-2) 16%, transparent)
   );
   border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* The Build Guides link. Guthix green, matching the Blessings nav tab, so the
+   two "new feature" surfaces read as the same family. */
+.home-guides-banner {
+  --guides-green: #3fbf6f;
+  position: relative;
+  overflow: hidden;
+  color: #5fd98c;
+  text-decoration: none;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--guides-green) 20%, transparent),
+    color-mix(in srgb, var(--guides-green) 8%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--guides-green) 45%, transparent);
+  box-shadow: 0 0 10px -3px color-mix(in srgb, var(--guides-green) 55%, transparent);
+  transition: transform 140ms, box-shadow 140ms, border-color 140ms;
+}
+
+:root[data-theme='light'] .home-guides-banner {
+  color: #1a7a42;
+}
+
+.home-guides-banner:hover,
+.home-guides-banner:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--guides-green);
+  box-shadow: 0 0 16px -3px color-mix(in srgb, var(--guides-green) 70%, transparent);
+}
+
+.home-banner-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* "New:" carries the emphasis; the rest of the label stays at the same weight
+   as the sibling pill so the two don't fight each other. */
+.home-banner-new {
+  color: var(--text-h);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.home-banner-arrow {
+  transition: transform 140ms;
+}
+
+.home-guides-banner:hover .home-banner-arrow,
+.home-guides-banner:focus-visible .home-banner-arrow {
+  transform: translateX(3px);
+}
+
+/* A slow sheen across the pill, so it catches the eye on a page the visitor
+   has already seen before without being a flashing element. */
+.home-guides-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    color-mix(in srgb, var(--guides-green) 28%, transparent) 50%,
+    transparent 65%
+  );
+  transform: translateX(-100%);
+  animation: home-banner-sheen 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes home-banner-sheen {
+  0%, 55% { transform: translateX(-100%); }
+  85%, 100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-guides-banner::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  .home-guides-banner,
+  .home-banner-arrow {
+    transition: none;
+  }
 }
 
 .gear-page-heading {
@@ -4175,6 +4276,22 @@ main.abilities-page .gear-item-rows {
   color: hsl(var(--tier-hue) 60% 28%);
 }
 
+/* A row whose label is a word rather than a letter ("Unranked (below F)").
+   The grade column is sized for one big character, so this drops to text that
+   fits inside it instead of overflowing, and reads as visibly off the A-F scale
+   rather than as another grade on it. */
+.tier-grade-wordy {
+  padding: 6px 4px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  border-style: dashed;
+  opacity: 0.85;
+}
+
 .tier-entries {
   display: flex;
   flex-wrap: wrap;
@@ -5103,30 +5220,476 @@ main.abilities-page .gear-item-rows {
   border-style: dashed;
 }
 
-/* Coming-soon banner under the Build Guides title - same pill look as
-   .home-updated-banner (HomePage's "Updated every day..." banner), just
-   centered here via a flex wrapper instead of a text-align:center parent. */
-.build-coming-soon {
+/* CTA row under the Build Guides title - "Create a build" mirrors
+   .share-button's pill look, "See user made builds" is the same shape but
+   outlined rather than filled so the two don't compete for attention. */
+.build-guides-user-cta {
   display: flex;
   justify-content: center;
-  margin: 0 0 14px;
+  gap: 12px;
+  margin: 0 0 18px;
+  flex-wrap: wrap;
 }
 
-.build-coming-soon-badge {
+.build-create-button,
+.build-see-user-builds-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.build-create-button {
+  border: 1px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.build-create-button:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.build-see-user-builds-button {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.build-see-user-builds-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Create Build page ─────────────────────────────────────────────── */
+
+.create-build-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px 48px;
+}
+
+.create-build-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-bg);
+}
+
+.create-build-section h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.create-build-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.create-build-field > span:first-child {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.create-build-field input,
+.create-build-field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+}
+
+.create-build-field input:focus,
+.create-build-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.create-build-field-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.create-build-field-row .create-build-field {
+  flex: 1;
+  min-width: 160px;
+}
+
+.create-build-field-wide {
+  flex: 2;
+  min-width: 240px;
+}
+
+.create-build-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.create-build-warning {
+  margin: 0;
+  font-size: 13px;
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.create-build-error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.create-build-style-toggles {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.create-build-style-toggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.create-build-style-toggle input {
+  margin: 0;
+}
+
+.create-build-pick-reasons {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-build-pick-reason {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.create-build-pick-reason-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 600;
+  min-width: 140px;
+}
+
+.create-build-pick-reason-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.create-build-pick-reason input {
+  flex: 1;
+  min-width: 200px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 13px;
+}
+
+.create-build-relic-tier h3 {
+  margin: 4px 0 6px;
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.create-build-style-block {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-build-style-block:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.create-build-style-block-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.create-build-style-block-head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.create-build-armour-note {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+/* One "Stage N" band inside the Gear loadout section - its own bordered
+   block so two stages read as clearly separate editing contexts, matching
+   .create-build-style-block's own border-top-as-divider convention one
+   level up. */
+.create-build-stage-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.create-build-stage-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.create-build-stage-label {
+  flex: 1;
+  min-width: 180px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  color: var(--text-h);
+  font: inherit;
+  font-weight: 600;
+}
+
+.create-build-stage-label:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.create-build-remove-stage {
+  border: none;
+  background: transparent;
+  color: var(--danger);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.create-build-remove-stage:hover {
+  text-decoration: underline;
+}
+
+.create-build-add-stage {
+  align-self: flex-start;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.create-build-add-stage:hover {
+  border-color: var(--accent);
   color: var(--accent);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent) 16%, transparent),
-    color-mix(in srgb, var(--accent-2) 16%, transparent)
-  );
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.create-build-edit-style-button {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.create-build-edit-style-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.create-build-loadout-editor {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) 1fr;
+  gap: 16px;
+}
+
+.create-build-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.create-build-item-list .gear-item-list-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.create-build-prose {
+  width: 100%;
+  min-height: 140px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  resize: vertical;
+}
+
+.create-build-prose:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.create-build-tradeoffs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-build-tradeoff-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.create-build-tradeoff-row input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 13px;
+}
+
+.create-build-tradeoff-row button {
+  border: none;
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+}
+
+.create-build-add-tradeoff {
+  align-self: flex-start;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.create-build-add-tradeoff:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.create-build-submit-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.create-build-submit-button {
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.create-build-submit-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.create-build-submit-button:hover:not(:disabled) {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+@media (max-width: 720px) {
+  .create-build-loadout-editor {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── User made builds page ─────────────────────────────────────────── */
+
+.user-build-author {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* Shown inside an expanded card only when this browser holds the build's own
+   edit token (see utils/myBuilds.js) - there is no account system, so this
+   is the only way an author ever sees an edit affordance for their build. */
+.user-build-owner-note {
+  margin: 0 0 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--accent-bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.user-build-edit-link {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 /* Hidden builds: dev-server only, filtered out of every release build.

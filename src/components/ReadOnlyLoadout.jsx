@@ -62,6 +62,7 @@ export default function ReadOnlyLoadout({
   armourTotalOverloaded,
   armourTotalElder,
   elderSources,
+  lifeTotal,
   isUnlocked,
   selectedLeagueRelics,
 }) {
@@ -126,6 +127,16 @@ export default function ReadOnlyLoadout({
               </span>
             </>
           )}
+        </p>
+      )}
+      {/* Only ever passed by a user-submitted build (see UserBuildCard) whose
+          author picked Big Boned - that's the one blessing that reads its
+          value straight off total life points, so it's the only case this
+          number is worth showing at all. Curated builds never pass it. */}
+      {lifeTotal != null && (
+        <p className="read-only-loadout-armour">
+          Total health <strong>{lifeTotal.toLocaleString()}</strong>
+          <span className="read-only-loadout-armour-note"> at 99 Hitpoints</span>
         </p>
       )}
     </figure>

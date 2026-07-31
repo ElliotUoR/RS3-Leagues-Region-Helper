@@ -53,6 +53,12 @@ const SORT_OPTIONS = [
   { id: 'lifeBonus', label: 'Tank (LP)' },
 ];
 
+// Neck and ring items are largely flat-damage accessories with no level
+// requirement at all and no armour/accuracy/LP spread - Level sorting groups
+// almost everything at 0 and does nothing useful, so Dmg is the only sort
+// (and the default) offered for these two slots.
+const NO_LEVEL_SLOTS = new Set(['neck', 'ring']);
+
 function sortItems(items, sortBy, style) {
   return [...items].sort((a, b) => {
     const valueOf = (item) => {
@@ -138,6 +144,7 @@ export default function GearPage({
   // attack text instead of stats, so it never has sort tabs.
   const visibleSortOptions = useMemo(() => {
     if (activeSlot === 'eof') return [];
+    if (NO_LEVEL_SLOTS.has(activeSlot)) return SORT_OPTIONS.filter((opt) => opt.id === 'damage');
     const items = GEAR[style]?.[activeSlot] ?? [];
     const hasAccuracy = items.some((item) => item.stats?.accuracy);
     const hasArmour = items.some((item) => getArmourRating(item, style));
@@ -155,8 +162,9 @@ export default function GearPage({
   }, [style, activeSlot]);
 
   useEffect(() => {
-    if (!visibleSortOptions.some((opt) => opt.id === sortBy)) setSortBy('level');
-  }, [visibleSortOptions, sortBy]);
+    if (visibleSortOptions.some((opt) => opt.id === sortBy)) return;
+    setSortBy(NO_LEVEL_SLOTS.has(activeSlot) ? 'damage' : 'level');
+  }, [visibleSortOptions, sortBy, activeSlot]);
 
   async function handleShare() {
     const url = buildShareUrl({

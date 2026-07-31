@@ -65,7 +65,14 @@ function LeagueRelicChip({ name }) {
   const hue = RELIC_COLOURS[name]?.hue;
   return (
     <span className="league-relic-chip" style={hue != null ? { '--relic-hue': hue } : undefined}>
-      <RetryImage src={relic.icon} alt="" className="league-relic-chip-icon" />
+      {/* Not every relic has artwork yet (see data/leagueRelics.js) - a null
+          src would resolve to "<base>/null" and put RetryImage into its
+          indefinite retry loop against a URL that can never load. */}
+      {relic.icon ? (
+        <RetryImage src={relic.icon} alt="" className="league-relic-chip-icon" />
+      ) : (
+        <span className="league-relic-chip-icon league-relic-icon-placeholder" aria-hidden="true" />
+      )}
       <span>{relic.name}</span>
     </span>
   );

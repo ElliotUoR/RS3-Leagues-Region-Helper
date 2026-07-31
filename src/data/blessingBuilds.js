@@ -95,6 +95,11 @@ export const RELIC_COLOURS = {
   'Crystal Grace': { hue: 190, label: 'cyan' },
   Superheated: { hue: 12, label: 'ember' },
   'Divine Druid': { hue: 95, label: 'moss' },
+  // Tier 3. Hues picked to stay distinguishable from the seven above rather
+  // than to match the reveal art, which is teal-on-green for all three.
+  Voidwalker: { hue: 260, label: 'void' },
+  "Nature's Network": { hue: 165, label: 'jade' },
+  "Assassin's Insight": { hue: 340, label: 'crimson' },
 };
 
 // Shown under the Arch relics column. Some relics list a second region that is
@@ -146,7 +151,7 @@ export const BLESSING_BUILDS_EXAMPLES = [
           { region: "asgarnia", note: "The upgraded Nex prayers (Ruination, Desolation, Malevolence, Affliction) and Torva. A reasonable swap for Morytania if you would rather have the prayers than the augmentable kiteshields - but then Aegis has a much worse shield to triple off." },
         ],
     whyItsGood:
-      'Teragard\'s Aegis adds 75% of your total armour to your base ability damage while you hold a shield. At 3,605 total armour that is +2,704 ability damage - roughly double what the weapon itself provides - and because it increases the base ability stat, every percentage-based ability, ultimate multiplier and crit scales off it.\n\nElder overloads and overloads give this build a massive boost . Armour is also granted from your Defence level, so the +25 boost from an Elder overload is worth about +849 armour on its own - taking this loadout from 3,605 to 4,454. Aegis triples off that too, so the bonus climbs from +2,704 to +3,341. The same +25 boost affects your Strength, adding another +55 through the level term of the damage formula. A potion is worth roughly +692 ability damage here, which is more than an abyssal whip. \n\nThe Divine Druid is in the relic list to make getting elder overloads possible (crystal flask and recipe) alongside secondary saving and golden touch, elder overloads should be incredibly sustainable. Every armour-scaling blessing in the build gets the same treatment: Bash climbs past 17,000 and Light of Saradomin past 13,500.\n\nAchto armour then double-dips on the same shield: its set bonus adds 5% per piece (25% at five) of a tier-equivalent main-hand\'s damage to your Strength Bonus, but only while the off-hand acts as a shield. Aegis wants a shield and Achto wants a shield, so they compound for more damage.\n\nMelee has the best basic attack in the game - 110-130% where every other style gets 90-110% - so Striking Light\'s +40% is worth proportionally more here than anywhere else. A single melee basic attack lands for about 8,270 once elder-overloaded, at no adrenaline and no cooldown. Simply auto-attacking, with Light of Saradomin firing every 9s on its own, is roughly a total of 55,000 damage per 9-second window; the magic side of the same build gets about 48,000 from the identical rotation. Most builds ask you to earn your damage through skill; you could beat that with an empty revo bar.',
+      'Teragard\'s Aegis adds 75% of your total armour to your base ability damage while you hold a shield. At 3,605 total armour that is +2,704 ability damage - roughly double what the weapon itself provides - and because it increases the base ability stat, every percentage-based ability, ultimate multiplier and crit scales off it.\n\nElder overloads and overloads give this build a massive boost . Armour is also granted from your Defence level, so the +25 boost from an Elder overload is worth about +849 armour on its own - taking this loadout from 3,605 to 4,454. Aegis triples off that too, so the bonus climbs from +2,704 to +3,341. The same +25 boost affects your Strength, adding another +55 through the level term of the damage formula. A potion is worth roughly +692 ability damage here, which is more than an abyssal whip. \n\nThe Divine Druid is in the relic list to make getting elder overloads possible (crystal flask and recipe) alongside secondary saving and golden touch, elder overloads should be incredibly sustainable. Every armour-scaling blessing in the build gets the same treatment: Bash climbs past 17,000 and Light of Saradomin past 13,500.\n\nAchto armour then double-dips on the same shield: its set bonus adds 5% per piece (25% at five) of a tier-equivalent main-hand\'s damage to your Strength Bonus, but only while the off-hand acts as a shield. Aegis wants a shield and Achto wants a shield, so they compound for more damage.\n\nMelee has the best basic attack in the game - 110-130% where every other style gets 90-110% - so Striking Light\'s +40% is worth proportionally more here than anywhere else. A single melee basic attack lands for about 8,270 once elder-overloaded, at no adrenaline and no cooldown. Simply auto-attacking, with Light of Saradomin firing every 9s on its own, is roughly a total of 55,000 damage per 9-second window; the magic side of the same build gets about 48,000 from the identical rotation. Most builds ask you to earn your damage through skill; you could beat that with an empty revo bar.\n\nCombo a fully stacked Revenge with Berserk and your 9 seconds of auto attacks deals 192k damage - don\'t forget Bash for an extra ~55K damage. ',
     howToPlay:
       'Hold a shield at all times.  Open with Revenge, and deliberately let the boss hit you: each incoming attack is +5% damage and Steadfast Will raises the cap to 20 stacks, so a full stack is +100%. Sacred Fervor cuts Revenge\'s cooldown to 63s while Preparation strips 12s off every cooldown per cast, collapsing the effective cooldown to roughly 34s - under Revenge\'s 39.6s duration, so held correctly it never drops. Weave Bash on cooldown (10 sec cd for an extra 350-450% of your armour value, around +14,000) and let basic attacks and striking light fill the gaps. You could even use some real abilities too.',
     tradeoffs: [
@@ -872,7 +877,10 @@ export const BLESSING_BUILDS_EXAMPLES = [
 // `unlocksGear` counts items in gear.js whose region tag lists that relic as an
 // alternative - i.e. gear obtainable WITHOUT the region that normally gates it.
 export const LEAGUE_RELIC_TIER_LIST = {
-  grades: ['A', 'B', 'C', 'D', 'E', 'F'],
+  // 'unranked' is an extra row BELOW F for relics that have not been assessed
+  // yet, not a seventh grade - see the Tier 3 entries at the bottom of
+  // `entries` and BuildGuidesPage's gradeLabels for the row's display name.
+  grades: ['A', 'B', 'C', 'D', 'E', 'F', 'unranked'],
   scopeNote:
     'Ranked for a combat-focused run. A pure-skilling ranking would look very different - Survivalist especially would rank far higher.',
   entries: [
@@ -903,6 +911,23 @@ export const LEAGUE_RELIC_TIER_LIST = {
     {
       name: 'Survivalist', relicTier: 1, grade: 'D', unlocksGear: 0,
       note: 'Doubled gathering, best-in-slot tools and a 150-slot bag and mega archeology bonuses - but it unlocks no gear, grants no spells, and does nothing for damage. On a skilling-first run this is an A.',
+    },
+    // Tier 3 sits in its own 'unranked' row rather than anywhere on A-F: these
+    // were only just revealed and have not been assessed, and parking them at a
+    // real grade would assert a judgement that has not been made. The row
+    // renders below F and is styled to read as off the scale rather than as the
+    // bottom of it - see BuildGuidesPage's gradeLabels and .tier-grade-wordy.
+    {
+      name: "Assassin's Insight", relicTier: 3, grade: 'unranked', unlocksGear: 0,
+      note: 'TBD',
+    },
+    {
+      name: "Nature's Network", relicTier: 3, grade: 'unranked', unlocksGear: 0,
+      note: 'TBD',
+    },
+    {
+      name: 'Voidwalker', relicTier: 3, grade: 'unranked', unlocksGear: 0,
+      note: 'TBD',
     },
   ],
 };

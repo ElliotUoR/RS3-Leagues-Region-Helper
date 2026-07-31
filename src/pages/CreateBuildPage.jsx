@@ -1,0 +1,887 @@
+import { useEffect, useMemo, useState } from 'react';
+import RetryImage from '../components/RetryImage';
+import EquipmentSlot from '../components/EquipmentSlot';
+import GearItemRow from '../components/GearItemRow';
+import RegionMap from '../components/RegionMap';
+import LeagueRelicRow from '../components/LeagueRelicRow';
+import RelicRow from '../components/RelicRow';
+import BlessingCard from '../components/BlessingCard';
+import BlessingGodPanel from '../components/BlessingGodPanel';
+import { useGearLoadout } from '../hooks/useGearLoadout';
+import { useRegionSelection } from '../hooks/useRegionSelection';
+import { useLeagueRelicSelection } from '../hooks/useLeagueRelicSelection';
+import { useRelicSelection, MAX_RELICS } from '../hooks/useRelicSelection';
+import { useBlessingSelection } from '../hooks/useBlessingSelection';
+import { emptyEofWeaponNames, emptyEquippedNames } from '../data/gearShape';
+import { COMBAT_STYLES, GEAR } from '../data/gear';
+import { BLESSINGS, BLESSING_COLOURS, BLESSING_TIERS } from '../data/blessings';
+import { LEAGUE_RELICS } from '../data/leagueRelics';
+import { RELICS, RELIC_CATEGORIES } from '../data/relics';
+import { GATEWAY_REGIONS, REGIONS } from '../data/regions';
+import { isGearItemAvailable } from '../data/gearAvailability';
+import {
+  ARMOUR_SCALING_BLESSINGS,
+  LIFE_SCALING_BLESSINGS,
+  getArmourRating,
+  getTotalArmour,
+  getTotalLifePoints,
+} from '../utils/gearStats';
+import { createUserBuild, updateUserBuild } from '../utils/api';
+import { saveMyBuildToken } from '../utils/myBuilds';
+import { MAX_LENGTHS, MAX_STAGES, MAX_TRADEOFFS } from '../utils/userBuildShape';
+
+const STYLE_LABELS = { melee: 'Melee', ranged: 'Ranged', magic: 'Magic', necromancy: 'Necromancy' };
+const SLOT_LABELS = {
+  head: 'Head', pocket: 'Pocket', back: 'Back', neck: 'Neck', ammo: 'Ammo',
+  weapon: 'Weapon', torso: 'Torso', offhand: 'Off-hand', legs: 'Legs',
+  hands: 'Hands', feet: 'Feet', ring: 'Ring',
+};
+const SLOT_GRID_AREAS = `
+  "eof head pocket"
+  "back neck ammo"
+  "weapon torso offhand"
+  ". legs ."
+  "hands feet ring"
+`;
+const regionIcon = (id) => `icons/regions/${id}.png`;
+
+// Same list/labels/logic as GearPage.jsx's own SORT_OPTIONS/NO_LEVEL_SLOTS -
+// a local copy rather than a shared export since the two pickers are free to
+// diverge.
+const SORT_OPTIONS = [
+  { id: 'level', label: 'Level' },
+  { id: 'damage', label: 'Dmg' },
+  { id: 'accuracy', label: 'Acc' },
+  { id: 'armour', label: 'Tank (Arm)' },
+  { id: 'lifeBonus', label: 'Tank (LP)' },
+];
+const NO_LEVEL_SLOTS = new Set(['neck', 'ring']);
+
+function sortGearItems(items, sortBy, style) {
+  return [...items].sort((a, b) => {
+    const valueOf = (item) => {
+      if (sortBy === 'level') return item.level?.level ?? 0;
+      if (sortBy === 'armour') return getArmourRating(item, style);
+      return item.stats?.[sortBy] ?? 0;
+    };
+    return valueOf(b) - valueOf(a);
+  });
+}
+const ARCH_RELIC_CATEGORY_LABELS = { combat: 'Combat', skilling: 'Skilling', misc: 'Misc' };
+const ARCH_RELIC_TABS = [...RELIC_CATEGORIES, 'all'];
+
+function groupBlessingsByTier(blessings) {
+  return BLESSING_TIERS.map((tier) => [
+    tier,
+    BLESSING_COLOURS.map((colour) => blessings.find((b) => b.tier === tier && b.colour === colour)).filter(Boolean),
+  ]);
+}
+
+function groupRelicsByTier(relics) {
+  const byTier = new Map();
+  for (const relic of relics) {
+    const key = relic.tier ?? 'unknown';
+    if (!byTier.has(key)) byTier.set(key, []);
+    byTier.get(key).push(relic);
+  }
+  return [...byTier.entries()].sort(([a], [b]) => {
+    if (a === 'unknown') return 1;
+    if (b === 'unknown') return -1;
+    return a - b;
+  });
+}
+
+// The equipped-names seed for one stage's gear hook, when editing an
+// existing build - blank for a brand new build/stage. Kept as plain
+// functions (not hook-internal state) because useGearLoadout only ever
+// reads its `initial*` props once, on mount.
+function initialEquippedNamesForStage(build, stageIndex) {
+  const stage = build?.stages?.[stageIndex];
+  const names = emptyEquippedNames();
+  if (!stage) return names;
+  for (const [style, loadout] of Object.entries(stage.loadouts)) {
+    names[style] = { ...loadout.slots };
+  }
+  return names;
+}
+function initialEofNamesForStage(build, stageIndex) {
+  const stage = build?.stages?.[stageIndex];
+  const names = emptyEofWeaponNames();
+  if (!stage) return names;
+  for (const [style, loadout] of Object.entries(stage.loadouts)) {
+    names[style] = loadout.eof ?? null;
+  }
+  return names;
+}
+
+// A single style's equip grid + item picker, mirroring GearPage.jsx but
+// trimmed down for authoring: no share buttons, no compact toggle - just
+// search, sort and click-to-equip. Availability is computed against the
+// REGIONS/RELICS THIS BUILD picked, not the visitor's own saved selection,
+// so the picker greys out exactly what the finished card will show as locked.
+function StyleLoadoutEditor({ style, gear, isUnlocked, selectedLeagueRelics }) {
+  const [search, setSearch] = useState('');
+  const [hideLocked, setHideLocked] = useState(true);
+  const [sortBy, setSortBy] = useState('level');
+  const equipped = gear.equipped;
+  const activeSlot = gear.activeSlot;
+
+  function isItemAvailable(item) {
+    if (activeSlot === 'offhand' && gear.offhandBlocked) return false;
+    if (activeSlot === 'eof') {
+      if (gear.eofWeapon?.name === item.name) return true;
+      return isGearItemAvailable(item, isUnlocked, { selectedLeagueRelics });
+    }
+    if (equipped[activeSlot]?.name === item.name) return true;
+    return isGearItemAvailable(item, isUnlocked, { selectedLeagueRelics });
+  }
+
+  // Only offer sort tabs for stats this slot's items actually carry (e.g. no
+  // "Acc" tab for a pure armour slot), same as GearPage.jsx's own
+  // visibleSortOptions. Neck and ring are a deliberate special case: most
+  // items in those slots have no level requirement at all and no armour/
+  // accuracy/LP spread, so Level/Acc/Tank sorting does nothing useful there -
+  // Dmg is the only sort that actually differentiates them.
+  const visibleSortOptions = useMemo(() => {
+    if (activeSlot === 'eof') return [];
+    if (NO_LEVEL_SLOTS.has(activeSlot)) return SORT_OPTIONS.filter((opt) => opt.id === 'damage');
+    const slotItems = GEAR[style]?.[activeSlot] ?? [];
+    const hasAccuracy = slotItems.some((item) => item.stats?.accuracy);
+    const hasArmour = slotItems.some((item) => getArmourRating(item, style));
+    const hasLifeBonus = slotItems.some((item) => item.stats?.lifeBonus);
+    return SORT_OPTIONS.filter((opt) => {
+      if (opt.id === 'accuracy') return hasAccuracy;
+      if (opt.id === 'armour') return hasArmour;
+      if (opt.id === 'lifeBonus') return hasLifeBonus;
+      return true;
+    });
+  }, [style, activeSlot]);
+
+  useEffect(() => {
+    if (visibleSortOptions.some((opt) => opt.id === sortBy)) return;
+    setSortBy(NO_LEVEL_SLOTS.has(activeSlot) ? 'damage' : 'level');
+  }, [visibleSortOptions, sortBy, activeSlot]);
+
+  const items =
+    activeSlot === 'eof'
+      ? (GEAR[style]?.weapon ?? []).filter((item) => item.specialAttack)
+      : GEAR[style]?.[activeSlot] ?? [];
+  const query = search.trim().toLowerCase();
+  const matched = query ? items.filter((item) => item.name.toLowerCase().includes(query)) : items;
+  // Available items always sort ahead of locked ones, same convention as the
+  // real Gear Planner - and hiding locked ones entirely is the default here,
+  // since a build author is usually only interested in what their own
+  // regions/relics picks actually unlock.
+  const available = matched.filter((item) => isItemAvailable(item));
+  const locked = hideLocked ? [] : matched.filter((item) => !isItemAvailable(item));
+  const displayItems = [...sortGearItems(available, sortBy, style), ...sortGearItems(locked, sortBy, style)];
+
+  return (
+    <div className="create-build-loadout-editor">
+      <div className="equip-grid" style={{ gridTemplateAreas: SLOT_GRID_AREAS }}>
+        {gear.eofVisible && (
+          <EquipmentSlot
+            slotId="eof"
+            label="EOF"
+            item={gear.eofWeapon}
+            isActive={activeSlot === 'eof'}
+            onSelect={gear.selectSlot}
+            onUnequip={gear.unequipSlot}
+            miniIcon={equipped.neck?.icon}
+            isUnlocked={isUnlocked}
+            style={style}
+            selectedLeagueRelics={selectedLeagueRelics}
+          />
+        )}
+        {Object.keys(SLOT_LABELS).map((slotId) => (
+          <EquipmentSlot
+            key={slotId}
+            slotId={slotId}
+            label={SLOT_LABELS[slotId]}
+            item={equipped[slotId]}
+            isActive={activeSlot === slotId}
+            onSelect={gear.selectSlot}
+            onUnequip={gear.unequipSlot}
+            disabled={slotId === 'offhand' && gear.offhandBlocked}
+            isUnlocked={isUnlocked}
+            style={style}
+            selectedLeagueRelics={selectedLeagueRelics}
+          />
+        ))}
+      </div>
+
+      <div className="create-build-item-list">
+        <input
+          type="search"
+          className="gear-search"
+          placeholder={`Search ${activeSlot === 'eof' ? 'EOF weapons' : SLOT_LABELS[activeSlot]?.toLowerCase()}…`}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          disabled={activeSlot === 'offhand' && gear.offhandBlocked}
+        />
+        <div className="gear-item-list-controls">
+          <div className="sort-tabs" role="tablist" aria-label="Sort by">
+            {visibleSortOptions.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                role="tab"
+                aria-selected={sortBy === opt.id}
+                className={`sort-tab${sortBy === opt.id ? ' active' : ''}`}
+                onClick={() => setSortBy(opt.id)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <label className="hide-locked-toggle">
+            <input type="checkbox" checked={hideLocked} onChange={(e) => setHideLocked(e.target.checked)} />
+            <span>Hide locked</span>
+          </label>
+        </div>
+        <div className="gear-item-list-scroll">
+          {displayItems.length > 0 ? (
+            <div className="gear-item-rows compact">
+              {displayItems.map((item) => (
+                <GearItemRow
+                  key={item.name}
+                  item={item}
+                  style={style}
+                  equipped={activeSlot === 'eof' ? gear.eofWeapon?.name === item.name : equipped[activeSlot]?.name === item.name}
+                  available={isItemAvailable(item)}
+                  isUnlocked={isUnlocked}
+                  selectedLeagueRelics={selectedLeagueRelics}
+                  onToggle={activeSlot === 'eof' ? gear.toggleEofWeapon : gear.toggleItem}
+                  showSpecialAttack={activeSlot === 'eof'}
+                  compact
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="gear-empty">No items for this slot.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// One stage's worth of per-style loadout editors (the "Stage N" block),
+// bound to its own useGearLoadout instance so two stages never share state.
+function StageEditor({ index, label, onLabelChange, onRemove, activeStyles, gear, isUnlocked, selectedLeagueRelics, blessings }) {
+  // Armour/health are only meaningful to show once a blessing that actually
+  // reads its value off one of them is picked - otherwise the number is
+  // just noise (see utils/gearStats.js's ARMOUR_SCALING_BLESSINGS/
+  // LIFE_SCALING_BLESSINGS). Blessings are build-wide, not per-style/stage,
+  // so this is the same check for every block below.
+  const showArmour = blessings.some((name) => ARMOUR_SCALING_BLESSINGS.has(name));
+  const showHealth = blessings.some((name) => LIFE_SCALING_BLESSINGS.has(name));
+  return (
+    <div className="create-build-stage-block">
+      <div className="create-build-stage-head">
+        <input
+          type="text"
+          className="create-build-stage-label"
+          value={label}
+          maxLength={MAX_LENGTHS.stageLabel}
+          onChange={(e) => onLabelChange(e.target.value)}
+          placeholder={`Stage ${index + 1} name, e.g. "Mid game" or "BIS"`}
+        />
+        {onRemove && (
+          <button type="button" className="create-build-remove-stage" onClick={onRemove}>
+            Remove this stage
+          </button>
+        )}
+      </div>
+      {[...activeStyles].map((style) => {
+        const names = gear.equippedNamesByStyle[style] ?? {};
+        const equipped = {};
+        for (const [slot, itemName] of Object.entries(names)) {
+          const item = GEAR[style]?.[slot]?.find((i) => i.name === itemName);
+          if (item) equipped[slot] = item;
+        }
+        const armourTotal = showArmour ? getTotalArmour(equipped, style, 99) : null;
+        const lifeTotal = showHealth ? getTotalLifePoints(equipped) : null;
+        return (
+          <div key={style} className="create-build-style-block">
+            <div className="create-build-style-block-head">
+              <h3>{STYLE_LABELS[style]}</h3>
+              <span className="create-build-armour-note">
+                {/* Same colour classes GearItemRow uses for these two stats
+                    (see utils/gearItemDisplay.js's keyStats), so this note
+                    reads as the same "armour"/"health" concept everywhere. */}
+                {/* .gear-stat + .gear-stat::before already inserts the "·"
+                    separator between adjacent stats (see index.css) - no
+                    manual separator needed here. */}
+                {armourTotal != null && (
+                  <span className="gear-stat gear-stat-armour">Total armour: {armourTotal.toLocaleString()} at 99 Defence</span>
+                )}
+                {lifeTotal != null && (
+                  <span className="gear-stat gear-stat-lp">Total health: {lifeTotal.toLocaleString()} at 99 Hitpoints</span>
+                )}
+              </span>
+            </div>
+            {gear.style === style ? (
+              <StyleLoadoutEditor style={style} gear={gear} isUnlocked={isUnlocked} selectedLeagueRelics={selectedLeagueRelics} />
+            ) : (
+              <button type="button" className="create-build-edit-style-button" onClick={() => gear.setStyle(style)}>
+                Edit {STYLE_LABELS[style]} loadout
+              </button>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// `editing`, when present, is `{ id, token, build }` (the sanitized existing
+// build) - switches the page into "Edit build" mode: every field seeds from
+// the existing build instead of blank, and submitting calls updateUserBuild
+// instead of createUserBuild. See pages/EditBuildPage.jsx, which resolves
+// the id/token/build and passes this prop.
+export default function CreateBuildPage({ onSubmitted, editing }) {
+  const build = editing?.build;
+  const [name, setName] = useState(build?.name ?? '');
+  const [tagline, setTagline] = useState(build?.tagline ?? '');
+  const [authorName, setAuthorName] = useState(build?.authorName ?? '');
+  const [difficultyLabel, setDifficultyLabel] = useState(build?.difficultyLabel ?? '');
+  const [difficultyNote, setDifficultyNote] = useState(build?.difficultyNote ?? '');
+  const [activeStyles, setActiveStyles] = useState(() => new Set(build?.styles ?? ['melee']));
+  const [whyItsGood, setWhyItsGood] = useState(build?.whyItsGood ?? '');
+  const [howToPlay, setHowToPlay] = useState(build?.howToPlay ?? '');
+  const [tradeoffs, setTradeoffs] = useState(() => (build?.tradeoffs?.length ? build.tradeoffs : ['']));
+  const [regionReasons, setRegionReasons] = useState(() => build?.regionReasons ?? {});
+  const [relicReasons, setRelicReasons] = useState(() => build?.relicReasons ?? {});
+  const [archRelicReasons, setArchRelicReasons] = useState(() => build?.archRelicReasons ?? {});
+  const [archRelicSearch, setArchRelicSearch] = useState('');
+  const [archRelicTab, setArchRelicTab] = useState('all');
+  const [archRelicHideLocked, setArchRelicHideLocked] = useState(true);
+  const [archRelicIgnoreArtefactRegions, setArchRelicIgnoreArtefactRegions] = useState(false);
+  const [stageLabels, setStageLabels] = useState(() => (build?.stages?.length ? build.stages.map((s) => s.label) : ['Stage 1']));
+  const [stageCount, setStageCount] = useState(() => build?.stages?.length ?? 1);
+  const [status, setStatus] = useState('idle'); // idle | working | error
+  const [error, setError] = useState(null);
+
+  const regionSelection = useRegionSelection({
+    persist: false,
+    initialSelection: build?.regions ?? [],
+    // Karamja (the one GATEWAY_REGIONS entry) defaults ON, same as a brand
+    // new visitor gets - almost no build is meant to assume it's off.
+    initialGatewaySelection: [...GATEWAY_REGIONS],
+  });
+  const relicSelection = useLeagueRelicSelection({ persist: false, initialSelection: build?.relics ?? [] });
+  const archRelicSelection = useRelicSelection({ persist: false, initialSelection: build?.archRelics ?? [] });
+  const blessingSelection = useBlessingSelection({ persist: false, initialSelection: build?.blessings ?? [] });
+
+  // Two independent loadout hooks, always both instantiated (React hooks
+  // can't be called conditionally/in a loop) - `stageCount` decides how many
+  // of them actually get rendered/submitted. Each seeds from the matching
+  // stage of the build being edited, or blank for a new build.
+  const initialDefaultStyle = build?.styles?.[0] ?? 'melee';
+  const gearStage0 = useGearLoadout({
+    persist: false,
+    initialEquippedNames: initialEquippedNamesForStage(build, 0),
+    initialEofWeaponNames: initialEofNamesForStage(build, 0),
+    initialDefaultStyle,
+  });
+  const gearStage1 = useGearLoadout({
+    persist: false,
+    initialEquippedNames: initialEquippedNamesForStage(build, 1),
+    initialEofWeaponNames: initialEofNamesForStage(build, 1),
+    initialDefaultStyle,
+  });
+  const gearStages = [gearStage0, gearStage1];
+
+  const relicTierGroups = useMemo(() => groupRelicsByTier(LEAGUE_RELICS), []);
+  const blessingTierGroups = useMemo(() => groupBlessingsByTier(BLESSINGS), []);
+  const selectedBlessingObjects = useMemo(
+    () => blessingSelection.selected.map((n) => BLESSINGS.find((b) => b.name === n)).filter(Boolean),
+    [blessingSelection.selected],
+  );
+
+  function isArchRelicAvailable(relic) {
+    return isGearItemAvailable(relic, regionSelection.isUnlocked, {
+      ignoreArtefactRegions: archRelicIgnoreArtefactRegions,
+    });
+  }
+  // Picked relics stay pinned to the top (same convention as RelicsPage) and
+  // are never hidden by the locked filter - unpicking your own already-taken
+  // relic has to stay possible even if a region change locked it again.
+  const archRelicsToShow = useMemo(() => {
+    const categoryFiltered = archRelicTab === 'all' ? RELICS : RELICS.filter((r) => r.category === archRelicTab);
+    const query = archRelicSearch.trim().toLowerCase();
+    const searched = query
+      ? categoryFiltered.filter((r) => r.name.toLowerCase().includes(query) || r.relicName.toLowerCase().includes(query))
+      : categoryFiltered;
+    const picked = archRelicSelection.selected.map((n) => searched.find((r) => r.name === n)).filter(Boolean);
+    const rest = searched.filter((r) => !archRelicSelection.selected.includes(r.name));
+    const available = rest.filter((r) => isArchRelicAvailable(r));
+    const locked = archRelicHideLocked ? [] : rest.filter((r) => !isArchRelicAvailable(r));
+    return [...picked, ...available, ...locked];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    archRelicTab,
+    archRelicSearch,
+    archRelicHideLocked,
+    archRelicIgnoreArtefactRegions,
+    archRelicSelection.selected,
+    regionSelection.isUnlocked,
+  ]);
+
+  function toggleActiveStyle(styleId) {
+    setActiveStyles((prev) => {
+      const next = new Set(prev);
+      if (next.has(styleId)) next.delete(styleId);
+      else next.add(styleId);
+      return next;
+    });
+  }
+
+  function setTradeoff(index, value) {
+    setTradeoffs((prev) => prev.map((t, i) => (i === index ? value : t)));
+  }
+  function addTradeoff() {
+    setTradeoffs((prev) => (prev.length >= MAX_TRADEOFFS ? prev : [...prev, '']));
+  }
+  function removeTradeoff(index) {
+    setTradeoffs((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function addStage() {
+    setStageCount(2);
+    setStageLabels((prev) => (prev.length > 1 ? prev : [...prev, 'Stage 2']));
+  }
+  function removeStage() {
+    setStageCount(1);
+  }
+  function setStageLabel(index, value) {
+    setStageLabels((prev) => prev.map((l, i) => (i === index ? value : l)));
+  }
+
+  // Builds the `stages` array actually worth submitting - a stage with no
+  // gear equipped in any active style is dropped, same rule
+  // sanitizeUserBuildPayload applies on the way back out.
+  function buildStagesPayload() {
+    const stages = [];
+    for (let i = 0; i < stageCount; i += 1) {
+      const gear = gearStages[i];
+      const loadouts = {};
+      for (const style of activeStyles) {
+        const slots = gear.equippedNamesByStyle[style] ?? {};
+        if (Object.keys(slots).length === 0) continue;
+        loadouts[style] = { slots, eof: gear.eofWeaponNamesByStyle[style] ?? null };
+      }
+      if (Object.keys(loadouts).length > 0) {
+        stages.push({ label: stageLabels[i]?.trim() || `Stage ${i + 1}`, loadouts });
+      }
+    }
+    return stages;
+  }
+
+  const stagesPreview = buildStagesPayload();
+  const stylesWithGear = [...activeStyles].filter((style) => stagesPreview.some((stage) => stage.loadouts[style]));
+  const canSubmit = name.trim().length > 0 && stagesPreview.length > 0 && status !== 'working';
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (!canSubmit) return;
+    setStatus('working');
+    setError(null);
+
+    const payload = {
+      name: name.trim(),
+      tagline: tagline.trim(),
+      authorName: authorName.trim(),
+      difficultyLabel: difficultyLabel.trim(),
+      difficultyNote: difficultyNote.trim(),
+      styles: stylesWithGear,
+      blessings: blessingSelection.selected,
+      relics: relicSelection.selected,
+      relicReasons,
+      archRelics: archRelicSelection.selected,
+      archRelicReasons,
+      regions: regionSelection.selected,
+      regionReasons,
+      whyItsGood: whyItsGood.trim(),
+      howToPlay: howToPlay.trim(),
+      tradeoffs: tradeoffs.filter((t) => t.trim()),
+      stages: stagesPreview,
+    };
+
+    try {
+      if (editing) {
+        await updateUserBuild(editing.id, editing.token, {
+          name: payload.name,
+          tagline: payload.tagline,
+          authorName: payload.authorName,
+          styles: payload.styles,
+          payload,
+        });
+        setStatus('idle');
+        onSubmitted(editing.id);
+      } else {
+        const { id, token } = await createUserBuild({
+          name: payload.name,
+          tagline: payload.tagline,
+          authorName: payload.authorName,
+          styles: payload.styles,
+          payload,
+        });
+        saveMyBuildToken(id, token);
+        setStatus('idle');
+        onSubmitted(id);
+      }
+    } catch (err) {
+      setStatus('error');
+      setError(err.message || 'Could not submit this build. Try again.');
+    }
+  }
+
+  return (
+    <>
+      <header>
+        <h1>{editing ? 'Edit your build' : 'Create a build'}</h1>
+        <p>
+          {editing
+            ? "Update your build's gear, relics, regions, stages or write-up."
+            : "Design your own build guide - pick the gear, league relics, regions and blessings, then write up why it works. It'll appear on the"}
+          {!editing && (
+            <>
+              {' '}
+              <a href="#user-builds" className="notice-link">
+                User made builds
+              </a>{' '}
+              page for everyone to see.
+            </>
+          )}
+        </p>
+      </header>
+
+      <form className="create-build-page" onSubmit={handleSubmit}>
+        <section className="create-build-section">
+          <h2>Basics</h2>
+          <label className="create-build-field">
+            <span>Build name*</span>
+            <input
+              type="text"
+              value={name}
+              maxLength={MAX_LENGTHS.name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. The Iron Vanguard"
+              required
+            />
+          </label>
+          <label className="create-build-field">
+            <span>Tagline</span>
+            <input
+              type="text"
+              value={tagline}
+              maxLength={MAX_LENGTHS.tagline}
+              onChange={(e) => setTagline(e.target.value)}
+              placeholder="One line describing what the build does"
+            />
+          </label>
+          <label className="create-build-field">
+            <span>Your name (optional)</span>
+            <input
+              type="text"
+              value={authorName}
+              maxLength={MAX_LENGTHS.authorName}
+              onChange={(e) => setAuthorName(e.target.value)}
+              placeholder="Anonymous"
+            />
+          </label>
+          <div className="create-build-field-row">
+            <label className="create-build-field">
+              <span>Difficulty label</span>
+              <input
+                type="text"
+                value={difficultyLabel}
+                maxLength={MAX_LENGTHS.difficultyLabel}
+                onChange={(e) => setDifficultyLabel(e.target.value)}
+                placeholder="e.g. Easy"
+              />
+            </label>
+            <label className="create-build-field create-build-field-wide">
+              <span>Difficulty tooltip - shown when a reader hovers the label</span>
+              <input
+                type="text"
+                value={difficultyNote}
+                maxLength={MAX_LENGTHS.difficultyNote}
+                onChange={(e) => setDifficultyNote(e.target.value)}
+                placeholder="e.g. Short rotation, minimal buff upkeep"
+              />
+            </label>
+          </div>
+          <div className="create-build-field">
+            <span>Combat styles this build covers*</span>
+            <div className="create-build-style-toggles">
+              {COMBAT_STYLES.map((s) => (
+                <label key={s} className="create-build-style-toggle">
+                  <input type="checkbox" checked={activeStyles.has(s)} onChange={() => toggleActiveStyle(s)} />
+                  <span>{STYLE_LABELS[s]}</span>
+                </label>
+              ))}
+            </div>
+            <p className="create-build-hint">
+              Only styles with gear actually equipped below will be included in the submitted build.
+            </p>
+          </div>
+        </section>
+
+        <section className="create-build-section">
+          <h2>Regions</h2>
+          <p className="create-build-hint">Pick up to 3 optional regions - click the map to toggle.</p>
+          <RegionMap isUnlocked={regionSelection.isUnlocked} toggleRegion={regionSelection.toggleRegion} />
+          {regionSelection.overLimit && (
+            <p className="create-build-warning">You've picked more than 3 optional regions.</p>
+          )}
+          <ul className="create-build-pick-reasons">
+            {regionSelection.selected.map((id) => (
+              <li key={id} className="create-build-pick-reason">
+                <span className="create-build-pick-reason-head">
+                  <RetryImage src={regionIcon(id)} alt="" className="create-build-pick-reason-icon" />
+                  {REGIONS[id]?.name ?? id}
+                </span>
+                <input
+                  type="text"
+                  value={regionReasons[id] ?? ''}
+                  maxLength={MAX_LENGTHS.reason}
+                  onChange={(e) => setRegionReasons((prev) => ({ ...prev, [id]: e.target.value }))}
+                  placeholder="Why this region?"
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="create-build-section">
+          <h2>League relics</h2>
+          {relicTierGroups.map(([tier, relics]) => (
+            <div key={tier} className="create-build-relic-tier">
+              <h3>{tier === 'unknown' ? 'Unknown tier - pick any number' : `Tier ${tier} - pick one`}</h3>
+              <div className="gear-item-rows compact">
+                {relics.map((relic) => (
+                  <LeagueRelicRow
+                    key={relic.name}
+                    relic={relic}
+                    selected={relicSelection.selected.includes(relic.name)}
+                    onToggleSelect={relicSelection.toggleLeagueRelic}
+                    compact
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+          <ul className="create-build-pick-reasons">
+            {relicSelection.selected.map((name2) => (
+              <li key={name2} className="create-build-pick-reason">
+                <span className="create-build-pick-reason-head">{name2}</span>
+                <input
+                  type="text"
+                  value={relicReasons[name2] ?? ''}
+                  maxLength={MAX_LENGTHS.reason}
+                  onChange={(e) => setRelicReasons((prev) => ({ ...prev, [name2]: e.target.value }))}
+                  placeholder="Why this relic?"
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="create-build-section">
+          <h2>Arch relics</h2>
+          <p className="create-build-hint">
+            Archaeology relic powers - pick up to {MAX_RELICS}, greyed out until the regions you picked above
+            unlock them.
+          </p>
+          <div className="abilities-controls">
+            <div className="style-tabs" role="tablist">
+              {ARCH_RELIC_TABS.map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  role="tab"
+                  aria-selected={archRelicTab === tab}
+                  className={`style-tab${archRelicTab === tab ? ' active' : ''}`}
+                  onClick={() => setArchRelicTab(tab)}
+                >
+                  {tab === 'all' ? 'All' : ARCH_RELIC_CATEGORY_LABELS[tab]}
+                </button>
+              ))}
+            </div>
+            <div className="abilities-toggles">
+              <label className="hide-locked-toggle">
+                <input
+                  type="checkbox"
+                  checked={archRelicHideLocked}
+                  onChange={(e) => setArchRelicHideLocked(e.target.checked)}
+                />
+                <span>Hide locked</span>
+              </label>
+              <label
+                className="hide-locked-toggle"
+                title="Archaeology materials can be gathered remotely via Research, without visiting the dig site itself - treats 'Artefacts: X' tags as satisfied. A relic's collector hand-in location, and any non-Archaeology component, still gates as normal."
+              >
+                <input
+                  type="checkbox"
+                  checked={archRelicIgnoreArtefactRegions}
+                  onChange={(e) => setArchRelicIgnoreArtefactRegions(e.target.checked)}
+                />
+                <span>Artefacts are not region-locked</span>
+              </label>
+            </div>
+          </div>
+          <input
+            type="search"
+            className="gear-search"
+            placeholder="Search Arch relics…"
+            value={archRelicSearch}
+            onChange={(e) => setArchRelicSearch(e.target.value)}
+          />
+          <p className="create-build-hint">
+            {archRelicSelection.selected.length}/{MAX_RELICS} picked
+          </p>
+          <div className="gear-item-rows compact">
+            {archRelicsToShow.map((relic) => (
+              <RelicRow
+                key={relic.name}
+                relic={relic}
+                available={isArchRelicAvailable(relic)}
+                isUnlocked={regionSelection.isUnlocked}
+                selected={archRelicSelection.selected.includes(relic.name)}
+                selectable={archRelicSelection.selected.length < MAX_RELICS}
+                onToggleSelect={archRelicSelection.toggleRelic}
+              />
+            ))}
+          </div>
+          <ul className="create-build-pick-reasons">
+            {archRelicSelection.selected.map((name2) => (
+              <li key={name2} className="create-build-pick-reason">
+                <span className="create-build-pick-reason-head">{name2}</span>
+                <input
+                  type="text"
+                  value={archRelicReasons[name2] ?? ''}
+                  maxLength={MAX_LENGTHS.reason}
+                  onChange={(e) => setArchRelicReasons((prev) => ({ ...prev, [name2]: e.target.value }))}
+                  placeholder="Why this relic?"
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="create-build-section">
+          <h2>Blessings</h2>
+          <p className="create-build-hint">
+            Optional - pick one blessing per tier and the God Tier One power is worked out automatically.
+          </p>
+          {blessingTierGroups.map(([tier, blessings]) => (
+            <div key={tier} className="blessing-tier-group">
+              <h3 className="blessing-tier-heading">Tier {tier}</h3>
+              <div className="blessing-grid compact">
+                {blessings.map((blessing) => (
+                  <BlessingCard
+                    key={blessing.name}
+                    blessing={blessing}
+                    selected={blessingSelection.selected.includes(blessing.name)}
+                    onToggle={blessingSelection.toggleBlessing}
+                    compact
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+          {selectedBlessingObjects.length > 0 && <BlessingGodPanel selectedBlessings={selectedBlessingObjects} />}
+        </section>
+
+        <section className="create-build-section">
+          <h2>Gear loadout</h2>
+          <p className="create-build-hint">
+            Up to {MAX_STAGES} stages - e.g. "Mid game" and "BIS", or "Mid-late game" and "Late game". Readers can
+            switch between them like the curated builds' tabs.
+          </p>
+          {activeStyles.size === 0 && <p className="create-build-warning">Tick at least one combat style above first.</p>}
+          {Array.from({ length: stageCount }, (_, i) => (
+            <StageEditor
+              // eslint-disable-next-line react/no-array-index-key
+              key={i}
+              index={i}
+              label={stageLabels[i] ?? `Stage ${i + 1}`}
+              onLabelChange={(value) => setStageLabel(i, value)}
+              onRemove={stageCount > 1 && i === stageCount - 1 ? removeStage : null}
+              activeStyles={activeStyles}
+              gear={gearStages[i]}
+              isUnlocked={regionSelection.isUnlocked}
+              selectedLeagueRelics={relicSelection.selected}
+              blessings={blessingSelection.selected}
+            />
+          ))}
+          {stageCount < MAX_STAGES && (
+            <button type="button" className="create-build-add-stage" onClick={addStage}>
+              + Add a second stage
+            </button>
+          )}
+        </section>
+
+        <section className="create-build-section">
+          <h2>Why it's good</h2>
+          <textarea
+            className="create-build-prose"
+            value={whyItsGood}
+            maxLength={MAX_LENGTHS.prose}
+            onChange={(e) => setWhyItsGood(e.target.value)}
+            placeholder="Explain the mechanics that make this build work…"
+            rows={8}
+          />
+        </section>
+
+        <section className="create-build-section">
+          <h2>How to play it</h2>
+          <textarea
+            className="create-build-prose"
+            value={howToPlay}
+            maxLength={MAX_LENGTHS.prose}
+            onChange={(e) => setHowToPlay(e.target.value)}
+            placeholder="Walk through the rotation…"
+            rows={8}
+          />
+        </section>
+
+        <section className="create-build-section">
+          <h2>Trade-offs</h2>
+          <ul className="create-build-tradeoffs">
+            {tradeoffs.map((text, index) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <li key={index} className="create-build-tradeoff-row">
+                <input
+                  type="text"
+                  value={text}
+                  maxLength={MAX_LENGTHS.tradeoff}
+                  onChange={(e) => setTradeoff(index, e.target.value)}
+                  placeholder="What does this build give up?"
+                />
+                <button type="button" onClick={() => removeTradeoff(index)} aria-label="Remove trade-off">
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+          {tradeoffs.length < MAX_TRADEOFFS && (
+            <button type="button" className="create-build-add-tradeoff" onClick={addTradeoff}>
+              + Add trade-off
+            </button>
+          )}
+        </section>
+
+        <div className="create-build-submit-row">
+          {error && <p className="create-build-error">{error}</p>}
+          <button type="submit" className="create-build-submit-button" disabled={!canSubmit}>
+            {status === 'working' ? (editing ? 'Saving…' : 'Publishing…') : editing ? 'Save changes' : 'Publish build'}
+          </button>
+        </div>
+      </form>
+    </>
+  );
+}

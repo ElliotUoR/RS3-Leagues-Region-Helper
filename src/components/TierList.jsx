@@ -11,14 +11,26 @@ import TagTooltip from './TagTooltip';
 // one empty grade by design - nothing in either is F-tier - and silently
 // dropping the row reads as a rendering bug rather than as "nothing is this
 // weak", which is the actual claim being made.
-const GRADE_HUES = { A: 140, B: 95, C: 45, D: 25, E: 5, F: 220 };
+// 'unranked' is not a grade so much as the absence of one - see the relic list's
+// use of it for entries nobody has assessed yet. Desaturated on purpose so it
+// does not read as sitting on the same scale as A-F.
+const GRADE_HUES = { A: 140, B: 95, C: 45, D: 25, E: 5, F: 220, unranked: 250 };
 
-function TierRow({ grade, entries, renderBadges }) {
+function TierRow({ grade, entries, renderBadges, gradeLabels }) {
   const hue = GRADE_HUES[grade] ?? 220;
+  // Grades are single letters, so the badge is sized for one character;
+  // anything longer opts into a wrapped, smaller variant rather than
+  // overflowing.
+  const label = gradeLabels?.[grade] ?? grade;
+  const isWordy = label.length > 2;
   return (
     <div className="tier-row">
-      <div className="tier-grade" style={{ '--tier-hue': hue }} aria-label={`Grade ${grade}`}>
-        {grade}
+      <div
+        className={`tier-grade${isWordy ? ' tier-grade-wordy' : ''}`}
+        style={{ '--tier-hue': hue }}
+        aria-label={isWordy ? label : `Grade ${label}`}
+      >
+        {label}
       </div>
       <div className="tier-entries">
         {entries.length === 0 ? (
@@ -57,7 +69,9 @@ function TierRow({ grade, entries, renderBadges }) {
   );
 }
 
-export default function TierList({ title, standfirst, grades, entries, renderBadges, footnote }) {
+// `gradeLabels` maps a grade key to what the badge should read, for rows whose
+// name is not the grade itself (e.g. { unranked: 'Unranked (below F)' }).
+export default function TierList({ title, standfirst, grades, entries, renderBadges, footnote, gradeLabels }) {
   return (
     <section className="tier-list">
       <h2 className="tier-list-title">{title}</h2>
@@ -69,6 +83,7 @@ export default function TierList({ title, standfirst, grades, entries, renderBad
             grade={grade}
             entries={entries.filter((entry) => entry.grade === grade)}
             renderBadges={renderBadges}
+            gradeLabels={gradeLabels}
           />
         ))}
       </div>

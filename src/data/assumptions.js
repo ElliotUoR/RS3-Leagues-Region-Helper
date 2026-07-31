@@ -46,6 +46,14 @@ export const JMOD_CONFIRMATIONS = [
     title: 'Quest-point rewards (Vanquish, etc.) treated as global',
     detail: 'Since players begin Leagues with a number of Quest Points already unlocked and can earn additional Quest Points through region unlocks, some Quest Caravan rewards have been disabled. Free dice rolls and the Armour of Trials and Vanquish rewards will not be available during Leagues.',
   },
+  {
+    title: 'Will bosses who drop Defender upgrade items drop the full items?',
+    detail: "Instead of needing the pre-requisite item in your inventory, Barrows, Nex, and KK will have a chance to drop the Corruption Sigil, Ancient Emblem, and Perfect Chitin outright. Note: you'll still need a Chaotic Splint from Dungeoneering for the Ancient ones.",
+  },
+  {
+    title: 'How will we hand in Archaeology artefacts to collectors in different regions?',
+    detail: 'Some collectors are in different regions compared to their respective dig sites. A special "collector delivery box" has been added at the Archaeology guild campus next to Velucia, letting you hand in artefacts to the unique collectors from there.',
+  },
 ];
 
 // Grouped into categories, each a list of `{ title, detail }` entries.

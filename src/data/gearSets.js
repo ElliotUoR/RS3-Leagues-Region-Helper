@@ -638,20 +638,31 @@ export const GEAR_SET_GROUPS = {
 
   // The defender/repriser/rebounder/lantern progression: each tier's 3
   // combat-style variants (melee defender, ranged repriser, magic
-  // rebounder/lantern) share one combined region requirement per tier -
-  // never combined ACROSS tiers, same principle as every other tier family.
+  // rebounder/lantern) - never combined ACROSS tiers, same principle as
+  // every other tier family. JMod-confirmed (see data/assumptions.js):
+  // Barrows/Nex/KK have a CHANCE to drop the Corruption Sigil/Ancient
+  // Emblem/Perfect Chitin outright, rather than needing the previous tier's
+  // item already held to receive the drop - so each tier's region
+  // requirement no longer cascades from the tier below it.
   'Corrupted defender': 'Corrupted defender(s)',
   'Tainted repriser': 'Corrupted defender(s)',
   'Blighted rebounder': 'Corrupted defender(s)',
 
+  // Both components (ancient emblem + chaotic splint) are still required as
+  // normal - only the "must already hold a tier-70 item" condition on the
+  // emblem was removed, so this tier still needs both asgarnia and
+  // wilderness for all 3 variants.
   'Ancient defender': 'Ancient defender(s)',
   'Ancient repriser': 'Ancient defender(s)',
   'Ancient lantern': 'Ancient defender(s)',
 
-  // Kalphite repriser additionally needs kandarin (for an off-hand
-  // ascension crossbow input) on top of the kharidianDesert/asgarnia/
-  // wilderness/morytania the other two need - a slightly wider requirement,
-  // included per direct instruction despite the asymmetry.
+  // Perfect chitin (kharidianDesert) is common to all 3, but each variant
+  // pairs it with a different second component: the Kalphite Defender's
+  // drygore off-hand weapon is ALSO a KK/kharidianDesert drop (so it alone
+  // needs nothing else), the rebounder adds a Seismic singularity (Vorago,
+  // asgarnia), and the repriser adds an off-hand ascension crossbow (Legio
+  // Primus, kandarin) - three genuinely different region combinations,
+  // included as one set per direct instruction regardless.
   'Kalphite Defender': 'Kalphite defender(s)',
   'Kalphite repriser': 'Kalphite defender(s)',
   'Kalphite rebounder': 'Kalphite defender(s)',

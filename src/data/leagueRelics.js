@@ -534,4 +534,68 @@ export const LEAGUE_RELICS = [
     ],
     icon: FP('Divine_Druid.png'),
   },
+  // ------------------------------------------------------------- TIER THREE
+  // Transcribed verbatim from Jagex's "Relic Reveal" promo images, same as
+  // Divine Druid/Transmutation above - none of these three are on the wiki yet,
+  // and their icons were cropped from those images rather than downloaded, so
+  // (like the four unknown-tier ones) scripts/download-icons.mjs must never be
+  // pointed at them.
+  //
+  // Filenames were normalised on copy from image/league relics/ and
+  // deliberately differ from the source - do not "fix" these back:
+  //   Assasin's_Insight.PNG -> Assassins_Insight.png  (spelling, apostrophe)
+  //   Natures_Network.PNG   -> Natures_Network.png    (extension case)
+  //   Voidwalker.PNG        -> Voidwalker.png         (extension case)
+  // The lowercase .png matters: these are served from a Linux container where
+  // the filesystem is case-sensitive, unlike the Windows machine they were
+  // authored on, so a ".PNG" reference would 404 only in production.
+  //
+  // Tier 3 with no Tier 2 revealed yet, so these render as the second group on
+  // the page - both tier-grouping helpers sort numerically and put unknown
+  // last, so that ordering falls out without a special case.
+  {
+    name: 'Voidwalker',
+    tier: 3,
+    summary:
+      'Unlimited teleports from 13 jewellery pieces, plus Void Shards that each open into a clue scroll and a piece of loot.',
+    effects: [
+      'Grants an Abyssal Conduit, a powerful item that provides unlimited teleports from the following jewelry pieces:',
+      "The Amulet of glory, Combat bracelet, Delver's anklet, Dig site pendant, Enlightened amulet, Ferocious ring, Games necklace, Ring of duelling, Ring of respawn, Ring of slaying, Ring of wealth, Skills necklace, and Traveller's necklace.",
+      'Occasionally gain Void Shards. Void Shards can be opened to gain one clue scroll and a piece of the following loot:',
+      'Summoning pouches, Ancient summoning pouches, Divine energy, Divine charge, Invention materials, Dragon equipment, Goldenhawk feathers, Divine geodes, Blessed fire spirits, or Crystal essence.',
+    ],
+    icon: FP('Voidwalker.png'),
+  },
+  {
+    name: "Nature's Network",
+    tier: 3,
+    summary:
+      'Fairy ring, spirit tree and farming patch teleports; instant growth and harvest, noted produce, free ultracompost, and 25% seeds saved.',
+    effects: [
+      'Grants a Fairy Mushroom, which allows you to teleport to any fairy ring, spirit tree, or farming patch.',
+      'Patches are harvested instantly and produce is automatically noted.',
+      'Seeds planted instantly grow to full.',
+      'All patches are always treated with ultracompost.',
+      '25% chance to save planted seeds when sowing.',
+      'Herb seeds are planted at max amount, with only the base amount of seeds used.',
+    ],
+    icon: FP('Natures_Network.png'),
+  },
+  {
+    name: "Assassin's Insight",
+    tier: 3,
+    summary:
+      'Slayer master and dungeon teleports, a choice of two assignments, free prefer/block, corrupted slayer mask effects, and 5x elite spawns and XP.',
+    effects: [
+      'Grants the Skull of Slaying, which allows you to teleport to any slayer master and a range of slayer dungeons and monsters.',
+      'When assigned a slayer assignment, you will be able to choose between two assignments.',
+      'Choose between minimum or maximum amounts when requesting a new slayer assignment.',
+      'Monsters can be added to the prefer and block lists for free.',
+      'You have the effects of the corrupted slayer mask without needing to wear it.',
+      'Elite slayer monsters are 5x more likely to spawn.',
+      'Elite slayer monsters give 5x slayer XP when defeated (before league modifiers).',
+      "Monsters are captured into Ushabti's 100% of the time.",
+    ],
+    icon: FP('Assassins_Insight.png'),
+  },
 ];

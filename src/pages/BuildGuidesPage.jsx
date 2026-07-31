@@ -138,11 +138,14 @@ export default function BuildGuidesPage() {
       </header>
 
       <main className="build-guides-page">
-        <p className="build-coming-soon">
-          <span className="build-coming-soon-badge">
-            <span aria-hidden="true">🚧</span> Coming soon: build your own guide
-          </span>
-        </p>
+        <div className="build-guides-user-cta">
+          <a href="#create-build" className="build-create-button">
+            + Create a build
+          </a>
+          <a href="#user-builds" className="build-see-user-builds-button">
+            See user made builds
+          </a>
+        </div>
 
         {CAN_EDIT && (
           <div className="build-edit-bar">
@@ -183,6 +186,7 @@ export default function BuildGuidesPage() {
           grades={LEAGUE_RELIC_TIER_LIST.grades}
           entries={relicTierEntries}
           renderBadges={RelicBadges}
+          gradeLabels={{ unranked: 'Unranked' }}
         />
       </main>
     </>

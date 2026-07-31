@@ -51,6 +51,41 @@ export async function callVoidRpc(name, args) {
   }
 }
 
+// Same as insertRow, but for a table where the DB itself generates part of
+// the row (e.g. user_builds.id, an identity column) that the caller needs
+// back - asks PostgREST to return the inserted row instead of 'minimal', and
+// resolves to it directly rather than the `{ conflict }` shape (this is only
+// used where a unique-constraint conflict isn't an expected/handled case).
+export async function insertRowReturning(table, row) {
+  const res = await fetch(`${POSTGREST_URL}/${table}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' },
+    body: JSON.stringify(row),
+  });
+  if (!res.ok) {
+    throw new Error(`PostgREST insert into ${table} failed: ${res.status} ${await res.text()}`);
+  }
+  const [inserted] = await res.json();
+  return inserted;
+}
+
+// GETs rows from a table through PostgREST's own query-string filter syntax
+// (e.g. `id=eq.5`, `order=created_at.desc`, `limit=50`) - `query` is passed
+// straight through unescaped-beyond-URLSearchParams, so callers build it with
+// exact PostgREST operators rather than this wrapper inventing its own query
+// language. Only usable against a table `anon` actually has a SELECT grant +
+// RLS policy on (currently just user_builds - see
+// deploy/migrations/012_user_builds.sql) - every other table in this schema
+// grants `anon` insert only, so a select against those simply 403s.
+export async function selectRows(table, query) {
+  const qs = query instanceof URLSearchParams ? query : new URLSearchParams(query);
+  const res = await fetch(`${POSTGREST_URL}/${table}?${qs}`);
+  if (!res.ok) {
+    throw new Error(`PostgREST select from ${table} failed: ${res.status} ${await res.text()}`);
+  }
+  return res.json();
+}
+
 export async function callScalarRpc(name, args) {
   const res = await fetch(`${POSTGREST_URL}/rpc/${name}`, {
     method: 'POST',

@@ -7,6 +7,9 @@ import HomePage from './pages/HomePage';
 import LeagueRelicsPage from './pages/LeagueRelicsPage';
 import BlessingsPage from './pages/BlessingsPage';
 import BuildGuidesPage from './pages/BuildGuidesPage';
+import CreateBuildPage from './pages/CreateBuildPage';
+import UserBuildsPage from './pages/UserBuildsPage';
+import EditBuildPage from './pages/EditBuildPage';
 import RelicImportDocsPage from './pages/RelicImportDocsPage';
 import ReportIssueButton from './components/ReportIssueButton';
 import ThemeToggle from './components/ThemeToggle';
@@ -95,6 +98,9 @@ function currentRoute() {
   // so a stale path can never outrank a newer hash.
   if (isBuildGuidePath()) return 'buildGuides';
   if (window.location.hash.split('/')[0] === '#build-guides') return 'buildGuides';
+  if (window.location.hash === '#create-build') return 'createBuild';
+  if (window.location.hash === '#user-builds') return 'userBuilds';
+  if (window.location.hash.split('/')[0] === '#edit-build') return 'editBuild';
   if (window.location.hash === '#relic-import-docs') return 'relicImportDocs';
   if (window.location.hash === '#assumptions') return 'assumptions';
   return 'home';
@@ -285,6 +291,26 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
           must never read or mutate the player's own region/relic/loadout
           state. The "open in gear planner" button emits a share link instead. */}
       {route === 'buildGuides' && <BuildGuidesPage />}
+      {/* Also takes no player state, same reasoning as BuildGuidesPage above -
+          a submitted build is its own independent thing, not derived from
+          whatever the visitor currently has equipped. On success it hands
+          back the new build's id and the page navigates to the listing,
+          where it sorts first (newest first). */}
+      {route === 'createBuild' && (
+        <CreateBuildPage
+          onSubmitted={() => {
+            window.location.hash = '#user-builds';
+          }}
+        />
+      )}
+      {route === 'userBuilds' && <UserBuildsPage />}
+      {route === 'editBuild' && (
+        <EditBuildPage
+          onSubmitted={() => {
+            window.location.hash = '#user-builds';
+          }}
+        />
+      )}
       {route === 'relicImportDocs' && <RelicImportDocsPage />}
       {route === 'assumptions' && <AssumptionsPage />}
       {route === 'home' && (
