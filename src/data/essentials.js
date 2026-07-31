@@ -25,15 +25,15 @@ export const ESSENTIALS = [
     icon: FP('Overload_potion.png'),
     summary: '+17 to every combat stat for 6 minutes.',
     why:
-      'The baseline endgame boost, and the one every damage number on this site assumes. Through the Defence-to-armour formula the +17 Defence alone is worth roughly +540 armour, which any armour-scaling effect then multiplies.',
+      '+17 to all stats. Through the Defence-to-armour formula the +17 Defence alone is worth roughly +540 armour, which any armour-scaling effect then multiplies.',
     source: { region: 'global', detail: 'Herblore 96 - no region requirement.' },
   },
   {
     name: 'Elder overload',
     icon: FP('Elder_overload_potion.png'),
-    summary: '+25 to every combat stat, and it lifts your main damage stat too.',
+    summary: '+25 to every combat stat for 6 minutes.',
     why:
-      'Strictly better than a normal overload: +25 Defence is about +849 armour, and unlike the standard version it raises Strength / Ranged / Magic / Necromancy as well. On a Teragard\'s Aegis build that is worth roughly +692 ability damage on its own.',
+      'Upgrade to an overload: +25 Defence is about +849 armour. On a Teragard\'s Aegis build that is worth roughly +692 ability damage on its own.',
     source: {
       // `label` is required for the relic alternative to show: a group with a
       // leagueRelic but no label falls through to plain region pills, which
@@ -49,7 +49,7 @@ export const ESSENTIALS = [
     icon: FP('Ancient_armour_gizmo.webp'),
     summary: 'Ancient gizmos, and the perks that only they can roll.',
     why:
-      'The tier above standard Invention. Ancient gizmos are what put Aftershock, Precise 6 and the other top perk lines on your gear - without it your augmented gear is running materially below its ceiling.',
+      'Ancient gizmos unlock BIS weapon and armour perks',
     source: { region: 'kandarin', detail: 'Unlocked in the Ancient Cavern / Kandarin.' },
   },
   {
@@ -57,7 +57,7 @@ export const ESSENTIALS = [
     icon: FP('Binding_contract.webp'),
     summary: 'The strongest familiars in the game, via binding contracts.',
     why:
-      'Ripper demons, Nightmare muspah and the rest of the ancient familiar line. A ripper is a large chunk of passive damage on any single-target kill, and nothing in the standard Summoning list replaces it.',
+      'Ripper demons, Kalgerion demon, Nightmare muspah, blood reavers. Gargoyle and divine druid combo to provide a +36 mining boost.',
     // Voidwalker is deliberately NOT listed as a leagueRelic alternative here.
     // Doing so would mark this green with Voidwalker picked and no Kandarin,
     // i.e. tell someone they can skip a region on an unconfirmed reading. Void
@@ -74,33 +74,33 @@ export const ESSENTIALS = [
     icon: FP('Ancient_elven_ritual_shard.png'),
     summary: 'Restores prayer points on a short cooldown, forever.',
     why:
-      'Effectively removes prayer potions from your inventory, which is several free slots and no downtime on long kills. Compounds with anything that wants sustained prayer uptime - Soul Split especially.',
+      'Restores up to 375 prayer points every 30 seconds.',
     source: { region: 'tirannwn', detail: 'From the Prifddinas ritual site, Tirannwn.' },
   },
   {
     name: 'Adrenaline potion',
     icon: FP('Adrenaline_potion.png'),
-    summary: 'Instantly restores 25% adrenaline.',
+    summary: 'Restores 25% adrenaline.',
     why:
-      'Front-loads an ultimate at the start of a kill instead of spending the first rotation building to it. The cheapest way to open hard.',
+      'Useful after ultimates to reach thresholds quicker',
     source: { region: 'global', detail: 'Herblore 84 - no region requirement.' },
   },
   {
     name: 'Super adrenaline potion',
     icon: FP('Super_adrenaline_potion.png'),
-    summary: 'Restores 25% adrenaline and grants Adrenaline Overload.',
+    summary: 'Restores 30% adrenaline.',
     why:
-      'The upgrade: on top of the instant adrenaline it suppresses drain for a short window, which is what makes back-to-back ultimates possible.',
+      'More adrenaline than its predecessor',
     source: { region: 'global', detail: 'Herblore 96 - no region requirement.' },
     note:
-      'Global to make, but hard to keep supplied without Golden Touch or Anachronia - so treat the tag as "possible", not "sustainable".',
+      'Global to make, but adren crystals are hard to keep supplied without Golden Touch or Anachronia - so treat it as "possible", not "sustainable".',
   },
   {
     name: 'Adrenaline renewal potion',
     icon: FP('Adrenaline_renewal_potion.png'),
-    summary: 'Adrenaline restored over time rather than in one hit.',
+    summary: 'Adrenaline restored over time rather than at once',
     why:
-      'Keeps a long fight topped up instead of giving one burst, so it does more across an extended kill than a plain adrenaline potion does.',
+      'Restores the most adrenaline - 40% over 10 ticks.',
     source: {
       region: { anyOf: ['anachronia'], label: 'Adrenaline renewal', leagueRelic: 'Golden Touch' },
       detail: 'Needs Anachronia - or the Golden Touch relic.',
@@ -109,9 +109,9 @@ export const ESSENTIALS = [
   {
     name: 'Powerburst of vitality',
     icon: FP('Powerburst_of_vitality.webp'),
-    summary: 'A short damage-reduction and restore window on a long cooldown.',
+    summary: 'Temporarily double your hitpoints.',
     why:
-      'The standard "survive this" button. Being able to eat one mechanic per kill is often what separates a clear from a death on progression.',
+      'Useful against many bosses, uniquely good this league due to the synergy with Big Bones and its HP scaling effect',
     source: {
       region: { anyOf: ['anachronia'], label: 'Powerburst', leagueRelic: 'Golden Touch' },
       detail: 'Needs Anachronia - or the Golden Touch relic.',
@@ -120,9 +120,9 @@ export const ESSENTIALS = [
   {
     name: 'Aggression potion',
     icon: FP('Aggression_potion.png'),
-    summary: 'Pulls nearby monsters onto you for several minutes.',
+    summary: 'Pulls aggro nearby monsters onto you for six minutes.',
     why:
-      'Turns scattered slayer tasks and AoE training into something you stand still for. A large practical difference to how much of a run you spend walking.',
+      'Useful for lazy slayer and general training',
     source: {
       region: { anyOf: ['wilderness'], label: 'Bloodweed / searing ashes', leagueRelic: 'Golden Touch' },
       detail: 'Bloodweed and searing ashes come from the Wilderness - or take Golden Touch.',
@@ -131,18 +131,18 @@ export const ESSENTIALS = [
   {
     name: 'Lantadyme incense sticks',
     icon: FP('Lantadyme_incense_sticks.png'),
-    summary: 'A passive damage-reduction buff while burning.',
+    summary: 'Potion extension.',
     why:
-      'Cheap, permanent-uptime mitigation that stacks with everything else. Nothing gates it, so there is no reason not to run it.',
+      'Get an extra 2 minutes out of overloads and other timed potions',
     source: { region: 'global', detail: 'Firemaking / Herblore - no region requirement.' },
     note: 'Superheated makes these substantially stronger if you have picked it.',
   },
   {
     name: 'Kwuarm incense sticks',
     icon: FP('Kwuarm_incense_sticks.webp'),
-    summary: 'A passive damage buff while burning.',
+    summary: 'Poison damage buff',
     why:
-      'The damage counterpart to Lantadyme, and the one nearly every serious PvM setup assumes. Worth checking early, because it is the one incense that is actually gated.',
+      'Provides up to +10% damage for weapon poison. Could synergise interestingly with Barkscales blessing',
     source: {
       region: { anyOf: ['kharidianDesert'], label: 'Acadia logs', leagueRelic: 'Transmutation' },
       detail: 'Burns acadia logs - the Desert, or Transmutation to convert into them.',
@@ -152,16 +152,16 @@ export const ESSENTIALS = [
   {
     name: 'Weapon poison++',
     icon: FP('Weapon_poison_plus2.png'),
-    summary: 'Applies a damage-over-time poison to your target.',
-    why: 'Free extra damage on anything poisonable, with no cost to your rotation.',
+    summary: 'Second best weapon poison.',
+    why: 'Free extra damage on anything poisonable.',
     source: { region: 'global', detail: 'Herblore 73 - no region requirement.' },
   },
   {
     name: 'Weapon poison+++',
     icon: FP('Weapon_poison_plus3.png'),
-    summary: 'The strongest weapon poison.',
+    summary: 'Best weapon poison.',
     why:
-      'Meaningfully more than the ++ version over a long kill. The gated one of the pair, so it is worth knowing which you are getting.',
+      'Even more free damage on non-poison immune enemies.',
     source: {
       region: { anyOf: ['anachronia'], label: 'Weapon poison+++', leagueRelic: 'Golden Touch' },
       detail: 'Needs Anachronia - or the Golden Touch relic.',
@@ -170,16 +170,16 @@ export const ESSENTIALS = [
   {
     name: 'Enhanced Excalibur',
     icon: 'icons/Enhanced_Excalibur.png',
-    summary: 'A healing special attack, usable from the off-hand slot.',
+    summary: 'A healing effect, usable from the inventory.',
     why:
-      'Heals over time on a special attack that costs no adrenaline, so it is effectively free sustain. Listed here as well as in the Gear Planner because it is a survivability unlock you plan regions around, not a weapon you fight with.',
+      'Free sustain every 5 minutes',
     // Same requirement the gear entry records - Taverley to obtain, Hard Seers'
     // Village achievements to enhance. Kept in step with gear.js by hand; the
     // two are separate entries on purpose, since this one is about planning.
     source: {
       region: ['asgarnia', 'kandarin'],
       detail:
-        "Merlin's Crystal for the base sword (Taverley, Asgarnia), enhanced by the Lady of the Lake after the Hard Seers' Village achievements (Kandarin).",
+        "Enhanced by the Lady of the Lake (Asgarnia) after the Hard Seers' Village achievements (Kandarin).",
     },
   },
 ];
