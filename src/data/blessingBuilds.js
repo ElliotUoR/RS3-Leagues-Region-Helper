@@ -193,13 +193,18 @@ export const BLESSING_BUILDS_EXAMPLES = [
       },
       midLate: {
         melee: {
-          armourTotal: 3605,
-          armourTotalOverloaded: 4146,
-          armourTotalElder: 4454,
+          // Teralith matches Primal piece-for-piece on armour, and Varanus's
+          // Mercy matches the Drygore Rapier exactly (both t90, 864 damage), so
+          // the whole difference from the previous Primal/Drygore version is
+          // the shield: Elder rune round shield + 5 gives 436 against the
+          // Primal kiteshield's 492, i.e. -56 armour.
+          armourTotal: 3549,
+          armourTotalOverloaded: 4089,
+          armourTotalElder: 4398,
           slots: {
-            weapon: 'Drygore Rapier', offhand: 'Primal kiteshield + 5',
-            head: 'Primal full helm + 5', torso: 'Primal platebody + 5', legs: 'Primal platelegs + 5',
-            hands: 'Primal gauntlets + 5', feet: 'Primal armoured boots + 5',
+            weapon: "Varanus's Mercy", offhand: 'Elder rune round shield + 5',
+            head: 'Teralith helmet', torso: 'Teralith cuirass', legs: 'Teralith leggings',
+            hands: 'Teralith gauntlets', feet: 'Teralith boots',
             back: 'Igneous Kal-Ket', neck: 'Amulet of souls',
             ring: 'Ring of death', pocket: 'Scripture of Ful', ammo: 'Nodon spike harness',
           },
