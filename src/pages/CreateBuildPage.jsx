@@ -45,6 +45,12 @@ const SLOT_GRID_AREAS = `
 `;
 const regionIcon = (id) => `icons/regions/${id}.png`;
 
+// Overload/Elder Overload potions grant a flat virtual Defence level boost -
+// same figures and mutual-exclusivity as GearStatsSummary's own
+// OVERLOAD_DEFENCE_BONUS_BY_MODE (the real Gear Planner's equivalent
+// toggle), kept as a local copy since the two pickers are free to diverge.
+const OVERLOAD_DEFENCE_BONUS_BY_MODE = { none: 0, overload: 17, elder: 25 };
+
 // Same list/labels/logic as GearPage.jsx's own SORT_OPTIONS/NO_LEVEL_SLOTS -
 // a local copy rather than a shared export since the two pickers are free to
 // diverge.
@@ -119,7 +125,7 @@ function initialEofNamesForStage(build, stageIndex) {
 // search, sort and click-to-equip. Availability is computed against the
 // REGIONS/RELICS THIS BUILD picked, not the visitor's own saved selection,
 // so the picker greys out exactly what the finished card will show as locked.
-function StyleLoadoutEditor({ style, gear, isUnlocked, selectedLeagueRelics }) {
+function StyleLoadoutEditor({ style, gear, isUnlocked, selectedLeagueRelics, showArmour, overloadMode, onSelectOverloadMode }) {
   const [search, setSearch] = useState('');
   const [hideLocked, setHideLocked] = useState(true);
   const [sortBy, setSortBy] = useState('level');
@@ -178,6 +184,7 @@ function StyleLoadoutEditor({ style, gear, isUnlocked, selectedLeagueRelics }) {
 
   return (
     <div className="create-build-loadout-editor">
+      <div className="create-build-equip-column">
       <div className="equip-grid" style={{ gridTemplateAreas: SLOT_GRID_AREAS }}>
         {gear.eofVisible && (
           <EquipmentSlot
@@ -208,6 +215,29 @@ function StyleLoadoutEditor({ style, gear, isUnlocked, selectedLeagueRelics }) {
             selectedLeagueRelics={selectedLeagueRelics}
           />
         ))}
+      </div>
+      {showArmour && (
+        <div className="create-build-overload-row">
+          <button
+            type="button"
+            className={`create-build-overload-button${overloadMode === 'overload' ? ' active' : ''}`}
+            onClick={() => onSelectOverloadMode('overload')}
+            aria-pressed={overloadMode === 'overload'}
+            title="Overload potions add 17 Defence levels to Total armour"
+          >
+            Overload
+          </button>
+          <button
+            type="button"
+            className={`create-build-overload-button${overloadMode === 'elder' ? ' active' : ''}`}
+            onClick={() => onSelectOverloadMode('elder')}
+            aria-pressed={overloadMode === 'elder'}
+            title="Elder Overload potions add 25 Defence levels to Total armour"
+          >
+            Elder Overload
+          </button>
+        </div>
+      )}
       </div>
 
       <div className="create-build-item-list">
@@ -276,6 +306,15 @@ function StageEditor({ index, label, onLabelChange, onRemove, activeStyles, gear
   // so this is the same check for every block below.
   const showArmour = blessings.some((name) => ARMOUR_SCALING_BLESSINGS.has(name));
   const showHealth = blessings.some((name) => LIFE_SCALING_BLESSINGS.has(name));
+  // Per-style, not per-stage-wide - each style has its own equipped items and
+  // its own Total armour line, so its own potion choice. Clicking the
+  // already-active mode turns it off; clicking the other one switches
+  // straight to it (never both at once), same convention as
+  // GearStatsSummary's selectOverloadMode.
+  const [overloadModeByStyle, setOverloadModeByStyle] = useState({});
+  function selectOverloadMode(style, mode) {
+    setOverloadModeByStyle((prev) => ({ ...prev, [style]: prev[style] === mode ? 'none' : mode }));
+  }
   return (
     <div className="create-build-stage-block">
       <div className="create-build-stage-head">
@@ -300,7 +339,9 @@ function StageEditor({ index, label, onLabelChange, onRemove, activeStyles, gear
           const item = GEAR[style]?.[slot]?.find((i) => i.name === itemName);
           if (item) equipped[slot] = item;
         }
-        const armourTotal = showArmour ? getTotalArmour(equipped, style, 99) : null;
+        const overloadMode = overloadModeByStyle[style] ?? 'none';
+        const effectiveDefenceLevel = 99 + OVERLOAD_DEFENCE_BONUS_BY_MODE[overloadMode];
+        const armourTotal = showArmour ? getTotalArmour(equipped, style, effectiveDefenceLevel) : null;
         const lifeTotal = showHealth ? getTotalLifePoints(equipped) : null;
         return (
           <div key={style} className="create-build-style-block">
@@ -322,7 +363,15 @@ function StageEditor({ index, label, onLabelChange, onRemove, activeStyles, gear
               </span>
             </div>
             {gear.style === style ? (
-              <StyleLoadoutEditor style={style} gear={gear} isUnlocked={isUnlocked} selectedLeagueRelics={selectedLeagueRelics} />
+              <StyleLoadoutEditor
+                style={style}
+                gear={gear}
+                isUnlocked={isUnlocked}
+                selectedLeagueRelics={selectedLeagueRelics}
+                showArmour={showArmour}
+                overloadMode={overloadMode}
+                onSelectOverloadMode={(mode) => selectOverloadMode(style, mode)}
+              />
             ) : (
               <button type="button" className="create-build-edit-style-button" onClick={() => gear.setStyle(style)}>
                 Edit {STYLE_LABELS[style]} loadout
@@ -722,7 +771,7 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
               </label>
               <label
                 className="hide-locked-toggle"
-                title="Archaeology materials can be gathered remotely via Research, without visiting the dig site itself - treats 'Artefacts: X' tags as satisfied. A relic's collector hand-in location, and any non-Archaeology component, still gates as normal."
+                title="Archaeology materials can be gathered remotely via Research, without visiting the dig site itself - treats 'Artefacts: X' tags as satisfied. Quest steps, boss drops, on-site interactions and hand-ins to NPCs who aren't collectors still gate as normal."
               >
                 <input
                   type="checkbox"

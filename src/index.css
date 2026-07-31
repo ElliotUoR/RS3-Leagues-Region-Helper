@@ -1462,6 +1462,39 @@ main.gear-page {
   object-fit: contain;
 }
 
+/* Overload/Elder Overload toggles for CreateBuildPage's gear loadout editor -
+   a row of proper (wide, rectangular) buttons directly below the equip-grid,
+   matching its 236px width rather than square slot-shaped cells within it. */
+.create-build-overload-row {
+  display: flex;
+  gap: 6px;
+  width: 236px;
+  margin: -18px 0 24px;
+}
+
+.create-build-overload-button {
+  flex: 1;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 6px;
+}
+
+.create-build-overload-button:hover {
+  border-color: var(--accent);
+}
+
+.create-build-overload-button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .gear-item-special {
   color: var(--accent);
 }
@@ -5550,6 +5583,14 @@ main.abilities-page .gear-item-rows {
   display: grid;
   grid-template-columns: minmax(240px, 320px) 1fr;
   gap: 16px;
+}
+
+/* Groups the equip-grid with its Overload/Elder Overload row so both stay in
+   the same left-hand grid column as a single unit, rather than the row
+   becoming its own implicit grid item next to the item list. */
+.create-build-equip-column {
+  display: flex;
+  flex-direction: column;
 }
 
 .create-build-item-list {

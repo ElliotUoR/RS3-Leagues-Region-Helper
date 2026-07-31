@@ -48,8 +48,10 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
       <header>
         <h1>Arch Relics</h1>
         <p>
-          Archaeology relic powers, greyed out until you've picked the region(s) their dig site or
-          collection requires. Pick up to {MAX_SELECTED} to plan your final loadout - click a
+          Archaeology relic powers, greyed out until you've picked the region(s) they need - a dig
+          site's artefacts, a quest, or a hand-in to someone who isn't a collector. Handing in the
+          collections themselves never needs a region: the delivery box at the Archaeology Campus
+          reaches every collector. Pick up to {MAX_SELECTED} to plan your final loadout - click a
           picked relic again to free up its slot.
         </p>
       </header>
@@ -82,7 +84,7 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
           <div className="abilities-toggles">
             <label
               className="hide-locked-toggle"
-              title="Archaeology materials can be gathered remotely via Research, without visiting the dig site itself - treats 'Artefacts: X' tags as satisfied. A relic's collector hand-in location, and any non-Archaeology component, still gates as normal."
+              title="Archaeology materials can be gathered remotely via Research, without visiting the dig site itself - treats 'Artefacts: X' tags as satisfied. Quest steps, boss drops, on-site interactions and hand-ins to NPCs who aren't collectors still gate as normal."
             >
               <input
                 type="checkbox"

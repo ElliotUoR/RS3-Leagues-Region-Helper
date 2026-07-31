@@ -85,6 +85,11 @@ function sanitizeBlessingsForImage(raw) {
     seenTiers.add(blessing.tier);
     picks.push(blessing);
   }
+  // `raw`'s own order is whatever canonicalise() (src/utils/shareBuild.js)
+  // alphabetised it to for hash-dedup purposes, not tier order - sort back to
+  // Tier 1/2/3 (top to bottom in the rendered column) before the God Tier
+  // power gets appended below.
+  picks.sort((a, b) => a.tier - b.tier);
   const colours = picks.map((b) => b.colour);
   const majority = ['red', 'green', 'blue'].find(
     (colour) => colours.filter((c) => c === colour).length >= 2,
@@ -110,10 +115,16 @@ function sanitizeLeagueRelicsForImage(raw) {
       if (seenTiers.has(relic.tier)) continue;
       seenTiers.add(relic.tier);
     }
-    picks.push({ icon: relic.icon, name: relic.name });
+    picks.push(relic);
     if (picks.length === MAX_LEAGUE_RELICS) break;
   }
-  return picks;
+  // Same alphabetisation issue as sanitizeBlessingsForImage above - sort back
+  // to tier order (1, 2, 3, ...) with "Unknown Tier" relics (tier: null,
+  // e.g. Crystal Grace/Superheated/Transmutation/Divine Druid until Jagex
+  // assigns them a real tier) sorted after every numbered tier, matching the
+  // live Relics page's own tier-grouping.
+  picks.sort((a, b) => (a.tier ?? Infinity) - (b.tier ?? Infinity));
+  return picks.map((r) => ({ icon: r.icon, name: r.name }));
 }
 
 // Decodes a `share`/short-link payload string down to just what the og-image

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import UserBuildCard from '../components/UserBuildCard';
 import { getUserBuild, listUserBuilds } from '../utils/api';
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
+import { IS_PAGES_BUILD, LIVE_SITE_URL } from '../utils/deployTarget';
 
 const STYLE_LABELS = { melee: 'Melee', ranged: 'Ranged', magic: 'Magic', necromancy: 'Necromancy' };
 
@@ -94,14 +95,23 @@ export default function UserBuildsPage() {
     <>
       <header>
         <h1>User made builds</h1>
-        <p>
-          Builds created by other players - their gear, relics, regions and write-ups, not this site's own
-          curated picks. Want to add yours?{' '}
-          <a href="#create-build" className="notice-link">
-            Create a build
-          </a>
-          .
-        </p>
+        {IS_PAGES_BUILD ? (
+          <p>
+            Visit{' '}
+            <a href={`${LIVE_SITE_URL}#user-builds`} className="notice-link">
+              {LIVE_SITE_URL}#user-builds
+            </a>{' '}
+            to create and view user builds.
+          </p>
+        ) : (
+          <p>
+            Builds created by other players - their gear, relics, regions and write-ups, not this site's own
+            curated picks. Want to add yours?{' '}
+            <a href="#create-build" className="notice-link">
+              Create a build
+            </a>.
+          </p>
+        )}
       </header>
 
       <main className="build-guides-page">

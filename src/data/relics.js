@@ -34,12 +34,34 @@
 // (Exam Centre, spending chronotes) without visiting the dig site itself,
 // these render as a distinct "Artefacts: X" tag and get skipped entirely
 // when the Relics page's "Artefacts are not region-locked" toggle is on.
-// A relic's actual collector/hand-in NPC location, and any non-Archaeology
-// component (a boss drop, a quest reward, a site-bound puzzle/altar/statue
-// interaction rather than a delegable collection), still gates as a normal
-// hard region regardless of that toggle - see gearAvailability.js for the
-// full mechanism (mirrors the existing Abilities page "Ignore component
+//
+// COLLECTOR LOCATIONS DO NOT GATE A REGION. A "collector delivery box" was
+// added at the Archaeology Campus next to Velucia, letting artefact collections
+// be handed in to any collector from there - and the campus is in Misthalin, a
+// fixed region everybody has. So where a collector happens to stand is
+// irrelevant to whether a relic is reachable, and those regions were removed
+// (see the per-entry comments). The collectors this covers, per
+// https://runescape.wiki/w/Collectors: Art Critic Jacques, Artiefax, Chief
+// Tess, Eblis, Generals Bentnoze and Wartface, Giles, Isaura, Lowse, Sharrigan,
+// Sir Atcha, Soran, Velucia, and the Wise Old Man.
+//
+// A hand-in to anyone NOT on that list is not a collection and still gates a
+// hard region - Koschei in Rellekka, Armadyl at his tower, the Fairy Queen in
+// Zanaris, Reldo, Dagon, Bob the cat. So does any non-Archaeology component: a
+// boss drop, a quest reward, or a site-bound puzzle/altar/statue interaction
+// rather than a delegable collection. All of those gate as a normal hard region
+// regardless of the artefact toggle - see gearAvailability.js for the full
+// mechanism (mirrors the existing Abilities page "Ignore component
 // requirements" toggle/`component: true` pattern).
+//
+// Beware the relic that has a collector AND something else in the same region:
+// Hungry Like the Wolf keeps Asgarnia because its expensive spices come from
+// the Let Them Eat Pie quest, not because Artiefax lives there.
+//
+// Collector entries in Misthalin (Soran on Unexpected Diplomacy, the Wise Old
+// Man on Slayer Introspection) are deliberately left in place - they gate
+// nothing either way, and listing them keeps the region tags complete, exactly
+// as the fixed-region note above describes.
 //
 // Dig site -> region mapping used throughout (confirmed per-site on
 // runescape.wiki): Infernal Source -> misthalin, Everlight -> morytania,
@@ -99,7 +121,8 @@ export const RELICS = [
       type: 'combination',
       detail: 'Combine an abyssal thread (Zamorakian I collection, Infernal Source Dig Site) with a giant pouch, handed in to Isaura in the Black Knights\' Base, Taverley Dungeon',
       region: [
-        'asgarnia',
+        // Collector-only region dropped: hand-ins now go to the collector delivery
+        // box by Velucia (Archaeology Campus, Misthalin - always unlocked).
         { anyOf: ['misthalin'], artefact: true, note: 'Region required to obtain artefacts - needs the Infernal Source dig site materials for the Zamorakian I collection.' },
       ],
     },
@@ -128,8 +151,11 @@ export const RELICS = [
       type: 'combination',
       detail:
         'Combine a lock of hair (Saradomin I collection, Everlight Dig Site) with an amulet of the forsaken (Barrows)',
-      region: ['morytania', 'asgarnia'],
-      note: 'The Saradomin I collection is handed in to Sir Atcha at the White Knights\' Castle, Falador.',
+      // Asgarnia dropped (collector delivery box): the only thing that needed it
+      // was handing the Saradomin I collection to Sir Atcha in Falador. Both the
+      // Everlight dig site and Barrows are in Morytania.
+      region: 'morytania',
+      note: 'The Saradomin I collection is handed in to Sir Atcha at the White Knights\' Castle, Falador - or at the collector delivery box.',
     },
   },
   {
@@ -207,8 +233,9 @@ export const RELICS = [
       type: 'combination',
       detail:
         'Complete the Smoky Fings collection (artefacts from Infernal Source, Everlight, and Kharid-et Dig Sites) and hand it in to Chief Tess in Oo\'glog',
+      // Kandarin dropped (collector delivery box): Chief Tess is a collector,
+      // and nothing else here needed Kandarin - so this is now artefact-only.
       region: [
-        'kandarin',
         { anyOf: ['morytania'], artefact: true, note: 'Region required to obtain artefacts - needs the Everlight dig site materials for the Smoky Fings collection.' },
         { anyOf: ['kharidianDesert'], artefact: true, note: 'Region required to obtain artefacts - needs the Kharid-et dig site materials for the Smoky Fings collection.' },
       ],
@@ -301,7 +328,8 @@ export const RELICS = [
       type: 'skilling',
       detail: 'Complete the Dragonkin VI collection (Daemonheim Dig Site), submitted to Sharrigan',
       region: [
-        'anachronia',
+        // Collector-only region dropped: hand-ins now go to the collector delivery
+        // box by Velucia (Archaeology Campus, Misthalin - always unlocked).
         { anyOf: ['wilderness'], artefact: true, note: 'Region required to obtain artefacts - needs the Daemonheim dig site materials for the Dragonkin VI collection.' },
       ],
       note: 'The completed collection must be handed in to Sharrigan, the dragonkin artefact collector, at the Anachronia base camp.',
@@ -409,7 +437,17 @@ export const RELICS = [
     category: 'skilling',
     effect: 'All guaranteed bone and ash drops are noted.',
     icon: FP('Death_Note.png'),
-    source: { type: 'skilling', detail: 'Complete the Dragonkin III collection (Orthen Dig Site)', region: 'anachronia' },
+    source: {
+      type: 'skilling',
+      detail: 'Complete the Dragonkin III collection (Orthen Dig Site)',
+      // The Dragonkin collectors (Giles, Sharrigan) are both in Anachronia, but
+      // so is the dig site - so the delivery box does not remove Anachronia, it
+      // downgrades it to an artefact requirement. Matches how Bait and Switch
+      // already records the very same Orthen site.
+      region: [
+        { anyOf: ['anachronia'], artefact: true, note: 'Region required to obtain artefacts - needs the Orthen dig site materials for the Dragonkin III collection.' },
+      ],
+    },
   },
   {
     name: 'Abyssal Link',
@@ -433,7 +471,8 @@ export const RELICS = [
       type: 'skilling',
       detail: 'Complete the Zamorakian IV collection (Infernal Source Dig Site)',
       region: [
-        'asgarnia',
+        // Collector-only region dropped: hand-ins now go to the collector delivery
+        // box by Velucia (Archaeology Campus, Misthalin - always unlocked).
         { anyOf: ['misthalin'], artefact: true, note: 'Region required to obtain artefacts - needs the Infernal Source dig site materials for the Zamorakian IV collection.' },
       ],
       note: 'The Zamorakian IV collection is handed in to Isura, in the Black Knights\' Base within Taverley Dungeon.',
@@ -449,7 +488,8 @@ export const RELICS = [
       type: 'combination',
       detail: 'Complete the Saradominist IV collection (Everlight Dig Site) and hand it in at its collector in Asgarnia',
       region: [
-        'asgarnia',
+        // Collector-only region dropped: hand-ins now go to the collector delivery
+        // box by Velucia (Archaeology Campus, Misthalin - always unlocked).
         { anyOf: ['morytania'], artefact: true, note: 'Region required to obtain artefacts - needs the Everlight dig site materials for the Saradominist IV collection.' },
       ],
     },
@@ -475,7 +515,14 @@ export const RELICS = [
     source: {
       type: 'combination',
       detail: 'Complete the Armadylean III collection (Stormguard Citadel Dig Site) and hand it in at its collector in Asgarnia',
-      region: ['kandarin', 'asgarnia'],
+      // Asgarnia dropped (collector delivery box): Lowse, the Armadylean
+      // collector, was the only reason for it. Kandarin stays but downgrades to
+      // an artefact requirement - the Stormguard Citadel materials are all it
+      // was ever for, and those can be researched remotely, exactly as the four
+      // other Stormguard relics already record it.
+      region: [
+        { anyOf: ['kandarin'], artefact: true, note: 'Region required to obtain artefacts - needs the Stormguard Citadel dig site materials for the Armadylean III collection.' },
+      ],
     },
   },
   {
@@ -507,7 +554,8 @@ export const RELICS = [
       detail:
         'Combine Helm of Terror (inside) with Helm of Terror (outside) (Red Rum Relics III and Green Gobbo Goodies III collections, both Warforge Dig Site) and hand them in at their collector in Asgarnia',
       region: [
-        'asgarnia',
+        // Collector-only region dropped: hand-ins now go to the collector delivery
+        // box by Velucia (Archaeology Campus, Misthalin - always unlocked).
         { anyOf: ['kandarin'], artefact: true, note: 'Region required to obtain artefacts - needs the Warforge dig site materials for the Red Rum Relics III / Green Gobbo Goodies III collections.' },
       ],
     },

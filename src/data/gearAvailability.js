@@ -18,7 +18,8 @@ const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
 // page's "Ignore component requirements" toggle to treat these groups as
 // automatically satisfied. An optional `artefact: true` marks a group that
 // represents Archaeology dig-site *artefact collection only* (as opposed to
-// a collector NPC hand-in or non-Archaeology component) - these materials
+// a quest step, boss drop, on-site interaction, or a hand-in to an NPC who
+// is not a collection collector) - these materials
 // are obtainable remotely via the Research system without visiting the dig
 // site's own region, so `isGearItemAvailable`'s `ignoreArtefactRegions`
 // option (the Relics page's "Artefacts are not region-locked" toggle) treats
@@ -112,8 +113,12 @@ export function isGearItemDisabled(item) {
 // group as automatically satisfied regardless of region - used by the
 // Relics page's "Artefacts are not region-locked" toggle, which reflects
 // that dig-site artefact collection can be done remotely via Research
-// without visiting the dig site's own region, while a relic's collector
-// hand-in location (and any non-Archaeology component) still gates.
+// without visiting the dig site's own region, while quest steps, boss drops,
+// on-site interactions and hand-ins to non-collector NPCs still gate.
+//
+// A collection's collector never gates at all any more and is not recorded as
+// a region - collections are handed in at the delivery box by Velucia, in
+// always-unlocked Misthalin. See the header of data/relics.js.
 //
 // `leagueRelic` is normally a single relic name, but a group can list
 // several alternative relics that each independently satisfy it (e.g.
