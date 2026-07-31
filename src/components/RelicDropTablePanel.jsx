@@ -3,6 +3,10 @@ import { createPortal } from 'react-dom';
 import { getDropTableCategoryColor } from '../data/regionColors';
 import { trackUsage } from '../utils/api';
 
+// Extra class on the modal shell for themes that restyle the whole panel
+// rather than just its contents.
+const THEME_MODAL_CLASS = { forge: ' drop-table-forge-panel', void: ' drop-table-void-modal' };
+
 // Per-item stagger delay for AlchemyCategoryCard's expand/collapse animation,
 // scaled down as chain length grows so the whole sequence always finishes
 // well under 1 second even for a 27-step chain (Raw fish) - see that
@@ -438,6 +442,67 @@ function AlchemyChainCategories({ dropTable }) {
 // one component every relic's drop table toggle already goes through,
 // rather than in each caller, so a future relic with a dropTable is counted
 // individually with no extra wiring.
+// Voidwalker's "Void Shard" rendering (dropTable.theme === 'void'). Its own
+// component for the same reason HerbloreDropTable is: the generic path stays
+// untouched.
+//
+// The design problem here is different from the other three tables. Superheated
+// is a ladder, Transmutation is a chain, Golden Touch is a clearance ledger -
+// each has an ORDER that carries meaning. This one has none: seven slots, an
+// equal 1/7 each, and that flatness IS the information. So the layout is a
+// rosette of seven equal facets rather than a list, every card is identical in
+// weight, and the 1/7 is stamped on each one rather than stated once.
+//
+// Motion: items arrive by teleport - collapsing in from a bright purple flash
+// with an expanding afterimage ring, staggered so the shard "unpacks". Entirely
+// CSS keyframes driven off a --i index; nothing animates on a timer.
+function VoidDropTable({ dropTable }) {
+  return (
+    <div className="drop-table-void-panel">
+      <div className="drop-table-void-header">
+        <span className="drop-table-void-sigil" aria-hidden="true">
+          <span className="drop-table-void-sigil-core" />
+          <span className="drop-table-void-sigil-ring" />
+        </span>
+        <div className="drop-table-void-header-text">
+          <h3 className="drop-table-void-heading">{dropTable.heading}</h3>
+          {dropTable.standfirst && (
+            <p className="drop-table-void-standfirst">{dropTable.standfirst}</p>
+          )}
+        </div>
+      </div>
+
+      <ul className="drop-table-void-grid">
+        {dropTable.categories.map((category, index) => {
+          const classes = ['drop-table-void-facet', category.hidden ? 'is-redacted' : '']
+            .filter(Boolean)
+            .join(' ');
+
+          return (
+            <li key={category.name} className={classes} style={{ '--i': index }}>
+              <span className="drop-table-void-flash" aria-hidden="true" />
+              <div className="drop-table-void-facet-top">
+                {/* The item itself rather than a repeated odds chip - the equal
+                    1/7 is stated once in the standfirst, and seven identical
+                    badges said less than seven distinct items do. */}
+                {category.icon && (
+                  <span className="drop-table-void-icon">
+                    <img src={category.icon} alt="" loading="eager" />
+                  </span>
+                )}
+                <span className="drop-table-void-name">{category.name}</span>
+              </div>
+              {category.detail && <p className="drop-table-void-detail">{category.detail}</p>}
+              {category.note && <p className="drop-table-void-note">{category.note}</p>}
+              {category.hidden && <span className="drop-table-void-redacted-tag">Unrevealed</span>}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export default function RelicDropTablePanel({ dropTable, relicName }) {
   const [open, setOpen] = useState(false);
 
@@ -483,6 +548,8 @@ export default function RelicDropTablePanel({ dropTable, relicName }) {
     );
   } else if (dropTable.theme === 'herblore') {
     panelContent = <HerbloreDropTable dropTable={dropTable} />;
+  } else if (dropTable.theme === 'void') {
+    panelContent = <VoidDropTable dropTable={dropTable} />;
   } else if (dropTable.theme === 'alchemy') {
     panelContent = (
       <>
@@ -528,7 +595,7 @@ export default function RelicDropTablePanel({ dropTable, relicName }) {
         createPortal(
           <div className="modal-overlay" onClick={() => setOpen(false)}>
             <div
-              className={`modal-panel relic-drop-table-modal${dropTable.theme === 'forge' ? ' drop-table-forge-panel' : ''}`}
+              className={`modal-panel relic-drop-table-modal${THEME_MODAL_CLASS[dropTable.theme] ?? ''}`}
               onClick={(event) => event.stopPropagation()}
             >
               <button

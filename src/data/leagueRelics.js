@@ -564,6 +564,67 @@ export const LEAGUE_RELICS = [
       'Occasionally gain Void Shards. Void Shards can be opened to gain one clue scroll and a piece of the following loot:',
       'Summoning pouches, Ancient summoning pouches, Divine energy, Divine charge, Invention materials, Dragon equipment, Goldenhawk feathers, Divine geodes, Blessed fire spirits, or Crystal essence.',
     ],
+    // Void Shard contents. Structurally unlike the other three drop tables:
+    // this one is a FLAT, EQUAL-WEIGHTED roll - seven slots, 1/7 each - rather
+    // than a tiered ladder (Superheated), a chain (Transmutation) or a
+    // clearance ledger (Golden Touch). The 'void' theme renders it as seven
+    // facets of a shard so the equal odds are the thing you see first, since
+    // that is the only number that matters when reading it.
+    //
+    // Three of the slots hand out materials that other relics also produce
+    // (goldenhawk feathers, crystal essence, blessed fire spirits) - but you do
+    // NOT need those relics to roll them here, so they are described as items
+    // rather than as conditions.
+    dropTable: {
+      heading: 'Void Shard',
+      footerText: 'Void Shard drop table',
+      theme: 'void',
+      standfirst:
+        'Opening a Void Shard always gives one clue scroll, plus exactly one of the seven slots below. Every slot is an equal 1/7.',
+      odds: '1/7',
+      categories: [
+        {
+          name: 'Summoning pouches',
+          icon: 'icons/voidshard/Binding_contract_ripper_demon.webp',
+          detail:
+            'Every ancient Summoning familiar pouch, and almost all standard pouches - only a handful of the least useful familiars are missing.',
+          note: 'Voidwalker can be used to access Ancient summoning without Kandarin.',
+        },
+        {
+          name: 'Divine energy & charge',
+          icon: 'icons/voidshard/Divine_charge.png',
+          detail: 'Core energies from Pale all the way to Incandescent, plus Divine Charge.',
+        },
+        {
+          name: 'Dragon equipment',
+          icon: 'icons/Dragon_hatchet.png',
+          detail:
+            '2h crossbow, 2h sword, arrow, arrowheads, battleaxe, battlestaff, claws, dagger, dart, halberd, hatchet, longsword, mace, pickaxe, scimitar, spear, throwing axe, warhammer, boots, chainbody, full helm, helm, platebody, platelegs, plateskirt, kiteshield, sq shield.',
+          note: 'Same table as the Motherlode Maw. Includes the dragon hatchet and pickaxe, which is otherwise a Fremennik drop.',
+        },
+        {
+          name: 'Goldenhawk feathers',
+          icon: 'icons/voidshard/Golden_feather.png',
+          detail: 'Convertible into Prayer XP, or alchemised. Normally a Golden Touch drop from Agility and Thieving.',
+        },
+        {
+          name: 'Crystal essence',
+          icon: 'icons/voidshard/Crystalline_essence.png',
+          detail: 'The Crystal Grace rune/pure essence stackable subtitute',
+        },
+        {
+          name: 'Blessed fire spirits',
+          icon: 'icons/voidshard/Fire_spirit.webp',
+          detail: 'Gain access to the Superheated fire spirit table',
+        },
+        {
+          name: 'Divine geodes',
+          icon: 'icons/Voidwalker.png',
+          detail: 'Contents not revealed yet.',
+          hidden: true,
+        },
+      ],
+    },
     icon: FP('Voidwalker.png'),
   },
   {

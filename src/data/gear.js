@@ -1422,7 +1422,10 @@ export const GEAR = {
         },
         specialAttack: "Clobber (30% adrenaline): 90-110% ability damage; raises the target's affinity values by 3 and lowers their Defence/Magic by 5%.",
         icon: "icons/Dragon_hatchet.png",
-        source: { type: 'boss', boss: 'Dagannoth Kings', region: 'fremennikProvince', note: 'Waterbirth Island; also obtainable from crystal triskelion rewards.' },
+        // Voidwalker's Void Shard table includes the full Motherlode Maw dragon
+        // equipment list, hatchet included - so this is reachable without
+        // Fremennik. See leagueRelics.js's Voidwalker dropTable.
+        source: { type: 'boss', boss: 'Dagannoth Kings', region: { anyOf: ['fremennikProvince'], label: 'Dragon hatchet', leagueRelic: 'Voidwalker' }, note: 'Waterbirth Island; also obtainable from crystal triskelion rewards, or from Voidwalker Void Shards.' },
       },
       {
         name: 'Crystal Hatchet',
@@ -1437,7 +1440,10 @@ export const GEAR = {
         },
         specialAttack: "Clobber (30% adrenaline): 90-110% ability damage; raises the target's affinity values by 3 and lowers their Defence/Magic by 5%.",
         icon: "icons/Crystal_hatchet.png",
-        source: { type: 'combination', region: ['tirannwn', 'fremennikProvince'], note: "Upgraded from a Dragon hatchet (Dagannoth Kings drop, fremennikProvince) + 4,000 harmonic dust via Lady Ithell, Ithell district of Prifddinas - requires Plague's End." },
+        // Cascades from the Dragon hatchet above: this is built FROM one, so
+        // Voidwalker substitutes for Fremennik here too. Tirannwn stays - Lady
+        // Ithell and the harmonic dust are not obtainable any other way.
+        source: { type: 'combination', region: ['tirannwn', { anyOf: ['fremennikProvince'], label: 'Dragon hatchet', leagueRelic: 'Voidwalker' }], note: "Upgraded from a Dragon hatchet (Dagannoth Kings drop, fremennikProvince, or a Voidwalker Void Shard) + 4,000 harmonic dust via Lady Ithell, Ithell district of Prifddinas - requires Plague's End." },
       },
       { name: 'Abyssal vine whip', slot: 'weapon', twoHanded: false, level: { skill: 'Attack', level: 75, note: 'also 80 Slayer, neither boostable' },
           stats: { attack: { stab: 0, slash: 720, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 720, accuracy: 1694, lifeBonus: 0, prayerBonus: 0, setEffect: null },

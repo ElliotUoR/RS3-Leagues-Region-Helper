@@ -136,7 +136,7 @@ export default function LeagueRelicRow({ relic, selected, onToggleSelect, compac
           </ul>
         </div>
       </button>
-      {relic.dropTable && <RelicDropTablePanel dropTable={relic.dropTable} />}
+      {relic.dropTable && <RelicDropTablePanel dropTable={relic.dropTable} relicName={relic.name} />}
     </div>
   );
 }

@@ -58,16 +58,13 @@ export const ESSENTIALS = [
     summary: 'The strongest familiars in the game, via binding contracts.',
     why:
       'Ripper demons, Kalgerion demon, Nightmare muspah, blood reavers. Gargoyle and divine druid combo to provide a +36 mining boost.',
-    // Voidwalker is deliberately NOT listed as a leagueRelic alternative here.
-    // Doing so would mark this green with Voidwalker picked and no Kandarin,
-    // i.e. tell someone they can skip a region on an unconfirmed reading. Void
-    // Shards list "ancient summoning pouches" among their loot, which is a
-    // random trickle rather than being able to make them on demand. The
-    // possibility is surfaced as a caveat instead - under-promising a bypass
-    // costs nothing, over-promising costs a region pick.
-    source: { region: 'kandarin', detail: 'Unlocked in Kandarin.' },
-    caveat:
-      "Voidwalker may partly cover this - Void Shards can contain ancient summoning pouches. It is unclear if ancient summoning pouches are binding contracts - or if they are actually pouches ready to summon creatures. Likewise it is unclear if binding contracts can be 'bound' without the mystery complete.",
+    // Voidwalker is a confirmed alternative: its Void Shard table includes
+    // every ancient Summoning pouch (see that relic's dropTable), so the
+    // familiars are reachable without Kandarin.
+    source: {
+      region: { anyOf: ['kandarin'], label: 'Ancient pouches', leagueRelic: 'Voidwalker' },
+      detail: 'Unlocked in Kandarin - or Voidwalker, whose Void Shards drop ancient Summoning pouches.',
+    },
   },
   {
     name: 'Ancient elven ritual shard',

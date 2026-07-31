@@ -6350,3 +6350,268 @@ main.abilities-page .gear-item-rows {
   line-height: 1.45;
   opacity: 0.9;
 }
+
+/* ======================================================================
+   VOIDWALKER - "Void Shard" drop table (dropTable.theme === 'void')
+
+   Black ground, purple light. Unlike the other three tables this one has no
+   order to convey - seven slots, an equal 1/7 each - so the layout is a grid
+   of identical facets and the odds are stamped on every one, rather than
+   ranked rows with a legend.
+
+   Motion is the relic's own fiction: things arrive by teleport. Each facet
+   collapses in from a bright flash with an expanding afterimage ring,
+   staggered by --i so the shard visibly unpacks. All CSS keyframes - nothing
+   is driven from JS, and the whole sequence is off under reduced-motion.
+   ====================================================================== */
+
+.drop-table-void-modal {
+  --void-ink: #c9b6ff;
+  --void-glow: #a855f7;
+  --void-hot: #e9d5ff;
+  border-color: color-mix(in srgb, var(--void-glow) 45%, transparent);
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgb(168 85 247 / 18%), transparent 60%),
+    radial-gradient(90% 60% at 50% 110%, rgb(88 28 135 / 22%), transparent 65%),
+    #08060d;
+  box-shadow: 0 0 60px -18px var(--void-glow);
+}
+
+:root[data-theme='light'] .drop-table-void-modal {
+  --void-ink: #e6dcff;
+  --void-hot: #ffffff;
+}
+
+.drop-table-void-panel {
+  color: var(--void-ink);
+}
+
+/* ---- header ---- */
+
+.drop-table-void-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--void-glow) 28%, transparent);
+}
+
+/* A pinched singularity: a bright core with a ring escaping it, which is the
+   same gesture the facets use when they arrive. */
+.drop-table-void-sigil {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+}
+
+.drop-table-void-sigil-core,
+.drop-table-void-sigil-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.drop-table-void-sigil-core {
+  background: radial-gradient(circle, var(--void-hot) 0%, var(--void-glow) 38%, transparent 70%);
+  animation: void-core-pulse 3.2s ease-in-out infinite;
+}
+
+.drop-table-void-sigil-ring {
+  border: 1px solid var(--void-glow);
+  animation: void-ring-out 3.2s ease-out infinite;
+}
+
+@keyframes void-core-pulse {
+  0%, 100% { transform: scale(0.72); opacity: 0.85; }
+  50% { transform: scale(0.92); opacity: 1; }
+}
+
+@keyframes void-ring-out {
+  0% { transform: scale(0.35); opacity: 0.9; }
+  70%, 100% { transform: scale(1.15); opacity: 0; }
+}
+
+.drop-table-void-heading {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--void-glow) 70%, transparent);
+}
+
+.drop-table-void-standfirst {
+  margin: 5px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-width: 62ch;
+  opacity: 0.85;
+}
+
+/* ---- the seven facets ---- */
+
+.drop-table-void-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drop-table-void-facet {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--void-glow) 30%, transparent);
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgb(168 85 247 / 10%), rgb(10 6 18 / 85%));
+  /* Teleport arrival, staggered per facet. */
+  animation: void-arrive 420ms cubic-bezier(0.2, 1.3, 0.4, 1) backwards;
+  animation-delay: calc(var(--i) * 55ms);
+}
+
+@keyframes void-arrive {
+  0% { opacity: 0; transform: scale(0.55) translateY(6px); filter: brightness(3.4); }
+  55% { opacity: 1; filter: brightness(1.5); }
+  100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+}
+
+/* The afterimage: a sheet of light that collapses through the facet as it
+   lands, then never runs again. */
+.drop-table-void-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, var(--void-hot), transparent 62%);
+  opacity: 0;
+  animation: void-flash 620ms ease-out backwards;
+  animation-delay: calc(var(--i) * 55ms);
+}
+
+@keyframes void-flash {
+  0% { opacity: 0.75; transform: scale(0.2); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+
+.drop-table-void-facet:hover {
+  border-color: var(--void-glow);
+  box-shadow: 0 0 22px -8px var(--void-glow);
+}
+
+.drop-table-void-facet-top {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+/* The item itself, not a repeated odds badge - seven identical 1/7 chips
+   carried less than seven distinct icons do, and the equal odds are stated
+   once in the standfirst. Sized to a common box because the source art is a
+   mix of inventory sprites and large detail renders. */
+.drop-table-void-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgb(168 85 247 / 14%);
+  border: 1px solid color-mix(in srgb, var(--void-glow) 40%, transparent);
+}
+
+.drop-table-void-icon img {
+  max-width: 26px;
+  max-height: 26px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgb(168 85 247 / 55%));
+}
+
+.drop-table-void-name {
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.25;
+  color: #fff;
+}
+
+.drop-table-void-detail {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  opacity: 0.88;
+}
+
+.drop-table-void-note {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  padding-left: 9px;
+  border-left: 2px solid color-mix(in srgb, var(--void-glow) 50%, transparent);
+  opacity: 0.72;
+}
+
+/* ---- unrevealed slot ---- */
+
+/* Exactly seven slots, so the last one always sits alone on its final row at
+   two or three columns. Column counts are fixed per breakpoint rather than
+   auto-fill precisely so nth-child can find it and centre it - with auto-fill
+   the column count is unknowable from CSS. */
+@media (min-width: 40rem) {
+  .drop-table-void-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .drop-table-void-facet:nth-child(7) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 24rem);
+  }
+}
+
+@media (min-width: 60rem) {
+  .drop-table-void-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .drop-table-void-facet:nth-child(7) {
+    grid-column: 2;
+    justify-self: stretch;
+    width: auto;
+  }
+}
+
+.drop-table-void-facet.is-redacted {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.drop-table-void-redacted-tag {
+  align-self: flex-start;
+  padding: 1px 8px;
+  border: 1px dashed currentcolor;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop-table-void-facet,
+  .drop-table-void-flash,
+  .drop-table-void-sigil-core,
+  .drop-table-void-sigil-ring {
+    animation: none;
+  }
+
+  .drop-table-void-flash {
+    opacity: 0;
+  }
+}
