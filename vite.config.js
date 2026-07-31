@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import buildTextEditor from './scripts/viteBuildTextEditor.js'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -11,5 +12,8 @@ export default defineConfig(({ mode }) => ({
   // like that, so it keeps the relative base (deployment-path-agnostic,
   // works whether Pages serves it at the repo name or a custom domain).
   base: mode === 'live' ? '/Leagues/' : './',
-  plugins: [react()],
+  // buildTextEditor is `apply: 'serve'` - it adds a localhost-only endpoint for
+  // editing the Build Guides prose in place, and is never part of a production
+  // build. See scripts/viteBuildTextEditor.js.
+  plugins: [react(), buildTextEditor()],
 }))

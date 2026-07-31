@@ -1391,6 +1391,30 @@ main.gear-page {
   gap: 6px;
 }
 
+.gear-stats-armour-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gear-stats-ovl-toggle {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.gear-stats-ovl-toggle.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .gear-stats-defence-level-row input {
   width: 48px;
   background: var(--panel-bg-2, var(--panel-bg));
@@ -1401,34 +1425,6 @@ main.gear-page {
   font-size: 12px;
   padding: 1px 4px;
   text-align: right;
-}
-
-.gear-stats-table-scroll {
-  /* Safety net, not the primary fit strategy - the table's own sizing
-     below is meant to fit the panel's fixed 236px width outright, this
-     just prevents a hard clip if it doesn't quite make it (e.g. unusual
-     font metrics). */
-  overflow-x: auto;
-}
-
-.gear-stats-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
-  font-size: 11px;
-}
-
-.gear-stats-table th,
-.gear-stats-table td {
-  text-align: right;
-  padding: 3px 2px;
-  border-top: 1px solid var(--border);
-}
-
-.gear-stats-table th:first-child,
-.gear-stats-table td:first-child {
-  text-align: left;
-  opacity: 0.7;
 }
 
 .gear-item-list {
@@ -1529,6 +1525,32 @@ main.gear-page {
 }
 
 .sort-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Character page's Abilities/Arch Relics/Spellbooks & Prayers switcher -
+   reuses .sort-tab's base but overrides the pill shape with a squared,
+   theme-accented box so it reads as a more prominent section switcher
+   rather than a plain filter row. */
+.character-subnav {
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.character-subnav .sort-tab {
+  border-radius: 4px;
+  border: 2px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 20px;
+}
+
+.character-subnav .sort-tab.active {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
@@ -3638,4 +3660,1464 @@ main.abilities-page .gear-item-rows {
   left: 8px;
   z-index: 1;
   pointer-events: none;
+}
+
+/* ==========================================================================
+   Build Guides page (#build-guides)
+   Fixed, illustrative builds - nothing here is configurable, so every
+   interactive-looking affordance inherited from the gear planner is
+   deliberately neutralised (see .equip-grid.read-only below).
+   ========================================================================== */
+
+.build-guides-page {
+  display: block;
+  margin-top: 24px;
+}
+
+.build-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.build-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-bg);
+  overflow: hidden;
+}
+
+.build-card.expanded {
+  border-color: var(--accent);
+}
+
+/* The head is a <button> spanning the whole row; the expanded body is its
+   sibling, never nested inside it - a nested button is invalid HTML and
+   browsers silently break click handling on it. */
+.build-card-head {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.build-card-head:hover {
+  background: var(--accent-bg);
+}
+
+.build-card-name {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-h);
+}
+
+.build-card-tagline {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.build-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.build-card-pills,
+.build-card-chips,
+.build-card-styles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.build-card-arrow {
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.build-card-chevron {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* Difficulty: green (very easy) through amber (demanding). A build you can
+   play badly and still perform with is a genuine selection axis, so this
+   gets real visual weight rather than being buried in the body. */
+.build-difficulty {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid hsl(var(--diff-hue) 60% 45% / 0.6);
+  background: hsl(var(--diff-hue) 60% 45% / 0.16);
+  color: hsl(var(--diff-hue) 70% 72%);
+}
+
+.build-difficulty-1 { --diff-hue: 140; }
+.build-difficulty-2 { --diff-hue: 95; }
+.build-difficulty-3 { --diff-hue: 45; }
+.build-difficulty-4 { --diff-hue: 25; }
+
+:root[data-theme='light'] .build-difficulty {
+  color: hsl(var(--diff-hue) 65% 28%);
+}
+
+.blessing-pill,
+.league-relic-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 4px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.blessing-pill-icon img,
+.league-relic-chip-icon img {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Blessing colours (red/green/blue) and relic colours encode two different
+   things on the same card, so the palettes are kept visually distinct:
+   blessings use flat god-colours, relics use their own per-relic hue. */
+.blessing-pill-red {
+  border: 1px solid rgba(248, 113, 113, 0.55);
+  background: rgba(248, 113, 113, 0.14);
+  color: #f87171;
+}
+
+.blessing-pill-green {
+  border: 1px solid rgba(74, 222, 128, 0.55);
+  background: rgba(74, 222, 128, 0.14);
+  color: #4ade80;
+}
+
+.blessing-pill-blue {
+  border: 1px solid rgba(96, 165, 250, 0.55);
+  background: rgba(96, 165, 250, 0.14);
+  color: #60a5fa;
+}
+
+:root[data-theme='light'] .blessing-pill-red { color: #b91c1c; }
+:root[data-theme='light'] .blessing-pill-green { color: #15803d; }
+:root[data-theme='light'] .blessing-pill-blue { color: #1d4ed8; }
+
+/* The god power is derived from the three picks rather than chosen, so it
+   reads as an outcome: gold outline, not a fourth pick. */
+.blessing-pill-god {
+  border-color: #d4a53a;
+  box-shadow: 0 0 0 1px rgba(212, 165, 58, 0.35);
+}
+
+.league-relic-chip {
+  border: 1px solid hsl(var(--relic-hue, 275) 55% 50% / 0.6);
+  background: hsl(var(--relic-hue, 275) 55% 50% / 0.14);
+  color: hsl(var(--relic-hue, 275) 65% 72%);
+}
+
+:root[data-theme='light'] .league-relic-chip {
+  color: hsl(var(--relic-hue, 275) 60% 30%);
+}
+
+.build-style-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: 1px solid currentColor;
+  opacity: 0.85;
+}
+
+.build-style-tag-melee { color: var(--style-melee); }
+.build-style-tag-ranged { color: var(--style-ranged); }
+.build-style-tag-magic { color: var(--style-magic); }
+.build-style-tag-necromancy { color: var(--style-necromancy); }
+
+/* ---- expanded body ---- */
+
+.build-card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  padding: 0 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.build-card-prose section {
+  margin-top: 18px;
+}
+
+.build-card-prose h4,
+.build-card-loadouts h4 {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.build-card-prose p {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.build-key-numbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.build-key-number {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.build-key-number dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.build-key-number dd {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+/* Trade-offs are the honest downsides and the reason the page is useful -
+   de-emphasised, but never hidden behind a toggle. */
+.build-tradeoffs ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.build-tradeoffs li {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text);
+  opacity: 0.85;
+  margin-bottom: 5px;
+}
+
+.build-card-prose .build-aside {
+  margin-top: 8px;
+  padding: 9px 11px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--accent-bg);
+  font-size: 0.85rem;
+}
+
+.unlock-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.unlock-list-inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.unlock-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.unlock-row-icon {
+  flex-shrink: 0;
+}
+
+.unlock-row-icon img {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.unlock-row-icon-empty {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+}
+
+.build-card-prose .unlock-row-name {
+  margin: 0 0 2px;
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 0.88rem;
+}
+
+.unlock-row-subtitle {
+  margin-left: 7px;
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.unlock-row-effect {
+  font-style: italic;
+  opacity: 0.85;
+}
+
+/* ---- loadouts ---- */
+
+.build-card-loadouts h4 {
+  margin-top: 18px;
+}
+
+.build-stage-tabs {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.build-stage-tab {
+  flex: 1;
+  padding: 7px 12px;
+  border: 0;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.build-stage-tab.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.build-stage-tab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.build-loadout-grids {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.read-only-loadout {
+  margin: 0;
+}
+
+.read-only-loadout-caption {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.read-only-loadout-armour {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.read-only-loadout-armour-note {
+  opacity: 0.6;
+  font-size: 0.75rem;
+}
+
+/* The planner's .equip-grid squares its top corners because a style-tabs
+   strip sits directly above it there; nothing sits above it here, so the
+   corners are restored. The grid keeps its fixed 236px width - it already
+   fits a 375px viewport, so it is centred rather than shrunk. */
+.equip-grid.read-only {
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.equip-slot-readonly {
+  cursor: default;
+}
+
+.equip-slot-readonly:hover {
+  border-color: var(--border);
+}
+
+.build-share-button {
+  padding: 8px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.build-share-button:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.build-share-note {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: var(--text);
+  opacity: 0.7;
+  max-width: 260px;
+}
+
+/* ==========================================================================
+   Tier lists - one component rendered twice (blessings + god powers, and
+   league relics). Empty grade rows are rendered, not skipped: "nothing is
+   this weak" is the actual claim, and a missing row reads as a bug.
+   ========================================================================== */
+
+.tier-list {
+  margin-top: 36px;
+}
+
+.tier-list-title {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+  color: var(--text-h);
+}
+
+.tier-list-standfirst {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text);
+  opacity: 0.85;
+  max-width: 70ch;
+}
+
+.tier-list-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tier-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.tier-grade {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--tier-hue) 55% 45% / 0.6);
+  background: hsl(var(--tier-hue) 55% 45% / 0.18);
+  color: hsl(var(--tier-hue) 65% 70%);
+}
+
+:root[data-theme='light'] .tier-grade {
+  color: hsl(var(--tier-hue) 60% 28%);
+}
+
+.tier-entries {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  min-height: 46px;
+}
+
+.tier-empty {
+  margin: 0;
+  align-self: center;
+  font-size: 0.8rem;
+  color: var(--text);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.tier-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 5px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: help;
+}
+
+.tier-entry-icon img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.tier-entry-relic {
+  border-color: hsl(var(--relic-hue) 55% 50% / 0.55);
+  background: hsl(var(--relic-hue) 55% 50% / 0.08);
+}
+
+.tier-entry-red { border-color: rgba(248, 113, 113, 0.5); }
+.tier-entry-green { border-color: rgba(74, 222, 128, 0.5); }
+.tier-entry-blue { border-color: rgba(96, 165, 250, 0.5); }
+
+.tier-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--border);
+  color: var(--text);
+}
+
+.tier-badge-god {
+  background: rgba(212, 165, 58, 0.2);
+  color: #d4a53a;
+}
+
+.tier-badge-unlocks {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.tier-entry-asterisk {
+  color: var(--warning);
+  font-weight: 700;
+}
+
+.tier-list-footnote {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   Build Guides - mobile (matches the site's existing 900px breakpoint)
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .build-card-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 8px;
+  }
+
+  /* Headline spans the full width above the pills so long names/taglines
+     never squeeze the meta column into a one-word-per-line strip. */
+  .build-card-headline {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .build-card-meta {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .build-card-chevron {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .build-card-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .build-loadout-grids {
+    justify-content: center;
+  }
+
+  .build-share-button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .build-share-note {
+    max-width: none;
+  }
+
+  .build-stage-tab {
+    min-height: 44px;
+  }
+
+  .tier-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .tier-grade {
+    justify-content: flex-start;
+    padding: 2px 10px;
+    font-size: 1rem;
+  }
+
+  /* Tap targets: tier entries are TagTooltip spans, and tapping them is the
+     only way to read a grade's reasoning on touch. */
+  .tier-entry {
+    min-height: 34px;
+  }
+}
+
+/* ==========================================================================
+   Gear by Region - global search bar
+   Search deliberately overrides the region view rather than filtering it,
+   so the bar sits above the region pills and reads as the wider net.
+   ========================================================================== */
+
+.gear-by-region-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.gear-by-region-search .gear-search {
+  flex: 1;
+  min-width: 0;
+  max-width: 420px;
+}
+
+.gear-search-clear {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.gear-search-clear:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Replaces the Direct/Combination tabs while searching - that split is a
+   per-region concept and means nothing across a global result set. */
+.gear-by-region-search-summary {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.gear-by-region-search-summary strong {
+  color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .gear-by-region-search .gear-search {
+    max-width: none;
+  }
+
+  .gear-search-clear {
+    min-height: 38px;
+  }
+}
+
+/* ==========================================================================
+   Gear slot hover card (GearTooltip)
+   The anchor is now the CSS grid item rather than the slot itself, so it has
+   to be laid out as a block of exactly the slot's size or the 3x5 equip-grid
+   collapses.
+   ========================================================================== */
+
+.equip-slot-anchor {
+  display: block;
+  width: 64px;
+  height: 64px;
+}
+
+.equip-slot-anchor .equip-slot {
+  width: 100%;
+  height: 100%;
+}
+
+.gear-tooltip-anchor {
+  position: relative;
+}
+
+.gear-tooltip {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 250px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 45%);
+  pointer-events: none;
+  text-align: left;
+}
+
+:root[data-theme='light'] .gear-tooltip {
+  box-shadow: 0 6px 20px rgb(0 0 0 / 18%);
+}
+
+.gear-tooltip-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-h);
+  line-height: 1.3;
+}
+
+.gear-tooltip-level {
+  font-size: 0.72rem;
+  color: var(--text);
+  opacity: 0.75;
+  margin-top: -4px;
+}
+
+.gear-tooltip-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.gear-tooltip-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.gear-tooltip-stat {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.76rem;
+  color: var(--text);
+}
+
+.gear-tooltip-stat strong {
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hover cards are mouse-only by design (see GearTooltip) - on touch the
+   planner's slots are the primary tap target and the build guides' are
+   inert, so there is nothing to reveal and nothing to hijack. */
+@media (hover: none) {
+  .gear-tooltip {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Build Guides - expanded body v2
+   Prose is collapsed by default and the pick-lists are laid out 3-up, so the
+   card opens on the things people actually scan (relics / regions / unlocks)
+   rather than on two screens of prose.
+   ========================================================================== */
+
+/* Was a 2-column prose+loadout split; the body is now a single flow with its
+   own internal grids. */
+.build-card-body {
+  display: block;
+  padding: 0 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* ---- style tabs (only rendered when a build covers 2+ styles) ---- */
+
+.build-style-tabs {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 16px 0 4px;
+}
+
+.build-style-tab {
+  flex: 1;
+  padding: 8px 14px;
+  border: 0;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.build-style-tab.active {
+  background: var(--accent-bg);
+  color: currentColor;
+}
+
+.build-style-tab-melee.active { color: var(--style-melee); }
+.build-style-tab-ranged.active { color: var(--style-ranged); }
+.build-style-tab-magic.active { color: var(--style-magic); }
+.build-style-tab-necromancy.active { color: var(--style-necromancy); }
+
+/* ---- collapsible prose ---- */
+
+.build-collapsible {
+  border-bottom: 1px solid var(--border);
+}
+
+.build-collapsible-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.build-collapsible-chevron {
+  font-size: 0.7rem;
+}
+
+.build-collapsible-body {
+  padding-bottom: 12px;
+}
+
+.build-collapsible-body p {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.build-collapsible-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- key numbers ---- */
+
+.build-key-numbers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  gap: 8px;
+  margin: 16px 0 0;
+}
+
+/* ---- setup / unlocks: three columns of compact pick-lists ---- */
+
+.build-setup-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.build-setup-group h4 {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.build-setup-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Prayers are just names - pack them tighter than the reasoned lists. */
+.build-setup-group .setup-list-tight {
+  gap: 4px;
+}
+
+.setup-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.setup-entry-icon {
+  flex-shrink: 0;
+}
+
+.setup-entry-icon img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.setup-entry-icon-empty {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+}
+
+.setup-entry-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.setup-entry-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-h);
+  line-height: 1.35;
+}
+
+.setup-entry-reason {
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.build-setup-note {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.build-card-body .build-aside {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--accent-bg);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+/* ---- trade-offs ---- */
+
+.build-tradeoffs {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.build-tradeoffs h4 {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+/* ---- loadout ---- */
+
+.build-loadout-section {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.build-loadout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.build-loadout-header h4 {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.build-loadout-header .build-stage-tabs {
+  margin-bottom: 0;
+  width: auto;
+}
+
+.build-loadout-grids {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.build-loadout-side {
+  flex: 1;
+  min-width: 220px;
+}
+
+@media (max-width: 900px) {
+  .build-setup-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .build-style-tab {
+    min-height: 44px;
+  }
+
+  .build-collapsible-head {
+    min-height: 44px;
+  }
+
+  .build-loadout-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .build-loadout-header .build-stage-tabs {
+    width: 100%;
+  }
+
+  .build-loadout-grids {
+    justify-content: center;
+  }
+
+  .build-loadout-side {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   Build Guides - picks/loadout split (v3)
+   Picks collapse to one row each on the left; the equipment grid sits beside
+   them on the right rather than below three columns of prose.
+   ========================================================================== */
+
+.build-main-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: start;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.build-picks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.build-loadout-column {
+  width: 236px;
+  flex-shrink: 0;
+}
+
+.build-loadout-column .build-loadout-header {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.build-loadout-column .build-loadout-header h4 {
+  margin: 0 0 8px;
+}
+
+.build-loadout-column .build-stage-tabs {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.build-loadout-column .build-share-button {
+  width: 100%;
+}
+
+.build-loadout-column .build-share-note {
+  max-width: none;
+}
+
+/* ---- collapsed pick rows ---- */
+
+.pick-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.pick-row {
+  background: var(--panel-bg);
+}
+
+.pick-row.open {
+  background: var(--accent-bg);
+}
+
+.pick-row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pick-row-head:hover {
+  background: var(--accent-bg);
+}
+
+/* Reads as a checkbox so "ticked = expanded" is obvious without a legend. */
+.pick-row-tick {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--accent);
+  font-size: 0.65rem;
+  line-height: 13px;
+  text-align: center;
+}
+
+.pick-row-tick.ticked {
+  border-color: var(--accent);
+}
+
+.pick-row-icon {
+  flex-shrink: 0;
+}
+
+.pick-row-icon img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.pick-row-icon-empty {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+}
+
+.pick-row-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-h);
+  line-height: 1.3;
+}
+
+.pick-row-reason {
+  margin: 0;
+  padding: 0 10px 9px 43px;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+/* The unlocks grid keeps its own 3-up treatment - unchanged. */
+.build-setup-grid-unlocks {
+  margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+  .build-main-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .build-loadout-column {
+    width: 100%;
+  }
+
+  /* Centre the fixed-width equipment grid inside the full-width column. */
+  .build-loadout-column .read-only-loadout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pick-row-head {
+    min-height: 40px;
+  }
+}
+
+/* Overloads give +17 Defence, worth ~+540 armour through D^3/1250 + 4D + 40 -
+   material, since four blessings scale off total armour. */
+.read-only-loadout-armour-ovl {
+  color: var(--accent);
+}
+
+/* Elder overload is +25 Defence (vs +17 from a normal overload), worth ~+849
+   armour through D^3/1250 + 4D + 40 - the single largest armour source in any
+   of these builds, so it gets the strongest emphasis of the three figures. */
+.read-only-loadout-armour-elder {
+  color: var(--style-ranged);
+}
+
+/* ==========================================================================
+   Build Guides - localhost-only text editor (see scripts/viteBuildTextEditor.js)
+   Never present in a production build: the toggle is gated on import.meta.env.DEV.
+   ========================================================================== */
+
+.build-edit-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border: 1px dashed var(--warning);
+  border-radius: 6px;
+  background: var(--panel-bg);
+}
+
+.build-edit-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--warning);
+  cursor: pointer;
+}
+
+.build-edit-note {
+  font-size: 0.76rem;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.build-edit-note code {
+  font-size: 0.72rem;
+}
+
+.editable-text {
+  display: block;
+  position: relative;
+}
+
+.editable-text:not(.editing) {
+  cursor: text;
+  border-radius: 4px;
+  outline: 1px dashed hsl(30 60% 50% / 0.5);
+  outline-offset: 2px;
+}
+
+.editable-text:not(.editing):hover {
+  outline-color: var(--warning);
+  background: hsl(30 60% 50% / 0.08);
+}
+
+.editable-text-hint {
+  margin-left: 6px;
+  font-size: 0.7rem;
+  color: var(--warning);
+  opacity: 0.8;
+}
+
+.editable-text-area {
+  display: block;
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.editable-text-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.editable-text-save,
+.editable-text-cancel {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.editable-text-save {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.editable-text-kbd {
+  font-size: 0.7rem;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.editable-text-status {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.editable-text-status.saved { color: var(--style-ranged); }
+.editable-text-status.error { color: var(--danger); }
+
+/* Alternate regions sit under the taken ones and are muted, so they read as
+   "considered and rejected" rather than as a fourth set of picks. */
+.build-alt-regions {
+  margin-top: 14px;
+}
+
+.build-alt-regions h4 {
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.build-alt-regions .pick-list {
+  opacity: 0.82;
+}
+
+.build-alt-regions .pick-row-tick {
+  border-style: dashed;
+}
+
+/* Coming-soon banner under the Build Guides title - same pill look as
+   .home-updated-banner (HomePage's "Updated every day..." banner), just
+   centered here via a flex wrapper instead of a text-align:center parent. */
+.build-coming-soon {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 14px;
+}
+
+.build-coming-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 16%, transparent),
+    color-mix(in srgb, var(--accent-2) 16%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* Hidden builds: dev-server only, filtered out of every release build.
+   Deliberately loud, so a build left hidden by accident is obvious. */
+.build-card-hidden {
+  border-style: dashed;
+  border-color: var(--warning);
+  opacity: 0.85;
+}
+
+.build-hidden-badge {
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--warning);
+  color: var(--bg);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  vertical-align: middle;
+}
+
+.build-hidden-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 16px;
+  border-bottom: 1px dashed var(--border);
+  background: hsl(30 60% 50% / 0.08);
+}
+
+.build-hidden-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--warning);
+  cursor: pointer;
+}
+
+.build-hidden-note {
+  font-size: 0.74rem;
+  color: var(--text);
+  opacity: 0.75;
 }

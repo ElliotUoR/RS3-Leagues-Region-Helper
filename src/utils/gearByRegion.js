@@ -28,6 +28,28 @@ function collectAllItems() {
 // Computed once - gear.js is static data, not something that changes at runtime.
 const ALL_ITEMS = collectAllItems();
 
+// Global name search across every item in gear.js, deliberately ignoring
+// region entirely - that's the whole point of the search bar on the Gear by
+// Region page, which otherwise only ever shows you one region at a time.
+//
+// Unlike getGearForRegion below, this does NOT filter out 'global'/'relic'
+// items or `impossible` ones. Those are invisible everywhere else on this
+// page (they're tied to no region, or to more regions than a run can hold),
+// so a search that hid them would be quietly lying about what exists - and
+// GearByRegionRow already renders their "Not obtainable"/global tags correctly.
+//
+// Matching is a case-insensitive substring on the item name, with curly
+// apostrophes folded to straight ones so typing "araxxi's" finds "Araxxi’s".
+function normalize(text) {
+  return text.toLowerCase().replace(/[‘’]/g, "'");
+}
+
+export function searchAllGear(query) {
+  const needle = normalize(query.trim());
+  if (!needle) return [];
+  return ALL_ITEMS.filter((item) => normalize(item.name).includes(needle));
+}
+
 // Classifies every non-impossible, real-region-gated item into two buckets
 // for the given region:
 //   - `direct`: the item has only ONE AND-group total (ignoring any

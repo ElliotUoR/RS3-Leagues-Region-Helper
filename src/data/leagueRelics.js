@@ -171,7 +171,7 @@ export const LEAGUE_RELICS = [
           icon: FP('Mort_myre_fungus_detail.webp'),
           clearance: 'both',
           detail:
-            "Chinchompa residue, yak milk, yak tuft, zygomite fruit, regular and enriched timber & calcified fungus, enriched fungal algae, kebbit teeth dust, mort myre mushroom, goat horn dust, toad's legs, spider venom",
+            "Chinchompa residue, yak milk, yak tuft, zygomite fruit, various PoF sheep wool, regular and enriched timber & calcified fungus, enriched fungal algae, kebbit teeth dust, mort myre mushroom, goat horn dust, toad's legs, spider venom",
         },
         {
           name: 'Tier 4 Secondaries',
@@ -520,7 +520,7 @@ export const LEAGUE_RELICS = [
       'Memory strands are gained at x10 rate.',
       'Chronicle fragments give 2x XP (before Leagues multipliers).',
       'Crafting items from divine energies only requires half as many energies, rounded down.',
-      'Unlock all Meilyr potion recipes.',
+      'Provides a flask and unlocks all Meilyr potion recipes.',
     ],
     icon: FP('Divine_Druid.png'),
   },

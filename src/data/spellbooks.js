@@ -11,6 +11,18 @@
 // tag that never locks the card. Currently only used for Ancient Curses,
 // where the desert gate isn't confirmed the way Ancient Magicks' is.
 //
+// League relic alternative: the Crystal Grace relic's own effect text says it
+// "Unlocks all Magic spells across all spellbooks", so every non-global
+// SPELLBOOK card carries `{ anyOf: [region], leagueRelic: 'Crystal Grace' }` -
+// the same "relic is an ADDITIONAL alternative on top of the region" shape
+// gear.js uses for its Luminate/Oricalchite/Light animica ore groups (see
+// gearAvailability.js's isGearItemAvailable). Picking Crystal Grace therefore
+// unlocks Lunar, Ancient Magicks and Seren spells regardless of region.
+//
+// Deliberately NOT applied to PRAYER_GROUPS: Crystal Grace unlocks *spells*,
+// and Ancient Curses / Seren Prayers / Knight Waves / the Nex curses are
+// prayer-book unlocks, not spells. Do not "fix" that asymmetry.
+//
 // Each `*_GROUPS` array is a set of independent unlock lines, one per panel
 // - a parent card plus the sub-unlocks/extensions layered on top of it.
 // Rendered as N side-by-side panels (3 for spellbooks, 2 for prayers),
@@ -32,7 +44,10 @@ export const SPELLBOOK_GROUPS = [
     parent: {
       name: 'Lunar spellbook',
       icons: [{ name: 'Lunar spellbook', icon: FP('Vengeance_icon.png') }],
-      source: { region: 'fremennikProvince', detail: 'Unlocked via the Fremennik quest line (Lunar Diplomacy).' },
+      source: {
+        region: { anyOf: ['fremennikProvince'], leagueRelic: 'Crystal Grace' },
+        detail: 'Unlocked via the Fremennik quest line (Lunar Diplomacy), or by the Crystal Grace relic.',
+      },
     },
     related: [],
   },
@@ -41,15 +56,24 @@ export const SPELLBOOK_GROUPS = [
     parent: {
       name: 'Ancient Magicks',
       icons: [{ name: 'Ancient Magicks', icon: FP('Blood_Barrage.png') }],
-      source: { region: 'kharidianDesert', detail: 'Unlocked via Desert Treasure.' },
+      source: {
+        region: { anyOf: ['kharidianDesert'], leagueRelic: 'Crystal Grace' },
+        detail: 'Unlocked via Desert Treasure, or by the Crystal Grace relic.',
+      },
     },
     related: [
       {
         name: 'Seren spells',
         icons: [{ name: 'Seren spells', icon: FP('Crystal_Mask.png') }],
         source: {
-          region: ['kharidianDesert', 'tirannwn'],
-          detail: "Requires The Light Within (tirannwn) on top of Ancient Magicks' own Desert Treasure requirement.",
+          // Both AND-groups carry the relic, so Crystal Grace satisfies the
+          // whole requirement rather than only half of it.
+          region: [
+            { anyOf: ['kharidianDesert'], leagueRelic: 'Crystal Grace' },
+            { anyOf: ['tirannwn'], leagueRelic: 'Crystal Grace' },
+          ],
+          detail:
+            "Requires The Light Within (tirannwn) on top of Ancient Magicks' own Desert Treasure requirement - or the Crystal Grace relic instead of either.",
         },
       },
     ],

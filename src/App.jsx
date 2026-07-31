@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import AbilitiesPage from './pages/AbilitiesPage';
+import CharacterPage from './pages/CharacterPage';
 import AssumptionsPage from './pages/AssumptionsPage';
 import GearPage from './pages/GearPage';
 import GearByRegionPage from './pages/GearByRegionPage';
 import HomePage from './pages/HomePage';
-import RelicsPage from './pages/RelicsPage';
 import LeagueRelicsPage from './pages/LeagueRelicsPage';
+import BuildGuidesPage from './pages/BuildGuidesPage';
 import RelicImportDocsPage from './pages/RelicImportDocsPage';
-import SpellbooksPage from './pages/SpellbooksPage';
 import ReportIssueButton from './components/ReportIssueButton';
 import ThemeToggle from './components/ThemeToggle';
 import ReportIssueModal from './components/ReportIssueModal';
@@ -71,11 +70,21 @@ function formatUpdatedAt(raw) {
 function currentRoute() {
   if (window.location.hash === '#gear') return 'gear';
   if (window.location.hash === '#gear-by-region') return 'gearByRegion';
-  if (window.location.hash === '#abilities') return 'abilities';
-  if (window.location.hash === '#relics') return 'relics';
+  // Abilities, Arch Relics, and Spellbooks & Prayers now live together under
+  // one Character tab (see CharacterPage) - the old standalone hashes are
+  // still accepted here so existing bookmarks/links keep working, and (like
+  // Build Guides below) "#character" itself matches on the prefix since the
+  // active sub-tab is appended, e.g. "#character/relics".
+  if (window.location.hash === '#abilities') return 'character';
+  if (window.location.hash === '#relics') return 'character';
+  if (window.location.hash === '#spellbooks') return 'character';
+  if (window.location.hash.split('/')[0] === '#character') return 'character';
   if (window.location.hash === '#league-relics') return 'leagueRelics';
+  // Build Guides appends the open build's id (e.g. "#build-guides/the-ironclad")
+  // so a link can be shared with that build already expanded - so this one
+  // matches on the prefix rather than the whole hash.
+  if (window.location.hash.split('/')[0] === '#build-guides') return 'buildGuides';
   if (window.location.hash === '#relic-import-docs') return 'relicImportDocs';
-  if (window.location.hash === '#spellbooks') return 'spellbooks';
   if (window.location.hash === '#assumptions') return 'assumptions';
   return 'home';
 }
@@ -199,14 +208,11 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         >
           League Relics
         </a>
-        <a href="#abilities" className={route === 'abilities' ? 'active' : ''}>
-          Abilities
+        <a href="#build-guides" className={route === 'buildGuides' ? 'active' : ''}>
+          Build Guides
         </a>
-        <a href="#relics" className={route === 'relics' ? 'active' : ''}>
-          Arch Relics
-        </a>
-        <a href="#spellbooks" className={route === 'spellbooks' ? 'active' : ''}>
-          Spellbooks & Prayers
+        <a href="#character" className={route === 'character' ? 'active' : ''}>
+          Character
         </a>
         <a href="#assumptions" className={route === 'assumptions' ? 'active' : ''}>
           Assumptions
@@ -227,20 +233,22 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         />
       )}
       {route === 'gearByRegion' && <GearByRegionPage isUnlocked={isUnlocked} />}
-      {route === 'abilities' && <AbilitiesPage isUnlocked={isUnlocked} />}
-      {route === 'relics' && (
-        <RelicsPage isUnlocked={isUnlocked} selected={selectedRelics} toggleRelic={toggleRelic} />
+      {route === 'character' && (
+        <CharacterPage
+          isUnlocked={isUnlocked}
+          selectedRelics={selectedRelics}
+          toggleRelic={toggleRelic}
+          hasCrystalGrace={selectedLeagueRelics.includes('Crystal Grace')}
+        />
       )}
       {route === 'leagueRelics' && (
         <LeagueRelicsPage selected={selectedLeagueRelics} toggleLeagueRelic={toggleLeagueRelic} />
       )}
+      {/* Takes no props: the build guides are fixed reference examples and
+          must never read or mutate the player's own region/relic/loadout
+          state. The "open in gear planner" button emits a share link instead. */}
+      {route === 'buildGuides' && <BuildGuidesPage />}
       {route === 'relicImportDocs' && <RelicImportDocsPage />}
-      {route === 'spellbooks' && (
-        <SpellbooksPage
-          isUnlocked={isUnlocked}
-          hasCrystalGrace={selectedLeagueRelics.includes('Crystal Grace')}
-        />
-      )}
       {route === 'assumptions' && <AssumptionsPage />}
       {route === 'home' && (
         <HomePage

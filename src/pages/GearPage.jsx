@@ -306,6 +306,9 @@ export default function GearPage({
                   onSelect={selectSlot}
                   onUnequip={unequipSlot}
                   miniIcon={equipped.neck?.icon}
+                  isUnlocked={isUnlocked}
+                  style={style}
+                  selectedLeagueRelics={selectedLeagueRelics}
                 />
               )}
               {Object.keys(SLOT_LABELS).map((slotId) => (
@@ -318,6 +321,9 @@ export default function GearPage({
                   onSelect={selectSlot}
                   onUnequip={unequipSlot}
                   disabled={slotId === 'offhand' && offhandBlocked}
+                  isUnlocked={isUnlocked}
+                  style={style}
+                  selectedLeagueRelics={selectedLeagueRelics}
                 />
               ))}
             </div>

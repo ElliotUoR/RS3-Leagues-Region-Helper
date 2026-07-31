@@ -24,11 +24,18 @@
 // this, the same way LeagueRelicRow.jsx distinguishes wiki-verbatim `effects`
 // bullets from app-added `regionTagNote`.
 //
-// Icon note: no blessing icons exist on the wiki yet and none have been cropped
-// from the reveal images into `public/icons/` - every `icon` here is null for
-// now. Populate by cropping the hexagonal badge from each reveal image (same
-// approach used for the four iconless league relics) rather than pointing
-// scripts/download-icons.mjs at a runescape.wiki file that doesn't exist.
+// Icon note: all twelve icons (nine blessings + three god powers) were cropped
+// from Jagex's reveal images and live in `public/icons/`, with the originals
+// kept in `image/Blessing icon/`. They are NOT on the wiki, so
+// scripts/download-icons.mjs must never be pointed at them - there is no
+// runescape.wiki file to re-fetch.
+//
+// Three filenames were normalised when copying, so the source and the copy
+// deliberately differ - do not "fix" these back:
+//   Teragard_Aegis.PNG      -> Teragard_Aegis.png      (drops the apostrophe-s)
+//   Eternal_Sustinence.PNG  -> Eternal_Sustenance.png  (spelling)
+//   Sacred_Fevor.PNG        -> Sacred_Fervor.png       (spelling)
+//   Demons_mark.PNG         -> Demons_Mark.png         (casing)
 
 export const BLESSING_COLOURS = ['red', 'green', 'blue'];
 
@@ -53,7 +60,7 @@ export const BLESSINGS = [
     name: 'Adrenaline Junkie',
     tier: 1,
     colour: 'red',
-    icon: null,
+    icon: 'icons/Adrenaline_Junkie.png',
     effects: [
       'Your maximum adrenaline is increased by +50%.',
       'Adrenaline generation is increased by 50%.',
@@ -88,7 +95,7 @@ export const BLESSINGS = [
     name: 'Big Boned',
     tier: 1,
     colour: 'green',
-    icon: null,
+    icon: 'icons/Big_Boned.png',
     effects: [
       'Your maximum life points are increased by 50%.',
       'All damage you deal gains 5% of your maximum life points as bonus damage.',
@@ -115,7 +122,7 @@ export const BLESSINGS = [
     name: "Teragard's Aegis",
     tier: 1,
     colour: 'blue',
-    icon: null,
+    icon: 'icons/Teragard_Aegis.png',
     effects: [
       'Your base ability damage is increased by 25% of your total armour value. This bonus is doubled while wielding a defender and tripled while wielding a shield.',
       'Your base health regeneration is increased by 2.5% of your maximum life points. This bonus is doubled while wielding a defender and tripled while wielding a shield.',
@@ -149,7 +156,7 @@ export const BLESSINGS = [
     name: 'Abyssal Cinders',
     tier: 2,
     colour: 'red',
-    icon: null,
+    icon: 'icons/Abyssal_Cinders.png',
     effects: [
       'On hit: your attacks deal 15% of ability damage as bonus damage.',
       'On hit: your attacks have a 5% chance to trigger an Inferno of Zamorak.',
@@ -188,7 +195,7 @@ export const BLESSINGS = [
     name: 'Barkscales',
     tier: 2,
     colour: 'green',
-    icon: null,
+    icon: 'icons/Barkscales.png',
     effects: [
       'Incoming damage is reduced by 10% of your armour value.',
       'After Barkscales reduces damage 5 times, unleash a Grasp of Guthix at your attackers location.',
@@ -214,7 +221,7 @@ export const BLESSINGS = [
     name: 'Striking Light',
     tier: 2,
     colour: 'blue',
-    icon: null,
+    icon: 'icons/Striking_Light.png',
     effects: [
       "Your basic attack's damage is increased by 40%",
       'Your basic attacks unleash a Light of Saradomin on your target. 9s cooldown.',
@@ -245,7 +252,7 @@ export const BLESSINGS = [
     name: 'Avernic Rampage',
     tier: 3,
     colour: 'red',
-    icon: null,
+    icon: 'icons/Avernic_Rampage.png',
     effects: [
       'On-attack: 5% chance to activate Avernic Rampage for 7.2s.',
       'Avernic Rampage: abilities and special attacks cost 0% adrenaline.',
@@ -285,7 +292,7 @@ export const BLESSINGS = [
     name: 'Eternal Sustenance',
     tier: 3,
     colour: 'green',
-    icon: null,
+    icon: 'icons/Eternal_Sustenance.png',
     effects: [
       'Food is no longer consumed when eaten.',
       'You no longer lose adrenaline when eating.',
@@ -315,7 +322,7 @@ export const BLESSINGS = [
     name: 'Steadfast Will',
     tier: 3,
     colour: 'blue',
-    icon: null,
+    icon: 'icons/Steadfast_Will.png',
     effects: [
       "Empowers the 'Bash', 'Preparation', 'Reflect' and 'Revenge' abilities.",
       'Bash: deals additional damage equal to 350-450% of your armour value.',
@@ -358,7 +365,7 @@ export const GOD_TIER_BLESSINGS = [
     name: "Demon's Mark",
     tier: 'god',
     colour: 'red',
-    icon: null,
+    icon: 'icons/Demons_Mark.png',
     effects: ["Your accuracy is always calculated using your target's weakness."],
     analysis: {
       summary:
@@ -375,7 +382,7 @@ export const GOD_TIER_BLESSINGS = [
     name: 'Splash Zone',
     tier: 'god',
     colour: 'green',
-    icon: null,
+    icon: 'icons/Splash_Zone.png',
     effects: [
       'Area-of-effect and multi-target attacks deal 30% more damage.',
       'Area of effect abilities deal 5% more damage per tile the target occupies.',
@@ -411,7 +418,7 @@ export const GOD_TIER_BLESSINGS = [
     name: 'Sacred Fervor',
     tier: 'god',
     colour: 'blue',
-    icon: null,
+    icon: 'icons/Sacred_Fervor.png',
     effects: [
       'Melee ability and special attack cooldowns are reduced by 30%.',
       'Magic ability and special attack cooldowns are reduced by 30%.',
@@ -512,37 +519,20 @@ export const BLESSING_PACKAGES = [
   },
 ];
 
-// Armour rating for a gear.js item. gear.js has no `armour:` field - the rating
-// is the highest value in `stats.defence`. Verified exact against the wiki for
-// Dragon defender (113.2), Kalphite defender (245.8), Malevolent kiteshield
-// (491.6), Bandos warshield (297.2), Elder rune round shield (384.8) and Divine
-// spirit shield (338.8). Four blessings scale off total armour, so this is the
-// single most important derived stat for the planned Blessings preview page.
-export function getArmourRating(item) {
-  const defence = item?.stats?.defence;
-  if (!defence) return 0;
-  const values = Object.values(defence).filter((v) => typeof v === 'number');
-  return values.length ? Math.max(0, ...values) : 0;
-}
-
-// Armour granted by Defence level alone, before any equipment:
+// Armour maths lives in utils/gearStats.js, which the gear planner already
+// uses - re-exported here so blessing code has one obvious import without
+// duplicating the formula.
 //
-//   natural = D^3/1250 + 4D + 40      (D = Defence level)
-//
-// Confirmed exact: D=90 gives 983.2, matching the figure the wiki's Cryptbloom
-// page quotes ("983.2 natural and 1843.4 from cryptbloom"). At 99 it is 1212.2.
-// Assume 99 Defence unless the player states otherwise.
-export function getNaturalArmour(defenceLevel = 99) {
-  const d = defenceLevel;
-  return (d ** 3) / 1250 + 4 * d + 40;
-}
-
-// Total armour = natural (Defence level) + sum of equipped armour ratings.
-// This is the input for all four armour-scaling blessings.
-export function getTotalArmour(items, defenceLevel = 99) {
-  const equipment = (items || []).reduce((sum, item) => sum + getArmourRating(item), 0);
-  return equipment + getNaturalArmour(defenceLevel);
-}
+// Two things worth knowing, because an earlier version of this file got both
+// wrong:
+//   - `getArmourRating(item, style)` is STYLE-AWARE. `stats.defence` is keyed
+//     by attack style, so a melee kiteshield genuinely has a large negative
+//     magic rating. Taking Math.max() across the keys would silently credit a
+//     melee shield's 491.6 to a magic loadout.
+//   - `getSkillArmour(D)` = D^3/1250 + 4D + 40 is the flat baseline from the
+//     Defence skill alone, before any gear (1212.24 at 99, shown in-game as
+//     1213). Assume 99 Defence unless the player says otherwise.
+export { getArmourRating, getSkillArmour, getTotalArmour } from '../utils/gearStats';
 
 // Recommended builds for the planned "Blessing guides" page.
 //
