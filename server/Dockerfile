@@ -16,8 +16,24 @@ COPY src/data/shortLinkWords.js ./src/data/shortLinkWords.js
 # og-image rendering (server/src/lib/ogImageRender.js) needs the same gear/
 # region data and icon assets the frontend build uses, so those come along
 # too - see that file's ICONS_DIR/REGION_ICONS_DIR resolution.
+#
+# WARNING: these are copied file-by-file, so adding an import to anything
+# under server/src/ that reaches a NEW file in src/ silently produces an image
+# that crashes on boot with ERR_MODULE_NOT_FOUND - taking down every /api/*
+# route, not just og-image. It builds and tests fine locally, where the whole
+# repo is on disk. Whole directories are not copied instead because src/data
+# pulls in the entire frontend data set (several MB of gear/ability tables)
+# that this service has no use for.
+#
+# The blessings/leagueRelics/gearStats entries below are what the share-image
+# renderer's blessing + league relic columns need; blessings.js re-exports from
+# src/utils/gearStats.js, so that has to come along even though no server file
+# imports it directly.
 COPY src/data/gear.js ./src/data/gear.js
 COPY src/data/regions.js ./src/data/regions.js
+COPY src/data/blessings.js ./src/data/blessings.js
+COPY src/data/leagueRelics.js ./src/data/leagueRelics.js
+COPY src/utils/gearStats.js ./src/utils/gearStats.js
 COPY public/icons ./public/icons
 # routes/shareLinkPage.js injects a per-build og:image tag into this same
 # HTML the frontend container serves, rather than proxying to it at request
