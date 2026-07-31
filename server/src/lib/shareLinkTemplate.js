@@ -43,7 +43,42 @@ export function renderShareLinkPage(code, { hasImage }) {
 
   const shareUrl = `${SITE_ORIGIN}${APP_BASE_PATH}s/${code}`;
   const imageUrl = `${SITE_ORIGIN}${APP_BASE_PATH}api/og-image/${code}.png`;
+  return withShareTags(shareUrl, imageUrl);
+}
 
+// Same swap for a Build Guide's own path URL (see routes/buildGuidePage.js).
+// `buildId` is null for an unknown id or the bare /build-guides tab, which just
+// gets the ordinary page.
+export function renderBuildGuidePage(buildId, { name }) {
+  if (!buildId) return template;
+
+  const shareUrl = `${SITE_ORIGIN}${APP_BASE_PATH}build-guides/${buildId}`;
+  const imageUrl = `${SITE_ORIGIN}${APP_BASE_PATH}api/og-image/build/${buildId}.png`;
+  let html = withShareTags(shareUrl, imageUrl);
+  // Unlike a short link, a build guide has a name worth putting in the unfurl -
+  // "The Ironclad" beats the generic site title in a Discord embed.
+  if (name) {
+    html = html.replace(
+      /(<meta property="og:title" content=")([^"]*)(")/,
+      (_match, open, current, close) => `${open}${escapeAttribute(name)} - ${current}${close}`,
+    );
+  }
+  return html;
+}
+
+// HTML-escapes a value being interpolated into a double-quoted attribute.
+// Build names are authored in-repo rather than user input, but a stray quote
+// would silently break the tag, and this is the kind of thing that should never
+// depend on the data staying well-behaved.
+function escapeAttribute(value) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
+
+function withShareTags(shareUrl, imageUrl) {
   let html = template;
   html = replaceMetaContent(html, 'property="og:image" content', DEFAULT_IMAGE, imageUrl);
   html = replaceMetaContent(html, 'name="twitter:image" content', DEFAULT_IMAGE, imageUrl);

@@ -33,6 +33,7 @@ COPY src/data/gear.js ./src/data/gear.js
 COPY src/data/regions.js ./src/data/regions.js
 COPY src/data/blessings.js ./src/data/blessings.js
 COPY src/data/leagueRelics.js ./src/data/leagueRelics.js
+COPY src/data/blessingBuilds.js ./src/data/blessingBuilds.js
 COPY src/utils/gearStats.js ./src/utils/gearStats.js
 COPY public/icons ./public/icons
 # routes/shareLinkPage.js injects a per-build og:image tag into this same

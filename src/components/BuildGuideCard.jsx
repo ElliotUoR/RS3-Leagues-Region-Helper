@@ -153,14 +153,20 @@ function Collapsible({ title, children, defaultOpen = false }) {
 // regions, and Karamja belongs in `gatewaySelected`.
 function shareFieldsFor(build) {
   const equippedNamesByStyle = { melee: {}, ranged: {}, magic: {}, necromancy: {} };
+  // Every guide loadout slots a weapon into the Essence of Finality amulet and
+  // the card renders it, so the share link has to carry it too - it is a
+  // separate field from `slots`, and leaving it empty silently dropped the EOF
+  // weapon from every shared build.
+  const eofWeaponNamesByStyle = {};
   for (const [styleId, entry] of Object.entries(build.loadouts.late || {})) {
     equippedNamesByStyle[styleId] = { ...entry.slots };
+    if (entry.eof) eofWeaponNamesByStyle[styleId] = entry.eof;
   }
   return {
     regions: build.regions,
     gatewaySelected: [...GATEWAY_REGIONS],
     equippedNamesByStyle,
-    eofWeaponNamesByStyle: {},
+    eofWeaponNamesByStyle,
     relics: build.unlocks.archRelics.map((relic) => relic.name),
     leagueRelics: build.relics,
     // `build.blessings` is the three tier picks by name - exactly the shape

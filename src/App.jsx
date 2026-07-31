@@ -23,6 +23,7 @@ import {
   useLeagueRelicSelection,
 } from './hooks/useLeagueRelicSelection';
 import { BLESSINGS_STORAGE_KEY, useBlessingSelection } from './hooks/useBlessingSelection';
+import { isBuildGuidePath, leaveBuildGuidePath } from './utils/buildGuideRoute';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { useTheme } from './hooks/useTheme';
 import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
@@ -83,9 +84,15 @@ function currentRoute() {
   if (window.location.hash.split('/')[0] === '#character') return 'character';
   if (window.location.hash === '#league-relics') return 'leagueRelics';
   if (window.location.hash === '#blessings') return 'blessings';
-  // Build Guides appends the open build's id (e.g. "#build-guides/the-ironclad")
-  // so a link can be shared with that build already expanded - so this one
-  // matches on the prefix rather than the whole hash.
+  // Build Guides has two URL forms. The path form ("/Leagues/build-guides/
+  // the-ironclad") is what the address bar shows on the live site, because only
+  // a path can carry the build id to the server for a link preview; the hash
+  // form ("#build-guides/the-ironclad") is what every previously-shared link
+  // uses and still works. See utils/buildGuideRoute.js.
+  //
+  // Path is checked first, and leaveBuildGuidePath() clears it on the way out,
+  // so a stale path can never outrank a newer hash.
+  if (isBuildGuidePath()) return 'buildGuides';
   if (window.location.hash.split('/')[0] === '#build-guides') return 'buildGuides';
   if (window.location.hash === '#relic-import-docs') return 'relicImportDocs';
   if (window.location.hash === '#assumptions') return 'assumptions';
@@ -323,9 +330,23 @@ function App() {
   }
 
   useEffect(() => {
-    const onHashChange = () => setRoute(currentRoute());
+    // A nav link is an "#hash" href, so clicking one from a Build Guides PATH
+    // url (e.g. /Leagues/build-guides/the-ironclad) only changes the hash - the
+    // path stays put, and currentRoute() checks the path first, so the app
+    // would appear stuck on Build Guides. Clearing the path here, before
+    // recomputing, is what makes leaving the tab work at all.
+    const onHashChange = () => {
+      leaveBuildGuidePath(window.location.hash);
+      setRoute(currentRoute());
+    };
+    // Back/forward across the path form fires popstate, never hashchange.
+    const onPopState = () => setRoute(currentRoute());
     window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('hashchange', onHashChange);
+      window.removeEventListener('popstate', onPopState);
+    };
   }, []);
 
   // Fires on every route change (including the initial mount) - a no-op

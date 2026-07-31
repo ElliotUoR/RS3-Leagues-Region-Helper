@@ -29,6 +29,15 @@ handle_path /Leagues/* {
 	@shortlink path /s/*
 	reverse_proxy @shortlink rs3_node:3000
 
+	# /build-guides and /build-guides/:id -> Node, for the same reason as
+	# /s/:code above. The app is hash-routed, so a guide's natural URL would
+	# be /Leagues/#build-guides/<id> - but a fragment is never sent in the
+	# HTTP request, so no server could ever know which build to make a
+	# preview image for. Putting the id in the path is what makes it
+	# visible. See server/src/routes/buildGuidePage.js.
+	@buildguide path /build-guides /build-guides/*
+	reverse_proxy @buildguide rs3_node:3000
+
 	# Public PostgREST API (anon insert-only + the short-link RPC) -
 	# stripped of the /rest prefix too, so e.g. /Leagues/rest/page_events
 	# maps to PostgREST's own /page_events route. The frontend calls

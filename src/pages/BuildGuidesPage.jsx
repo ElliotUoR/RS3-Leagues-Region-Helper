@@ -10,6 +10,7 @@ import {
 import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { isBuildTextEditable, isBuildVisible } from '../utils/buildTextEdit';
+import { buildGuideUrl, buildIdFromLocation } from '../utils/buildGuideRoute';
 import { trackUsage } from '../utils/api';
 
 const BLESSING_ICONS = new Map([...BLESSINGS, ...GOD_TIER_BLESSINGS].map((b) => [b.name, b.icon]));
@@ -51,14 +52,16 @@ function RelicBadges(entry) {
   );
 }
 
-// The route is `#build-guides`; an open build appends its id, e.g.
-// `#build-guides/the-ironclad`. Sharing that link opens the page with that
-// build already expanded, which is the main reason to put it in the URL.
+// An open build puts its id in the URL so the link opens that build expanded.
+// Two forms exist - "/Leagues/build-guides/the-ironclad" (what the address bar
+// shows on the live site, and the only form a crawler can read a build id out
+// of for a link preview) and "#build-guides/the-ironclad" (every link shared
+// before that existed, still accepted). See utils/buildGuideRoute.js.
 const VISIBLE_BUILDS = BLESSING_BUILDS_EXAMPLES.filter(isBuildVisible);
 const BUILD_IDS = new Set(VISIBLE_BUILDS.map((b) => b.id));
 
-function buildIdFromHash() {
-  const id = window.location.hash.split('/')[1];
+function openBuildIdFromUrl() {
+  const id = buildIdFromLocation();
   return id && BUILD_IDS.has(id) ? id : null;
 }
 
@@ -73,7 +76,7 @@ export default function BuildGuidesPage() {
   // builds side by side, so this is a Set rather than a single active id. Only
   // the most recently opened one is reflected in the URL.
   const [expanded, setExpanded] = useState(() => {
-    const id = buildIdFromHash();
+    const id = openBuildIdFromUrl();
     return new Set(id ? [id] : []);
   });
 
@@ -83,22 +86,26 @@ export default function BuildGuidesPage() {
   // build (if any) was already open on the very first render, since toggle()
   // below and the hashchange listener below only cover *subsequent* opens.
   useEffect(() => {
-    const id = buildIdFromHash();
+    const id = openBuildIdFromUrl();
     if (id) trackUsage([{ category: 'build_guide', key: id }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Back/forward and hand-edited URLs both go through the hash, so listen for
-  // changes rather than only reading it once on mount.
+  // Back/forward and hand-edited URLs reach here as hashchange (hash form) or
+  // popstate (path form), so both are listened for.
   useEffect(() => {
-    function onHashChange() {
-      const id = buildIdFromHash();
+    function onLocationChange() {
+      const id = openBuildIdFromUrl();
       if (!id) return;
       setExpanded((prev) => (prev.has(id) ? prev : new Set([...prev, id])));
       trackUsage([{ category: 'build_guide', key: id }]);
     }
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    window.addEventListener('hashchange', onLocationChange);
+    window.addEventListener('popstate', onLocationChange);
+    return () => {
+      window.removeEventListener('hashchange', onLocationChange);
+      window.removeEventListener('popstate', onLocationChange);
+    };
   }, []);
 
   function toggle(id) {
@@ -107,10 +114,9 @@ export default function BuildGuidesPage() {
       const next = new Set(prev);
       if (opening) next.add(id);
       else next.delete(id);
-      // replaceState rather than assigning location.hash: this should be a
-      // shareable address, not a history entry per card you poke at.
-      const hash = opening ? `#build-guides/${id}` : '#build-guides';
-      window.history.replaceState(null, '', window.location.pathname + window.location.search + hash);
+      // replaceState rather than a navigation: this should be a shareable
+      // address, not a history entry per card you poke at.
+      window.history.replaceState(null, '', buildGuideUrl(opening ? id : null));
       return next;
     });
     // Only fires when actually opening a build, not closing one - "was this
