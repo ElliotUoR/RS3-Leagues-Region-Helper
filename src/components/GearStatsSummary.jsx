@@ -18,19 +18,29 @@ const MINIMISED_STORAGE_KEY = 'rs3-leagues-gear-stats-minimised';
 const DEFENCE_LEVEL_STORAGE_KEY = 'rs3-leagues-gear-stats-defence-level';
 const MAX_SKILL_LEVEL = 99;
 
-// Overload potions grant a flat +17 virtual Defence levels - applied only to
-// the Total Armour formula (see getSkillArmour), not to the stored/displayed
-// Defence level itself, since it's a temporary buff rather than the
-// player's real level. Persisted like the other display prefs on this panel.
-const OVERLOAD_STORAGE_KEY = 'rs3-leagues-gear-stats-overload';
-const OVERLOAD_DEFENCE_BONUS = 17;
+// Overload/Elder Overload potions grant a flat virtual Defence level boost -
+// applied only to the Total Armour formula (see getSkillArmour), not to the
+// stored/displayed Defence level itself, since it's a temporary buff rather
+// than the player's real level. The two are mutually exclusive (Elder
+// Overload replaces Overload entirely rather than stacking with it), so
+// this is a single three-way mode rather than two independent toggles.
+// Persisted like the other display prefs on this panel.
+const OVERLOAD_MODE_STORAGE_KEY = 'rs3-leagues-gear-stats-overload-mode';
+// Pre-Elder-Overload storage key, a plain boolean - read as a fallback below
+// so an already-active plain Overload carries forward as 'overload' instead
+// of silently resetting to 'none' for anyone with it already set.
+const LEGACY_OVERLOAD_BOOLEAN_KEY = 'rs3-leagues-gear-stats-overload';
+const OVERLOAD_DEFENCE_BONUS_BY_MODE = { none: 0, overload: 17, elder: 25 };
 
-function loadInitialOverloaded() {
-  if (typeof window === 'undefined') return false;
+function loadInitialOverloadMode() {
+  if (typeof window === 'undefined') return 'none';
   try {
-    return window.localStorage.getItem(OVERLOAD_STORAGE_KEY) === 'true';
+    const stored = window.localStorage.getItem(OVERLOAD_MODE_STORAGE_KEY);
+    if (stored === 'overload' || stored === 'elder') return stored;
+    if (window.localStorage.getItem(LEGACY_OVERLOAD_BOOLEAN_KEY) === 'true') return 'overload';
+    return 'none';
   } catch {
-    return false;
+    return 'none';
   }
 }
 
@@ -91,7 +101,7 @@ function sumStats(equipped) {
 export default function GearStatsSummary({ equipped, style }) {
   const [minimised, setMinimised] = useState(loadInitialMinimised);
   const [defenceLevel, setDefenceLevel] = useState(loadInitialDefenceLevel);
-  const [overloaded, setOverloaded] = useState(loadInitialOverloaded);
+  const [overloadMode, setOverloadMode] = useState(loadInitialOverloadMode);
 
   useEffect(() => {
     window.localStorage.setItem(MINIMISED_STORAGE_KEY, String(minimised));
@@ -102,15 +112,17 @@ export default function GearStatsSummary({ equipped, style }) {
   }, [defenceLevel]);
 
   useEffect(() => {
-    window.localStorage.setItem(OVERLOAD_STORAGE_KEY, String(overloaded));
-  }, [overloaded]);
+    window.localStorage.setItem(OVERLOAD_MODE_STORAGE_KEY, overloadMode);
+  }, [overloadMode]);
 
   function toggleMinimised() {
     setMinimised((prev) => !prev);
   }
 
-  function toggleOverloaded() {
-    setOverloaded((prev) => !prev);
+  // Clicking the already-active one turns it off; clicking the other one
+  // switches straight to it (never both at once).
+  function selectOverloadMode(mode) {
+    setOverloadMode((prev) => (prev === mode ? 'none' : mode));
   }
 
   function handleDefenceLevelChange(e) {
@@ -121,7 +133,7 @@ export default function GearStatsSummary({ equipped, style }) {
 
   const totals = sumStats(equipped);
   const itemCount = Object.keys(equipped).length;
-  const effectiveDefenceLevel = defenceLevel + (overloaded ? OVERLOAD_DEFENCE_BONUS : 0);
+  const effectiveDefenceLevel = defenceLevel + OVERLOAD_DEFENCE_BONUS_BY_MODE[overloadMode];
   const totalArmour = getTotalArmour(equipped, style, effectiveDefenceLevel);
 
   return (
@@ -165,12 +177,21 @@ export default function GearStatsSummary({ equipped, style }) {
               <span>Total Armour</span>
               <button
                 type="button"
-                className={`gear-stats-ovl-toggle${overloaded ? ' active' : ''}`}
-                onClick={toggleOverloaded}
-                aria-pressed={overloaded}
+                className={`gear-stats-ovl-toggle${overloadMode === 'overload' ? ' active' : ''}`}
+                onClick={() => selectOverloadMode('overload')}
+                aria-pressed={overloadMode === 'overload'}
                 title="Overload potions add 17 Defence levels"
               >
-                Ovl?
+                Ovl
+              </button>
+              <button
+                type="button"
+                className={`gear-stats-ovl-toggle${overloadMode === 'elder' ? ' active' : ''}`}
+                onClick={() => selectOverloadMode('elder')}
+                aria-pressed={overloadMode === 'elder'}
+                title="Elder Overload potions add 25 Defence levels"
+              >
+                E-Ovl
               </button>
             </span>
             <strong>{totalArmour}</strong>
