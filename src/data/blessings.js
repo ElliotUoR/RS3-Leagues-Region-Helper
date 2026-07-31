@@ -25,19 +25,36 @@
 // bullets from app-added `regionTagNote`.
 //
 // Icon note: all twelve icons (nine blessings + three god powers) were cropped
-// from Jagex's reveal images and live in `public/icons/`, with the originals
-// kept in `image/Blessing icon/`. They are NOT on the wiki, so
+// from Jagex's reveal images. They are NOT on the wiki, so
 // scripts/download-icons.mjs must never be pointed at them - there is no
 // runescape.wiki file to re-fetch.
 //
-// Three filenames were normalised when copying, so the source and the copy
-// deliberately differ - do not "fix" these back:
-//   Teragard_Aegis.PNG      -> Teragard_Aegis.png      (drops the apostrophe-s)
-//   Eternal_Sustinence.PNG  -> Eternal_Sustenance.png  (spelling)
-//   Sacred_Fevor.PNG        -> Sacred_Fervor.png       (spelling)
-//   Demons_mark.PNG         -> Demons_Mark.png         (casing)
+// The live set is `public/icons/blessings/*.webp`, copied from
+// `image/BlessingIconsClear/` - background-free versions of the original crops.
+// The earlier opaque PNGs are still in `public/icons/` and are no longer
+// referenced from here. These paths are read by BOTH the app and the share-image
+// renderer (server/src/lib/ogImageRender.js), so any replacement set has to be a
+// format @napi-rs/canvas can decode; webp is verified working.
+//
+// Two filenames were normalised when copying, so the source and the copy
+// deliberately differ - do not "fix" these back. Apostrophes are dropped rather
+// than percent-encoded, matching what the PNG set already did:
+//   Teragard's_Aegis.webp -> Teragard_Aegis.webp
+//   Demon's_Mark.webp     -> Demons_Mark.webp
 
 export const BLESSING_COLOURS = ['red', 'green', 'blue'];
+
+// The god each colour belongs to, and the God Tier One power that colour awards
+// a majority of. The god/theme pairing is the standard RS3 one (Zamorak-chaos,
+// Guthix-balance, Saradomin-order) rather than anything stated on the reveal
+// images - it is what the colour choice reads as in-universe, and the Blessings
+// page leans on it so the three columns are identifiable at a glance without
+// relying on colour alone.
+export const BLESSING_COLOUR_META = {
+  red: { god: 'Zamorak', theme: 'Chaos', godPower: "Demon's Mark" },
+  green: { god: 'Guthix', theme: 'Balance', godPower: 'Splash Zone' },
+  blue: { god: 'Saradomin', theme: 'Order & Wisdom', godPower: 'Sacred Fervor' },
+};
 
 export const BLESSING_TIERS = [1, 2, 3];
 
@@ -60,10 +77,14 @@ export const BLESSINGS = [
     name: 'Adrenaline Junkie',
     tier: 1,
     colour: 'red',
-    icon: 'icons/Adrenaline_Junkie.png',
+    icon: 'icons/blessings/Adrenaline_Junkie.webp',
     effects: [
       'Your maximum adrenaline is increased by +50%.',
       'Adrenaline generation is increased by 50%.',
+    ],
+    compactPoints: [
+      '+50% maximum adrenaline',
+      '+50% adrenaline generation',
     ],
     analysis: {
       summary:
@@ -95,10 +116,14 @@ export const BLESSINGS = [
     name: 'Big Boned',
     tier: 1,
     colour: 'green',
-    icon: 'icons/Big_Boned.png',
+    icon: 'icons/blessings/Big_Boned.webp',
     effects: [
       'Your maximum life points are increased by 50%.',
       'All damage you deal gains 5% of your maximum life points as bonus damage.',
+    ],
+    compactPoints: [
+      '+50% maximum life points',
+      'All damage gains +5% of max LP',
     ],
     analysis: {
       summary:
@@ -122,10 +147,15 @@ export const BLESSINGS = [
     name: "Teragard's Aegis",
     tier: 1,
     colour: 'blue',
-    icon: 'icons/Teragard_Aegis.png',
+    icon: 'icons/blessings/Teragard_Aegis.webp',
     effects: [
       'Your base ability damage is increased by 25% of your total armour value. This bonus is doubled while wielding a defender and tripled while wielding a shield.',
       'Your base health regeneration is increased by 2.5% of your maximum life points. This bonus is doubled while wielding a defender and tripled while wielding a shield.',
+    ],
+    compactPoints: [
+      'Base ability damage +25% of total armour',
+      'Base health regen +2.5% of max LP',
+      'Both x2 with a defender, x3 with a shield',
     ],
     analysis: {
       summary:
@@ -156,11 +186,16 @@ export const BLESSINGS = [
     name: 'Abyssal Cinders',
     tier: 2,
     colour: 'red',
-    icon: 'icons/Abyssal_Cinders.png',
+    icon: 'icons/blessings/Abyssal_Cinders.webp',
     effects: [
       'On hit: your attacks deal 15% of ability damage as bonus damage.',
       'On hit: your attacks have a 5% chance to trigger an Inferno of Zamorak.',
       'Inferno of Zamorak: deals 100-200% ability damage to a single target.',
+    ],
+    compactPoints: [
+      'On hit: +15% of ability damage',
+      'On hit: 5% chance of an Inferno of Zamorak',
+      'Inferno: 100-200% ability damage, single target',
     ],
     analysis: {
       summary:
@@ -195,11 +230,16 @@ export const BLESSINGS = [
     name: 'Barkscales',
     tier: 2,
     colour: 'green',
-    icon: 'icons/Barkscales.png',
+    icon: 'icons/blessings/Barkscales.webp',
     effects: [
       'Incoming damage is reduced by 10% of your armour value.',
       'After Barkscales reduces damage 5 times, unleash a Grasp of Guthix at your attackers location.',
       'Grasp of Guthix: deals poison damage equal to 80-120% of your ability damage in a 3x3 area.',
+    ],
+    compactPoints: [
+      'Incoming damage -10% of armour value',
+      'Every 5th reduction: Grasp of Guthix at the attacker',
+      'Grasp: 80-120% ability damage as poison, 3x3',
     ],
     analysis: {
       summary:
@@ -221,11 +261,16 @@ export const BLESSINGS = [
     name: 'Striking Light',
     tier: 2,
     colour: 'blue',
-    icon: 'icons/Striking_Light.png',
+    icon: 'icons/blessings/Striking_Light.webp',
     effects: [
       "Your basic attack's damage is increased by 40%",
       'Your basic attacks unleash a Light of Saradomin on your target. 9s cooldown.',
       'Light of Saradomin: deals damage equal to 40-60% of your ability damage, plus 250% of your armour value.',
+    ],
+    compactPoints: [
+      'Basic attack damage +40%',
+      'Basic attacks unleash Light of Saradomin, 9s cooldown',
+      'Light: 40-60% ability damage + 250% of armour',
     ],
     analysis: {
       summary:
@@ -252,10 +297,14 @@ export const BLESSINGS = [
     name: 'Avernic Rampage',
     tier: 3,
     colour: 'red',
-    icon: 'icons/Avernic_Rampage.png',
+    icon: 'icons/blessings/Avernic_Rampage.webp',
     effects: [
       'On-attack: 5% chance to activate Avernic Rampage for 7.2s.',
       'Avernic Rampage: abilities and special attacks cost 0% adrenaline.',
+    ],
+    compactPoints: [
+      'On attack: 5% chance to trigger, lasts 7.2s',
+      'While active: abilities and specials cost 0% adrenaline',
     ],
     analysis: {
       summary:
@@ -292,10 +341,14 @@ export const BLESSINGS = [
     name: 'Eternal Sustenance',
     tier: 3,
     colour: 'green',
-    icon: 'icons/Eternal_Sustenance.png',
+    icon: 'icons/blessings/Eternal_Sustenance.webp',
     effects: [
       'Food is no longer consumed when eaten.',
       'You no longer lose adrenaline when eating.',
+    ],
+    compactPoints: [
+      'Food is not consumed when eaten',
+      'No adrenaline lost when eating',
     ],
     analysis: {
       summary:
@@ -322,13 +375,20 @@ export const BLESSINGS = [
     name: 'Steadfast Will',
     tier: 3,
     colour: 'blue',
-    icon: 'icons/Steadfast_Will.png',
+    icon: 'icons/blessings/Steadfast_Will.webp',
     effects: [
       "Empowers the 'Bash', 'Preparation', 'Reflect' and 'Revenge' abilities.",
       'Bash: deals additional damage equal to 350-450% of your armour value.',
       'Preparation: on activation reduces the cooldown of all abilities by 12s.',
       'Reflect: reflect 100% of incoming damage + 10-15% of your armour value as additional damage. Reflected damage hits up to 8 additional targets within 3 tiles of you.',
       'Revenge: the duration and cooldown of this ability is doubled. The maximum number of stacks is increased to 20.',
+    ],
+    compactPoints: [
+      'Bash: +350-450% of armour value as damage',
+      'Preparation: -12s off every ability cooldown',
+      'Reflect: 100% of incoming damage +10-15% of armour',
+      'Reflect also hits 8 extra targets within 3 tiles',
+      'Revenge: double duration and cooldown, max 20 stacks',
     ],
     analysis: {
       summary:
@@ -365,7 +425,7 @@ export const GOD_TIER_BLESSINGS = [
     name: "Demon's Mark",
     tier: 'god',
     colour: 'red',
-    icon: 'icons/Demons_Mark.png',
+    icon: 'icons/blessings/Demons_Mark.webp',
     effects: ["Your accuracy is always calculated using your target's weakness."],
     analysis: {
       summary:
@@ -382,7 +442,7 @@ export const GOD_TIER_BLESSINGS = [
     name: 'Splash Zone',
     tier: 'god',
     colour: 'green',
-    icon: 'icons/Splash_Zone.png',
+    icon: 'icons/blessings/Splash_Zone.webp',
     effects: [
       'Area-of-effect and multi-target attacks deal 30% more damage.',
       'Area of effect abilities deal 5% more damage per tile the target occupies.',
@@ -418,7 +478,7 @@ export const GOD_TIER_BLESSINGS = [
     name: 'Sacred Fervor',
     tier: 'god',
     colour: 'blue',
-    icon: 'icons/Sacred_Fervor.png',
+    icon: 'icons/blessings/Sacred_Fervor.webp',
     effects: [
       'Melee ability and special attack cooldowns are reduced by 30%.',
       'Magic ability and special attack cooldowns are reduced by 30%.',
@@ -532,7 +592,11 @@ export const BLESSING_PACKAGES = [
 //   - `getSkillArmour(D)` = D^3/1250 + 4D + 40 is the flat baseline from the
 //     Defence skill alone, before any gear (1212.24 at 99, shown in-game as
 //     1213). Assume 99 Defence unless the player says otherwise.
-export { getArmourRating, getSkillArmour, getTotalArmour } from '../utils/gearStats';
+// Extension is required, not optional: this module is imported by the og-image
+// renderer (server/src/lib/shareBuild.js), which runs under plain `node` rather
+// than Vite - Node's ESM resolver does not add `.js` for you, so an
+// extensionless specifier here crashes that route at request time.
+export { getArmourRating, getSkillArmour, getTotalArmour } from '../utils/gearStats.js';
 
 // Recommended builds for the planned "Blessing guides" page.
 //

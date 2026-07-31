@@ -21,8 +21,18 @@
 import LZString from 'lz-string';
 import { COMBAT_STYLES, ESSENCE_OF_FINALITY_NAMES, GEAR_SLOTS } from '../../../src/data/gear.js';
 import { GATEWAY_REGIONS, OPTIONAL_REGIONS, REGIONS } from '../../../src/data/regions.js';
+import { BLESSINGS, GOD_TIER_BLESSINGS, resolveGodTier } from '../../../src/data/blessings.js';
+import { LEAGUE_RELICS } from '../../../src/data/leagueRelics.js';
 
-const SUPPORTED_VERSIONS = new Set([2, 3, 4, 5, 6, 7]);
+// The planner allows at most this many optional regions; a payload claiming
+// more is either stale or hand-edited. The image renders the first three
+// rather than growing an unbounded column.
+const MAX_OPTIONAL_REGIONS = 3;
+// A run can hold one league relic per tier. Seven is the announced ceiling once
+// every tier is released, and is what the image's two-column block is sized for.
+const MAX_LEAGUE_RELICS = 7;
+
+const SUPPORTED_VERSIONS = new Set([2, 3, 4, 5, 6, 7, 8]);
 
 function sanitizeRegionSelection(raw) {
   if (!Array.isArray(raw)) return [];
@@ -60,10 +70,52 @@ function sanitizeEofWeaponNames(raw) {
   return names;
 }
 
+// Blessing picks, capped at one per tier, resolved to the icon paths the
+// renderer draws. The God Tier One power is appended when the picks settle it
+// (a colour with two or more, or all three tiers picked) - it is derived rather
+// than stored, exactly as on the Blessings page, so it never appears in the
+// payload itself. Arch relics are not rendered.
+function sanitizeBlessingsForImage(raw) {
+  if (!Array.isArray(raw)) return [];
+  const seenTiers = new Set();
+  const picks = [];
+  for (const name of raw) {
+    const blessing = BLESSINGS.find((b) => b.name === name);
+    if (!blessing || seenTiers.has(blessing.tier)) continue;
+    seenTiers.add(blessing.tier);
+    picks.push(blessing);
+  }
+  const colours = picks.map((b) => b.colour);
+  const majority = ['red', 'green', 'blue'].find(
+    (colour) => colours.filter((c) => c === colour).length >= 2,
+  );
+  const settled = Boolean(majority) || picks.length === 3;
+  const god = settled ? resolveGodTier(colours) : null;
+  const all = god ? [...picks, GOD_TIER_BLESSINGS.find((p) => p.name === god.name)] : picks;
+  return all.filter(Boolean).map((b) => ({ icon: b.icon, colour: b.colour, name: b.name }));
+}
+
+function sanitizeLeagueRelicsForImage(raw) {
+  if (!Array.isArray(raw)) return [];
+  const seenTiers = new Set();
+  const picks = [];
+  for (const name of raw) {
+    const relic = LEAGUE_RELICS.find((r) => r.name === name);
+    if (!relic?.icon) continue;
+    if (relic.tier != null) {
+      if (seenTiers.has(relic.tier)) continue;
+      seenTiers.add(relic.tier);
+    }
+    picks.push({ icon: relic.icon, name: relic.name });
+    if (picks.length === MAX_LEAGUE_RELICS) break;
+  }
+  return picks;
+}
+
 // Decodes a `share`/short-link payload string down to just what the og-image
-// renderer needs (regions + gateway picks + the default style's equipped
-// items, including its EOF-slotted weapon if any) - relics aren't part of
-// the thumbnail, so they're not carried through here.
+// renderer needs: regions + gateway picks, the default style's equipped items
+// (including its EOF-slotted weapon if any), blessings, and league relics.
+// Arch relics are deliberately not carried through - they are not drawn.
 export function decodeShareBuildForImage(payload) {
   if (!payload) return null;
   try {
@@ -81,7 +133,11 @@ export function decodeShareBuildForImage(payload) {
     const unlockedRegionIds = [
       ...Object.keys(REGIONS).filter((id) => REGIONS[id].fixed),
       ...GATEWAY_REGIONS.filter((id) => gatewaySelected.includes(id)),
-      ...OPTIONAL_REGIONS.filter((id) => regions.includes(id)),
+      // Capped: a run only ever gets three optional regions, and a payload
+      // carrying more (stale, or hand-edited) previously grew the image's
+      // region column without limit. Which three is not meaningful here - any
+      // three is as good as any other - so it takes them in payload order.
+      ...OPTIONAL_REGIONS.filter((id) => regions.includes(id)).slice(0, MAX_OPTIONAL_REGIONS),
     ];
 
     const equippedNames = equippedNamesByStyle[defaultStyle];
@@ -98,6 +154,8 @@ export function decodeShareBuildForImage(payload) {
       equippedNames,
       eofWeaponName,
       defaultStyle,
+      blessings: sanitizeBlessingsForImage(parsed.b),
+      leagueRelics: sanitizeLeagueRelicsForImage(parsed.l),
     };
   } catch {
     return null;

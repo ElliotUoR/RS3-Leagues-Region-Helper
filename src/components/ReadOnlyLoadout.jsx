@@ -122,7 +122,7 @@ export default function ReadOnlyLoadout({
               <strong className="read-only-loadout-armour-elder">{armourTotalElder.toLocaleString()}</strong>
               <span className="read-only-loadout-armour-note">
                 {' '}elder overloaded (+25)
-                {elderSources?.length ? ` — via ${elderSources.join(' or ')}` : ''}
+                {elderSources?.length ? ` - via ${elderSources.join(' or ')}` : ''}
               </span>
             </>
           )}

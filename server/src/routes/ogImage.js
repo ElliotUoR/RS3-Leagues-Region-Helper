@@ -25,6 +25,8 @@ ogImageRouter.get('/api/og-image/:code.png', async (req, res) => {
       equippedNames: decoded.equippedNames,
       eofWeaponName: decoded.eofWeaponName,
       defaultStyle: decoded.defaultStyle ?? 'melee',
+      blessings: decoded.blessings,
+      leagueRelics: decoded.leagueRelics,
     });
 
     res.setHeader('Content-Type', 'image/png');

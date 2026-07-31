@@ -5,6 +5,7 @@ import GearPage from './pages/GearPage';
 import GearByRegionPage from './pages/GearByRegionPage';
 import HomePage from './pages/HomePage';
 import LeagueRelicsPage from './pages/LeagueRelicsPage';
+import BlessingsPage from './pages/BlessingsPage';
 import BuildGuidesPage from './pages/BuildGuidesPage';
 import RelicImportDocsPage from './pages/RelicImportDocsPage';
 import ReportIssueButton from './components/ReportIssueButton';
@@ -21,6 +22,7 @@ import {
   sanitizeLeagueRelicSelectionLoose,
   useLeagueRelicSelection,
 } from './hooks/useLeagueRelicSelection';
+import { BLESSINGS_STORAGE_KEY, useBlessingSelection } from './hooks/useBlessingSelection';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { useTheme } from './hooks/useTheme';
 import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
@@ -80,6 +82,7 @@ function currentRoute() {
   if (window.location.hash === '#spellbooks') return 'character';
   if (window.location.hash.split('/')[0] === '#character') return 'character';
   if (window.location.hash === '#league-relics') return 'leagueRelics';
+  if (window.location.hash === '#blessings') return 'blessings';
   // Build Guides appends the open build's id (e.g. "#build-guides/the-ironclad")
   // so a link can be shared with that build already expanded - so this one
   // matches on the prefix rather than the whole hash.
@@ -120,6 +123,10 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
   // straight to the fresh instance's initial state has no such window.
   const { selected: selectedLeagueRelics, toggleLeagueRelic } = useLeagueRelicSelection({
     initialSelection: sharedBuild?.leagueRelics ?? importedLeagueRelics,
+    persist: !sharedBuild,
+  });
+  const { selected: selectedBlessings, toggleBlessing, clearBlessings } = useBlessingSelection({
+    initialSelection: sharedBuild?.blessings,
     persist: !sharedBuild,
   });
 
@@ -169,6 +176,7 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
     );
     window.localStorage.setItem(RELICS_STORAGE_KEY, JSON.stringify(selectedRelics));
     window.localStorage.setItem(LEAGUE_RELICS_STORAGE_KEY, JSON.stringify(selectedLeagueRelics));
+    window.localStorage.setItem(BLESSINGS_STORAGE_KEY, JSON.stringify(selectedBlessings));
     stripShareParam();
     onAdopted();
   }
@@ -208,6 +216,9 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         >
           League Relics
         </a>
+        <a href="#blessings" className={`blessings-tab${route === 'blessings' ? ' active' : ''}`}>
+          Blessings
+        </a>
         <a href="#build-guides" className={route === 'buildGuides' ? 'active' : ''}>
           Build Guides
         </a>
@@ -229,6 +240,7 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
           gatewaySelected={gatewaySelected}
           selectedRelics={selectedRelics}
           selectedLeagueRelics={selectedLeagueRelics}
+          selectedBlessings={selectedBlessings}
           {...gear}
         />
       )}
@@ -243,6 +255,23 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
       )}
       {route === 'leagueRelics' && (
         <LeagueRelicsPage selected={selectedLeagueRelics} toggleLeagueRelic={toggleLeagueRelic} />
+      )}
+      {/* Takes the rest of the build too, not just blessings: its share button
+          emits the same whole-build link the Gear Planner's does, only with a
+          landing hash pointing back here. */}
+      {route === 'blessings' && (
+        <BlessingsPage
+          selected={selectedBlessings}
+          toggleBlessing={toggleBlessing}
+          clearBlessings={clearBlessings}
+          regions={selected}
+          gatewaySelected={gatewaySelected}
+          equippedNamesByStyle={gear.equippedNamesByStyle}
+          eofWeaponNamesByStyle={gear.eofWeaponNamesByStyle}
+          relics={selectedRelics}
+          leagueRelics={selectedLeagueRelics}
+          defaultStyle={gear.defaultStyle}
+        />
       )}
       {/* Takes no props: the build guides are fixed reference examples and
           must never read or mutate the player's own region/relic/loadout
@@ -328,13 +357,19 @@ function App() {
       const decoded = payload ? decodeShareBuild(payload) : null;
       if (cancelled || !decoded) return;
       setSharedBuild(decoded);
+      // A short link has no hash of its own to read the landing tab from (that
+      // is the point of it being short), so the tab is carried inside the
+      // payload instead - see shareBuild.js's landingHash, which allow-lists
+      // the value before it ever reaches replaceState. Pre-v8 payloads have no
+      // hash and sanitize to #gear, which is where they always used to land.
+      const landingHash = decoded.landingHash ?? '#gear';
       // history.replaceState never fires 'hashchange' (unlike a real
       // navigation or a direct `location.hash =` assignment), so `route`
       // has to be updated explicitly here too - otherwise the visible tab
       // would silently stay stuck on 'home' despite the hash now saying
       // #gear.
-      window.history.replaceState(null, '', `${window.location.pathname}#gear`);
-      setRoute('gear');
+      window.history.replaceState(null, '', `${window.location.pathname}${landingHash}`);
+      setRoute(currentRoute());
     })();
 
     return () => {

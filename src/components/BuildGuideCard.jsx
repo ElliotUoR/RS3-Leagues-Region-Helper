@@ -17,7 +17,7 @@ import { ABILITIES } from '../data/abilities';
 import { PRAYER_GROUPS, SPELLBOOK_GROUPS } from '../data/spellbooks';
 import { FIXED_REGIONS, GATEWAY_REGIONS, REGIONS } from '../data/regions';
 import { normalizeRegionGroups } from '../data/gearAvailability';
-import { buildShareUrl } from '../utils/shareBuild';
+import { copyShareLink, shareLinkFor } from '../utils/shareLink';
 import { saveBuildText } from '../utils/buildTextEdit';
 
 const STYLE_LABELS = { melee: 'Melee', ranged: 'Ranged', magic: 'Magic', necromancy: 'Necromancy' };
@@ -125,6 +125,14 @@ function PickRow({ icon, name, reason, editing, buildId, path }) {
   );
 }
 
+const BUILD_SHARE_LABELS = {
+  idle: 'Open in gear planner',
+  working: 'Creating link…',
+  copied: 'Link copied',
+  manual: 'Link ready',
+  error: 'Share unavailable',
+};
+
 function Collapsible({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -140,23 +148,27 @@ function Collapsible({ title, children, defaultOpen = false }) {
   );
 }
 
-// Builds the share URL for the build's LATE-game loadout. `regions` carries
-// only the optional picks: sanitizeRegionSelection() drops fixed and gateway
+// The share payload for the build's LATE-game loadout. `regions` carries only
+// the optional picks: sanitizeRegionSelection() drops fixed and gateway
 // regions, and Karamja belongs in `gatewaySelected`.
-function shareUrlFor(build) {
+function shareFieldsFor(build) {
   const equippedNamesByStyle = { melee: {}, ranged: {}, magic: {}, necromancy: {} };
   for (const [styleId, entry] of Object.entries(build.loadouts.late || {})) {
     equippedNamesByStyle[styleId] = { ...entry.slots };
   }
-  return buildShareUrl({
+  return {
     regions: build.regions,
     gatewaySelected: [...GATEWAY_REGIONS],
     equippedNamesByStyle,
     eofWeaponNamesByStyle: {},
     relics: build.unlocks.archRelics.map((relic) => relic.name),
     leagueRelics: build.relics,
+    // `build.blessings` is the three tier picks by name - exactly the shape
+    // useBlessingSelection stores, so it needs no translation. The god power is
+    // deliberately not carried: it is derived from these three, never stored.
+    blessings: build.blessings,
     defaultStyle: build.styles[0],
-  });
+  };
 }
 
 export default function BuildGuideCard({ build, expanded, onToggle, editing = false }) {
@@ -164,7 +176,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
   // One style shown at a time. Keeps every loadout the same size across every
   // guide, and lets a multi-style build be read as the style you actually play.
   const [style, setStyle] = useState(build.styles[0]);
-  const [copied, setCopied] = useState(false);
+  const [shareStatus, setShareStatus] = useState('idle');
   // Mirrors build.hidden locally so the badge flips immediately on click; the
   // file is the real store and HMR reconciles a moment later.
   const [hidden, setHidden] = useState(Boolean(build.hidden));
@@ -217,15 +229,18 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
     }
   }
 
+  // Goes through shareLinkFor, so on the live site this is a short link that is
+  // created once and re-fetched from the database on every later share of the
+  // same build - see utils/shareLink.js.
   async function handleShare() {
-    const url = shareUrlFor(build);
+    setShareStatus('working');
     try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const url = await shareLinkFor(shareFieldsFor(build));
+      setShareStatus(await copyShareLink(url));
     } catch {
-      window.open(url, '_blank', 'noopener');
+      setShareStatus('error');
     }
+    setTimeout(() => setShareStatus('idle'), 2500);
   }
 
   return (
@@ -433,7 +448,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
 
             <div className="build-loadout-column">
               <div className="build-loadout-header">
-                <h4>Loadout — {STYLE_LABELS[style]}</h4>
+                <h4>Loadout - {STYLE_LABELS[style]}</h4>
                 <div className="build-stage-tabs" role="tablist" aria-label="Progression stage">
                   {BLESSING_BUILD_STAGES.map((entry) => (
                     <button
@@ -454,7 +469,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                 <>
                   <ReadOnlyLoadout
                     styleId={style}
-                    styleLabel={`${STYLE_LABELS[style]} — ${BLESSING_BUILD_STAGES.find((s) => s.id === stage)?.label}`}
+                    styleLabel={`${STYLE_LABELS[style]} - ${BLESSING_BUILD_STAGES.find((s) => s.id === stage)?.label}`}
                     slots={loadout.slots}
                     eof={loadout.eof}
                     armourTotal={loadout.armourTotal}
@@ -464,12 +479,18 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                     isUnlocked={buildIsUnlocked}
                     selectedLeagueRelics={build.relics}
                   />
-                  <button type="button" className="build-share-button" onClick={handleShare}>
-                    {copied ? 'Link copied' : 'Open in gear planner'}
+                  <button
+                    type="button"
+                    className="build-share-button"
+                    onClick={handleShare}
+                    disabled={shareStatus === 'working'}
+                  >
+                    {BUILD_SHARE_LABELS[shareStatus]}
                   </button>
                   <p className="build-share-note">
-                    Copies a share link for the late-game loadout, regions, Arch relics and league relics.
-                    Opening it previews the build without overwriting your own saved loadout.
+                    Copies a share link for the late-game loadout, regions, Arch relics, league
+                    relics and blessings. Opening it previews the build without overwriting your own
+                    saved loadout.
                   </p>
                 </>
               ) : (
@@ -508,7 +529,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
             </section>
 
             <section className="build-setup-group">
-              <h4>Abilities — {STYLE_LABELS[style]}</h4>
+              <h4>Abilities - {STYLE_LABELS[style]}</h4>
               <ul>
                 {styleAbilities.map((ability) => (
                   <SetupEntry

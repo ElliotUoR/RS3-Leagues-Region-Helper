@@ -54,10 +54,43 @@ const REGION_GRID_GAP_X = 40;
 const REGION_GRID_GAP_Y = 28;
 const REGION_LABEL_HEIGHT = 30;
 
+// Blessings and league relics are drawn as bare icons with no label, so they
+// pack much tighter than the labelled region grid.
+//
+// Column counts are sized for the eventual ceiling, not today's data: eight
+// blessings once all tiers are released (four picks now - three tiers plus the
+// derived god power), and seven league relics. Both fill their first column
+// before starting a second, so today's four blessings render as a single
+// column of four rather than a lopsided 2x2.
+const PICK_ICON_BOX = 88;
+const PICK_GRID_GAP_X = 26;
+const PICK_GRID_GAP_Y = 20;
+const BLESSING_MAX = 8;
+const BLESSING_COL_HEIGHT = 4;
+const LEAGUE_RELIC_MAX = 7;
+const LEAGUE_RELIC_COL_HEIGHT = 4;
+
 const MARGIN = 50;
 const MIDDLE_GAP = 56;
 const HEADER_HEIGHT = 100;
 const BOTTOM_MARGIN = 40;
+
+// Fills column-first: index 0..colHeight-1 in column 0, the rest in column 1.
+// Returns { col, row } so a partly-filled second column stays top-aligned.
+function columnFirstPosition(index, colHeight) {
+  return { col: Math.floor(index / colHeight), row: index % colHeight };
+}
+
+function pickBlockSize(count, colHeight) {
+  if (count === 0) return { width: 0, height: 0, cols: 0 };
+  const cols = Math.ceil(count / colHeight);
+  const rows = Math.min(count, colHeight);
+  return {
+    cols,
+    width: cols * PICK_ICON_BOX + (cols - 1) * PICK_GRID_GAP_X,
+    height: rows * PICK_ICON_BOX + (rows - 1) * PICK_GRID_GAP_Y,
+  };
+}
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -89,7 +122,14 @@ function findItemIcon(style, slot, itemName) {
   return items.find((item) => item.name === itemName)?.icon ?? null;
 }
 
-export async function renderShareImage({ unlockedRegionIds, equippedNames, eofWeaponName, defaultStyle }) {
+export async function renderShareImage({
+  unlockedRegionIds,
+  equippedNames,
+  eofWeaponName,
+  defaultStyle,
+  blessings = [],
+  leagueRelics = [],
+}) {
   const gearGridWidth = SLOT_COLS * SLOT_BOX + (SLOT_COLS - 1) * SLOT_GAP;
   const gearGridHeight = SLOT_ROWS * SLOT_BOX + (SLOT_ROWS - 1) * SLOT_GAP;
 
@@ -98,13 +138,35 @@ export async function renderShareImage({ unlockedRegionIds, equippedNames, eofWe
   const regionGridWidth = regionCols * REGION_ICON_BOX + (regionCols - 1) * REGION_GRID_GAP_X;
   const regionGridHeight = regionRows * (REGION_ICON_BOX + REGION_LABEL_HEIGHT) + (regionRows - 1) * REGION_GRID_GAP_Y;
 
+  // Defensive caps: the decoder already limits both, but the renderer sizes the
+  // canvas from these counts, so an over-long list here would silently draw
+  // outside it rather than being clipped.
+  const shownBlessings = blessings.slice(0, BLESSING_MAX);
+  const shownRelics = leagueRelics.slice(0, LEAGUE_RELIC_MAX);
+
+  const blessingBlock = pickBlockSize(shownBlessings.length, BLESSING_COL_HEIGHT);
+  const relicBlock = pickBlockSize(shownRelics.length, LEAGUE_RELIC_COL_HEIGHT);
+
   const gearGridLeft = MARGIN;
   const gearGridTop = HEADER_HEIGHT;
   const regionGridLeft = gearGridLeft + gearGridWidth + MIDDLE_GAP;
   const regionGridTop = HEADER_HEIGHT;
 
-  const width = regionGridLeft + regionGridWidth + MARGIN;
-  const height = HEADER_HEIGHT + Math.max(gearGridHeight, regionGridHeight) + BOTTOM_MARGIN;
+  // Each block only claims horizontal space when it has something in it, and
+  // only adds the gap that precedes it - so a build with no blessings puts the
+  // relics where the blessings would have been rather than leaving a hole, and
+  // a build with neither ends the canvas right after the regions.
+  let nextLeft = regionGridLeft + regionGridWidth;
+  const blessingLeft = nextLeft + MIDDLE_GAP;
+  if (blessingBlock.width > 0) nextLeft = blessingLeft + blessingBlock.width;
+  const relicLeft = nextLeft + MIDDLE_GAP;
+  if (relicBlock.width > 0) nextLeft = relicLeft + relicBlock.width;
+
+  const width = nextLeft + MARGIN;
+  const height =
+    HEADER_HEIGHT +
+    Math.max(gearGridHeight, regionGridHeight, blessingBlock.height, relicBlock.height) +
+    BOTTOM_MARGIN;
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
@@ -203,5 +265,25 @@ export async function renderShareImage({ unlockedRegionIds, equippedNames, eofWe
     ctx.textAlign = 'left';
   }
 
+  // Blessings, then league relics. Both are drawn as bare icons: the artwork is
+  // already distinctive and colour-coded (blessings by god, league relics by
+  // their own frame), and a name under each would double the block's width for
+  // no gain at thumbnail size - unlike regions, whose icons are far less
+  // recognisable on their own.
+  await drawPickColumn(ctx, shownBlessings, blessingLeft, HEADER_HEIGHT, BLESSING_COL_HEIGHT);
+  await drawPickColumn(ctx, shownRelics, relicLeft, HEADER_HEIGHT, LEAGUE_RELIC_COL_HEIGHT);
+
   return canvas.toBuffer('image/png');
+}
+
+async function drawPickColumn(ctx, picks, left, top, colHeight) {
+  for (const [index, pick] of picks.entries()) {
+    const { col, row } = columnFirstPosition(index, colHeight);
+    const x = left + col * (PICK_ICON_BOX + PICK_GRID_GAP_X);
+    const y = top + row * (PICK_ICON_BOX + PICK_GRID_GAP_Y);
+    // No panel/border behind these: the icons are hexagonal or shield-shaped
+    // with their own frame, so a rounded square underneath reads as a second,
+    // conflicting frame rather than as a slot.
+    await drawIconCentered(ctx, path.join(path.dirname(ICONS_DIR), pick.icon), x, y, PICK_ICON_BOX, 2);
+  }
 }

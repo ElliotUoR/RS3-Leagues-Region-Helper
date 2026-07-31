@@ -6,8 +6,8 @@ import TagTooltip from '../components/TagTooltip';
 import { COMBAT_STYLES, GEAR } from '../data/gear';
 import { isGearItemAvailable } from '../data/gearAvailability';
 import { getArmourRating } from '../utils/gearStats';
-import { buildShareUrl, encodeShareBuild } from '../utils/shareBuild';
-import { createShortLink } from '../utils/api';
+import { buildShareUrl } from '../utils/shareBuild';
+import { copyShareLink, shareLinkFor } from '../utils/shareLink';
 import { IS_PAGES_BUILD } from '../utils/deployTarget';
 
 const SLOT_LABELS = {
@@ -70,6 +70,7 @@ export default function GearPage({
   gatewaySelected,
   selectedRelics,
   selectedLeagueRelics,
+  selectedBlessings,
   style,
   setStyle,
   defaultStyle,
@@ -165,6 +166,7 @@ export default function GearPage({
       eofWeaponNamesByStyle,
       relics: selectedRelics,
       leagueRelics: selectedLeagueRelics,
+      blessings: selectedBlessings,
       defaultStyle,
     });
     try {
@@ -201,23 +203,20 @@ export default function GearPage({
           setDefaultStyle(fallbackStyle);
         }
       }
-      const payload = encodeShareBuild({
+      // shareLinkFor caches per payload and the backend looks the payload hash
+      // up before inserting, so re-sharing an unchanged build returns the code
+      // that already exists - see utils/shareLink.js.
+      const url = await shareLinkFor({
         regions: selected,
         gatewaySelected,
         equippedNamesByStyle,
         eofWeaponNamesByStyle,
         relics: selectedRelics,
         leagueRelics: selectedLeagueRelics,
+        blessings: selectedBlessings,
         defaultStyle: effectiveDefaultStyle,
       });
-      const url = await createShortLink(payload);
-      try {
-        await navigator.clipboard.writeText(url);
-        setShortenStatus('copied');
-      } catch {
-        window.prompt('Copy this short link:', url);
-        setShortenStatus('manual');
-      }
+      setShortenStatus(await copyShareLink(url));
     } catch {
       setShortenStatus('error');
     }

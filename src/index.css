@@ -134,6 +134,28 @@ h1, h2, h3 {
   border-color: #d4af37;
 }
 
+/* Blessings gets the same outlined-tab treatment as League Relics, in Guthix
+   green rather than gold - both are "pick from a league-wide list" pages, as
+   distinct from the region/gear planning tabs. */
+.site-nav a.blessings-tab {
+  border: 1px solid #3fbf6f;
+  border-radius: 6px;
+  margin-bottom: 0;
+  color: #5fd98c;
+  box-shadow: 0 0 8px -2px rgb(63 191 111 / 45%);
+}
+
+:root[data-theme='light'] .site-nav a.blessings-tab {
+  color: #1a7a42;
+}
+
+.site-nav a.blessings-tab.active {
+  background: color-mix(in srgb, #3fbf6f 18%, transparent);
+  color: var(--text-h);
+  border-color: #3fbf6f;
+  box-shadow: 0 0 12px -2px rgb(63 191 111 / 65%);
+}
+
 .site-footer {
   margin-top: 48px;
   padding-top: 16px;
@@ -5152,4 +5174,498 @@ main.abilities-page .gear-item-rows {
   font-size: 0.74rem;
   color: var(--text);
   opacity: 0.75;
+}
+
+/* ======================================================================
+   BLESSINGS PAGE
+
+   The whole page is organised around the three colours, because the colour
+   of each pick - not the pick itself - is what determines the God Tier One
+   power. Every blessing surface (card, tally chip, key swatch, god power)
+   pulls its palette from the same three --bl-* custom properties, set once
+   per colour below, so the association stays consistent everywhere.
+
+   Colour never carries meaning on its own: each card also names its
+   blessing, selection adds a tick, and the key/tally chips spell out the
+   god and theme in words.
+   ====================================================================== */
+
+.blessing-card-red,
+.god-power-red,
+.god-tally-red,
+.blessing-key-red,
+.blessing-tier-picked-red,
+.god-panel-red {
+  --bl-accent: #ef5350;
+  --bl-soft: rgb(239 83 80 / 10%);
+  --bl-glow: rgb(239 83 80 / 45%);
+}
+
+.blessing-card-green,
+.god-power-green,
+.god-tally-green,
+.blessing-key-green,
+.blessing-tier-picked-green,
+.god-panel-green {
+  --bl-accent: #3fbf6f;
+  --bl-soft: rgb(63 191 111 / 10%);
+  --bl-glow: rgb(63 191 111 / 45%);
+}
+
+.blessing-card-blue,
+.god-power-blue,
+.god-tally-blue,
+.blessing-key-blue,
+.blessing-tier-picked-blue,
+.god-panel-blue {
+  --bl-accent: #4a90e2;
+  --bl-soft: rgb(74 144 226 / 10%);
+  --bl-glow: rgb(74 144 226 / 45%);
+}
+
+:root[data-theme='light'] .blessing-card-red,
+:root[data-theme='light'] .god-power-red,
+:root[data-theme='light'] .god-tally-red,
+:root[data-theme='light'] .blessing-key-red,
+:root[data-theme='light'] .blessing-tier-picked-red,
+:root[data-theme='light'] .god-panel-red {
+  --bl-accent: #c0392b;
+}
+
+:root[data-theme='light'] .blessing-card-green,
+:root[data-theme='light'] .god-power-green,
+:root[data-theme='light'] .god-tally-green,
+:root[data-theme='light'] .blessing-key-green,
+:root[data-theme='light'] .blessing-tier-picked-green,
+:root[data-theme='light'] .god-panel-green {
+  --bl-accent: #15803d;
+}
+
+:root[data-theme='light'] .blessing-card-blue,
+:root[data-theme='light'] .god-power-blue,
+:root[data-theme='light'] .god-tally-blue,
+:root[data-theme='light'] .blessing-key-blue,
+:root[data-theme='light'] .blessing-tier-picked-blue,
+:root[data-theme='light'] .god-panel-blue {
+  --bl-accent: #1d4ed8;
+}
+
+.blessings-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.blessings-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.blessings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ---- colour key ---- */
+
+.blessing-colour-key {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+}
+
+.blessing-key {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+}
+
+.blessing-key-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  background: var(--bl-accent);
+  box-shadow: 0 0 7px -1px var(--bl-glow);
+}
+
+.blessing-key-god {
+  font-weight: 600;
+  color: var(--bl-accent);
+}
+
+.blessing-key-theme {
+  color: var(--text);
+  opacity: 0.75;
+}
+
+/* Pushed to the far right of the key row rather than given a row of its own -
+   same placement logic as League Relics' toggle sitting on the tier heading. */
+.blessing-mode-toggle {
+  margin-left: auto;
+}
+
+/* ---- tier groups ---- */
+
+.blessing-tier-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blessing-tier-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.blessing-tier-label {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.blessing-tier-note {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* Echoes the current pick on the heading so the tier still reads as decided
+   when the cards are scrolled out of view. */
+.blessing-tier-picked {
+  margin-left: auto;
+  padding: 2px 9px;
+  border: 1px solid var(--bl-accent);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--bl-accent);
+  background: var(--bl-soft);
+}
+
+/* Three equal columns so a colour keeps the same column across all three
+   tiers - the vertical read is what makes "two of a colour" visible.
+   `align-items: start` sizes each card to its own content: the three cards in a
+   tier differ a lot in length (Steadfast Will has four effect lines, Eternal
+   Sustenance has two), and stretching them to match left the short ones as
+   mostly-empty boxes. The row still reads as a set because the coloured top
+   edges all align. */
+.blessing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+/* ---- blessing card ---- */
+
+.blessing-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px 14px 13px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--bl-accent);
+  border-radius: 9px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms, box-shadow 120ms, background 120ms;
+}
+
+.blessing-card:hover {
+  border-color: var(--bl-accent);
+  box-shadow: 0 0 14px -6px var(--bl-glow);
+}
+
+.blessing-card:focus-visible {
+  outline: 2px solid var(--bl-accent);
+  outline-offset: 2px;
+}
+
+.blessing-card.selected {
+  border-color: var(--bl-accent);
+  background: var(--bl-soft);
+  box-shadow: 0 0 0 1px var(--bl-accent), 0 0 18px -6px var(--bl-glow);
+}
+
+/* Selection is announced by a tick as well as the glow - the glow alone would
+   be a colour-only cue. */
+.blessing-card-check {
+  position: absolute;
+  top: 9px;
+  right: 11px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--bl-accent);
+  opacity: 0;
+}
+
+.blessing-card.selected .blessing-card-check {
+  opacity: 1;
+}
+
+.blessing-card-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-right: 18px;
+}
+
+.blessing-card-icon,
+.blessing-card-icon-placeholder {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  object-fit: contain;
+}
+
+.blessing-card-icon-placeholder {
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+
+.blessing-card-name {
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--text-h);
+}
+
+/* Verbatim card text from Jagex's reveal images. */
+.blessing-card-effects {
+  margin: 0;
+  padding-left: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+.blessing-card-effects li::marker {
+  color: var(--bl-accent);
+}
+
+/* Compact mode: the same effects reduced to their numbers and conditions.
+   Tighter leading than the detailed list because each point is a fragment
+   rather than a sentence, and they are meant to be scanned as a set. */
+.blessing-card-points {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.79rem;
+  line-height: 1.4;
+}
+
+.blessing-card-points li::marker {
+  color: var(--bl-accent);
+}
+
+.blessing-card-compact {
+  gap: 7px;
+  padding: 11px 12px;
+}
+
+.blessing-card-compact .blessing-card-icon,
+.blessing-card-compact .blessing-card-icon-placeholder {
+  width: 24px;
+  height: 24px;
+}
+
+/* ---- god tier panel ---- */
+
+.god-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-bg);
+  transition: border-color 160ms, box-shadow 160ms;
+}
+
+/* Once a power is settled the whole panel takes that colour, so the outcome is
+   visible without reading it. */
+.god-panel-red,
+.god-panel-green,
+.god-panel-blue {
+  border-color: var(--bl-accent);
+  box-shadow: 0 0 24px -14px var(--bl-glow);
+}
+
+.god-panel-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.god-panel-title {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.god-panel-derived {
+  font-size: 0.74rem;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.god-panel-tally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.god-tally {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  opacity: 0.55;
+  transition: opacity 120ms, border-color 120ms, box-shadow 120ms;
+}
+
+.god-tally.has-picks {
+  opacity: 1;
+  border-color: var(--bl-accent);
+  background: var(--bl-soft);
+}
+
+.god-tally.winning {
+  box-shadow: 0 0 12px -4px var(--bl-glow);
+}
+
+.god-tally-count {
+  min-width: 1.1em;
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--bl-accent);
+}
+
+.god-tally-god {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.god-tally-theme {
+  opacity: 0.7;
+}
+
+.god-panel-rule {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.god-panel-powers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+/* Unawarded powers stay legible but visibly out of play - dimmed rather than
+   hidden, since comparing what you are giving up is the point. Kept at 0.62
+   rather than lower: Sacred Fervor's four near-identical lines still have to be
+   readable, and this is the floor where they stay so in the light theme. */
+.god-power {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  opacity: 0.62;
+  transition: opacity 140ms, border-color 140ms, box-shadow 140ms;
+}
+
+.god-power.awarded {
+  opacity: 1;
+  border-color: var(--bl-accent);
+  background: var(--bl-soft);
+  box-shadow: 0 0 18px -8px var(--bl-glow);
+}
+
+.god-power-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.god-power-icon {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  object-fit: contain;
+}
+
+.god-power-name {
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--text-h);
+}
+
+.god-power-badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bl-accent);
+  border: 1px solid var(--bl-accent);
+}
+
+.god-power-effects {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.79rem;
+  line-height: 1.45;
+}
+
+.god-power-effects li::marker {
+  color: var(--bl-accent);
+}
+
+@media (max-width: 860px) {
+  .blessing-grid,
+  .god-panel-powers {
+    grid-template-columns: 1fr;
+  }
+
+  .blessing-tier-picked,
+  .blessing-mode-toggle {
+    margin-left: 0;
+  }
 }
