@@ -21,11 +21,13 @@ const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 const MIN_DAYS = 1;
 const MAX_DAYS = 365;
 const DEFAULT_DAYS = 30;
-const TOP_N = 10;
+const TOP_N = 25;
 // Fetched from each of the two data sources (rolled-up + raw-recent) before
-// merging, so summing two partial top-10 lists can't drop an entry that
-// would have made the real top 10 overall.
-const PARTIAL_TOP_N = 20;
+// merging, so summing two partial lists can't drop an entry that would have
+// made the real top N overall. Must stay comfortably above TOP_N for that to
+// hold - an entry ranked just outside both partial lists but first overall is
+// only recoverable with headroom here.
+const PARTIAL_TOP_N = 50;
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -311,6 +313,17 @@ adminRouter.get('/api/admin/summary', requireAdmin, async (req, res) => {
     console.error('admin summary query failed:', err);
     res.status(502).json({ error: 'could not load analytics right now' });
   }
+});
+
+// GET /api/admin/active-users
+// The same live gauge /api/admin/summary returns, on its own. The dashboard
+// polls this on a 60s timer when "auto-refresh active users" is on, and
+// hitting /summary for it would re-run that route's ~8 Postgres aggregations
+// every minute to read a number that is a Map scan in this process's memory
+// (see lib/activeSessions.js). No date range applies - "right now" is the
+// only window this number has.
+adminRouter.get('/api/admin/active-users', requireAdmin, (_req, res) => {
+  res.json({ activeUsers: countActiveSessions() });
 });
 
 const MIN_PAGE_SIZE = 10;
