@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import AbilitiesPage from './AbilitiesPage';
 import RelicsPage from './RelicsPage';
 import SpellbooksPage from './SpellbooksPage';
+import EssentialsPage from './EssentialsPage';
 import { trackPageview } from '../utils/api';
 
 const SUB_TABS = [
   { id: 'abilities', label: 'Abilities' },
   { id: 'relics', label: 'Arch Relics' },
   { id: 'spellbooks', label: 'Spellbooks & Prayers' },
+  { id: 'essentials', label: 'Essentials' },
 ];
 const SUB_TAB_IDS = new Set(SUB_TABS.map((t) => t.id));
 const DEFAULT_SUB_TAB = 'abilities';
@@ -36,7 +38,13 @@ function isCharacterHash(hash) {
   return LEGACY_HASH_SUB_TAB[hash] !== undefined || hash.split('/')[0] === '#character';
 }
 
-export default function CharacterPage({ isUnlocked, selectedRelics, toggleRelic, hasCrystalGrace }) {
+export default function CharacterPage({
+  isUnlocked,
+  selectedRelics,
+  toggleRelic,
+  hasCrystalGrace,
+  selectedLeagueRelics,
+}) {
   const [subTab, setSubTab] = useState(subTabFromHash);
 
   // Switching sub-tabs never changes App.jsx's top-level `route` (it stays
@@ -87,6 +95,9 @@ export default function CharacterPage({ isUnlocked, selectedRelics, toggleRelic,
         <RelicsPage isUnlocked={isUnlocked} selected={selectedRelics} toggleRelic={toggleRelic} />
       )}
       {subTab === 'spellbooks' && <SpellbooksPage isUnlocked={isUnlocked} hasCrystalGrace={hasCrystalGrace} />}
+      {subTab === 'essentials' && (
+        <EssentialsPage isUnlocked={isUnlocked} selectedLeagueRelics={selectedLeagueRelics} />
+      )}
     </>
   );
 }

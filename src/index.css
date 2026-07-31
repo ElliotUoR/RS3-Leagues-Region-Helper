@@ -6273,3 +6273,80 @@ main.abilities-page .gear-item-rows {
     margin-left: 0;
   }
 }
+
+/* ---- Character > Essentials ---- */
+
+.essentials-tally {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.essentials-tally strong {
+  color: var(--accent);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* These icons are detail renders rather than the small inventory sprites the
+   gear rows use, so they get a bit more room and are top-aligned with the
+   text block beside them. */
+.essential-row .essential-icon {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  align-self: flex-start;
+}
+
+.essential-row .gear-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.essential-summary {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.essential-why {
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+/* An uncertain requirement is called out rather than folded into the lit/unlit
+   state - being wrongly told a region is unnecessary costs a whole pick. */
+.essential-caveat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 2px;
+  padding: 6px 9px;
+  border-left: 2px solid var(--warning);
+  border-radius: 0 4px 4px 0;
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.essential-caveat-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--warning);
+}
+
+/* Neutral practical footnote, distinct from .essential-caveat which flags an
+   unconfirmed requirement in amber. */
+.essential-note {
+  padding: 5px 9px;
+  border-left: 2px solid var(--border);
+  border-radius: 0 4px 4px 0;
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  opacity: 0.9;
+}

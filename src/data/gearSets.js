@@ -45,13 +45,13 @@ export const GEAR_SET_GROUPS = {
   // Elder rune Longsword + round shield share the exact same
   // Smithing/Light-animica-ore source as the armour pieces (just a
   // different bar count in the shop text) - all one family.
-  'Elder rune full helm': 'Elder rune gear',
-  'Elder rune platebody': 'Elder rune gear',
-  'Elder rune platelegs': 'Elder rune gear',
-  'Elder rune gauntlets': 'Elder rune gear',
-  'Elder rune armoured boots': 'Elder rune gear',
-  'Elder rune round shield': 'Elder rune gear',
-  'Elder Rune Longsword': 'Elder rune gear',
+  'Elder rune full helm': 'Elder rune equipment',
+  'Elder rune platebody': 'Elder rune equipment',
+  'Elder rune platelegs': 'Elder rune equipment',
+  'Elder rune gauntlets': 'Elder rune equipment',
+  'Elder rune armoured boots': 'Elder rune equipment',
+  'Elder rune round shield + 5': 'Elder rune equipment',
+  'Elder Rune Longsword': 'Elder rune equipment',
 
   'Bane full helm': 'Bane gear',
   'Bane platebody': 'Bane gear',
@@ -535,32 +535,20 @@ export const GEAR_SET_GROUPS = {
   'Off-hand Drygore Longsword': 'Drygore longswords',
   'Drygore Mace': 'Drygore maces',
   'Off-hand Drygore Mace': 'Drygore maces',
-  'Chaotic longsword': 'Chaotic longswords',
-  'Off-hand chaotic longsword': 'Chaotic longswords',
-  'Attuned crystal dagger': 'Attuned crystal daggers',
-  'Off-hand attuned crystal dagger': 'Attuned crystal daggers',
   'Ripper Claw': 'Ripper claws',
   'Off-hand Ripper Claw': 'Ripper claws',
-  'Ruinous rapier': 'Ruinous rapiers',
-  'Off-hand ruinous rapier': 'Ruinous rapiers',
   'Khopesh of the Kharidian': 'Khopeshes of the Kharidian',
   'Off-hand Khopesh of the Kharidian': 'Khopeshes of the Kharidian',
 
   // --- Ranged dual-wielded weapon pairs ---
   'Blightbound crossbow': 'Blightbound crossbows',
   'Off-hand Blightbound crossbow': 'Blightbound crossbows',
-  'Ruinous crossbow': 'Ruinous crossbows',
-  'Off-hand Ruinous crossbow': 'Ruinous crossbows',
   'Ascension crossbow': 'Ascension crossbows',
   'Off-hand Ascension crossbow': 'Ascension crossbows',
   'Dragon crossbow': 'Dragon crossbows',
   'Off-hand dragon crossbow': 'Dragon crossbows',
-  'Chaotic crossbow': 'Chaotic crossbows',
-  'Off-hand chaotic crossbow': 'Chaotic crossbows',
   'Death Lotus dart': 'Death Lotus darts',
   'Off-hand Death Lotus dart': 'Death Lotus darts',
-  'Attuned crystal chakram': 'Attuned crystal chakrams',
-  'Off-hand attuned crystal chakram': 'Attuned crystal chakrams',
   'Primal crossbow Mk. 5': 'Primal crossbows Mk. 5',
   'Off-hand primal crossbow Mk. 5': 'Primal crossbows Mk. 5',
   'Shadow glaive': 'Shadow glaives',
@@ -569,24 +557,31 @@ export const GEAR_SET_GROUPS = {
   // --- Magic dual-wielded weapon pairs ---
   'Abyssal wand': 'Abyssal wand & orb',
   'Abyssal orb': 'Abyssal wand & orb',
-  'Crystal wand': 'Crystal wand & orb',
-  'Crystal orb': 'Crystal wand & orb',
   // Blisterwood staff shares the same morytania source as the wand/orb pair
   // (both ultimately gate on The Branches of Darkmeyer for the logs) - one
   // family of anti-vampyre weapons rather than a separate dual-wield pair.
   'Blisterwood wand': 'Blisterwood weapons',
   'Blisterwood orb': 'Blisterwood weapons',
   'Blisterwood staff': 'Blisterwood weapons',
-  'Eternal magic wand (meagre)': 'Eternal magic wand & orb (meagre)',
-  'Eternal magic orb (meagre)': 'Eternal magic wand & orb (meagre)',
-  'Eternal magic wand (saturated)': 'Eternal magic wand & orb (saturated)',
-  'Eternal magic orb (saturated)': 'Eternal magic wand & orb (saturated)',
-  'Attuned crystal wand': 'Attuned crystal wand & orb',
-  'Attuned crystal orb': 'Attuned crystal wand & orb',
+  // Eternal magic weapons: every bow/staff/wand/orb cut from the same
+  // eternal magic logs (Piscatoris, kandarin) - folded into one family per
+  // direct instruction, superseding the old per-tier wand & orb pairs.
+  'Eternal magic shortbow Mk. 5': 'Eternal magic weapons',
+  'Eternal Magic longbow': 'Eternal magic weapons',
+  'Meagre eternal magic staff': 'Eternal magic weapons',
+  'Saturated eternal magic staff': 'Eternal magic weapons',
+  'Eternal magic wand (meagre)': 'Eternal magic weapons',
+  'Eternal magic orb (meagre)': 'Eternal magic weapons',
+  'Eternal magic wand (saturated)': 'Eternal magic weapons',
+  'Eternal magic orb (saturated)': 'Eternal magic weapons',
+  // Both Nex drops, asgarnia.
+  'Wand of the Praesul': 'Wand of the Praesul & Imperium core',
+  'Imperium core': 'Wand of the Praesul & Imperium core',
+  // Both Vorago drops, asgarnia.
+  'Seismic wand': 'Seismic wand & singularity',
+  'Seismic singularity': 'Seismic wand & singularity',
 
   // --- Necromancy dual-wielded weapon pairs ---
-  'Ruinous guard': 'Ruinous guard & lantern',
-  'Ruinous lantern': 'Ruinous guard & lantern',
   'Gravite guard': 'Gravite guard & lantern',
   'Gravite lantern': 'Gravite guard & lantern',
 
@@ -621,6 +616,110 @@ export const GEAR_SET_GROUPS = {
   'Primal Warhammer + 5': 'Primal gear',
   'Primal Off Hand Warhammer + 5': 'Primal gear',
   'Primal kiteshield + 5': 'Primal gear',
+
+  // Ruinous weapons: every main-hand/off-hand pair across all 4 combat
+  // styles (melee rapier, ranged crossbow, magic staff, necromancy guard),
+  // plus the 2h maul - all bought from the same Marmaros Dungeoneering
+  // rewards trader (wilderness), per direct instruction folded into one
+  // family rather than kept as separate per-style dual-wield pairs.
+  'Ruinous Maul': 'Ruinous weapons',
+  'Ruinous rapier': 'Ruinous weapons',
+  'Off-hand ruinous rapier': 'Ruinous weapons',
+  'Ruinous crossbow': 'Ruinous weapons',
+  'Off-hand Ruinous crossbow': 'Ruinous weapons',
+  'Ruinous staff': 'Ruinous weapons',
+  'Ruinous guard': 'Ruinous weapons',
+  'Ruinous lantern': 'Ruinous weapons',
+
+  // Chaotic equipment: every Chaotic weapon/shield across all styles, all
+  // bought from the same Marmaros Dungeoneering rewards trader (wilderness) -
+  // folded into one family per direct instruction, same as Ruinous weapons.
+  'Chaotic Rapier': 'Chaotic equipment',
+  'Chaotic longsword': 'Chaotic equipment',
+  'Off-hand chaotic longsword': 'Chaotic equipment',
+  'Chaotic maul': 'Chaotic equipment',
+  'Chaotic kiteshield': 'Chaotic equipment',
+  'Chaotic crossbow': 'Chaotic equipment',
+  'Off-hand chaotic crossbow': 'Chaotic equipment',
+  'Chaotic staff': 'Chaotic equipment',
+
+  // Annihilation/Decimation/Obliteration: the 3 tier-87 2h Wilderness boss
+  // weapons, one per combat style.
+  'Annihilation': 'T87 Wildy weapons',
+  'Decimation': 'T87 Wildy weapons',
+  'Obliteration': 'T87 Wildy weapons',
+
+  // Glaiven/Ragefire/Steadfast boots: the 3 base-tier Glacor boot variants
+  // (magic/ranged/melee), all the same Glacor drop - not combined with their
+  // Emberkeen/Flarefrost/Hailfire upgrades, same tiering rule as elsewhere.
+  'Glaiven boots': 'Glacor boots',
+  'Ragefire boots': 'Glacor boots',
+  'Steadfast boots': 'Glacor boots',
+
+  // Enhanced/base Dino boots (Anachronia): each tier is its own set, never
+  // combined across tiers, same as every other tier family.
+  'Enhanced blast diffusion boots': 'Enhanced Dino boots',
+  'Enhanced fleeting boots': 'Enhanced Dino boots',
+  'Enhanced laceration boots': 'Enhanced Dino boots',
+  'Blast diffusion boots': 'Dino boots',
+  'Fleeting boots': 'Dino boots',
+  'Laceration boots': 'Dino boots',
+
+  // God Arrows: the 5 Elder God Dinarrow variants, all charged the same way
+  // (95 Fletching, resonant anima) at Anachronia.
+  'Bik arrow': 'God Arrows',
+  'Ful arrow': 'God Arrows',
+  'Jas demonbane arrow': 'God Arrows',
+  'Jas dragonbane arrow': 'God Arrows',
+  'Wen arrow': 'God Arrows',
+
+  // Attuned crystal gear: every Attuned-tier crystal weapon/shield (all
+  // Crystal Singing, Prifddinas/tirannwn) folded into one family per direct
+  // instruction, superseding the old per-pair dual-wield sets.
+  'Attuned crystal dagger': 'Attuned crystal gear',
+  'Off-hand attuned crystal dagger': 'Attuned crystal gear',
+  'Attuned crystal shield': 'Attuned crystal gear',
+  'Attuned crystal chakram': 'Attuned crystal gear',
+  'Off-hand attuned crystal chakram': 'Attuned crystal gear',
+  'Attuned crystal bow': 'Attuned crystal gear',
+  'Attuned crystal deflector': 'Attuned crystal gear',
+  'Attuned crystal staff': 'Attuned crystal gear',
+  'Attuned crystal wand': 'Attuned crystal gear',
+  'Attuned crystal orb': 'Attuned crystal gear',
+  'Attuned crystal ward': 'Attuned crystal gear',
+
+  // Crystal gear: the base-tier (non-Attuned) crystal weapons/shields, all
+  // tirannwn. Crystal Hatchet is deliberately excluded - a tool/weapon
+  // hybrid upgraded from a Dragon hatchet rather than bought/crafted the
+  // same way as the rest of this family (see its own gear.js entry, which
+  // now also requires fremennikProvince for that Dragon hatchet source).
+  'Crystal dagger': 'Crystal gear',
+  'Crystal halberd': 'Crystal gear',
+  'Crystal bow': 'Crystal gear',
+  'Crystal deflector': 'Crystal gear',
+  'Crystal staff': 'Crystal gear',
+  'Crystal wand': 'Crystal gear',
+  'Crystal orb': 'Crystal gear',
+  'Crystal ward': 'Crystal gear',
+
+  // Ascendri bolts are fletched directly from Ascension bolts (tipped with
+  // Hydrix) - both Legio Primus/Ascension Monastery, kandarin.
+  'Ascendri bolts': 'Ascendri bolts',
+  'Ascension bolts': 'Ascendri bolts',
+
+  // Automaton gloves: all 3 World Wakes automaton bosses' drops, kandarin.
+  'Pneumatic gloves': 'Automaton gloves',
+  'Static gloves': 'Automaton gloves',
+  'Tracking gloves': 'Automaton gloves',
+
+  // Corp spirit shields: the base blessed spirit shield plus all 4 sigil
+  // upgrades - every one either drops from, or (for the sigils) is attached
+  // to a shield sourced from, the Corporeal Beast, wilderness.
+  'Spirit shield': 'Corp spirit shields',
+  'Divine spirit shield': 'Corp spirit shields',
+  'Elysian spirit shield': 'Corp spirit shields',
+  'Arcane spirit shield': 'Corp spirit shields',
+  'Spectral spirit shield': 'Corp spirit shields',
 
   // Noxious Scythe/longbow/staff are all Araxxor and Araxxi (morytania)
   // drops - one per combat style, same source.

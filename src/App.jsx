@@ -265,6 +265,7 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
           selectedRelics={selectedRelics}
           toggleRelic={toggleRelic}
           hasCrystalGrace={selectedLeagueRelics.includes('Crystal Grace')}
+          selectedLeagueRelics={selectedLeagueRelics}
         />
       )}
       {route === 'leagueRelics' && (

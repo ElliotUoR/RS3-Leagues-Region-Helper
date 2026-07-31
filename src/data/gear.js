@@ -1437,7 +1437,7 @@ export const GEAR = {
         },
         specialAttack: "Clobber (30% adrenaline): 90-110% ability damage; raises the target's affinity values by 3 and lowers their Defence/Magic by 5%.",
         icon: "icons/Crystal_hatchet.png",
-        source: { type: 'combination', region: ['tirannwn'], note: "Upgraded from a Dragon hatchet + 4,000 harmonic dust via Lady Ithell, Ithell district of Prifddinas - requires Plague's End." },
+        source: { type: 'combination', region: ['tirannwn', 'fremennikProvince'], note: "Upgraded from a Dragon hatchet (Dagannoth Kings drop, fremennikProvince) + 4,000 harmonic dust via Lady Ithell, Ithell district of Prifddinas - requires Plague's End." },
       },
       { name: 'Abyssal vine whip', slot: 'weapon', twoHanded: false, level: { skill: 'Attack', level: 75, note: 'also 80 Slayer, neither boostable' },
           stats: { attack: { stab: 0, slash: 720, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 720, accuracy: 1694, lifeBonus: 0, prayerBonus: 0, setEffect: null },
