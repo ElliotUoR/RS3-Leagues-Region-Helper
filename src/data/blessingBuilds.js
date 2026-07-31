@@ -136,7 +136,7 @@ export const BLESSING_BUILDS_EXAMPLES = [
     regions: ['kharidianDesert', 'morytania', 'anachronia'],
     regionReasons: {
       kharidianDesert: 'Achto Teralith - the augmentable tank set. Base Teralith and Primal are not augmentable, so they forfeit every Invention perk; only the Achto variant belongs in a late-game slot. Also buys the mid-late Primeval robes with Teci.',
-      morytania: 'Malevolent (melee) and Merciless (magic) kiteshields. Both augmentable, and Aegis triples off them.',
+      morytania: 'Malevolent (melee) and Merciless (magic) kiteshields. Both augmentable, and Aegis triples off them. If you want to get 100 smithing for a Primal Kiteshield +5 you can drop this region.',
       anachronia: 'Champion\'s / Channeller\'s rings, the Nodon spike harness for the ammo slot, Varanus\'s Mercy for EoF, and Double Surge for mobility.',
     },
     alternateRegions: [

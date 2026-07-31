@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
 import { getAnalyticsPool } from '../lib/analyticsDb.js';
+import { countActiveSessions } from '../lib/activeSessions.js';
 import { ROLLUP_LAG_DAYS } from '../lib/analyticsRollup.js';
 import { utcDateDaysAgo } from '../lib/dates.js';
 import {
@@ -292,6 +293,10 @@ adminRouter.get('/api/admin/summary', requireAdmin, async (req, res) => {
 
     res.json({
       days,
+      // Deliberately NOT scoped to `days` like everything else here: this is a
+      // live gauge of who is on the site right now, held in this process's
+      // memory rather than queried (see lib/activeSessions.js).
+      activeUsers: countActiveSessions(),
       totalPageviews,
       uniqueVisitors: totalSessions,
       avgSessionSeconds: totalSessions > 0 ? Math.round(totalSeconds / totalSessions) : 0,

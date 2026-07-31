@@ -3,11 +3,17 @@ import { insertRow } from '../lib/postgrest.js';
 import { sessionIdFor } from '../lib/session.js';
 import { parseUserAgent } from '../lib/userAgent.js';
 import { isAdminSession, ADMIN_COOKIE_NAME } from '../lib/adminAuth.js';
+import { markSessionActive } from '../lib/activeSessions.js';
 
 export const trackRouter = Router();
 
 const MAX_PATH_LENGTH = 500;
 const EVENT_TYPE_RE = /^[a-z0-9_-]{1,50}$/;
+
+// Sent periodically by an open tab (see src/hooks/useHeartbeat.js). Handled
+// like any other event for validation and admin exclusion, then dropped before
+// the insert - see the comment at that point for why it must not be stored.
+const HEARTBEAT_EVENT_TYPE = 'heartbeat';
 
 // POST /api/track
 // Body: { event_type: string, path: string, referrer?: string }
@@ -36,6 +42,23 @@ trackRouter.post('/api/track', async (req, res) => {
   const userAgent = req.get('user-agent') ?? 'unknown';
   const sessionId = sessionIdFor(req.ip ?? 'unknown', userAgent);
   const { browser, os, deviceType } = parseUserAgent(userAgent);
+
+  // Every tracked request counts as activity, heartbeat or not - someone
+  // clicking between tabs is obviously active and should not depend on a
+  // heartbeat landing. In-memory only; see lib/activeSessions.js.
+  markSessionActive(sessionId);
+
+  // Heartbeats stop here. They exist purely to keep a reading visitor inside
+  // the active window (a pageview only fires on tab change, so someone reading
+  // one page emits nothing for minutes), and they must never reach page_events:
+  // the summary queries in routes/admin.js count rows without filtering on
+  // event_type, so a stored heartbeat would inflate Pageviews and appear in Top
+  // pages. Keeping them out of the table entirely is what makes this change
+  // impossible to get wrong later, rather than relying on every future query
+  // remembering to filter.
+  if (eventType === HEARTBEAT_EVENT_TYPE) {
+    return res.status(204).end();
+  }
 
   try {
     await insertRow('page_events', {

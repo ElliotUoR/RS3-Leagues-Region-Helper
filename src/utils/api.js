@@ -93,6 +93,19 @@ export function trackPageview(path) {
   }).catch(() => {});
 }
 
+// "Still here" ping from an open tab, so a visitor reading one page keeps
+// counting towards active users (see hooks/useHeartbeat.js). Goes to the same
+// endpoint as a pageview but is NOT stored - the server marks the session
+// active and drops it, so it never reaches page_events or affects any existing
+// figure. See server/src/routes/track.js.
+export function trackHeartbeat() {
+  fetch(`${APP_BASE_PATH}api/track`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event_type: 'heartbeat', path: window.location.hash || '#home' }),
+  }).catch(() => {});
+}
+
 // Ever-incrementing usage counters (see server/routes/trackCounter.js) for
 // product questions pageviews don't answer - "how often is each region
 // picked", "how many people used the import-relics API", etc. `increments`

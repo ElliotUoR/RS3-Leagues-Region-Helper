@@ -26,6 +26,7 @@ import { BLESSINGS_STORAGE_KEY, useBlessingSelection } from './hooks/useBlessing
 import { isBuildGuidePath, leaveBuildGuidePath } from './utils/buildGuideRoute';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { useTheme } from './hooks/useTheme';
+import { useHeartbeat } from './hooks/useHeartbeat';
 import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
 import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
 import { parseImportRelicsParam, stripImportRelicsParam } from './utils/importRelics';
@@ -320,6 +321,9 @@ function App() {
   const [contentGeneration, setContentGeneration] = useState(0);
   const isAdmin = useIsAdmin();
   const { theme, toggleTheme } = useTheme();
+  // Keeps this visitor inside the admin dashboard's "active users" window for
+  // as long as the tab is open and visible - see hooks/useHeartbeat.js.
+  useHeartbeat();
   // Called once here rather than inside each modal that displays it - see
   // useLiveSiteUrl.js for why that used to create duplicate short links.
   const liveUrl = useLiveSiteUrl();
