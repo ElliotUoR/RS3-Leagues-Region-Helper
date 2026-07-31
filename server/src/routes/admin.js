@@ -386,8 +386,15 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
   const pool = getAnalyticsPool();
 
   try {
-    const [regionPicks, regionCombos, leagueRelicPicks, dropTableViews, buildGuideViews, featureCounters] =
-      await Promise.all([
+    const [
+      regionPicks,
+      regionCombos,
+      leagueRelicPicks,
+      dropTableViews,
+      buildGuideViews,
+      blessingPicks,
+      featureCounters,
+    ] = await Promise.all([
         pool.query(
           `select key, count from public.usage_counters where category = 'region_pick' order by count desc`,
         ),
@@ -415,6 +422,14 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
         pool.query(
           `select key, count from public.usage_counters where category = 'build_guide' order by count desc`,
         ),
+        // See deploy/migrations/011_blessing_usage.sql /
+        // hooks/useBlessingSelection.js - keyed by blessing name, one row per
+        // blessing that has been picked at least once. Only the three tier
+        // picks appear: the God Tier One power is derived from them rather
+        // than chosen, so it is never counted.
+        pool.query(
+          `select key, count from public.usage_counters where category = 'blessing_pick' order by count desc`,
+        ),
         pool.query(`select key, count from public.usage_counters where category = 'feature'`),
       ]);
 
@@ -426,6 +441,7 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
       leagueRelicPicks: leagueRelicPicks.rows.map((r) => ({ relic: r.key, count: r.count })),
       dropTableViews: dropTableViews.rows.map((r) => ({ relic: r.key, count: r.count })),
       buildGuideViews: buildGuideViews.rows.map((r) => ({ build: r.key, count: r.count })),
+      blessingPicks: blessingPicks.rows.map((r) => ({ blessing: r.key, count: r.count })),
       karamjaToggledOffCount: featureCountFor('karamja_toggled_off'),
       importRelicsUsedCount: featureCountFor('import_relics_used'),
     });

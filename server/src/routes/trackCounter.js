@@ -7,9 +7,14 @@ export const trackCounterRouter = Router();
 
 // Kept in sync with the CHECK constraint on usage_counters.category (see
 // deploy/migrations/008_usage_counters.sql, widened by
-// 009_relic_drop_table_usage.sql and 010_build_guide_usage.sql) - validated
-// here too so a bad request 400s with a clear error instead of surfacing a
-// raw Postgres constraint-violation message.
+// 009_relic_drop_table_usage.sql, 010_build_guide_usage.sql and
+// 011_blessing_usage.sql) - validated here too so a bad request 400s with a
+// clear error instead of surfacing a raw Postgres constraint-violation
+// message.
+//
+// Adding a category here without the matching migration (or the reverse) fails
+// silently from the visitor's side: trackUsage is fire-and-forget, so a
+// rejected increment is simply never counted and nothing surfaces it.
 const VALID_CATEGORIES = new Set([
   'region_pick',
   'region_combo',
@@ -17,6 +22,7 @@ const VALID_CATEGORIES = new Set([
   'feature',
   'relic_drop_table',
   'build_guide',
+  'blessing_pick',
 ]);
 const MAX_KEY_LENGTH = 200;
 // A single user action can fire several increments at once (locking in a
