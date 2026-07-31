@@ -35,6 +35,16 @@ jobs:
             set -e
             cd /opt/rs3-site
             git pull
+            # Before anything is rebuilt: server/Dockerfile copies individual
+            # files out of src/, so an import added under server/src that
+            # reaches a file not on that list produces an image that builds
+            # cleanly and then dies on boot with ERR_MODULE_NOT_FOUND - taking
+            # every /api/* route down, not just the new feature. `set -e` makes
+            # this abort the deploy while the current containers are still
+            # untouched, which degrades to "still running yesterday's code"
+            # rather than "API is down". Needs no npm install: plain Node, no
+            # dependencies. See server/scripts/check-docker-copies.mjs.
+            node server/scripts/check-docker-copies.mjs
             npm ci
             npm run build
 

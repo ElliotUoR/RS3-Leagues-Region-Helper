@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch --env-file=.env src/index.js",
-    "migrate": "node --env-file=.env scripts/migrate.js"
+    "migrate": "node --env-file=.env scripts/migrate.js",
+    "check:docker-copies": "node scripts/check-docker-copies.mjs"
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.53",
