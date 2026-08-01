@@ -48,7 +48,7 @@ export default function HomePage({ selected, toggleRegion, isUnlocked, overLimit
             <span className="all-regions-note">
               All regions unlocked <span className="all-regions-arrow" aria-hidden="true">→</span>
             </span>
-            <a href="#gear" className="gear-planner-cta">
+            <a href="#gear" className="build-create-button">
               Gear Planner
             </a>
             {/* Forces the flex-wrap to break exactly here (a common
@@ -59,7 +59,7 @@ export default function HomePage({ selected, toggleRegion, isUnlocked, overLimit
             <span className="all-regions-note">
               Or check <span className="all-regions-arrow" aria-hidden="true">→</span>
             </span>
-            <a href="#gear-by-region" className="gear-planner-cta">
+            <a href="#gear-by-region" className="build-create-button">
               Gear by Region
             </a>
           </div>

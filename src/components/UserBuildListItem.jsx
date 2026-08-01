@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import UserBuildCard from './UserBuildCard';
 import BuildCardMeta from './BuildCardMeta';
 import BuildVoteBar from './BuildVoteBar';
@@ -68,6 +68,7 @@ export default function UserBuildListItem({
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [build, setBuild] = useState(initialBuild);
   const [status, setStatus] = useState('idle'); // idle | loading | error
+  const entryRef = useRef(null);
   const meta = summaryMeta(summary);
 
   // Landing on a shared link counts as a view of that build, the same way
@@ -77,6 +78,23 @@ export default function UserBuildListItem({
     if (defaultExpanded) trackUsage([{ category: 'build_guide', key: userBuildCounterKey(summary.id) }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Opening a card that sits below the fold otherwise leaves you reading its
+  // middle - scroll its top edge to the top of the viewport so the build starts
+  // where you are looking. Only on open, never on close, so collapsing does not
+  // yank the page around. Same behaviour BuildGuideCard has for curated guides.
+  //
+  // `build` is a dependency as well as `expanded` because this card loads its
+  // payload AFTER opening: the first scroll happens while it is still a
+  // one-line "Loading…", which is often too short to reach the top of the
+  // viewport at all. Re-running once the real content lands settles it there.
+  // Covers all three ways a card opens - clicked in the listing, clicked in the
+  // featured strip, or already open from a shared link (defaultExpanded, where
+  // this runs on mount).
+  useEffect(() => {
+    if (!expanded || !entryRef.current) return;
+    entryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [expanded, build]);
 
   async function handleToggle() {
     const opening = !expanded;
@@ -165,7 +183,7 @@ export default function UserBuildListItem({
   // so the footer is a sibling of it rather than something wrapped around it.
   if (expanded && build && status === 'idle') {
     return (
-      <div className={entryClasses}>
+      <div ref={entryRef} className={entryClasses}>
         <UserBuildCard build={build} expanded onToggle={handleToggle} />
         {footer}
       </div>
@@ -208,7 +226,7 @@ export default function UserBuildListItem({
   }
 
   return (
-    <div className={entryClasses}>
+    <div ref={entryRef} className={entryClasses}>
       <article className={`build-card user-build-card${expanded ? ' expanded' : ''}`}>{body}</article>
       {footer}
     </div>

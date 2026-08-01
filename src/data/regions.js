@@ -117,15 +117,6 @@ const FP = (file) => `icons/${file}`;
 export const BOSSES = [
   // Misthalin (incl. Underworld / Senntisten, Fort Forinthry)
   {
-    name: 'Dragith Nurn',
-    region: 'misthalin',
-    subLocation: 'Lumbridge Catacombs',
-    drops: [
-      { name: 'Mask part 5', icon: FP('Mask_part_5.png') },
-      { name: "Lady Grey's guitar", icon: FP('Lady_Grey%27s_guitar.png') },
-    ],
-  },
-  {
     name: 'Rasial, the First Necromancer',
     region: 'misthalin',
     subLocation: 'Underworld',
@@ -1201,7 +1192,7 @@ export const MONSTERS = [
   {
     name: 'Ganodermic creatures',
     wikiName: 'Ganodermic beast',
-    region: 'morytania',
+    region: 'misthalin',
     subLocation: 'Polypore Dungeon',
     drops: [
       { name: 'Ganodermic gloves', icon: 'icons/Ganodermic_gloves.png' },

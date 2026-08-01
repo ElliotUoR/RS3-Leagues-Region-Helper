@@ -870,8 +870,12 @@ main {
 .unlocks-list-heading-note.visible {
   /* Tall enough for two wrapped rows (narrow viewports/zoomed text) - this
      note now carries two text+arrow+button groups (Gear Planner, then Gear
-     by Region), not just one. */
-  max-height: 100px;
+     by Region), not just one. Bumped from 100px once the CTAs switched to
+     .build-create-button's larger pill (8px/18px padding, 14px bold text)
+     in place of the old smaller .gear-planner-cta - the taller buttons no
+     longer fit two wrapped rows under the old cap and got clipped by this
+     container's overflow: hidden. */
+  max-height: 150px;
   margin-top: 8px;
   opacity: 1;
   visibility: visible;
@@ -926,25 +930,6 @@ main {
   50% {
     transform: translateX(4px);
   }
-}
-
-.gear-planner-cta {
-  padding: 5px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--accent);
-  background: var(--accent-bg);
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 12px;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-
-.gear-planner-cta:hover {
-  background: var(--accent);
-  color: #fff;
-  transform: translateY(-1px);
 }
 
 .region-picker-heading {

@@ -54,6 +54,10 @@ export const JMOD_CONFIRMATIONS = [
     title: 'How will we hand in Archaeology artefacts to collectors in different regions?',
     detail: 'Some collectors are in different regions compared to their respective dig sites. A special "collector delivery box" has been added at the Archaeology guild campus next to Velucia, letting you hand in artefacts to the unique collectors from there.',
   },
+  {
+    title: 'Polypore Dungeon -> Misthalin',
+    detail: "JMod-confirmed: the Polypore Dungeon is in Misthalin - not Morytania or the Desert.",
+  },
 ];
 
 // Grouped into categories, each a list of `{ title, detail }` entries.
@@ -86,10 +90,6 @@ export const ASSUMPTION_GROUPS = [
       {
         title: 'Zanaris -> Misthalin',
         detail: "Jukat's Dragon Sword Shop (Dragon dagger, Dragon 2h sword, Dragon longsword) is reached via the Lumbridge Swamp Caves, so Zanaris is folded into Misthalin - same reasoning as Tormented demons' Ancient Guthix Temple.",
-      },
-      {
-        title: 'Polypore Dungeon -> Misthalin',
-        detail: "JMod-confirmed: the Polypore Dungeon is in Misthalin - not Morytania (the original fan-maintained coordinate-mapped spreadsheet this was sourced from), and not the Kharidian Desert (a since-corrected earlier JMod statement). Gates the Ganodermic armour set, Ganodermic gloves/boots, the Polypore staff, and Grifolic shield. The Masterwork hat was previously listed here too via an assumed Masterwork green cloth/ganodermic flake component - that's not actually part of its recipe, so it no longer carries a Misthalin requirement.",
       },
     ],
   },

@@ -884,7 +884,7 @@ export const LEAGUE_RELIC_TIER_LIST = {
     },
     {
       name: 'Golden Touch', relicTier: 1, grade: 'A', unlocksGear: 0,
-      note: 'The broadest progression relic in the game. Its Thieving table supplies grimy herbs from Guam to Fellstalk PLUS tier 1 and 2 secondaries - the entire overload supply chain - and the Teci that buys mazcab armour outright. Goldenhawk feathers convert to Prayer XP, fast-tracking Soul Split at 92.',
+      note: 'The broadest progression relic in the game. Its Thieving table supplies grimy herbs from Guam to Fellstalk + secondaries - the entire overload supply chain. Thieving provides the Teci that can buy mazcab armour outright. Goldenhawk feathers convert to Prayer XP, fast-tracking Soul Split at 92.',
     },
     {
       name: 'Crystal Grace', relicTier: null, grade: 'C', unlocksGear: 0,
@@ -935,8 +935,8 @@ export const BLESSING_TIER_LIST = {
   entries: [
     { name: "Teragard's Aegis", kind: 'blessing', tier: 1, colour: 'blue', grade: 'A',
       note: 'Roughly doubles ability damage with a shield, and feeds the base stat so everything scales off it. Compounds with Achto armour, which also requires a shield.' },
-    { name: 'Steadfast Will', kind: 'blessing', tier: 3, colour: 'blue', grade: 'A',
-      note: 'Revenge to 20 stacks is +100% damage; Bash gains ~14,000; Preparation becomes a cooldown engine.' },
+    { name: 'Steadfast Will', kind: 'blessing', tier: 3, colour: 'blue', grade: 'C',
+      note: 'Revenge to 20 stacks is +100% damage; Bash gains ~14,000; Preparation becomes a cooldown engine. But you need to run a shield, otherwise you just get the prep bonus.' },
     { name: 'Sacred Fervor', kind: 'god', colour: 'blue', grade: 'A',
       note: 'Unconditional -30% cooldowns on all four styles. No drawback, no setup, useful at every stage.' },
     { name: 'Striking Light', kind: 'blessing', tier: 2, colour: 'blue', grade: 'B',
