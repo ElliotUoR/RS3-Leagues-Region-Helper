@@ -879,15 +879,15 @@ export const LEAGUE_RELIC_TIER_LIST = {
     'Ranked for a combat-focused run. A pure-skilling ranking would look very different - Survivalist especially would rank far higher.',
   entries: [
     {
-      name: 'Transmutation', relicTier: null, grade: 'A', unlocksGear: 63,
-      note: 'The gear-access relic, and effectively worth a region pick. Divine Divergence steps any resource up a tier, substituting for Wilderness on Primal ore and for the ore regions on the smithing line. Verified: with Transmutation and zero optional regions you can still assemble a complete loadout.',
+      name: 'Transmutation', relicTier: null, grade: 'C', unlocksGear: 63,
+      note: 'Provides access to a lot of resources otherwise unobtainable - but the pure innate raw power of other relics slightly overwhelms this one. Still very useful to avoid taking Kandarin or Wildy if Eternal Logs and Primal ore are needed respectively.',
     },
     {
       name: 'Golden Touch', relicTier: 1, grade: 'A', unlocksGear: 0,
-      note: 'The broadest progression relic in the game. Its Thieving table supplies grimy herbs from Guam to Fellstalk PLUS tier 1 and 2 secondaries - the entire overload supply chain - and the Teci that buys Primeval robes outright. Goldenhawk feathers convert to Prayer XP, fast-tracking Soul Split at 92.',
+      note: 'The broadest progression relic in the game. Its Thieving table supplies grimy herbs from Guam to Fellstalk PLUS tier 1 and 2 secondaries - the entire overload supply chain - and the Teci that buys mazcab armour outright. Goldenhawk feathers convert to Prayer XP, fast-tracking Soul Split at 92.',
     },
     {
-      name: 'Crystal Grace', relicTier: null, grade: 'B', unlocksGear: 0,
+      name: 'Crystal Grace', relicTier: null, grade: 'C', unlocksGear: 0,
       note: 'Unlocks every Magic spell across all spellbooks, guaranteeing Animate Dead and Ancient Magicks regardless of region - can make the all-green immortality build possible without desert. Triples rune output. For necromancy it is close to A: every ritual behaves as though Multiply, Attraction and Protection are drawn at 200%.',
     },
     {
@@ -904,7 +904,7 @@ export const LEAGUE_RELIC_TIER_LIST = {
     },
     {
       name: 'Survivalist', relicTier: 1, grade: 'D', unlocksGear: 0,
-      note: 'Doubled gathering, best-in-slot tools and a 150-slot bag and mega archeology bonuses - but it unlocks no gear, grants no spells, and does nothing for damage. On a skilling-first run this is an A.',
+      note: 'Doubled gathering, best-in-slot tools and a 150-slot bag and mega archeology bonuses - but it unlocks no gear, grants no spells, and does nothing for damage. On a skilling-first run this is an A. Could however increase Croesus kill times.',
     },
     // Tier 3 sits in its own 'unranked' row rather than anywhere on A-F: these
     // were only just revealed and have not been assessed, and parking them at a
@@ -912,16 +912,16 @@ export const LEAGUE_RELIC_TIER_LIST = {
     // renders below F and is styled to read as off the scale rather than as the
     // bottom of it - see BuildGuidesPage's gradeLabels and .tier-grade-wordy.
     {
-      name: "Assassin's Insight", relicTier: 3, grade: 'unranked', unlocksGear: 0,
-      note: 'TBD',
+      name: "Assassin's Insight", relicTier: 3, grade: 'D', unlocksGear: 0,
+      note: 'Slayer last league was highly skippable with shattered worlds and Blue dragons tasks (Vorkath). We are more powerful this league, so as long as the blue dragon tech is still do-able the corrupted slayer helm is the only important effect - and its probably not worth a relic slot (even in a PVM tier list).',
     },
     {
-      name: "Nature's Network", relicTier: 3, grade: 'unranked', unlocksGear: 0,
-      note: 'TBD',
+      name: "Nature's Network", relicTier: 3, grade: 'B', unlocksGear: 0,
+      note: 'Synergises brilliantly with Guthix butterflies in Priff and Divine Druid. 99 farming from a teleport relic. Very strong option if you don\'t take Golden Touch.',
     },
     {
-      name: 'Voidwalker', relicTier: 3, grade: 'unranked', unlocksGear: 0,
-      note: 'TBD',
+      name: 'Voidwalker', relicTier: 3, grade: 'C', unlocksGear: 0,
+      note: 'Generic teleports, but offers valuable resources like ancient summoning pouches, invention components, dragon items (e.g. claws), and divine charges. But can only be triggered once every 3 minutes, and at a 1/8 chance of getting each type of item; targetting specific items is awkward.',
     },
   ],
 };

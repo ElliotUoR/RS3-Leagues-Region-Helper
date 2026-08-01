@@ -46,14 +46,7 @@ function BlessingBadges(entry) {
 }
 
 function RelicBadges(entry) {
-  return (
-    <>
-      <span className="tier-badge">{entry.relicTier != null ? `T${entry.relicTier}` : '?'}</span>
-      {entry.unlocksGear > 0 && (
-        <span className="tier-badge tier-badge-unlocks">unlocks {entry.unlocksGear} items</span>
-      )}
-    </>
-  );
+  return <span className="tier-badge">{entry.relicTier != null ? `T${entry.relicTier}` : '?'}</span>;
 }
 
 // An open build puts its id in the URL so the link opens that build expanded.

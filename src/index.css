@@ -4824,11 +4824,6 @@ main.abilities-page .gear-item-rows {
   color: #d4a53a;
 }
 
-.tier-badge-unlocks {
-  background: var(--accent-bg);
-  color: var(--accent);
-}
-
 .tier-entry-asterisk {
   color: var(--warning);
   font-weight: 700;
