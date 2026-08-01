@@ -18,6 +18,13 @@ import { ABILITIES } from '../data/abilities';
 import { PRAYER_GROUPS, SPELLBOOK_GROUPS } from '../data/spellbooks';
 import { FIXED_REGIONS, GATEWAY_REGIONS, REGIONS } from '../data/regions';
 import { normalizeRegionGroups } from '../data/gearAvailability';
+import {
+  equippedItemsFor,
+  getAegisFromArmour,
+  getBigBonedBonusDamage,
+  getElderOverloadSources,
+  getTotalLifePoints,
+} from '../utils/gearStats';
 import { copyShareLink, shareLinkFor } from '../utils/shareLink';
 import { saveBuildText } from '../utils/buildTextEdit';
 
@@ -219,13 +226,36 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
   const buildRegions = new Set([...FIXED_REGION_IDS, ...build.regions]);
   const buildIsUnlocked = (regionId) => buildRegions.has(regionId);
 
-  // Elder overloads are Meilyr potions: reachable via Tirannwn (Prifddinas)
-  // or the Divine Druid relic, which unlocks every Meilyr recipe. Derived
-  // rather than stored so it stays correct if a build's picks change.
-  const elderSources = [
-    build.relics.includes('Divine Druid') && 'Divine Druid',
-    build.regions.includes('tirannwn') && 'Tirannwn',
-  ].filter(Boolean);
+  const elderSources = getElderOverloadSources({ leagueRelics: build.relics, regions: build.regions });
+
+  // Teragard's Aegis and Big Boned both state a number that used to be written
+  // by hand into this build's keyNumbers. Derived now instead, from the
+  // loadout on screen - which means they follow the style and stage tabs, and
+  // cannot drift out of date when a build's gear is edited. See
+  // utils/gearStats.js.
+  //
+  // Aegis reads the PRECOMPUTED armour totals rather than re-deriving them, so
+  // the figures in its brackets are the same ones the armour lines above show.
+  const archRelicNames = build.unlocks.archRelics.map((relic) => relic.name);
+  const aegis =
+    loadout && build.blessings.includes("Teragard's Aegis")
+      ? getAegisFromArmour({
+          weaponName: loadout.slots.weapon,
+          offhandName: loadout.slots.offhand,
+          base: loadout.armourTotal,
+          overloaded: loadout.armourTotalOverloaded,
+          elder: elderSources.length > 0 ? loadout.armourTotalElder : null,
+        })
+      : null;
+
+  const lifeTotal =
+    loadout && build.blessings.includes('Big Boned')
+      ? getTotalLifePoints(equippedItemsFor(style, loadout.slots), {
+          bigBoned: true,
+          archRelics: archRelicNames,
+        })
+      : null;
+  const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
 
   // Detected from the relic data rather than hardcoded, so adding an
   // artefact-gated relic to any build surfaces the explanation automatically.
@@ -503,6 +533,9 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                     armourTotalOverloaded={loadout.armourTotalOverloaded}
                     armourTotalElder={elderSources.length ? loadout.armourTotalElder : null}
                     elderSources={elderSources}
+                    lifeTotal={lifeTotal}
+                    aegis={aegis}
+                    bigBonedBonus={bigBonedBonus}
                     isUnlocked={buildIsUnlocked}
                     selectedLeagueRelics={build.relics}
                   />

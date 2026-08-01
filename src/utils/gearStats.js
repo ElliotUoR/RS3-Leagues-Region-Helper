@@ -5,9 +5,23 @@
 // item's own armour rating" depends on which combat style tab it's being
 // viewed under. Necromancy has no dedicated key in this dataset and
 // piggybacks on `magic`, matching the convention used for its weapons.
-// Explicit .js extension: this module is COPY'd into the server image (see
-// server/Dockerfile) and Node's ESM resolver, unlike Vite's, will not guess it.
-import { getAegisMultiplier, getOffhandClass } from '../data/offhandClass.js';
+// Explicit .js extensions: this module is COPY'd into the server image (see
+// server/Dockerfile) and Node's ESM resolver, unlike Vite's, will not guess them.
+import { getAegisClass, getAegisMultiplier } from '../data/aegisMultiplier.js';
+import { GEAR } from '../data/gear.js';
+
+// A slot -> item-name map (what both kinds of build store) resolved to the
+// actual gear entries the stat helpers below need. Unknown names are dropped
+// rather than faked, so an item renamed since a build was written degrades to
+// an empty slot instead of poisoning a total.
+export function equippedItemsFor(style, slots) {
+  const equipped = {};
+  for (const [slot, itemName] of Object.entries(slots ?? {})) {
+    const item = GEAR[style]?.[slot]?.find((entry) => entry.name === itemName);
+    if (item) equipped[slot] = item;
+  }
+  return equipped;
+}
 
 export const DEFENCE_KEY_BY_STYLE = { melee: 'stab', ranged: 'ranged', magic: 'magic', necromancy: 'magic' };
 
@@ -118,19 +132,39 @@ export function getElderOverloadSources({ leagueRelics = [], regions = [] } = {}
 export const OVERLOAD_DEFENCE_BONUS = { none: 0, overload: 17, elder: 25 };
 
 // Everything a loadout needs to state its Teragard's Aegis bonus, in one shape:
-// the multiplier and what earned it, plus the bonus at each potion state.
-// `elder` is null when the build has no way to brew an elder overload, so the
-// row simply does not appear rather than quoting a number it cannot reach.
-export function getAegisBreakdown({ equipped, style, offhandName, hasElder }) {
-  const multiplier = getAegisMultiplier(offhandName);
-  const at = (defenceLevel) => getAegisAbilityDamage(getTotalArmour(equipped, style, defenceLevel), multiplier);
+// the multiplier and what earned it, the bonus at each potion state, and the
+// armour each of those was derived FROM - the bonus is meaningless without the
+// number it is a quarter of, and an overloaded figure quoted beside armour
+// measured at 99 Defence would silently not add up.
+//
+// A null at any state means "not applicable here": `elder` is null when the
+// build has no way to brew one, so the row simply does not appear rather than
+// quoting a number it cannot reach.
+export function getAegisFromArmour({ weaponName, offhandName, base, overloaded = null, elder = null }) {
+  const hands = { weaponName, offhandName };
+  const multiplier = getAegisMultiplier(hands);
+  const damageAt = (armour) => (armour == null ? null : getAegisAbilityDamage(armour, multiplier));
   return {
     multiplier,
-    offhandClass: getOffhandClass(offhandName),
-    base: at(99),
-    overloaded: at(99 + OVERLOAD_DEFENCE_BONUS.overload),
-    elder: hasElder ? at(99 + OVERLOAD_DEFENCE_BONUS.elder) : null,
+    source: getAegisClass(hands),
+    armour: { base, overloaded, elder },
+    base: damageAt(base),
+    overloaded: damageAt(overloaded),
+    elder: damageAt(elder),
   };
+}
+
+// The same, derived from the worn gear rather than from precomputed totals -
+// what a user-submitted build needs, since nobody hand-supplies its armour.
+export function getAegisBreakdown({ equipped, style, weaponName, offhandName, hasElder }) {
+  const armourAt = (defenceLevel) => getTotalArmour(equipped, style, defenceLevel);
+  return getAegisFromArmour({
+    weaponName,
+    offhandName,
+    base: armourAt(99),
+    overloaded: armourAt(99 + OVERLOAD_DEFENCE_BONUS.overload),
+    elder: hasElder ? armourAt(99 + OVERLOAD_DEFENCE_BONUS.elder) : null,
+  });
 }
 
 // Which of the two totals above a blessing actually reads its value from -

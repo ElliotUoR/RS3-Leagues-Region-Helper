@@ -32,7 +32,10 @@ export default function ShareBuildButton({ slug }) {
   return (
     <button
       type="button"
-      className={`build-share-button${status !== 'idle' ? ' shared' : ''}`}
+      // NOT .build-share-button - that class already belongs to the curated
+      // guides' "Open in gear planner" button, and a second rule for it here
+      // silently restyled theirs.
+      className={`user-build-share-button${status !== 'idle' ? ' shared' : ''}`}
       onClick={handleClick}
     >
       {LABELS[status]}

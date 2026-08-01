@@ -162,7 +162,6 @@ export const BLESSING_BUILDS_EXAMPLES = [
     ],
     keyNumbers: [
       { label: 'Total armour (late, melee)', value: '3,605 - 4,454 elder overloaded' },
-      { label: "Teragard's Aegis bonus", value: '+2,704 - +3,341 elder overloaded' },
       { label: 'Bash bonus damage', value: '~+14,000 - ~+17,800 elder' },
       { label: 'Melee basic attack', value: '~8,270 elder (110-130%, best in game)' },
       { label: 'Light of Saradomin', value: '~11,100 - ~13,600 elder, every 9s' },
@@ -285,7 +284,6 @@ export const BLESSING_BUILDS_EXAMPLES = [
     ],
     keyNumbers: [
       { label: 'Total armour (late)', value: '3,605 - 4,454 elder overloaded' },
-      { label: "Teragard's Aegis bonus", value: '+2,704 - +3,341 elder overloaded' },
       { label: 'Elder overload worth', value: '+692 ability damage (both routes)' },
       { label: 'Abyssal Cinders per hit', value: '+594' },
       { label: "Erethdor's grimoire", value: '+12% crit chance' },
@@ -500,7 +498,6 @@ export const BLESSING_BUILDS_EXAMPLES = [
     ],
     keyNumbers: [
       { label: 'Splash Zone (3x3 boss)', value: '+75% on AoE abilities' },
-      { label: 'Big Boned per hit', value: '+1,010 to +1,350' },
       { label: 'Barkscales reduction', value: '-300 per hit taken' },
       { label: 'Grasp of Guthix', value: '~100% ability damage, 3x3' },
       { label: 'God arrows', value: '1,440 - best ammo in the game' },
@@ -622,7 +619,6 @@ export const BLESSING_BUILDS_EXAMPLES = [
     keyNumbers: [
       { label: 'Total armour (late)', value: '3,114' },
       { label: 'Light of Saradomin', value: '~7,800 - ~9,900 elder overloaded' },
-      { label: 'Big Boned per hit', value: '+1,350 (tank LP)' },
       { label: "Erethdor's grimoire", value: '+12% crit chance' },
       { label: 'Core kit region cost', value: '0 - all Misthalin' },
     ],
@@ -719,7 +715,6 @@ export const BLESSING_BUILDS_EXAMPLES = [
       { label: 'Animate Dead + Barkscales', value: '~669 - ~785 elder overloaded' },
       { label: 'A 1,000 hit becomes', value: '243 (76% reduction)' },
       { label: 'Total armour (late)', value: '3,605 - 4,454 elder overloaded' },
-      { label: 'Life pool (Big Boned)', value: '~27,000' },
       { label: 'Unhealed hits to die @2k', value: '29' },
     ],
     loadouts: {
@@ -814,7 +809,6 @@ export const BLESSING_BUILDS_EXAMPLES = [
     keyNumbers: [
       { label: 'Ability damage', value: '5,451 - 2.2% behind The Ironclad' },
       { label: 'Total armour (late)', value: '3,566 - 4,415 elder overloaded' },
-      { label: "Teragard's Aegis bonus", value: '+2,675 - +3,311 elder overloaded' },
       { label: 'Weapon tier', value: '85 - far shorter runway' },
       { label: 'Strykebow bonus', value: '+560 LP, 8.5% PvM reduction' },
     ],

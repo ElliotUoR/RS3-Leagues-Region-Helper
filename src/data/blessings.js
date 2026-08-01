@@ -74,6 +74,14 @@ export const BLESSING_TIERS = [1, 2, 3];
 // page, rather than a claim that e.g. Tier 1 "belongs to" Zamorak. The two
 // God Tier rows get `colour: 'god'` for a distinct combined-palette treatment
 // instead of any single colour.
+//
+// Each `passives` entry is normally a plain string, rendered as-is. An entry
+// can instead be `{ text, tooltip }` for a passive whose one-line wording
+// doesn't say enough on its own (e.g. Tier 3's rune pouch doesn't state its
+// capacity) - BlessingPassivesModal.jsx renders those via the shared
+// TagTooltip component (hover OR tap, unlike a plain title attribute) with
+// underlined, colour-accented text so it reads as interactive rather than
+// looking like an unexplained inconsistency with its plain-string siblings.
 export const BLESSING_PASSIVE_TIERS = [
   {
     tier: 'Tier 1',
@@ -101,7 +109,7 @@ export const BLESSING_PASSIVE_TIERS = [
       '75% chance to save ammunition in combat',
       '75% chance to save ectoplasm and runes when casting abilities and incantations',
       'All movement ability cooldowns are reduced to 4.2s',
-      "Granted Nature's rune pouch",
+      { text: "Granted Nature's rune pouch", tooltip: 'Holds 4 Runes' },
     ],
   },
   {

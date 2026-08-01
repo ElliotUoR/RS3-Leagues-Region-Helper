@@ -143,23 +143,37 @@ export default function ReadOnlyLoadout({
         <p className="read-only-loadout-armour">
           Ability damage <strong className="gear-stat-dmg">+{aegis.base.toLocaleString()}</strong>
           <span className="read-only-loadout-armour-note">
-            {' '}from Teragard's Aegis ({aegis.multiplier}x, {aegis.offhandClass})
+            {' '}from Teragard's Aegis ({aegis.multiplier}x, {aegis.source})
           </span>
+          {/* The armour each boosted figure came from, in armour colour, so it
+              is obvious at a glance which number is the cause and which is the
+              effect - and so an overloaded bonus is never sitting next to an
+              unboosted armour total with no way to check it divides. */}
           {aegis.overloaded != null && (
             <>
               <br />
               <strong className="read-only-loadout-armour-ovl">+{aegis.overloaded.toLocaleString()}</strong>
               <span className="read-only-loadout-armour-note"> overloaded</span>
+              {aegis.armour?.overloaded != null && (
+                <span className="read-only-loadout-aegis-armour">
+                  {' '}({aegis.armour.overloaded.toLocaleString()} armour)
+                </span>
+              )}
             </>
           )}
           {aegis.elder != null && (
             <>
               <br />
               <strong className="read-only-loadout-armour-elder">+{aegis.elder.toLocaleString()}</strong>
-              <span className="read-only-loadout-armour-note">
-                {' '}elder overloaded
-                {elderSources?.length ? ` - via ${elderSources.join(' or ')}` : ''}
-              </span>
+              <span className="read-only-loadout-armour-note"> elder overloaded</span>
+              {aegis.armour?.elder != null && (
+                <span className="read-only-loadout-aegis-armour">
+                  {' '}({aegis.armour.elder.toLocaleString()} armour)
+                </span>
+              )}
+              {elderSources?.length ? (
+                <span className="read-only-loadout-armour-note"> - via {elderSources.join(' or ')}</span>
+              ) : null}
             </>
           )}
         </p>

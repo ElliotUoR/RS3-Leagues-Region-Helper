@@ -146,6 +146,8 @@ export const LEAGUE_RELICS = [
     //     "Access: <badge>") so the underlying game info isn't only conveyed
     //     via color/icons. The dark-green-to-black tint per line is assigned
     //     positionally in CSS (nth-child), not from a data field.
+    //   - `quantity` (e.g. '3-9 at a time') renders next to the category
+    //     name, in smaller/lighter text than the name itself.
     dropTable: {
       heading: 'Thieving drop table',
       footerText: 'Thieving drop table',
@@ -157,6 +159,7 @@ export const LEAGUE_RELICS = [
           badge: 'Heist + Outside',
           icon: FP('Clean_lantadyme_detail.png'),
           clearance: 'both',
+          quantity: '3-9 at a time',
           detail: 'Guam → Fellstalk',
         },
         {
@@ -164,6 +167,7 @@ export const LEAGUE_RELICS = [
           badge: 'Heist only',
           icon: FP('Congealed_blood_1000_detail.png'),
           clearance: 'heist',
+          quantity: '5-15 at a time',
           detail:
             'Primal extract, bottled roar, spark chitin, poison slime, adrenaline crystal, ground wyvern bone and wyvern bonemeal, grenwall spikes, congealed blood, ground Miasma runes, dragonscale dust, phoenix feather, morchella mushroom, tombshroom, timeworn tincture, spider fang',
         },
@@ -172,6 +176,7 @@ export const LEAGUE_RELICS = [
           badge: 'Heist + Outside',
           icon: FP('Snape_grass_detail.png'),
           clearance: 'both',
+          quantity: '5-15 at a time',
           detail:
             "Snape grass, Red spider's eggs, unicorn horn dust, limpwurt roots, white berries, wine of zamorak, crushed birds nest, cactus potato, Yew and Magic roots, Searing ashes, cockatrice egg, rabbit foot, bull horns, wine of saradomin, wine of guthix, Mycelial webbing, poison ivy berries",
         },
@@ -180,6 +185,7 @@ export const LEAGUE_RELICS = [
           badge: 'Heist + Outside',
           icon: FP('Mort_myre_fungus_detail.webp'),
           clearance: 'both',
+          quantity: '5-15 at a time',
           detail:
             "Chinchompa residue, yak milk, yak tuft, zygomite fruit, various PoF sheep wool, regular and enriched timber & calcified fungus, enriched fungal algae, kebbit teeth dust, mort myre mushroom, goat horn dust, toad's legs, spider venom",
         },
@@ -188,6 +194,7 @@ export const LEAGUE_RELICS = [
           badge: 'Outside only',
           icon: FP('Jangerberries_detail.webp'),
           clearance: 'outside',
+          quantity: '5-15 at a time',
           detail:
             'Eye of newt, jangerberries, Frog spawn, Papaya, Swordfish, Wimpy feather, redberries, ground mud runes, Nail beast nails, bull horns, Bear fur, cadava berries, chocolate dust, white, red, yellow and black beads',
         },
@@ -459,7 +466,9 @@ export const LEAGUE_RELICS = [
     // Blessed Fire Spirits (see effects above - Fire spirits are replaced by
     // these while Superheated is active) drop table - each entry below is a
     // range (e.g. Stone Spirits drops anywhere from Copper up to Platinum,
-    // not just those two ends) rather than a fixed list of items.
+    // not just those two ends) rather than a fixed list of items. An
+    // optional `quantity` (e.g. '5-15 dropped') renders as its own bulleted
+    // line under `detail` instead of being folded into that sentence.
     //
     // `theme: 'forge'` opts this table into RelicDropTablePanel.jsx's
     // bespoke forge-themed rendering branch (see the `dropTable.theme ===
@@ -481,25 +490,35 @@ export const LEAGUE_RELICS = [
         {
           name: 'Stone Spirits',
           detail: 'Copper → Platinum',
+          quantity: '5-15 dropped',
           color: '#8f3a1e',
           icon: FP('Drakolith_stone_spirit_detail.png'),
         },
         {
           name: 'Uncut Gems',
           detail: 'Sapphire → Dragonstone',
+          quantity: '3-10 dropped',
           color: '#c8421f',
           icon: FP('Uncut_sapphire_detail.png'),
         },
-        { name: 'Charms', detail: 'Gold, Green, Crimson, Blue', color: '#dd6a1f', icon: FP('Gold_charm_detail.png') },
+        {
+          name: 'Charms',
+          detail: 'Gold, Green, Crimson, Blue',
+          quantity: '4-12 dropped',
+          color: '#dd6a1f',
+          icon: FP('Gold_charm_detail.png'),
+        },
         {
           name: 'Clues',
           detail: 'Easy → Master, and Box of Clue Scrolls',
+          quantity: '1-3, or a Box of Clues',
           color: '#e8a824',
           icon: FP('Sealed_clue_scroll_(hard)_detail.webp'),
         },
         {
           name: 'Flasks',
           detail: 'Crystal & Potion Flasks',
+          quantity: '10-20 dropped',
           color: '#f3d35a',
           icon: FP('Crystal_flask_detail.webp'),
         },
@@ -565,9 +584,9 @@ export const LEAGUE_RELICS = [
       'Summoning pouches, Ancient summoning pouches, Divine energy, Divine charge, Invention materials, Dragon equipment, Goldenhawk feathers, Divine geodes, Blessed fire spirits, or Crystal essence.',
     ],
     // Void Shard contents. Structurally unlike the other three drop tables:
-    // this one is a FLAT, EQUAL-WEIGHTED roll - seven slots, 1/7 each - rather
+    // this one is a FLAT, EQUAL-WEIGHTED roll - eight slots, 1/8 each - rather
     // than a tiered ladder (Superheated), a chain (Transmutation) or a
-    // clearance ledger (Golden Touch). The 'void' theme renders it as seven
+    // clearance ledger (Golden Touch). The 'void' theme renders it as eight
     // facets of a shard so the equal odds are the thing you see first, since
     // that is the only number that matters when reading it.
     //
@@ -580,37 +599,39 @@ export const LEAGUE_RELICS = [
       footerText: 'Void Shard drop table',
       theme: 'void',
       standfirst:
-        'Opening a Void Shard always gives one clue scroll, plus exactly one of the seven slots below. Every slot is an equal 1/7.',
-      odds: '1/7',
+        'Opening a Void Shard always gives one clue scroll, plus exactly one of the eight slots below. Every slot is an equal 1/8.',
+      odds: '1/8',
       categories: [
         {
           name: 'Summoning pouches',
           icon: 'icons/voidshard/Binding_contract_ripper_demon.webp',
           detail:
-            'Every ancient Summoning familiar pouch, and almost all standard pouches - only a handful of the least useful familiars are missing.',
+            'Every ancient Summoning familiar pouch, and almost all standard pouches - only a handful of the least useful familiars are missing. 1-5 dropped.',
           note: 'Voidwalker can be used to access Ancient summoning without Kandarin.',
         },
         {
           name: 'Divine energy & charge',
           icon: 'icons/voidshard/Divine_charge.png',
-          detail: 'Core energies from Pale all the way to Incandescent, plus Divine Charge.',
+          detail:
+            'Core energies from Pale all the way to Incandescent, plus Divine Charge. 50/50 chance of either - 150-300 Energy, or 10-20 Charge.',
         },
         {
           name: 'Dragon equipment',
           icon: 'icons/Dragon_hatchet.png',
           detail:
-            '2h crossbow, 2h sword, arrow, arrowheads, battleaxe, battlestaff, claws, dagger, dart, halberd, hatchet, longsword, mace, pickaxe, scimitar, spear, throwing axe, warhammer, boots, chainbody, full helm, helm, platebody, platelegs, plateskirt, kiteshield, sq shield.',
+            '2h crossbow, 2h sword, arrow, arrowheads, battleaxe, battlestaff, claws, dagger, dart, halberd, hatchet, longsword, mace, pickaxe, scimitar, spear, throwing axe, warhammer, boots, chainbody, full helm, helm, platebody, platelegs, plateskirt, kiteshield, sq shield. Always 1 item.',
           note: 'Same table as the Motherlode Maw. Includes the dragon hatchet and pickaxe, which is otherwise a Fremennik drop.',
         },
         {
           name: 'Goldenhawk feathers',
           icon: 'icons/voidshard/Golden_feather.png',
-          detail: 'Convertible into Prayer XP, or alchemised. Normally a Golden Touch drop from Agility and Thieving.',
+          detail:
+            'Convertible into Prayer XP, or alchemised. Normally a Golden Touch drop from Agility and Thieving. 1-3 dropped.',
         },
         {
           name: 'Crystal essence',
           icon: 'icons/voidshard/Crystalline_essence.png',
-          detail: 'The Crystal Grace rune/pure essence stackable subtitute',
+          detail: 'The Crystal Grace rune/pure essence stackable subtitute. 3-10 dropped.',
         },
         {
           name: 'Blessed fire spirits',
@@ -618,9 +639,14 @@ export const LEAGUE_RELICS = [
           detail: 'Gain access to the Superheated fire spirit table',
         },
         {
+          name: 'Invention components',
+          icon: 'icons/voidshard/Precious_components.webp',
+          detail: 'Quantities not revealed yet.',
+        },
+        {
           name: 'Divine geodes',
           icon: 'icons/Voidwalker.png',
-          detail: 'Contents not revealed yet.',
+          detail: 'Contents not revealed yet. 1-5 dropped.',
           hidden: true,
         },
       ],

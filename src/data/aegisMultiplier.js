@@ -1,18 +1,21 @@
-// Which class of off-hand item is equipped - the only thing that decides
-// Teragard's Aegis' multiplier:
+// What Teragard's Aegis sees in your hands, and the multiplier it pays:
 //
 //   "Your base ability damage is increased by 25% of your total armour value.
 //    This bonus is doubled while wielding a defender and tripled while
 //    wielding a shield."
 //
-// A weapon (or nothing, or a two-handed main-hand, which leaves the slot
-// unusable) is the plain x1 case.
+// x3 shield, x2 defender, x1 anything else (a weapon, or an empty off-hand).
+//
+// BOTH HANDS, not just the off-hand. A shieldbow is a two-handed weapon, so it
+// occupies the WEAPON slot and leaves the off-hand empty - but it counts as a
+// shield here, which is the entire premise of the Shield-Bow-er build. Reading
+// only the off-hand would quietly pay that build x1 instead of x3.
 //
 // WHY A LOOKUP RATHER THAN A FIELD ON EACH ITEM. Ninety-three items sit in the
 // off-hand slot across the four styles and the overwhelming majority are
-// weapons, so tagging every one of them by hand would be ninety-three chances
-// to typo a field that changes a headline damage number by 50% or 200%. Only
-// the two exceptional classes are listed, and everything unlisted is a weapon.
+// weapons, so tagging every one by hand would be ninety-three chances to typo
+// a field that changes a headline damage number by 50% or 200%. Only the
+// exceptional classes are listed; everything unlisted is a plain weapon.
 //
 // WHY NOT MATCH ON THE NAME. The ranged and magic members of a defender set are
 // not called "defender" - they are reprisers, rebounders and, for the Ancient
@@ -21,7 +24,7 @@
 // with nothing on screen to say it had happened. Shields are no better: wards,
 // deflectors, bucklers and one shroud are all shield-class.
 //
-// scripts/check-offhand-class.mjs asserts every name below still exists in
+// scripts/check-aegis-multiplier.mjs asserts every name below still exists in
 // gear.js, so a rename there cannot quietly drop an item back to x1.
 
 // The full defender family. Melee members are "defender", ranged are
@@ -78,19 +81,37 @@ export const SHIELD_OFFHANDS = new Set([
   'Dragonfire shroud',
 ]);
 
-export const AEGIS_MULTIPLIER_BY_CLASS = { weapon: 1, defender: 2, shield: 3 };
+// Two-handed weapons that count as a shield. Listed explicitly because the one
+// in this dataset does not say so in its name - the Strykebow is a shieldbow.
+// isShieldbow() ALSO accepts any name containing "shieldbow", so the ordinary
+// ones (elder rune shieldbow, crystal shieldbow, ...) are covered the moment
+// they are added to gear.js without an edit here. The two rules exist for
+// opposite reasons: the set catches shieldbows that do not say it, the name
+// test catches the ones that do.
+export const SHIELDBOW_WEAPONS = new Set(['Strykebow']);
 
-// `offhandName` is whatever is in the off-hand slot, or null/undefined for an
-// empty slot. Returns 'weapon' for anything unrecognised, which is both the
-// correct default and the safe one: an unlisted item understates the bonus
-// rather than inventing one.
-export function getOffhandClass(offhandName) {
-  if (typeof offhandName !== 'string') return 'weapon';
-  if (DEFENDER_OFFHANDS.has(offhandName)) return 'defender';
-  if (SHIELD_OFFHANDS.has(offhandName)) return 'shield';
+export function isShieldbow(weaponName) {
+  if (typeof weaponName !== 'string') return false;
+  return SHIELDBOW_WEAPONS.has(weaponName) || /shieldbow/i.test(weaponName);
+}
+
+// 'shieldbow' is reported separately from 'shield' only so the UI can say which
+// one earned the x3 - they pay identically.
+export const AEGIS_MULTIPLIER_BY_CLASS = { weapon: 1, defender: 2, shield: 3, shieldbow: 3 };
+
+// `weaponName`/`offhandName` are whatever is in those slots, or null for empty.
+// Returns 'weapon' for anything unrecognised, which is both the correct default
+// and the safe one: an unlisted item understates the bonus rather than
+// inventing one.
+export function getAegisClass({ weaponName, offhandName } = {}) {
+  if (isShieldbow(weaponName)) return 'shieldbow';
+  if (typeof offhandName === 'string') {
+    if (DEFENDER_OFFHANDS.has(offhandName)) return 'defender';
+    if (SHIELD_OFFHANDS.has(offhandName)) return 'shield';
+  }
   return 'weapon';
 }
 
-export function getAegisMultiplier(offhandName) {
-  return AEGIS_MULTIPLIER_BY_CLASS[getOffhandClass(offhandName)];
+export function getAegisMultiplier(hands) {
+  return AEGIS_MULTIPLIER_BY_CLASS[getAegisClass(hands)];
 }

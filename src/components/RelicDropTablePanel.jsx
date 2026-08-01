@@ -60,7 +60,12 @@ function HerbloreDropTable({ dropTable }) {
               </div>
               <div className="drop-table-herblore-entry-body">
                 <div className="drop-table-herblore-entry-top">
-                  <span className="drop-table-herblore-name">{category.name}</span>
+                  <span className="drop-table-herblore-name">
+                    {category.name}
+                    {category.quantity && (
+                      <span className="drop-table-herblore-quantity">{category.quantity}</span>
+                    )}
+                  </span>
                   <div className="drop-table-herblore-clearance">
                     <span className={`drop-table-herblore-clearance-seg ${heistLit ? 'is-lit' : 'is-locked'}`}>
                       Heist
@@ -540,6 +545,11 @@ export default function RelicDropTablePanel({ dropTable, relicName }) {
                   <span className="drop-table-forge-name">{category.name}</span>
                 </div>
                 {category.detail && <span className="drop-table-forge-detail">{category.detail}</span>}
+                {category.quantity && (
+                  <ul className="drop-table-forge-quantity-list">
+                    <li>{category.quantity}</li>
+                  </ul>
+                )}
               </div>
             </li>
           ))}

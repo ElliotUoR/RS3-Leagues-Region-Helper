@@ -373,6 +373,7 @@ function StageEditor({
           ? getAegisBreakdown({
               equipped,
               style,
+              weaponName: names.weapon,
               offhandName: names.offhand,
               hasElder: elderSources.length > 0,
             })
@@ -409,7 +410,7 @@ function StageEditor({
                       Teragard&apos;s Aegis: +{aegis.base.toLocaleString()} ability damage
                     </span>
                     <span className="create-build-blessing-detail">
-                      {' '}({aegis.multiplier}x - {aegis.offhandClass} in the off-hand)
+                      {' '}({aegis.multiplier}x - {aegis.source})
                       {' · '}+{aegis.overloaded.toLocaleString()} overloaded
                       {aegis.elder != null && (
                         <> {'· '}+{aegis.elder.toLocaleString()} elder overloaded - via {elderSources.join(' or ')}</>

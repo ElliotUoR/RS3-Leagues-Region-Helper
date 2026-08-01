@@ -2567,6 +2567,19 @@ main.abilities-page .gear-item-rows {
   opacity: 0.85;
 }
 
+.drop-table-forge-quantity-list {
+  margin: 2px 0 0;
+  padding-left: 14px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.drop-table-forge-quantity-list li {
+  list-style: disc;
+}
+
 @keyframes drop-table-forge-flicker {
   0%,
   100% {
@@ -2704,6 +2717,16 @@ main.abilities-page .gear-item-rows {
   font-weight: 700;
   font-size: 12.5px;
   color: color-mix(in srgb, var(--herblore-tint) 70%, var(--text-h) 30%);
+}
+
+/* Slightly smaller than the name it sits beside (12.5px), and not bold, so
+   it reads as a secondary detail rather than part of the heading itself. */
+.drop-table-herblore-quantity {
+  margin-left: 6px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text);
+  opacity: 0.75;
 }
 
 .drop-table-herblore-clearance {
@@ -4477,6 +4500,20 @@ main.abilities-page .gear-item-rows {
   font-size: 0.75rem;
 }
 
+/* The armour figure a Teragard's Aegis bonus was derived from. Armour-coloured
+   rather than muted like the surrounding note text, so cause and effect are
+   distinguishable on a line that carries both. Deliberately does NOT stack the
+   note's 0.6 opacity on top - that washes the colour out to the same grey as
+   everything else, which defeats the point. */
+.read-only-loadout-aegis-armour {
+  font-size: 0.75rem;
+  color: var(--stat-armour-color, #a8c5dd);
+}
+
+:root[data-theme='light'] .read-only-loadout-aegis-armour {
+  color: var(--stat-armour-color, #5c7a94);
+}
+
 /* The planner's .equip-grid squares its top corners because a style-tabs
    strip sits directly above it there; nothing sits above it here, so the
    corners are restored. The grid keeps its fixed 236px width - it already
@@ -5584,26 +5621,48 @@ main.abilities-page .gear-item-rows {
   white-space: nowrap;
 }
 
+/* Same filled treatment as .build-see-user-builds-button beside it, in the
+   site's purple rather than green - the two are peers, so a filled pill next
+   to an outlined one read as primary/secondary when they are not. Hardcoded
+   hexes rather than var(--accent) for the same reason .blessing-passives-toggle
+   uses them: a gradient and a readable dark label need a matched light/dark
+   pair, which one accent variable cannot supply. */
 .build-create-button {
-  border: 1px solid var(--accent);
-  background: var(--accent-bg);
-  color: var(--accent);
+  border: 1px solid #b98cf5;
+  background: linear-gradient(135deg, #d4b3ff, #7a3bd6);
+  color: #1b0733;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 14px -4px rgb(122 59 214 / 65%);
+  transition: transform 120ms, box-shadow 120ms;
 }
 
 .build-create-button:hover {
-  background: var(--accent);
-  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px -4px rgb(122 59 214 / 85%);
 }
 
+/* Same vivid green fill as .blessing-passives-toggle (and League Relics' gold
+   .relic-passives-toggle) rather than the muted outline it used to have -
+   "See user made builds" is a route to a whole other section of the site, not
+   a secondary action next to "Create a build", so it reads as an equally
+   unmissable destination. Shares that button's exact palette and glow. */
 .build-see-user-builds-button {
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
+  border: 1px solid #57d98a;
+  background: linear-gradient(135deg, #7de8a4, #1f9e52);
+  color: #04321a;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 14px -4px rgb(31 158 82 / 65%);
+  transition: transform 120ms, box-shadow 120ms;
 }
 
+/* Lift and glow only. The button is filled green now, so the purple
+   border/text this used to swap to on hover no longer belongs - a leftover
+   from when it was an outlined secondary. */
 .build-see-user-builds-button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px -4px rgb(31 158 82 / 85%);
 }
 
 /* ── Create Build page ─────────────────────────────────────────────── */
@@ -6453,6 +6512,22 @@ main.abilities-page .gear-item-rows {
   border-top: 1px solid var(--border);
 }
 
+/* Marks a passive's wording as backed by a TagTooltip (hover OR tap - see
+   BlessingPassivesModal.jsx) rather than plain text - colour + underline is
+   the same "this is interactive" signal a hyperlink uses, so a reader
+   doesn't have to discover it by accidentally hovering. Colour comes from
+   var(--bl-accent), the same custom property this passive's own column is
+   already scoped to (see the .blessing-passives-column-{red,green,blue}
+   rules), so it stays visually tied to that column rather than introducing
+   a fourth, unrelated colour into the page. */
+.blessing-passives-tooltip-term {
+  color: var(--bl-accent, var(--accent));
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  font-weight: 600;
+}
+
 @media (max-width: 700px) {
   .blessing-passives-grid {
     grid-template-columns: 1fr 1fr;
@@ -6995,9 +7070,16 @@ main.abilities-page .gear-item-rows {
 
 /* ---- the seven facets ---- */
 
+/* Flexbox + wrap rather than CSS Grid on purpose: this table's slot count
+   has already changed once (7 -> 8) and may again, and a wrapping flex
+   container centres a leftover partial last row for free (`justify-content:
+   center` applies per-row when wrapped) - no nth-child arithmetic to
+   maintain per item count, unlike the old grid version's hardcoded
+   `:nth-child(7)` overrides below. */
 .drop-table-void-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
   margin: 16px 0 0;
   padding: 0;
@@ -7009,6 +7091,7 @@ main.abilities-page .gear-item-rows {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  flex: 1 1 100%;
   gap: 6px;
   padding: 13px 14px;
   border: 1px solid color-mix(in srgb, var(--void-glow) 30%, transparent);
@@ -7101,31 +7184,20 @@ main.abilities-page .gear-item-rows {
 
 /* ---- unrevealed slot ---- */
 
-/* Exactly seven slots, so the last one always sits alone on its final row at
-   two or three columns. Column counts are fixed per breakpoint rather than
-   auto-fill precisely so nth-child can find it and centre it - with auto-fill
-   the column count is unknowable from CSS. */
+/* Two columns, then three - a lone or partial leftover row centres itself
+   automatically via .drop-table-void-grid's justify-content: center, no
+   per-item-count overrides needed (see that rule's comment). */
 @media (min-width: 40rem) {
-  .drop-table-void-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .drop-table-void-facet:nth-child(7) {
-    grid-column: 1 / -1;
-    justify-self: center;
-    width: min(100%, 24rem);
+  .drop-table-void-facet {
+    flex: 1 1 calc(50% - 6px);
+    max-width: calc(50% - 6px);
   }
 }
 
 @media (min-width: 60rem) {
-  .drop-table-void-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .drop-table-void-facet:nth-child(7) {
-    grid-column: 2;
-    justify-self: stretch;
-    width: auto;
+  .drop-table-void-facet {
+    flex: 1 1 calc(33.333% - 8px);
+    max-width: calc(33.333% - 8px);
   }
 }
 
@@ -7265,7 +7337,10 @@ main.abilities-page .gear-item-rows {
   opacity: 1;
 }
 
-.build-share-button {
+/* Deliberately NOT .build-share-button - the curated guides' "Open in gear
+   planner" owns that class, and a second rule for it here (later in the file,
+   equal specificity) silently restyled theirs into this pill. */
+.user-build-share-button {
   font-size: 0.78rem;
   font-weight: 600;
   padding: 3px 12px;
@@ -7276,12 +7351,12 @@ main.abilities-page .gear-item-rows {
   cursor: pointer;
 }
 
-.build-share-button:hover {
+.user-build-share-button:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.build-share-button.shared {
+.user-build-share-button.shared {
   border-color: var(--style-ranged);
   color: var(--style-ranged);
 }

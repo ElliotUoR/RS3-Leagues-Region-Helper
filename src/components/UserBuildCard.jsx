@@ -105,6 +105,7 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
       ? getAegisBreakdown({
           equipped,
           style,
+          weaponName: loadout.slots.weapon,
           offhandName: loadout.slots.offhand,
           hasElder: elderSources.length > 0,
         })

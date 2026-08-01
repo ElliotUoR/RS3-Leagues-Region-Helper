@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import TagTooltip from './TagTooltip';
 import { BLESSING_PASSIVE_TIERS } from '../data/blessings';
 
 // A single button + modal pair for the "Blessing Passives Revealed" reference
@@ -56,11 +57,21 @@ export default function BlessingPassivesModal() {
                       </span>
                     </h3>
                     <ul className="blessing-passives-list">
-                      {passives.map((passive) => (
-                        <li key={passive} className="blessing-passives-item">
-                          {passive}
-                        </li>
-                      ))}
+                      {passives.map((passive) => {
+                        const hasTooltip = typeof passive === 'object';
+                        const text = hasTooltip ? passive.text : passive;
+                        return (
+                          <li key={text} className="blessing-passives-item">
+                            {hasTooltip ? (
+                              <TagTooltip className="blessing-passives-tooltip-term" tooltip={passive.tooltip}>
+                                {text}
+                              </TagTooltip>
+                            ) : (
+                              text
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 ))}
