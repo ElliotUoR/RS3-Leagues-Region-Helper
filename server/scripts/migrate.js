@@ -18,7 +18,13 @@ import pg from 'pg';
 
 const { Client } = pg;
 
-const MIGRATIONS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'deploy', 'migrations');
+// Overridable so local development can point at a generated copy of the
+// migrations with the CHANGE_ME_* password placeholders filled in, without
+// editing the tracked files (see scripts/dev-db.mjs). Production never sets
+// this and reads deploy/migrations directly.
+const MIGRATIONS_DIR =
+  process.env.MIGRATIONS_DIR ??
+  path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'deploy', 'migrations');
 const BOOTSTRAP_MIGRATION = '001_init.sql';
 
 const DATABASE_URL = process.env.DATABASE_URL;

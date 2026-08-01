@@ -231,7 +231,7 @@ export const GEAR_SET_GROUPS = {
   'Refined anima core body of Zamorak': 'Refined anima core armour of Zamorak',
   'Refined anima core legs of Zamorak': 'Refined anima core armour of Zamorak',
 
-  // Grifolic shield is also a Polypore Dungeon (morytania) drop, same as the
+  // Grifolic shield is also a Polypore Dungeon (desert) drop, same as the
   // Ganodermic armour pieces - one family, renamed since it's not armour-only.
   'Ganodermic visor': 'Ganodermic gear',
   'Ganodermic poncho': 'Ganodermic gear',

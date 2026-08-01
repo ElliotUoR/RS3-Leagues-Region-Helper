@@ -16,4 +16,29 @@ export default defineConfig(({ mode }) => ({
   // editing the Build Guides prose in place, and is never part of a production
   // build. See scripts/viteBuildTextEditor.js.
   plugins: [react(), buildTextEditor()],
+
+  // Dev-server only (Vite ignores `server` in a build), and it exists so the
+  // app can talk to a real backend locally. In production Caddy routes these
+  // two prefixes (see deploy/Caddyfile.snippet); here Vite does the same job,
+  // so utils/api.js's hardcoded /Leagues/ paths work unchanged rather than
+  // needing a separate dev base URL.
+  //
+  // The /Leagues prefix is stripped before forwarding, because Caddy strips it
+  // too (`handle_path`) - the Node service's routes are declared as
+  // "/api/user-builds", not "/Leagues/api/user-builds", and PostgREST expects
+  // a bare table name.
+  server: {
+    proxy: {
+      '/Leagues/api': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/Leagues/, ''),
+      },
+      '/Leagues/rest': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/Leagues\/rest/, ''),
+      },
+    },
+  },
 }))

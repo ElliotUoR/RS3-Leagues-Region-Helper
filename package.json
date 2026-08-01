@@ -11,7 +11,11 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "fetch-icons": "node scripts/download-icons.mjs",
-    "shortlink-words": "node scripts/extract-shortlink-words.mjs"
+    "shortlink-words": "node scripts/extract-shortlink-words.mjs",
+    "dev:db": "docker compose -f deploy/docker-compose.dev.yml up -d",
+    "dev:db:migrate": "node scripts/dev-db.mjs",
+    "dev:db:stop": "docker compose -f deploy/docker-compose.dev.yml down",
+    "dev:db:reset": "docker compose -f deploy/docker-compose.dev.yml down -v && docker compose -f deploy/docker-compose.dev.yml up -d"
   },
   "dependencies": {
     "lz-string": "^1.5.0",

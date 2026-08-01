@@ -1,0 +1,61 @@
+# Local development database only - Postgres + PostgREST, nothing else.
+#
+# Deliberately NOT the production stack (docker-compose.yml). The Node service
+# and the frontend run on the host instead, so a code change is a save-and-
+# refresh rather than an image rebuild; only the two things that are genuinely
+# awkward to install natively live in Docker.
+#
+# Differences from production, all intentional:
+#   - passwords are fixed, public, and useless (see scripts/dev-db.mjs)
+#   - ports are published to localhost so host processes can reach them
+#   - the data volume is ordinary and disposable: `docker compose -f
+#     docker-compose.dev.yml down -v` gives you a clean database
+#   - no initdb.d mount. Production seeds 001_init.sql that way, which only
+#     ever runs against an empty volume; locally every migration goes through
+#     scripts/dev-db.mjs so re-running is predictable.
+#
+# Usage (from the repo root):
+#   npm run dev:db          start it
+#   npm run dev:db:migrate  create the schema
+#   npm run dev:db:reset    throw it away and start over
+name: rs3-leagues-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rs3_dev_postgres
+    environment:
+      POSTGRES_DB: rs3
+      # Local-only. This database holds nothing but test data and is not
+      # reachable from outside your machine.
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - rs3_dev_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  postgrest:
+    image: postgrest/postgrest:v14.5
+    container_name: rs3_dev_postgrest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:devpassword@postgres:5432/rs3
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      # Without this, a schema change needs a container restart before
+      # PostgREST notices it - which is exactly the kind of confusing stale
+      # state a local setup should not have.
+      PGRST_DB_CHANNEL_ENABLED: 'true'
+    ports:
+      - '127.0.0.1:3001:3000'
+
+volumes:
+  rs3_dev_postgres_data:
+    name: rs3_dev_postgres_data
