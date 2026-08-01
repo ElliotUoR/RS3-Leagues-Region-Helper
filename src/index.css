@@ -5917,6 +5917,99 @@ main.abilities-page .gear-item-rows {
   margin-left: auto;
 }
 
+/* ---- Blessing Passives modal ---- */
+
+/* Same pill shape as .share-button (accent border/tint) - a reference lookup
+   button, not a destructive one like Clear picks, so it doesn't borrow that
+   button's warning colouring. */
+.blessing-passives-toggle {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.blessing-passives-toggle:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Wider than the default .modal-panel (440px) - same reasoning as
+   .relic-drop-table-modal, this needs room for an 8-column reference table. */
+.blessing-passives-modal {
+  max-width: min(920px, 92vw);
+}
+
+.blessing-passives-hint {
+  margin: 0 0 14px;
+  opacity: 0.75;
+  font-size: 12px;
+}
+
+/* 4 columns wraps the 8 tiers into 2 rows of 4 in DOM order (Tier 1/2/3/God
+   Tier 1, then Tier 5/6/7/God Tier 2) - the same grouping the reveal image
+   itself uses, without needing two separately-rendered grids. */
+.blessing-passives-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.blessing-passives-column {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg-2, var(--panel-bg));
+}
+
+.blessing-passives-column.god-tier {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.blessing-passives-column-head {
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  text-align: center;
+  color: var(--accent);
+}
+
+.blessing-passives-column.god-tier .blessing-passives-column-head {
+  border-bottom-color: var(--accent);
+}
+
+.blessing-passives-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.blessing-passives-item {
+  padding: 10px 0;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.blessing-passives-item + .blessing-passives-item {
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 700px) {
+  .blessing-passives-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* ---- tier groups ---- */
 
 .blessing-tier-group {

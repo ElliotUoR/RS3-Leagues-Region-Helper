@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import BlessingCard from '../components/BlessingCard';
 import BlessingGodPanel from '../components/BlessingGodPanel';
+import BlessingPassivesModal from '../components/BlessingPassivesModal';
 import { BLESSINGS, BLESSING_COLOURS, BLESSING_COLOUR_META, BLESSING_TIERS } from '../data/blessings';
 import { copyShareLink, shareLinkFor } from '../utils/shareLink';
 
@@ -84,6 +85,7 @@ export default function BlessingsPage({
         <div className="blessings-heading">
           <h1>Blessings</h1>
           <div className="blessings-actions">
+            <BlessingPassivesModal />
             <button
               type="button"
               className="clear-loadout-button"

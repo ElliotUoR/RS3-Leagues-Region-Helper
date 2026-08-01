@@ -58,6 +58,73 @@ export const BLESSING_COLOUR_META = {
 
 export const BLESSING_TIERS = [1, 2, 3];
 
+// Transcribed verbatim from Jagex's "Blessing Passives Revealed" promo image -
+// a SEPARATE progression track from BLESSING_TIERS above. BLESSING_TIERS is
+// "pick one blessing per tier" (which blessing you equip); this is the
+// account-wide passive perks unlocked by resetting/re-progressing blessings
+// overall - hence "1x Blessing progression reset" appearing as a reward
+// itself at Tier 1/God Tier 1/God Tier 2. Tier 4 is not a gap in this data -
+// the reveal image itself jumps straight from Tier 3 to God Tier 1, then
+// Tier 5-7 to God Tier 2, with no Tier 4 shown at all.
+export const BLESSING_PASSIVE_TIERS = [
+  {
+    tier: 'Tier 1',
+    passives: [
+      '50% chance to save runes in combat',
+      '50% chance to save ammunition in combat',
+      '50% chance to save ectoplasm and runes when casting abilities and incantations',
+      '1x Blessing progression reset',
+    ],
+  },
+  {
+    tier: 'Tier 2',
+    passives: [
+      'The Dive ability is automatically unlocked',
+      'Your attack range for all combat styles is increased by 1 tile. Maximum range is capped at 10 tiles',
+    ],
+  },
+  {
+    tier: 'Tier 3',
+    passives: [
+      '75% chance to save runes in combat',
+      '75% chance to save ammunition in combat',
+      '75% chance to save ectoplasm and runes when casting abilities and incantations',
+      'All movement ability cooldowns are reduced to 4.2s',
+      "Granted Nature's rune pouch",
+    ],
+  },
+  {
+    tier: 'God Tier 1',
+    passives: ['1x Blessing progression reset'],
+  },
+  {
+    tier: 'Tier 5',
+    passives: [
+      "All War's Wares rewards are unlocked",
+      'Your maximum adrenaline is increased by +25%',
+    ],
+  },
+  {
+    tier: 'Tier 6',
+    passives: [
+      'God books, scriptures, grimoires and scrimshaws no longer use charge',
+      'Equipment no longer degrades',
+    ],
+  },
+  {
+    tier: 'Tier 7',
+    passives: [
+      '95% chance to save runes in combat',
+      '95% chance to save ammunition in combat',
+      '95% chance to save ectoplasm and runes when casting abilities and incantations',
+    ],
+  },
+  {
+    tier: 'God Tier 2',
+    passives: ['1x Blessing progression reset'],
+  },
+];
+
 // Game-progression buckets used by `analysis.stageRank`. Blessings being
 // resettable makes these three independent answers, not one averaged verdict.
 export const BLESSING_STAGES = ['early', 'mid', 'late'];

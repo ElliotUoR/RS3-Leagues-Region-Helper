@@ -35,6 +35,7 @@ COPY src/data/blessings.js ./src/data/blessings.js
 COPY src/data/leagueRelics.js ./src/data/leagueRelics.js
 COPY src/data/blessingBuilds.js ./src/data/blessingBuilds.js
 COPY src/utils/gearStats.js ./src/utils/gearStats.js
+COPY src/utils/usageKeys.js ./src/utils/usageKeys.js
 COPY public/icons ./public/icons
 # routes/shareLinkPage.js injects a per-build og:image tag into this same
 # HTML the frontend container serves, rather than proxying to it at request

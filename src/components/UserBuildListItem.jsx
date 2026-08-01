@@ -2,8 +2,9 @@ import { useState } from 'react';
 import UserBuildCard from './UserBuildCard';
 import BuildCardMeta from './BuildCardMeta';
 import BuildVoteBar from './BuildVoteBar';
-import { getUserBuild } from '../utils/api';
+import { getUserBuild, trackUsage } from '../utils/api';
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
+import { userBuildCounterKey } from '../utils/usageKeys';
 import { sanitizeBlessingSelection } from '../hooks/useBlessingSelection';
 import { sanitizeLeagueRelicSelection } from '../hooks/useLeagueRelicSelection';
 import { resolveGodTier } from '../data/blessings';
@@ -65,6 +66,12 @@ export default function UserBuildListItem({
   async function handleToggle() {
     const opening = !expanded;
     setExpanded(opening);
+    // Only when actually opening, not closing - "was this build looked at" is
+    // the question, same convention as the curated guides on BuildGuidesPage
+    // and as RelicDropTablePanel's own toggle. Fires on every open rather than
+    // only the first, for the same reason: two visits are two views even
+    // though the second costs no fetch.
+    if (opening) trackUsage([{ category: 'build_guide', key: userBuildCounterKey(summary.id) }]);
     if (opening && !build && status !== 'loading') {
       setStatus('loading');
       try {

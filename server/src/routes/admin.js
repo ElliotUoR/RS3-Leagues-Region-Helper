@@ -14,6 +14,7 @@ import {
 } from '../lib/adminAuth.js';
 import { validateBuildFields } from './userBuilds.js';
 import { REGIONS } from '../../../src/data/regions.js';
+import { userBuildIdFromCounterKey } from '../../../src/utils/usageKeys.js';
 
 export const adminRouter = Router();
 
@@ -395,6 +396,34 @@ function comboLabel(key) {
   return key.split(',').map(regionLabel).join(' + ');
 }
 
+// The `build_guide` counter covers this site's own guides AND user-submitted
+// builds - same question, one ranked list (see src/utils/usageKeys.js). A
+// curated guide's key is its slug id and reads fine as-is; a user build's is
+// "user:<numeric id>", which does not, so the ids are resolved to the build's
+// CURRENT name here. Deliberately at read time rather than baked into the
+// counter key: a build can be renamed by its author or by an admin, and its
+// view count has to survive that rather than splitting in two.
+//
+// A user build with views but no row left (it was deleted) still shows, as an
+// explicit "deleted" entry - dropping it would silently change the totals.
+async function labelBuildGuideKeys(pool, rows) {
+  const ids = rows.map((r) => userBuildIdFromCounterKey(r.key)).filter(Boolean);
+  let namesById = new Map();
+  if (ids.length > 0) {
+    const { rows: nameRows } = await pool.query(
+      'select id, name from public.user_builds where id = any($1::bigint[])',
+      [ids],
+    );
+    namesById = new Map(nameRows.map((r) => [String(r.id), r.name]));
+  }
+  return rows.map((r) => {
+    const id = userBuildIdFromCounterKey(r.key);
+    if (!id) return { build: r.key, count: r.count };
+    const name = namesById.get(id);
+    return { build: name ? `${name} (user build)` : `deleted user build #${id}`, count: r.count };
+  });
+}
+
 // GET /api/admin/usage
 // Ever-incrementing product-usage counters (see deploy/migrations/008_usage_counters.sql
 // and routes/trackCounter.js) - distinct from /api/admin/summary's
@@ -437,7 +466,9 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
         // clicking a card open and landing directly on a
         // "#build-guides/<id>" link. Same "opened at least once" caveat as
         // dropTableViews above - a build nobody's clicked yet just doesn't
-        // appear here.
+        // appear here. Also carries user-submitted builds under a "user:<id>"
+        // key (components/UserBuildListItem.jsx), resolved to their names by
+        // labelBuildGuideKeys below.
         pool.query(
           `select key, count from public.usage_counters where category = 'build_guide' order by count desc`,
         ),
@@ -459,7 +490,7 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
       regionCombos: regionCombos.rows.map((r) => ({ combo: comboLabel(r.key), count: r.count })),
       leagueRelicPicks: leagueRelicPicks.rows.map((r) => ({ relic: r.key, count: r.count })),
       dropTableViews: dropTableViews.rows.map((r) => ({ relic: r.key, count: r.count })),
-      buildGuideViews: buildGuideViews.rows.map((r) => ({ build: r.key, count: r.count })),
+      buildGuideViews: await labelBuildGuideKeys(pool, buildGuideViews.rows),
       blessingPicks: blessingPicks.rows.map((r) => ({ blessing: r.key, count: r.count })),
       karamjaToggledOffCount: featureCountFor('karamja_toggled_off'),
       importRelicsUsedCount: featureCountFor('import_relics_used'),
