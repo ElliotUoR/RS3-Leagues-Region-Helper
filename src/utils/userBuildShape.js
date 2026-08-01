@@ -83,6 +83,20 @@ function sanitizeStages(raw, styles) {
     .filter((stage) => Object.keys(stage.loadouts).length > 0);
 }
 
+// Which single loadout the share thumbnail renders, as an index into the
+// SURVIVING stages plus a style. Dropped entirely unless it still points at a
+// loadout that exists - the author may have emptied that stage or unticked
+// that combat style since choosing it, and a thumbnail pointing at nothing is
+// worse than no preference at all (the renderer then falls back to the first
+// stage's first style, which is what the card itself opens on).
+function sanitizeThumbnail(raw, stages, styles) {
+  const stage = raw?.stage;
+  const style = raw?.style;
+  if (!Number.isInteger(stage) || stage < 0 || stage >= stages.length) return null;
+  if (!styles.includes(style) || !stages[stage].loadouts[style]) return null;
+  return { stage, style };
+}
+
 function sanitizeReasons(raw, validKeys) {
   const reasons = {};
   if (!raw || typeof raw !== 'object') return reasons;
@@ -150,5 +164,6 @@ export function sanitizeUserBuildPayload(raw) {
     howToPlay: trimTo(raw.howToPlay, MAX_LENGTHS.prose),
     tradeoffs,
     stages,
+    thumbnail: sanitizeThumbnail(raw.thumbnail, stages, styles),
   };
 }

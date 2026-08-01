@@ -299,7 +299,19 @@ function StyleLoadoutEditor({ style, gear, isUnlocked, selectedLeagueRelics, sho
 
 // One stage's worth of per-style loadout editors (the "Stage N" block),
 // bound to its own useGearLoadout instance so two stages never share state.
-function StageEditor({ index, label, onLabelChange, onRemove, activeStyles, gear, isUnlocked, selectedLeagueRelics, blessings }) {
+function StageEditor({
+  index,
+  label,
+  onLabelChange,
+  onRemove,
+  activeStyles,
+  gear,
+  isUnlocked,
+  selectedLeagueRelics,
+  blessings,
+  thumbnailPick,
+  onPickThumbnail,
+}) {
   // Armour/health are only meaningful to show once a blessing that actually
   // reads its value off one of them is picked - otherwise the number is
   // just noise (see utils/gearStats.js's ARMOUR_SCALING_BLESSINGS/
@@ -363,6 +375,20 @@ function StageEditor({ index, label, onLabelChange, onRemove, activeStyles, gear
                 )}
               </span>
             </div>
+            {/* A share thumbnail renders ONE loadout, so this is really a radio
+                group spread across every stage and style - ticking any box
+                unticks whichever was ticked before, even in the other stage.
+                It stays a checkbox because "none of them" is a valid state
+                (the server then picks the default), which a radio group has no
+                way to express. */}
+            <label className="create-build-thumbnail-toggle">
+              <input
+                type="checkbox"
+                checked={thumbnailPick?.stage === index && thumbnailPick?.style === style}
+                onChange={() => onPickThumbnail(index, style)}
+              />
+              <span>Use this gear loadout for thumbnail</span>
+            </label>
             {gear.style === style ? (
               <StyleLoadoutEditor
                 style={style}
@@ -412,6 +438,16 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
   const [archRelicIgnoreArtefactRegions, setArchRelicIgnoreArtefactRegions] = useState(false);
   const [stageLabels, setStageLabels] = useState(() => (build?.stages?.length ? build.stages.map((s) => s.label) : ['Stage 1']));
   const [stageCount, setStageCount] = useState(() => build?.stages?.length ?? 1);
+  // Which single gear loadout the share thumbnail should render, as
+  // { stage, style } against the ON-SCREEN stage blocks. At most one across
+  // every stage and style - a thumbnail shows one loadout, so this behaves like
+  // a radio group spread over several blocks rather than independent
+  // checkboxes. Null = let the server pick the default.
+  //
+  // Seeds straight from the saved build when editing: the payload's stage
+  // indexes and the editor's line up on load, because every saved stage is by
+  // definition one that survived the drop-empty-stages rule.
+  const [thumbnailPick, setThumbnailPick] = useState(() => build?.thumbnail ?? null);
   const [status, setStatus] = useState('idle'); // idle | working | error
   const [error, setError] = useState(null);
 
@@ -511,6 +547,12 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
     setStageLabels((prev) => prev.map((l, i) => (i === index ? value : l)));
   }
 
+  // Ticking any thumbnail box replaces whatever was ticked before, anywhere in
+  // the form; ticking the one that is already on clears it back to "no pick".
+  function pickThumbnail(stage, style) {
+    setThumbnailPick((prev) => (prev?.stage === stage && prev?.style === style ? null : { stage, style }));
+  }
+
   // Builds the `stages` array actually worth submitting - a stage with no
   // gear equipped in any active style is dropped, same rule
   // sanitizeUserBuildPayload applies on the way back out.
@@ -525,10 +567,26 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
         loadouts[style] = { slots, eof: gear.eofWeaponNamesByStyle[style] ?? null };
       }
       if (Object.keys(loadouts).length > 0) {
-        stages.push({ label: stageLabels[i]?.trim() || `Stage ${i + 1}`, loadouts });
+        // `editorIndex` is which Stage block on screen this came from, kept
+        // only so the thumbnail pick can be translated (see resolveThumbnail).
+        // Dropping an empty stage shifts every later index, so "stage 1 in the
+        // editor" and "stage 1 in the payload" are not the same thing. Stripped
+        // before submitting.
+        stages.push({ label: stageLabels[i]?.trim() || `Stage ${i + 1}`, loadouts, editorIndex: i });
       }
     }
     return stages;
+  }
+
+  // The thumbnail pick is stored against the on-screen stage; the payload
+  // stores it against the submitted stage. Returns null if the picked loadout
+  // did not survive - the author emptied it, or unticked its combat style -
+  // which puts the image back on its default (first stage, first style).
+  function resolveThumbnail(previewStages) {
+    if (!thumbnailPick) return null;
+    const index = previewStages.findIndex((s) => s.editorIndex === thumbnailPick.stage);
+    if (index < 0 || !previewStages[index].loadouts[thumbnailPick.style]) return null;
+    return { stage: index, style: thumbnailPick.style };
   }
 
   const stagesPreview = buildStagesPayload();
@@ -558,7 +616,13 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
       whyItsGood: whyItsGood.trim(),
       howToPlay: howToPlay.trim(),
       tradeoffs: tradeoffs.filter((t) => t.trim()),
-      stages: stagesPreview,
+      // Listed explicitly rather than spread, so buildStagesPayload's
+      // authoring-only `editorIndex` never reaches the stored payload.
+      stages: stagesPreview.map((stage) => ({ label: stage.label, loadouts: stage.loadouts })),
+      // Which single loadout the share thumbnail renders. Null means "decide
+      // for me": the server falls back to the first stage's first style, which
+      // is also what the card itself opens on.
+      thumbnail: resolveThumbnail(stagesPreview),
     };
 
     try {
@@ -894,6 +958,8 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
               isUnlocked={regionSelection.isUnlocked}
               selectedLeagueRelics={relicSelection.selected}
               blessings={blessingSelection.selected}
+              thumbnailPick={thumbnailPick}
+              onPickThumbnail={pickThumbnail}
             />
           ))}
           {stageCount < MAX_STAGES && (

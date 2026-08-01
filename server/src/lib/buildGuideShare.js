@@ -93,11 +93,25 @@ export function buildGuideImageInput(build) {
 // rather than trusting a shape a crafted POST could break.
 export function userBuildImageInput(payload) {
   const styles = Array.isArray(payload?.styles) ? payload.styles.filter((s) => COMBAT_STYLES.includes(s)) : [];
-  const style = styles[0] ?? 'melee';
-  // Stage 0 and the first style: exactly what UserBuildCard opens on, so the
-  // preview matches the first thing a visitor following the link will see.
   const stages = Array.isArray(payload?.stages) ? payload.stages : [];
-  const loadout = stages[0]?.loadouts?.[style] ?? {};
+
+  // The author can nominate ONE loadout for the thumbnail (the "Use this gear
+  // loadout for thumbnail" tickbox - see pages/CreateBuildPage.jsx). Without a
+  // pick, stage 0 and the first style: exactly what UserBuildCard opens on, so
+  // the preview matches the first thing a visitor following the link sees.
+  //
+  // Re-validated rather than trusted. The payload is opaque JSON to this
+  // service, and even an honest one can go stale - a build edited after the
+  // pick was made can lose that stage or that style.
+  const pick = payload?.thumbnail;
+  const pickIsUsable =
+    Number.isInteger(pick?.stage) &&
+    styles.includes(pick?.style) &&
+    Boolean(stages[pick.stage]?.loadouts?.[pick.style]);
+
+  const style = pickIsUsable ? pick.style : styles[0] ?? 'melee';
+  const stageIndex = pickIsUsable ? pick.stage : 0;
+  const loadout = stages[stageIndex]?.loadouts?.[style] ?? {};
   const slots = loadout.slots && typeof loadout.slots === 'object' ? loadout.slots : {};
 
   return {

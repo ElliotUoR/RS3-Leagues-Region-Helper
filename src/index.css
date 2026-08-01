@@ -4773,6 +4773,49 @@ main.abilities-page .gear-item-rows {
   color: var(--accent);
 }
 
+/* Heading row for the first pick list - the "LEAGUE RELICS" label with the
+   click-for-more hint and its expand-all toggle sitting alongside it.
+   `align-items: baseline` so the uppercase label and the sentence-case hint sit
+   on the same line of text rather than being centred against each other. */
+.build-picks-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 0 0 8px;
+}
+
+.build-picks-heading h4 {
+  margin: 0;
+}
+
+.build-picks-hint {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--style-ranged);
+}
+
+/* `font`/`color: inherit` on purpose - this has to read as part of the hint
+   sentence, not as a form control that happens to sit next to it. The border is
+   the only thing marking it as clickable. */
+.build-picks-expand-all {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--style-ranged);
+  border-radius: 0;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+
+.build-picks-expand-all:hover {
+  background: color-mix(in srgb, var(--style-ranged) 16%, transparent);
+}
+
 .build-setup-group ul {
   list-style: none;
   margin: 0;
@@ -5488,6 +5531,24 @@ main.abilities-page .gear-item-rows {
 .create-build-style-block-head h3 {
   margin: 0;
   font-size: 15px;
+}
+
+/* Sits between the style heading and the equipment grid it applies to, so
+   "this loadout" is unambiguous - there can be four of these on screen at once
+   across two stages, and only one may be ticked. */
+.create-build-thumbnail-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 2px 0 8px;
+  font-size: 0.78rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.create-build-thumbnail-toggle input:checked + span {
+  color: var(--style-ranged);
+  font-weight: 600;
 }
 
 .create-build-armour-note {

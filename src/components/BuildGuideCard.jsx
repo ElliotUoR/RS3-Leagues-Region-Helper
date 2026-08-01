@@ -4,6 +4,7 @@ import ReadOnlyLoadout from './ReadOnlyLoadout';
 import TagTooltip from './TagTooltip';
 import EditableText from './EditableText';
 import BuildProse from './BuildProse';
+import PicksHeading from './PicksHeading';
 import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import {
   ARTEFACT_BYPASS_NOTE,
@@ -106,8 +107,14 @@ function SetupEntry({ icon, name, reason, editing, buildId, path }) {
 // appears once that row is ticked. Three lists of prose side by side was the
 // densest part of the card, and the reasons are reference material rather than
 // something you read every time.
-function PickRow({ icon, name, reason, editing, buildId, path }) {
+// `expandAll` is a nudge, not a lock: flipping it sets every row to match, and
+// individual rows stay clickable afterwards. A row forced permanently open
+// would make the toggle a one-way door.
+function PickRow({ icon, name, reason, editing, buildId, path, expandAll }) {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    setOpen(expandAll);
+  }, [expandAll]);
   return (
     <li className={`pick-row${open ? ' open' : ''}`}>
       <button type="button" className="pick-row-head" onClick={() => setOpen((p) => !p)} aria-expanded={open}>
@@ -193,6 +200,9 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
   // Mirrors build.hidden locally so the badge flips immediately on click; the
   // file is the real store and HMR reconciles a moment later.
   const [hidden, setHidden] = useState(Boolean(build.hidden));
+  // Opens every pick row at once - relics, Arch relics and regions - for anyone
+  // who would rather read the reasoning than click through it row by row.
+  const [expandAll, setExpandAll] = useState(false);
   const cardRef = useRef(null);
   const difficulty = EXECUTION_DIFFICULTIES[build.difficulty];
   const loadout = build.loadouts[stage]?.[style];
@@ -370,10 +380,14 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
           <div className="build-main-split">
             <div className="build-picks">
               <section className="build-setup-group">
-                <h4>League relics</h4>
+                <PicksHeading
+                  title="League relics"
+                  expanded={expandAll}
+                  onToggle={() => setExpandAll((p) => !p)}
+                />
                 <ul className="pick-list">
                   {build.relics.map((name) => (
-                    <PickRow
+                    <PickRow expandAll={expandAll}
                       key={name}
                       icon={LEAGUE_RELIC_BY_NAME.get(name)?.icon}
                       name={name}
@@ -389,7 +403,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                 <h4>Arch relics</h4>
                 <ul className="pick-list">
                   {build.unlocks.archRelics.map((relic, index) => (
-                    <PickRow
+                    <PickRow expandAll={expandAll}
                       key={relic.name}
                       icon={ARCH_RELIC_BY_NAME.get(relic.name)?.icon}
                       name={relic.name}
@@ -416,7 +430,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                 <h4>Regions</h4>
                 <ul className="pick-list">
                   {build.regions.map((id) => (
-                    <PickRow
+                    <PickRow expandAll={expandAll}
                       key={id}
                       icon={regionIcon(id)}
                       name={regionLabel(id)}
@@ -444,7 +458,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                   <h4>Alternate regions</h4>
                   <ul className="pick-list">
                     {build.alternateRegions.map((alt, index) => (
-                      <PickRow
+                      <PickRow expandAll={expandAll}
                         key={alt.region}
                         icon={regionIcon(alt.region)}
                         name={regionLabel(alt.region)}

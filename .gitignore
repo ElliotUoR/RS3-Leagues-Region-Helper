@@ -34,3 +34,7 @@ deploy/.migrations-dev
 # Local backend env for development
 server/.env
 /.playwright-mcp
+# Screenshots taken while checking the UI - throwaway, never part of the repo.
+# See CLAUDE.md.
+/.screenshots
+CLAUDE.md

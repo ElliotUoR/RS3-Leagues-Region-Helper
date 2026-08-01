@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import RetryImage from './RetryImage';
 import ReadOnlyLoadout from './ReadOnlyLoadout';
 import BuildProse from './BuildProse';
 import BuildCardMeta from './BuildCardMeta';
+import PicksHeading from './PicksHeading';
 import { ARCH_RELIC_BY_NAME, LEAGUE_RELIC_BY_NAME } from '../data/buildLookups';
 import { REGIONS, FIXED_REGIONS, GATEWAY_REGIONS } from '../data/regions';
 import { GEAR } from '../data/gear';
@@ -14,8 +15,14 @@ const FIXED_REGION_IDS = [...FIXED_REGIONS, ...GATEWAY_REGIONS];
 const regionIcon = (id) => `icons/regions/${id}.png`;
 const regionLabel = (id) => REGIONS[id]?.name ?? id;
 
-function PickRow({ icon, name, reason }) {
+// `expandAll` is a nudge, not a lock: flipping it sets every row to match, and
+// individual rows stay clickable afterwards. A row forced permanently open
+// would make the toggle a one-way door.
+function PickRow({ icon, name, reason, expandAll }) {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    setOpen(expandAll);
+  }, [expandAll]);
   return (
     <li className={`pick-row${open ? ' open' : ''}`}>
       <button type="button" className="pick-row-head" onClick={() => setOpen((p) => !p)} aria-expanded={open}>
@@ -56,6 +63,7 @@ function Collapsible({ title, children, defaultOpen = false }) {
 export default function UserBuildCard({ build, expanded, onToggle }) {
   const [style, setStyle] = useState(build.styles[0]);
   const [stageIndex, setStageIndex] = useState(0);
+  const [expandAll, setExpandAll] = useState(false);
   const stage = build.stages[stageIndex];
   const loadout = stage?.loadouts[style];
   const buildRegions = new Set([...FIXED_REGION_IDS, ...build.regions]);
@@ -75,6 +83,22 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
   const showHealth = build.blessings.some((name) => LIFE_SCALING_BLESSINGS.has(name));
   const armourTotal = loadout && showArmour ? getTotalArmour(equipped, style, 99) : null;
   const lifeTotal = loadout && showHealth ? getTotalLifePoints(equipped, { bigBoned: true }) : null;
+
+  // The hint and its expand-all toggle belong above the first pick list that
+  // actually renders - all three sections are optional here, so "first" is not
+  // always League relics.
+  const firstPickGroup = [
+    build.relics.length > 0 ? 'relics' : null,
+    build.archRelics.length > 0 ? 'archRelics' : null,
+    build.regions.length > 0 ? 'regions' : null,
+  ].find(Boolean);
+
+  const headingFor = (id, title) =>
+    id === firstPickGroup ? (
+      <PicksHeading title={title} expanded={expandAll} onToggle={() => setExpandAll((p) => !p)} />
+    ) : (
+      <h4>{title}</h4>
+    );
 
   return (
     <article className={`build-card user-build-card${expanded ? ' expanded' : ''}`}>
@@ -139,10 +163,10 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
             <div className="build-picks">
               {build.relics.length > 0 && (
                 <section className="build-setup-group">
-                  <h4>League relics</h4>
+                  {headingFor('relics', 'League relics')}
                   <ul className="pick-list">
                     {build.relics.map((name) => (
-                      <PickRow key={name} icon={LEAGUE_RELIC_BY_NAME.get(name)?.icon} name={name} reason={build.relicReasons[name]} />
+                      <PickRow key={name} icon={LEAGUE_RELIC_BY_NAME.get(name)?.icon} name={name} reason={build.relicReasons[name]} expandAll={expandAll} />
                     ))}
                   </ul>
                 </section>
@@ -150,10 +174,10 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
 
               {build.archRelics.length > 0 && (
                 <section className="build-setup-group">
-                  <h4>Arch relics</h4>
+                  {headingFor('archRelics', 'Arch relics')}
                   <ul className="pick-list">
                     {build.archRelics.map((name) => (
-                      <PickRow key={name} icon={ARCH_RELIC_BY_NAME.get(name)?.icon} name={name} reason={build.archRelicReasons[name]} />
+                      <PickRow key={name} icon={ARCH_RELIC_BY_NAME.get(name)?.icon} name={name} reason={build.archRelicReasons[name]} expandAll={expandAll} />
                     ))}
                   </ul>
                 </section>
@@ -161,10 +185,10 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
 
               {build.regions.length > 0 && (
                 <section className="build-setup-group">
-                  <h4>Regions</h4>
+                  {headingFor('regions', 'Regions')}
                   <ul className="pick-list">
                     {build.regions.map((id) => (
-                      <PickRow key={id} icon={regionIcon(id)} name={regionLabel(id)} reason={build.regionReasons[id]} />
+                      <PickRow key={id} icon={regionIcon(id)} name={regionLabel(id)} reason={build.regionReasons[id]} expandAll={expandAll} />
                     ))}
                   </ul>
                 </section>

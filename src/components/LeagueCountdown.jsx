@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 // RS3 Leagues II: Equilibrium's confirmed start time.
-const TARGET_DATE = new Date('2026-08-10T11:00:00Z');
+const TARGET_DATE = new Date('2026-08-10T12:00:00Z');
 
 function getTimeRemaining() {
   const diff = TARGET_DATE.getTime() - Date.now();
