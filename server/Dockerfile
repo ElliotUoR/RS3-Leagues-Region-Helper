@@ -7,6 +7,17 @@
 FROM node:22-alpine
 WORKDIR /app
 
+# FONTS. node:22-alpine ships with NONE - `fc-list` returns 0 and there is no
+# /usr/share/fonts at all. @napi-rs/canvas does not error when a font cannot be
+# resolved; ctx.fillText simply draws nothing. Every og-image therefore rendered
+# with its shapes, icons and colours intact and all of its TEXT missing, which
+# looks like a layout bug rather than a missing dependency, and never reproduces
+# locally because a dev machine has system fonts.
+#
+# fontconfig is what canvas asks for "sans-serif" through; font-dejavu is what
+# answers. Both are needed - the config alone resolves nothing.
+RUN apk add --no-cache fontconfig font-dejavu && fc-cache -f
+
 COPY server/package.json server/package-lock.json* ./server/
 RUN npm install --prefix server --omit=dev
 

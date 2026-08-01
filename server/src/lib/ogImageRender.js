@@ -11,6 +11,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GEAR } from '../../../src/data/gear.js';
 import { REGIONS } from '../../../src/data/regions.js';
+import { sans } from './ogFonts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ICONS_DIR = path.join(__dirname, '../../../public/icons');
@@ -175,10 +176,10 @@ export async function renderShareImage({
   ctx.fillRect(0, 0, width, height);
 
   ctx.fillStyle = TEXT_H;
-  ctx.font = '700 30px sans-serif';
+  ctx.font = sans('700 30px');
   ctx.fillText('RS3 Leagues II: Equilibrium', MARGIN, 44);
   ctx.fillStyle = ACCENT;
-  ctx.font = '600 17px sans-serif';
+  ctx.font = sans('600 17px');
   ctx.fillText('Regional PVM Unlock Planner', MARGIN, 70);
 
   // Left - equipped gear grid. 'eof' isn't a real GEAR_SLOTS slot (it's the
@@ -259,7 +260,7 @@ export async function renderShareImage({
     await drawIconCentered(ctx, path.join(REGION_ICONS_DIR, `${id}.png`), x, y, REGION_ICON_BOX, 10);
 
     ctx.fillStyle = TEXT;
-    ctx.font = '600 15px sans-serif';
+    ctx.font = sans('600 15px');
     ctx.textAlign = 'center';
     ctx.fillText(REGIONS[id]?.name ?? id, x + REGION_ICON_BOX / 2, y + REGION_ICON_BOX + 22);
     ctx.textAlign = 'left';

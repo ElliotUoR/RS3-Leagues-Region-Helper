@@ -15,6 +15,7 @@ import { createCanvas, loadImage } from '@napi-rs/canvas';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { itemsFor, tierListTitle } from '../../../src/data/tierListItems.js';
+import { sans } from './ogFonts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '../../../public');
@@ -48,7 +49,7 @@ const CHIP_H = 50;
 const CHIP_GAP = 10;
 const CHIP_PAD_X = 14;
 const CHIP_ICON = 34;
-const CHIP_FONT = '600 17px sans-serif';
+const CHIP_FONT = sans('600 17px');
 
 const FOOTER_H = 46;
 
@@ -152,11 +153,11 @@ export async function renderTierListImage({ type, authorName, angle, rowLabels, 
 
   // Header: whose list, what for.
   ctx.fillStyle = TEXT_H;
-  ctx.font = '700 34px sans-serif';
+  ctx.font = sans('700 34px');
   ctx.fillText(truncate(ctx, tierListTitle(authorName, type), WIDTH - MARGIN * 2), MARGIN, HEADER_TOP);
   if (angle) {
     ctx.fillStyle = ACCENT;
-    ctx.font = 'italic 600 20px sans-serif';
+    ctx.font = sans('italic 600 20px');
     ctx.fillText(truncate(ctx, angle, WIDTH - MARGIN * 2), MARGIN, HEADER_TOP + HEADER_GAP);
   }
 
@@ -173,7 +174,7 @@ export async function renderTierListImage({ type, authorName, angle, rowLabels, 
     ctx.fillStyle = hsl(row.hue, 65, 70);
     // Single letters get the big treatment; a renamed row gets a size that
     // fits the label block instead of overflowing it.
-    ctx.font = row.label.length <= 2 ? '700 30px sans-serif' : '700 15px sans-serif';
+    ctx.font = row.label.length <= 2 ? sans('700 30px') : sans('700 15px');
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(truncate(ctx, row.label, LABEL_W - 14), MARGIN + LABEL_W / 2, y + row.height / 2);
@@ -192,7 +193,7 @@ export async function renderTierListImage({ type, authorName, angle, rowLabels, 
     if (row.entries.length === 0) {
       ctx.fillStyle = TEXT;
       ctx.globalAlpha = 0.45;
-      ctx.font = 'italic 16px sans-serif';
+      ctx.font = sans('italic 16px');
       ctx.fillText('Nothing in this tier', areaX + ROW_PAD, y + row.height / 2 + 5);
       ctx.globalAlpha = 1;
     } else {
@@ -230,7 +231,7 @@ export async function renderTierListImage({ type, authorName, angle, rowLabels, 
 
   ctx.fillStyle = TEXT;
   ctx.globalAlpha = 0.6;
-  ctx.font = '600 15px sans-serif';
+  ctx.font = sans('600 15px');
   ctx.fillText('jellyflow.xyz/Leagues - RS3 Leagues II: Equilibrium', MARGIN, height - 18);
   ctx.globalAlpha = 1;
 
