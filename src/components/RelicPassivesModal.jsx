@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { RELIC_PASSIVE_TIERS } from '../data/leagueRelics';
+import { trackUsage } from '../utils/api';
+import { PASSIVE_TABLE_KEYS } from '../utils/usageKeys';
 
 // A single button + modal pair for the "Relic Passives Revealed" reference
 // table - same relationship to LEAGUE_RELICS that BlessingPassivesModal has
@@ -81,9 +83,17 @@ export default function RelicPassivesModal() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Counted on open only - a close is not a second look, the same convention
+  // RelicDropTablePanel uses for its own toggle. Fire-and-forget: trackUsage
+  // swallows failures, so analytics can never stop the table opening.
+  function handleOpen() {
+    setOpen(true);
+    trackUsage([{ category: 'relic_drop_table', key: PASSIVE_TABLE_KEYS.relic }]);
+  }
+
   return (
     <>
-      <button type="button" className="relic-passives-toggle" onClick={() => setOpen(true)}>
+      <button type="button" className="relic-passives-toggle" onClick={handleOpen}>
         View Relic Passives
       </button>
       {open &&

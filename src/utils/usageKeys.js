@@ -27,3 +27,17 @@ export function userBuildIdFromCounterKey(key) {
   const id = key.slice(USER_BUILD_PREFIX.length);
   return /^\d+$/.test(id) ? id : null;
 }
+
+// The two "View X Passives" reference tables (components/RelicPassivesModal.jsx
+// and BlessingPassivesModal.jsx) share the `relic_drop_table` category with the
+// relic drop tables, so they land in the admin dashboard's "Drop table views"
+// panel alongside them.
+//
+// Neither is a drop table, but the category answers a broader question than its
+// name suggests - "which reference table did someone open" - and these are two
+// more reference tables. Keyed by their display label rather than a slug,
+// because that panel prints the key verbatim.
+export const PASSIVE_TABLE_KEYS = {
+  relic: 'Relic passives',
+  blessing: 'Blessing passives',
+};

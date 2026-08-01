@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import TagTooltip from './TagTooltip';
 import { BLESSING_PASSIVE_TIERS } from '../data/blessings';
+import { trackUsage } from '../utils/api';
+import { PASSIVE_TABLE_KEYS } from '../utils/usageKeys';
 
 // A single button + modal pair for the "Blessing Passives Revealed" reference
 // table (see data/blessings.js's BLESSING_PASSIVE_TIERS for why this is a
@@ -26,9 +28,17 @@ export default function BlessingPassivesModal() {
     };
   }, [open]);
 
+  // Counted on open only - a close is not a second look, the same convention
+  // RelicDropTablePanel uses for its own toggle. Fire-and-forget: trackUsage
+  // swallows failures, so analytics can never stop the table opening.
+  function handleOpen() {
+    setOpen(true);
+    trackUsage([{ category: 'relic_drop_table', key: PASSIVE_TABLE_KEYS.blessing }]);
+  }
+
   return (
     <>
-      <button type="button" className="blessing-passives-toggle" onClick={() => setOpen(true)}>
+      <button type="button" className="blessing-passives-toggle" onClick={handleOpen}>
         View Blessing Passives
       </button>
       {open &&
