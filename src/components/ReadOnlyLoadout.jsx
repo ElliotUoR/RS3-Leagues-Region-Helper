@@ -103,7 +103,10 @@ export default function ReadOnlyLoadout({
       </div>
       {armourTotal != null && (
         <p className="read-only-loadout-armour">
-          Total armour <strong>{armourTotal.toLocaleString()}</strong>
+          {/* Same colour coding the gear planner's own stat line uses
+              (.gear-stat-armour / .gear-stat-lp) - armour is armour-blue and
+              health is life-green wherever either number appears. */}
+          Total armour <strong className="gear-stat-armour">{armourTotal.toLocaleString()}</strong>
           <span className="read-only-loadout-armour-note"> at 99 Defence</span>
           {/* Armour from the Defence skill is D^3/1250 + 4D + 40, so a boost to
               Defence is worth a lot of armour: +17 from a normal overload is
@@ -135,7 +138,7 @@ export default function ReadOnlyLoadout({
           number is worth showing at all. Curated builds never pass it. */}
       {lifeTotal != null && (
         <p className="read-only-loadout-armour">
-          Total health <strong>{lifeTotal.toLocaleString()}</strong>
+          Total health <strong className="gear-stat-lp">{lifeTotal.toLocaleString()}</strong>
           <span className="read-only-loadout-armour-note"> at 99 Hitpoints</span>
         </p>
       )}

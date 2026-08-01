@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import RetryImage from './RetryImage';
 import ReadOnlyLoadout from './ReadOnlyLoadout';
-import TagTooltip from './TagTooltip';
 import BuildProse from './BuildProse';
-import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
-import { RELIC_COLOURS } from '../data/blessingBuilds';
-import { LEAGUE_RELICS } from '../data/leagueRelics';
-import { RELICS } from '../data/relics';
+import BuildCardMeta from './BuildCardMeta';
+import { ARCH_RELIC_BY_NAME, LEAGUE_RELIC_BY_NAME } from '../data/buildLookups';
 import { REGIONS, FIXED_REGIONS, GATEWAY_REGIONS } from '../data/regions';
 import { GEAR } from '../data/gear';
 import { ARMOUR_SCALING_BLESSINGS, LIFE_SCALING_BLESSINGS, getTotalArmour, getTotalLifePoints } from '../utils/gearStats';
@@ -16,44 +13,6 @@ const STYLE_LABELS = { melee: 'Melee', ranged: 'Ranged', magic: 'Magic', necroma
 const FIXED_REGION_IDS = [...FIXED_REGIONS, ...GATEWAY_REGIONS];
 const regionIcon = (id) => `icons/regions/${id}.png`;
 const regionLabel = (id) => REGIONS[id]?.name ?? id;
-
-const byName = (list) => new Map(list.map((entry) => [entry.name, entry]));
-const BLESSING_BY_NAME = byName([...BLESSINGS, ...GOD_TIER_BLESSINGS]);
-const LEAGUE_RELIC_BY_NAME = byName(LEAGUE_RELICS);
-const ARCH_RELIC_BY_NAME = byName(RELICS);
-
-function BlessingPill({ name, isGodTier }) {
-  const blessing = BLESSING_BY_NAME.get(name);
-  if (!blessing) return null;
-  const classes = ['blessing-pill', `blessing-pill-${blessing.colour}`, isGodTier ? 'blessing-pill-god' : '']
-    .filter(Boolean)
-    .join(' ');
-  return (
-    <span className={classes}>
-      {blessing.icon && <RetryImage src={blessing.icon} alt="" className="blessing-pill-icon" />}
-      <span>{blessing.name}</span>
-    </span>
-  );
-}
-
-function LeagueRelicChip({ name }) {
-  const relic = LEAGUE_RELIC_BY_NAME.get(name);
-  if (!relic) return null;
-  const hue = RELIC_COLOURS[name]?.hue;
-  return (
-    <span className="league-relic-chip" style={hue != null ? { '--relic-hue': hue } : undefined}>
-      {/* Not every relic has artwork yet (see data/leagueRelics.js) - a null
-          src would resolve to "<base>/null" and put RetryImage into its
-          indefinite retry loop against a URL that can never load. */}
-      {relic.icon ? (
-        <RetryImage src={relic.icon} alt="" className="league-relic-chip-icon" />
-      ) : (
-        <span className="league-relic-chip-icon league-relic-icon-placeholder" aria-hidden="true" />
-      )}
-      <span>{relic.name}</span>
-    </span>
-  );
-}
 
 function PickRow({ icon, name, reason }) {
   const [open, setOpen] = useState(false);
@@ -126,40 +85,14 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
           {build.authorName && <p className="user-build-author">by {build.authorName}</p>}
         </div>
 
-        <div className="build-card-meta">
-          {build.difficultyLabel && (
-            <TagTooltip className="build-difficulty" tooltip={build.difficultyNote}>
-              {build.difficultyLabel}
-            </TagTooltip>
-          )}
-          {build.blessings.length > 0 && (
-            <div className="build-card-pills">
-              {build.blessings.map((name) => (
-                <BlessingPill key={name} name={name} />
-              ))}
-              {build.godTier && (
-                <>
-                  <span className="build-card-arrow" aria-hidden="true">
-                    →
-                  </span>
-                  <BlessingPill name={build.godTier} isGodTier />
-                </>
-              )}
-            </div>
-          )}
-          <div className="build-card-chips">
-            {build.relics.map((name) => (
-              <LeagueRelicChip key={name} name={name} />
-            ))}
-          </div>
-          <div className="build-card-styles">
-            {build.styles.map((styleId) => (
-              <span key={styleId} className={`build-style-tag build-style-tag-${styleId}`}>
-                {STYLE_LABELS[styleId]}
-              </span>
-            ))}
-          </div>
-        </div>
+        <BuildCardMeta
+          difficultyLabel={build.difficultyLabel}
+          difficultyNote={build.difficultyNote}
+          blessings={build.blessings}
+          godTier={build.godTier}
+          relics={build.relics}
+          styles={build.styles}
+        />
 
         <span className="build-card-chevron" aria-hidden="true">
           {expanded ? '▾' : '▸'}

@@ -12,6 +12,7 @@ import {
   ADMIN_COOKIE_NAME,
   ADMIN_COOKIE_MAX_AGE_MS,
 } from '../lib/adminAuth.js';
+import { validateBuildFields } from './userBuilds.js';
 import { REGIONS } from '../../../src/data/regions.js';
 
 export const adminRouter = Router();
@@ -480,11 +481,20 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────
 
 // GET /api/admin/user-builds - every build INCLUDING hidden ones, with scores.
+// Carries the same payload-derived summary fields the public listing does
+// (see LIST_SELECT in routes/userBuilds.js), because the admin view renders
+// the identical cards - an admin should be looking at what everyone else sees,
+// plus the moderation controls, not a stripped-down version of it.
 adminRouter.get('/api/admin/user-builds', requireAdmin, async (req, res) => {
   const pool = getAnalyticsPool();
   try {
     const { rows } = await pool.query(
-      `select b.id, b.name, b.tagline, b.author_name, b.styles, b.hidden, b.created_at,
+      `select b.id, b.name, b.tagline, b.author_name, b.styles, b.hidden,
+              b.featured, b.featured_at, b.created_at,
+              b.payload->'blessings'           as blessings,
+              b.payload->'relics'              as relics,
+              b.payload->>'difficultyLabel'    as "difficultyLabel",
+              b.payload->>'difficultyNote'     as "difficultyNote",
               coalesce(sum(v.vote), 0)::int as raw_score,
               count(v.*) filter (where v.vote = 1)::int as upvotes,
               count(v.*) filter (where v.vote = -1)::int as downvotes
@@ -508,22 +518,111 @@ adminRouter.get('/api/admin/user-builds', requireAdmin, async (req, res) => {
   }
 });
 
-// PATCH /api/admin/user-builds/:id   body: { hidden: boolean }
-// Hiding removes it from every public read (the anon RLS policy in 012), and
-// from voting too - cast_user_build_vote refuses a hidden build.
-adminRouter.patch('/api/admin/user-builds/:id', requireAdmin, async (req, res) => {
+// GET /api/admin/user-builds/:id - one full build, `payload` included.
+//
+// Exists rather than reusing the public GET because that one reads as `anon`,
+// whose RLS policy hides exactly the rows an admin most needs to open: a
+// hidden build would 404. Editing a build down to something acceptable instead
+// of leaving it hidden forever is the whole point of admin editing, so it has
+// to be reachable while hidden.
+//
+// MUST be declared before PUT/PATCH below only for readability - Express keys
+// on method as well as path, so these three cannot shadow each other.
+adminRouter.get('/api/admin/user-builds/:id', requireAdmin, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
-  const { hidden } = req.body ?? {};
-  if (typeof hidden !== 'boolean') return res.status(400).json({ error: 'hidden must be a boolean' });
 
   const pool = getAnalyticsPool();
   try {
-    const { rows } = await pool.query('select * from public.set_user_build_hidden($1, $2)', [id, hidden]);
+    const { rows } = await pool.query(
+      `select id, name, tagline, author_name, styles, payload, hidden, featured, created_at
+         from public.user_builds where id = $1`,
+      [id],
+    );
     if (rows.length === 0) return res.status(404).json({ error: 'not found' });
     res.json(rows[0]);
   } catch (err) {
-    console.error('admin hide build failed:', err);
+    console.error('admin get build failed:', err);
+    res.status(502).json({ error: 'could not load that build right now' });
+  }
+});
+
+// PATCH /api/admin/user-builds/:id   body: { hidden?: boolean, featured?: boolean }
+// The two moderation flags, either or both at once.
+//
+// Hiding removes it from every public read (the anon RLS policy in 012), and
+// from voting too - cast_user_build_vote refuses a hidden build. Featuring
+// promotes it onto the Build Guides page (see 014). The two are independent
+// flags rather than one state, and hidden wins: the featured listing is an
+// ordinary anon read, so the RLS policy pulls a hidden build off that page
+// whether or not it is still flagged featured.
+adminRouter.patch('/api/admin/user-builds/:id', requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
+
+  const { hidden, featured } = req.body ?? {};
+  for (const [key, value] of [['hidden', hidden], ['featured', featured]]) {
+    if (value !== undefined && typeof value !== 'boolean') {
+      return res.status(400).json({ error: `${key} must be a boolean` });
+    }
+  }
+  if (hidden === undefined && featured === undefined) {
+    return res.status(400).json({ error: 'nothing to update - pass hidden and/or featured' });
+  }
+
+  const pool = getAnalyticsPool();
+  try {
+    const result = {};
+    if (hidden !== undefined) {
+      const { rows } = await pool.query('select * from public.set_user_build_hidden($1, $2)', [id, hidden]);
+      if (rows.length === 0) return res.status(404).json({ error: 'not found' });
+      Object.assign(result, rows[0]);
+    }
+    if (featured !== undefined) {
+      const { rows } = await pool.query('select * from public.set_user_build_featured($1, $2)', [id, featured]);
+      if (rows.length === 0) return res.status(404).json({ error: 'not found' });
+      Object.assign(result, rows[0]);
+    }
+    res.json(result);
+  } catch (err) {
+    console.error('admin moderate build failed:', err);
     res.status(502).json({ error: 'could not update that build right now' });
+  }
+});
+
+// PUT /api/admin/user-builds/:id
+// Body: { name, tagline, authorName, styles, payload } - the same envelope
+// PATCH /api/user-builds/:id takes, minus the edit token. A full replace, not
+// a partial update, because the edit form always submits the whole build.
+//
+// Runs the same validateBuildFields as the public create/update routes: an
+// admin edit must not be able to store a build a normal submitter couldn't,
+// or the sanitizer on the read side would start meeting shapes it was never
+// written for. The write itself is admin_update_user_build (see 014) - a
+// separate function from the token-checked one, granted only to `analytics`,
+// so there is no code path where a missing token silently becomes an
+// authorised edit.
+adminRouter.put('/api/admin/user-builds/:id', requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
+
+  const validated = validateBuildFields(req.body);
+  if (validated.error) return res.status(400).json(validated);
+
+  const pool = getAnalyticsPool();
+  try {
+    const { rows } = await pool.query('select * from public.admin_update_user_build($1, $2, $3, $4, $5, $6)', [
+      id,
+      validated.name,
+      validated.tagline,
+      validated.authorName,
+      validated.styles,
+      JSON.stringify(validated.payload),
+    ]);
+    if (rows.length === 0) return res.status(404).json({ error: 'not found' });
+    res.json({ id: rows[0].id });
+  } catch (err) {
+    console.error('admin edit build failed:', err);
+    res.status(502).json({ error: 'could not save those changes right now' });
   }
 });

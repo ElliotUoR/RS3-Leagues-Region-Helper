@@ -166,6 +166,22 @@ export async function listUserBuilds() {
   return res.json();
 }
 
+// The builds an admin has promoted onto the Build Guides page. Same row shape
+// as listUserBuilds. Returns [] on any failure rather than throwing: the
+// featured strip is an addition to a page that is otherwise entirely static,
+// so a backend outage (or the GitHub Pages mirror, which has no backend at
+// all) must leave the curated guides rendering exactly as before.
+export async function listFeaturedUserBuilds() {
+  try {
+    const res = await fetch(`${APP_BASE_PATH}api/user-builds/featured`);
+    if (!res.ok) return [];
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows : [];
+  } catch {
+    return [];
+  }
+}
+
 // The full row (incl. `payload`, the whole build) for one open card.
 export async function getUserBuild(id) {
   const res = await fetch(`${APP_BASE_PATH}api/user-builds/${id}`);
@@ -243,14 +259,50 @@ export async function adminListUserBuilds() {
   return res.json();
 }
 
-export async function adminSetBuildHidden(id, hidden) {
+// The two admin moderation flags. `patch` is { hidden } and/or { featured } -
+// hiding takes a build away from everyone, featuring promotes it onto the
+// Build Guides page. Hidden wins over featured on the public side (see the
+// route's own comment), so no combination of these needs guarding here.
+async function adminPatchBuild(id, patch) {
   const res = await fetch(`${APP_BASE_PATH}api/admin/user-builds/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ hidden }),
+    body: JSON.stringify(patch),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `hide failed: ${res.status}`);
+  if (!res.ok) throw new Error(data.error || `moderate failed: ${res.status}`);
+  return data;
+}
+
+export function adminSetBuildHidden(id, hidden) {
+  return adminPatchBuild(id, { hidden });
+}
+
+export function adminSetBuildFeatured(id, featured) {
+  return adminPatchBuild(id, { featured });
+}
+
+// One full build (incl. `payload`) read as admin rather than as anon, so a
+// HIDDEN build can still be opened - the public getUserBuild would 404 on one.
+export async function adminGetUserBuild(id) {
+  const res = await fetch(`${APP_BASE_PATH}api/admin/user-builds/${id}`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`admin get build failed: ${res.status}`);
+  return res.json();
+}
+
+// Admin-only edit of someone else's build - no edit token involved, unlike
+// updateUserBuild above. A full replace of the same fields the author's own
+// edit form submits (see pages/EditBuildPage.jsx, which routes to this when
+// the visitor is an admin without a stored token for the build).
+export async function adminUpdateUserBuild(id, { name, tagline, authorName, styles, payload }) {
+  const res = await fetch(`${APP_BASE_PATH}api/admin/user-builds/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ name, tagline, authorName, styles, payload }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `admin edit failed: ${res.status}`);
   return data;
 }

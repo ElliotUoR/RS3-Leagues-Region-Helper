@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import BuildGuideCard from '../components/BuildGuideCard';
+import UserBuildListItem from '../components/UserBuildListItem';
+import ReportBuildModal from '../components/ReportBuildModal';
 import TierList from '../components/TierList';
 import {
   BLESSING_BUILDS_EXAMPLES,
@@ -11,7 +13,8 @@ import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { isBuildTextEditable, isBuildVisible } from '../utils/buildTextEdit';
 import { buildGuideUrl, buildIdFromLocation } from '../utils/buildGuideRoute';
-import { trackUsage } from '../utils/api';
+import { fetchBuildVotes, listFeaturedUserBuilds, trackUsage } from '../utils/api';
+import { IS_PAGES_BUILD } from '../utils/deployTarget';
 
 const BLESSING_ICONS = new Map([...BLESSINGS, ...GOD_TIER_BLESSINGS].map((b) => [b.name, b.icon]));
 const LEAGUE_RELIC_ICONS = new Map(LEAGUE_RELICS.map((r) => [r.name, r.icon]));
@@ -70,8 +73,31 @@ function openBuildIdFromUrl() {
 // isBuildTextEditable falls out of the bundle entirely.
 const CAN_EDIT = import.meta.env.DEV && isBuildTextEditable();
 
+// The featured strip is the one part of this page that isn't static data, and
+// it is deliberately optional: listFeaturedUserBuilds resolves to [] on any
+// failure, and the whole fetch is skipped on the GitHub Pages mirror, which
+// has no backend at all. Nothing below depends on it having loaded.
+function useFeaturedBuilds() {
+  const [featured, setFeatured] = useState([]);
+  const [votes, setVotes] = useState({});
+
+  useEffect(() => {
+    if (IS_PAGES_BUILD) return;
+    listFeaturedUserBuilds().then((rows) => {
+      setFeatured(rows);
+      // Only worth a request once we know something is actually featured -
+      // this page has no vote bars at all otherwise.
+      if (rows.length > 0) fetchBuildVotes().then(setVotes);
+    });
+  }, []);
+
+  return { featured, votes, setVotes };
+}
+
 export default function BuildGuidesPage() {
   const [editing, setEditing] = useState(false);
+  const [reporting, setReporting] = useState(null);
+  const { featured, votes, setVotes } = useFeaturedBuilds();
   // Multiple cards may be open at once - readers commonly want to compare two
   // builds side by side, so this is a Set rather than a single active id. Only
   // the most recently opened one is reflected in the URL.
@@ -171,6 +197,36 @@ export default function BuildGuidesPage() {
           ))}
         </section>
 
+        {/* Player-made builds an admin has picked out, sitting under this
+            site's own guides rather than mixed in with them - a featured build
+            is a recommendation, not a curated guide, and the heading says so.
+            Renders nothing at all when none are featured (or when there is no
+            backend to ask), so this page's default state is unchanged. */}
+        {featured.length > 0 && (
+          <section className="featured-builds">
+            <header className="featured-builds-header">
+              <h2>Featured player builds</h2>
+              <p>
+                Builds submitted by other players and picked out as worth a look. See{' '}
+                <a href="#user-builds" className="notice-link">
+                  all user made builds
+                </a>.
+              </p>
+            </header>
+            <div className="build-list">
+              {featured.map((summary) => (
+                <UserBuildListItem
+                  key={summary.id}
+                  summary={summary}
+                  vote={votes[summary.id]}
+                  onVoted={(id, next) => setVotes((prev) => ({ ...prev, [id]: next }))}
+                  onReport={setReporting}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         <TierList
           title="Blessing tier list"
           standfirst="Each blessing and god power graded on its own isolated power, deliberately ignoring the combos above."
@@ -189,6 +245,8 @@ export default function BuildGuidesPage() {
           gradeLabels={{ unranked: 'Unranked' }}
         />
       </main>
+
+      {reporting && <ReportBuildModal build={reporting} onClose={() => setReporting(null)} />}
     </>
   );
 }

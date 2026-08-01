@@ -102,6 +102,12 @@ involved. Worth walking through after touching anything server-side:
   crash.
 - **Hide it as admin, then reload as a normal visitor.** It should vanish
   entirely.
+- **Feature it as admin.** It should appear under "Featured player builds" on
+  the Build Guides page. Hiding a featured build takes it off that page too -
+  the featured listing is an ordinary anon read, so the same RLS policy applies.
+- **Edit it as admin.** `#edit-build/<id>` works without an edit token when the
+  admin cookie is set, including on a build that is currently hidden - the
+  public row read would 404 on one, so that path uses its own admin endpoint.
 
 ## Things that are deliberately not local
 

@@ -14,6 +14,7 @@ const MAX_AUTHOR_LENGTH = 60;
 const MAX_PAYLOAD_JSON_LENGTH = 40_000;
 const VALID_STYLES = new Set(['melee', 'ranged', 'magic', 'necromancy']);
 const LIST_LIMIT = 100;
+const FEATURED_LIMIT = 12;
 // Absolute, because a GitHub issue is read outside the browser that filed it.
 const SITE_ORIGIN = 'https://jellyflow.xyz';
 const APP_BASE_PATH = '/Leagues/';
@@ -21,7 +22,50 @@ const APP_BASE_PATH = '/Leagues/';
 // `edit_token_hash`. Postgres itself already refuses to SELECT that column
 // for `anon` (see the column-scoped grant in 012_user_builds.sql), so this
 // is belt-and-braces rather than the only thing stopping a leak.
-const PUBLIC_COLUMNS = 'id,name,tagline,styles,author_name,payload,hidden,created_at';
+const PUBLIC_COLUMNS = 'id,name,tagline,styles,author_name,payload,hidden,featured,created_at';
+
+// What a collapsed card on the listing shows. The blessings/relics/difficulty
+// live inside `payload`, so they are read out as jsonb paths rather than
+// shipping the whole payload (up to MAX_PAYLOAD_JSON_LENGTH each) for every
+// row just to draw a few pills - the point of keeping `payload` off this
+// endpoint in the first place. `->` for the arrays, `->>` for the text fields.
+//
+// No god tier here: it is not stored. The submitted payload carries only the
+// three tier picks and the god power is derived from them on read (see
+// sanitizeUserBuildPayload), so the card derives it too rather than reading a
+// field that is always null.
+const LIST_SELECT = [
+  'id,name,tagline,styles,author_name,created_at,featured',
+  'blessings:payload->blessings',
+  'relics:payload->relics',
+  'difficultyLabel:payload->>difficultyLabel',
+  'difficultyNote:payload->>difficultyNote',
+].join(',');
+
+// `payload` is opaque JSON to this service - it is only ever sanitized in the
+// browser (see src/utils/userBuildShape.js), so a hand-crafted POST can put
+// anything at all in these fields. The listing clamps them rather than handing
+// the frontend a 10,000-character "difficulty label" to try to lay out. Names
+// that aren't real blessings/relics are dropped by the components themselves,
+// so only length and type need enforcing here.
+function shortText(value, max) {
+  return typeof value === 'string' ? value.slice(0, max) : '';
+}
+
+function nameArray(value, max) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v) => typeof v === 'string').slice(0, max).map((v) => v.slice(0, 60));
+}
+
+function shapeListRow(row) {
+  return {
+    ...row,
+    blessings: nameArray(row.blessings, 4),
+    relics: nameArray(row.relics, 8),
+    difficultyLabel: shortText(row.difficultyLabel, 40),
+    difficultyNote: shortText(row.difficultyNote, 300),
+  };
+}
 
 // Same insurance level as report-issue - cheap protection against casual
 // spam, not a defence against a determined attacker.
@@ -48,8 +92,10 @@ function hashToken(token) {
 }
 
 // Shared by create and update - both need the same envelope checks on
-// name/tagline/authorName/styles/payload.
-function validateBuildFields(body) {
+// name/tagline/authorName/styles/payload. Exported because the admin edit
+// route (routes/admin.js) has to apply exactly the same limits: an admin
+// rewriting a build must not be able to store one a normal submitter couldn't.
+export function validateBuildFields(body) {
   const { name, tagline = '', authorName = '', styles, payload } = body ?? {};
   if (!isNonEmptyString(name, MAX_NAME_LENGTH)) {
     return { error: `name must be 1-${MAX_NAME_LENGTH} characters` };
@@ -140,6 +186,7 @@ userBuildsRouter.patch('/api/user-builds/:id', updateLimiter, async (req, res) =
       p_token_hash: hashToken(token),
       p_name: validated.name,
       p_tagline: validated.tagline,
+      p_author_name: validated.authorName,
       p_styles: validated.styles,
       p_payload: validated.payload,
     });
@@ -158,18 +205,42 @@ userBuildsRouter.patch('/api/user-builds/:id', updateLimiter, async (req, res) =
 // one is opened, newest first. Deliberately omits `payload` (the full
 // build) - that's only fetched once a specific card is opened, via
 // GET /api/user-builds/:id below, so browsing the list doesn't pull down
-// every submitted build's entire loadout/prose up front.
+// every submitted build's entire loadout/prose up front. The handful of
+// payload fields a collapsed card DOES need come through as jsonb paths -
+// see LIST_SELECT.
 userBuildsRouter.get('/api/user-builds', async (_req, res) => {
   try {
     const rows = await selectRows('user_builds', {
-      select: 'id,name,tagline,styles,author_name,created_at',
+      select: LIST_SELECT,
       order: 'created_at.desc',
       limit: String(LIST_LIMIT),
     });
-    res.json(rows);
+    res.json(rows.map(shapeListRow));
   } catch (err) {
     console.error('list user builds failed:', err);
     res.status(502).json({ error: 'could not load user builds right now' });
+  }
+});
+
+// MUST be declared before the ':id' route below - Express matches in
+// definition order, so '/featured' would otherwise be captured as an id.
+// GET /api/user-builds/featured - the builds an admin has promoted onto the
+// Build Guides page, most recently featured first. A hidden build never
+// appears here even if it is still flagged featured: the `not hidden` RLS
+// policy from 012 applies to this read like every other anon read, so hiding
+// something is enough on its own to pull it off that page.
+userBuildsRouter.get('/api/user-builds/featured', async (_req, res) => {
+  try {
+    const rows = await selectRows('user_builds', {
+      select: LIST_SELECT,
+      featured: 'is.true',
+      order: 'featured_at.desc',
+      limit: String(FEATURED_LIMIT),
+    });
+    res.json(rows.map(shapeListRow));
+  } catch (err) {
+    console.error('list featured builds failed:', err);
+    res.status(502).json({ error: 'could not load featured builds right now' });
   }
 });
 

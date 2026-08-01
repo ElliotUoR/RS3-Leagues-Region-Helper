@@ -26,7 +26,7 @@ import {
   getTotalArmour,
   getTotalLifePoints,
 } from '../utils/gearStats';
-import { createUserBuild, updateUserBuild } from '../utils/api';
+import { adminUpdateUserBuild, createUserBuild, updateUserBuild } from '../utils/api';
 import { reportPublishFailure } from '../utils/autoReport';
 import { saveMyBuildToken } from '../utils/myBuilds';
 import { MAX_LENGTHS, MAX_STAGES, MAX_TRADEOFFS } from '../utils/userBuildShape';
@@ -385,11 +385,13 @@ function StageEditor({ index, label, onLabelChange, onRemove, activeStyles, gear
   );
 }
 
-// `editing`, when present, is `{ id, token, build }` (the sanitized existing
-// build) - switches the page into "Edit build" mode: every field seeds from
-// the existing build instead of blank, and submitting calls updateUserBuild
-// instead of createUserBuild. See pages/EditBuildPage.jsx, which resolves
-// the id/token/build and passes this prop.
+// `editing`, when present, is `{ id, build, ...credential }` where `build` is
+// the sanitized existing build and the credential is either `{ token }` (the
+// author's own, from localStorage) or `{ asAdmin: true }` (the admin session
+// cookie). Switches the page into "Edit build" mode: every field seeds from
+// the existing build instead of blank, and submitting calls updateUserBuild /
+// adminUpdateUserBuild instead of createUserBuild. See pages/EditBuildPage.jsx,
+// which works out which credential applies and passes this prop.
 export default function CreateBuildPage({ onSubmitted, editing }) {
   const build = editing?.build;
   const [name, setName] = useState(build?.name ?? '');
@@ -561,13 +563,19 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
 
     try {
       if (editing) {
-        await updateUserBuild(editing.id, editing.token, {
+        const fields = {
           name: payload.name,
           tagline: payload.tagline,
           authorName: payload.authorName,
           styles: payload.styles,
           payload,
-        });
+        };
+        // Two genuinely different endpoints, not one with a flag: the author's
+        // edit proves itself with the token this browser stored at creation,
+        // an admin's proves itself with the session cookie and carries no
+        // token at all. EditBuildPage decides which applies.
+        if (editing.asAdmin) await adminUpdateUserBuild(editing.id, fields);
+        else await updateUserBuild(editing.id, editing.token, fields);
         setStatus('idle');
         onSubmitted(editing.id);
       } else {
@@ -589,7 +597,7 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
       // work, and nobody stops to write a bug report at that moment - so file
       // one for them. Shape only, never their content. See utils/autoReport.js.
       reportPublishFailure({
-        action: editing ? 'Edit build' : 'Publish build',
+        action: editing ? (editing.asAdmin ? 'Edit build (admin)' : 'Edit build') : 'Publish build',
         error: err,
         reason: err.reason,
         context: {
@@ -609,10 +617,12 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
   return (
     <>
       <header>
-        <h1>{editing ? 'Edit your build' : 'Create a build'}</h1>
+        <h1>{editing ? (editing.asAdmin ? 'Edit this build' : 'Edit your build') : 'Create a build'}</h1>
         <p>
           {editing
-            ? "Update your build's gear, relics, regions, stages or write-up."
+            ? editing.asAdmin
+              ? "Editing someone else's build as an admin. Their edit token still works afterwards - this changes the build, not who owns it."
+              : "Update your build's gear, relics, regions, stages or write-up."
             : "Design your own build guide - pick the gear, league relics, regions and blessings, then write up why it works. It'll appear on the"}
           {!editing && (
             <>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import CreateBuildPage from './CreateBuildPage';
-import { getUserBuild } from '../utils/api';
+import { adminGetUserBuild, fetchIsAdmin, getUserBuild } from '../utils/api';
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
 import { getMyBuildToken } from '../utils/myBuilds';
 
@@ -9,11 +9,28 @@ function idFromHash() {
   return match ? Number(match[1]) : null;
 }
 
+// Who is allowed to edit this build, and by which route.
+//
+// The normal answer is an edit token in this browser's localStorage (see
+// utils/myBuilds.js) - proof this device created the build, and the only proof
+// that exists, since there are no accounts.
+//
+// The other answer is "an admin", asked of the server directly rather than
+// read from useIsAdmin(): that hook starts `false` and settles asynchronously,
+// which is right for a badge but would flash "no access" at a real admin here.
+// Admin access is a moderation tool - the point is editing an offensive line
+// out of a reported build instead of hiding the whole thing - so it reads the
+// build through the admin endpoint too, which can see hidden rows.
+async function resolveAccess(id) {
+  const token = getMyBuildToken(id);
+  if (token) return { credential: { token }, load: () => getUserBuild(id) };
+  if (await fetchIsAdmin()) return { credential: { asAdmin: true }, load: () => adminGetUserBuild(id) };
+  return null;
+}
+
 // Resolves "#edit-build/<id>" into the `editing` prop CreateBuildPage needs
-// (id/token/sanitized build), or explains why it can't - no token in this
-// browser's localStorage (see utils/myBuilds.js) means this device didn't
-// create the build, and there is no recovery path since there are no
-// accounts (see that file's own comment on the tradeoff).
+// (id, sanitized build, and whichever credential applies), or explains why it
+// can't.
 export default function EditBuildPage({ onSubmitted }) {
   const [state, setState] = useState('loading'); // loading | no-access | not-found | error | ready
   const [editing, setEditing] = useState(null);
@@ -24,22 +41,23 @@ export default function EditBuildPage({ onSubmitted }) {
       setState('not-found');
       return undefined;
     }
-    const token = getMyBuildToken(id);
-    if (!token) {
-      setState('no-access');
-      return undefined;
-    }
 
     let cancelled = false;
-    getUserBuild(id)
-      .then((row) => {
+    resolveAccess(id)
+      .then(async (access) => {
+        if (cancelled) return;
+        if (!access) {
+          setState('no-access');
+          return;
+        }
+        const row = await access.load();
         if (cancelled) return;
         const build = sanitizeUserBuildPayload(row.payload);
         if (!build) {
           setState('error');
           return;
         }
-        setEditing({ id, token, build });
+        setEditing({ id, build, ...access.credential });
         setState('ready');
       })
       .catch(() => {
@@ -63,7 +81,7 @@ export default function EditBuildPage({ onSubmitted }) {
       <main className="build-guides-page">
         <p className="build-setup-note">
           This browser doesn't have edit access to this build - editing only works from the device that
-          created it. <a href="#user-builds" className="notice-link">Back to User made builds</a>
+          created it, or as an admin. <a href="#user-builds" className="notice-link">Back to User made builds</a>
         </p>
       </main>
     );
