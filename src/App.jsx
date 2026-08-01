@@ -29,7 +29,7 @@ import {
 } from './hooks/useLeagueRelicSelection';
 import { BLESSINGS_STORAGE_KEY, useBlessingSelection } from './hooks/useBlessingSelection';
 import { isBuildGuidePath, leaveBuildGuidePath } from './utils/buildGuideRoute';
-import { leaveTierListPath, tierListFromLocation } from './utils/tierListRoute';
+import { isTierListMakerPath, leaveTierListPath, tierListFromLocation } from './utils/tierListRoute';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { useTheme } from './hooks/useTheme';
 import { useHeartbeat } from './hooks/useHeartbeat';
@@ -104,6 +104,8 @@ function currentRoute() {
   if (window.location.hash === '#create-build') return 'createBuild';
   if (window.location.hash === '#user-builds') return 'userBuilds';
   if (window.location.hash === '#tier-list-maker') return 'tierListMaker';
+  // The maker's path form, which exists so the page can have a link preview.
+  if (isTierListMakerPath()) return 'tierListMaker';
   // A shared list has a path form and a hash form, same as Build Guides -
   // path first so a stale hash cannot outrank it. See utils/tierListRoute.js.
   if (tierListFromLocation()) return 'sharedTierList';
@@ -242,9 +244,6 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         </a>
         <a href="#build-guides" className={route === 'buildGuides' ? 'active' : ''}>
           Build Guides
-        </a>
-        <a href="#tier-list-maker" className={route === 'tierListMaker' ? 'active' : ''}>
-          Tier Lists
         </a>
         <a href="#character" className={route === 'character' ? 'active' : ''}>
           Character

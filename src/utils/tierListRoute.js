@@ -27,6 +27,16 @@ export function isTierListPath() {
   return PATH_RE.test(window.location.pathname);
 }
 
+// The maker's own path form - /Leagues/tier-list/ with nothing after it. Exists
+// so the page can have a link preview at all: "#tier-list-maker" is a fragment
+// and is never sent to the server. The hash form still works and is what the
+// in-app links use.
+const MAKER_PATH_RE = /\/tier-list\/?$/i;
+
+export function isTierListMakerPath() {
+  return MAKER_PATH_RE.test(window.location.pathname);
+}
+
 // Absolute, because this only ever exists to be copied somewhere else.
 export function tierListShareUrl(type, code) {
   const relative = USE_PATH_ROUTING
@@ -40,6 +50,6 @@ export function tierListShareUrl(type, code) {
 // new hash, and currentRoute() reads the path first - so the app would stay
 // stuck on the shared list. Same fix leaveBuildGuidePath makes.
 export function leaveTierListPath(hash) {
-  if (!USE_PATH_ROUTING || !isTierListPath()) return;
+  if (!USE_PATH_ROUTING || (!isTierListPath() && !isTierListMakerPath())) return;
   window.history.replaceState(null, '', `${BASE}${hash}`);
 }

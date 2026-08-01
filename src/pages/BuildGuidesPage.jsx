@@ -302,6 +302,18 @@ export default function BuildGuidesPage() {
           </section>
         )}
 
+        {/* The way into the maker, now that it has no nav tab of its own - put
+            directly above this site's own rankings, which is exactly where
+            someone thinking "I'd rank these differently" is looking. */}
+        <div className="tier-maker-cta">
+          <a href="#tier-list-maker" className="build-create-button">
+            + Make your own tier list
+          </a>
+          <span className="tier-maker-cta-hint">
+            Rank the blessings or league relics yourself, then share it or export it as an image.
+          </span>
+        </div>
+
         <TierList
           title="Blessing tier list"
           standfirst="Each blessing and god power graded on its own isolated power, deliberately ignoring the combos above."

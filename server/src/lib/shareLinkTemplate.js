@@ -81,6 +81,26 @@ export function renderTierListPage(type, code, { title, angle }) {
   return html;
 }
 
+// The tier list MAKER's own page - one fixed image for everybody, unlike a
+// specific list, which gets a picture of itself.
+//
+// It needs a PATH at all because "#tier-list-maker" is a fragment: browsers
+// never send it, so a crawler asking for that URL is simply asking for
+// /Leagues/ and gets the site default. /Leagues/tier-list/ is the shareable
+// address; the hash form still works for people already using it, it just
+// cannot unfurl with anything of its own.
+export function renderTierListMakerPage() {
+  const shareUrl = `${SITE_ORIGIN}${APP_BASE_PATH}tier-list/`;
+  const imageUrl = `${SITE_ORIGIN}${APP_BASE_PATH}TierListsSiteImage.png`;
+  let html = withShareTags(shareUrl, imageUrl);
+  html = setMetaContent(html, 'og:title', (current) => `Tier list maker - ${current}`);
+  return setMetaContent(
+    html,
+    'og:description',
+    () => 'Rank every blessing or league relic yourself, then share your list or export it as an image.',
+  );
+}
+
 // Rewrites one <meta property="..."> tag's content.
 //
 // `[^>]*` between the attributes on purpose: og:description is written across

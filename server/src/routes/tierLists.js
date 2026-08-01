@@ -6,7 +6,7 @@ import { generateTierListCode } from '../lib/shortCode.js';
 import { fileIssue } from '../lib/github.js';
 import { CODE_RE, TIER_LIST_TYPES, canonicalTierListJson, validateTierList } from '../lib/tierListShape.js';
 import { renderTierListImage } from '../lib/tierListImageRender.js';
-import { renderTierListPage } from '../lib/shareLinkTemplate.js';
+import { renderTierListMakerPage, renderTierListPage } from '../lib/shareLinkTemplate.js';
 import { tierListTitle } from '../../../src/data/tierListItems.js';
 
 export const tierListsRouter = Router();
@@ -110,6 +110,15 @@ async function loadForPage(type, code) {
   const rows = await callTableRpc('get_tier_list', { p_code: code, p_type: type });
   return rows?.[0] ?? null;
 }
+
+// The maker itself. Caddy routes `/tier-list/*`, and that pattern matches the
+// bare `/tier-list/` too, so this needs no new routing rule - only the
+// no-trailing-slash form would miss, which is why the canonical link everywhere
+// uses the slash.
+tierListsRouter.get(['/tier-list', '/tier-list/'], (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(renderTierListMakerPage());
+});
 
 tierListsRouter.get('/tier-list/:type/:code', async (req, res) => {
   const { type, code } = req.params;
