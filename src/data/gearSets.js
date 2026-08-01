@@ -31,9 +31,10 @@
 // Sets that combine weapons/shields into what would otherwise be a pure
 // armour set are named "X gear" rather than "X armour" to reflect that.
 //
-// Masterwork mage armour deliberately excludes the hat: it has different
-// requirements from the rest of the set (see the hat's own gear.js entry),
-// so it's left out of the mapping entirely and keeps showing as its own row.
+// Masterwork mage armour's hat WAS excluded here (it briefly carried an extra
+// misthalin requirement for a Masterwork green cloth/ganodermic flake
+// component) - that turned out not to be a real part of its recipe, so it's
+// now folded into the set like every other Masterwork armour hat/helm.
 export const GEAR_SET_GROUPS = {
   // --- Melee armour ---
   'Torva full helm': 'Torva armour',
@@ -312,13 +313,11 @@ export const GEAR_SET_GROUPS = {
   'Refined anima core body of Seren': 'Refined anima core armour of Seren',
   'Refined anima core legs of Seren': 'Refined anima core armour of Seren',
 
-  // Masterwork mage armour's hat is deliberately NOT mapped here - it has
-  // different requirements from the rest of the set (see its gear.js entry)
-  // so it stays its own standalone row even in combine mode.
-  'Masterwork robe top': 'Masterwork mage armour (w/o hat)',
-  'Masterwork robe bottom': 'Masterwork mage armour (w/o hat)',
-  'Masterwork gloves (magic)': 'Masterwork mage armour (w/o hat)',
-  'Masterwork boots (magic)': 'Masterwork mage armour (w/o hat)',
+  'Masterwork hat': 'Masterwork mage armour',
+  'Masterwork robe top': 'Masterwork mage armour',
+  'Masterwork robe bottom': 'Masterwork mage armour',
+  'Masterwork gloves (magic)': 'Masterwork mage armour',
+  'Masterwork boots (magic)': 'Masterwork mage armour',
   // Masterwork staff excluded for the same reason as Masterwork 2h Sword/bow.
 
   'Tectonic mask': 'Tectonic armour',
