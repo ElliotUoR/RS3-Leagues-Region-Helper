@@ -13,6 +13,8 @@ import {
   ADMIN_COOKIE_MAX_AGE_MS,
 } from '../lib/adminAuth.js';
 import { validateBuildFields } from './userBuilds.js';
+import { CODE_RE, TIER_LIST_TYPES } from '../lib/tierListShape.js';
+import { summariseTierLists } from '../lib/tierListStats.js';
 import { REGIONS } from '../../../src/data/regions.js';
 import { userBuildIdFromCounterKey } from '../../../src/utils/usageKeys.js';
 
@@ -498,6 +500,71 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('admin usage query failed:', err);
     res.status(502).json({ error: 'could not load usage stats right now' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Tier lists
+//
+// Reads go through the `analytics` role's direct pg connection, not
+// PostgREST-as-anon: anon has no select grant on this table at all (resolving
+// one is an exact-code RPC), and the dashboard needs to see every row
+// including hidden ones. Hiding is a SECURITY DEFINER function granted only to
+// that role - see 016_tier_lists.sql.
+// ─────────────────────────────────────────────────────────────────────────
+
+// GET /api/admin/tier-lists?type=blessings
+// Every stored list of that type, newest first, each with its full payload so
+// the dashboard can rebuild the actual ranking - plus the aggregate analysis.
+adminRouter.get('/api/admin/tier-lists', requireAdmin, async (req, res) => {
+  const type = TIER_LIST_TYPES.includes(req.query.type) ? req.query.type : TIER_LIST_TYPES[0];
+  const pool = getAnalyticsPool();
+  try {
+    const { rows } = await pool.query(
+      `select code, type, payload, author_name, angle, hidden, created_at
+         from public.tier_lists
+        where type = $1
+        order by created_at desc`,
+      [type],
+    );
+    res.json({
+      type,
+      // Hidden lists stay in the stats deliberately: hiding is about a name or
+      // an angle line being unacceptable, not about the ranking being invalid,
+      // and silently dropping them would make the averages depend on
+      // moderation decisions.
+      stats: summariseTierLists(type, rows),
+      lists: rows.map((row) => ({
+        code: row.code,
+        authorName: row.author_name,
+        angle: row.angle,
+        hidden: row.hidden,
+        createdAt: row.created_at,
+        rowLabels: row.payload?.rowLabels ?? [],
+        placements: row.payload?.placements ?? {},
+      })),
+    });
+  } catch (err) {
+    console.error('admin tier-lists query failed:', err);
+    res.status(502).json({ error: 'could not load tier lists right now' });
+  }
+});
+
+// PATCH /api/admin/tier-lists/:code  body: { hidden: boolean }
+adminRouter.patch('/api/admin/tier-lists/:code', requireAdmin, async (req, res) => {
+  const { code } = req.params;
+  if (!CODE_RE.test(code)) return res.status(400).json({ error: 'invalid code' });
+  const { hidden } = req.body ?? {};
+  if (typeof hidden !== 'boolean') return res.status(400).json({ error: 'hidden must be a boolean' });
+
+  const pool = getAnalyticsPool();
+  try {
+    const { rows } = await pool.query('select * from public.set_tier_list_hidden($1, $2)', [code, hidden]);
+    if (rows.length === 0) return res.status(404).json({ error: 'not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('admin hide tier list failed:', err);
+    res.status(502).json({ error: 'could not update that tier list right now' });
   }
 });
 

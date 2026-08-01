@@ -34,6 +34,10 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/Leagues/, ''),
       },
+      // A shared tier list's own path is served by Node in production (Caddy
+      // routes it there for the preview image); in dev the app handles it
+      // client-side, so only the IMAGE endpoint needs proxying - and that is
+      // already covered by /Leagues/api above.
       '/Leagues/rest': {
         target: 'http://127.0.0.1:3001',
         changeOrigin: true,

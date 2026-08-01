@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import RetryImage from './RetryImage';
-import TagTooltip from './TagTooltip';
 import TierNoteModal from './TierNoteModal';
+import { TierChipContent } from './tierChip';
+import { GRADE_HUES, tierChipClassName, tierChipStyle } from '../utils/tierChipStyles';
+import TagTooltip from './TagTooltip';
 import { isSourceEditable, saveTierListChanges } from '../utils/buildTextEdit';
 
 // Generic A-F tier list, rendered twice on the Build Guides page - once for
@@ -14,11 +15,6 @@ import { isSourceEditable, saveTierListChanges } from '../utils/buildTextEdit';
 // one empty grade by design - nothing in either is F-tier - and silently
 // dropping the row reads as a rendering bug rather than as "nothing is this
 // weak", which is the actual claim being made.
-// 'unranked' is not a grade so much as the absence of one - see the relic list's
-// use of it for entries nobody has assessed yet. Desaturated on purpose so it
-// does not read as sitting on the same scale as A-F.
-const GRADE_HUES = { A: 140, B: 95, C: 45, D: 25, E: 5, F: 220, unranked: 250 };
-
 // The `import.meta.env.DEV &&` prefix is load-bearing, not belt-and-braces.
 // isSourceEditable() checks it internally too, but a CALL cannot be folded at
 // build time - written as just `isSourceEditable()` the customiser's markup
@@ -28,52 +24,27 @@ const GRADE_HUES = { A: 140, B: 95, C: 45, D: 25, E: 5, F: 220, unranked: 250 };
 // CAN_EDIT this way.
 const CAN_CUSTOMISE = import.meta.env.DEV && isSourceEditable();
 
-function entryClassName(entry, customising) {
-  return [
-    'tier-entry',
-    entry.colour ? `tier-entry-${entry.colour}` : '',
-    // League relics carry a per-relic hue instead of a red/green/blue blessing
-    // colour - a real class rather than an attribute selector on the inline
-    // custom property, which is unreliable.
-    entry.hue != null ? 'tier-entry-relic' : '',
-    customising ? 'tier-entry-draggable' : '',
-    entry.dirty ? 'tier-entry-dirty' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-}
-
 // One chip. While customising, the tooltip anchor is replaced by a plain
 // draggable span: TagTooltip owns click and pointerdown for its bubble, which
 // fights a drag gesture - and the note is reachable anyway by right-clicking,
 // which is the only way to edit it.
 function TierEntry({ entry, renderBadges, customising, onEditNote }) {
-  const style = entry.hue != null ? { '--relic-hue': entry.hue } : undefined;
-  const content = (
-    <>
-      {entry.icon && <RetryImage src={entry.icon} alt="" className="tier-entry-icon" />}
-      <span className="tier-entry-name">{entry.name}</span>
-      {renderBadges?.(entry)}
-      {entry.asterisk && (
-        <span className="tier-entry-asterisk" aria-hidden="true">
-          *
-        </span>
-      )}
-    </>
-  );
-
   if (!customising) {
     return (
-      <TagTooltip className={entryClassName(entry, false)} style={style} tooltip={entry.note}>
-        {content}
+      <TagTooltip
+        className={tierChipClassName(entry, { dirty: entry.dirty })}
+        style={tierChipStyle(entry)}
+        tooltip={entry.note}
+      >
+        <TierChipContent entry={entry} renderBadges={renderBadges} />
       </TagTooltip>
     );
   }
 
   return (
     <span
-      className={entryClassName(entry, true)}
-      style={style}
+      className={tierChipClassName(entry, { draggable: true, dirty: entry.dirty })}
+      style={tierChipStyle(entry)}
       draggable
       onDragStart={(event) => {
         event.dataTransfer.setData('text/plain', entry.name);
@@ -85,7 +56,7 @@ function TierEntry({ entry, renderBadges, customising, onEditNote }) {
       }}
       title="Drag to another tier - right-click to edit its tooltip"
     >
-      {content}
+      <TierChipContent entry={entry} renderBadges={renderBadges} />
     </span>
   );
 }

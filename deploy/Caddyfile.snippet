@@ -38,6 +38,16 @@ handle_path /Leagues/* {
 	@buildguide path /build-guides /build-guides/*
 	reverse_proxy @buildguide rs3_node:3000
 
+	# /tier-list/:type/:code -> Node, for exactly the same reason as
+	# /build-guides above: a shared tier list needs a per-list preview
+	# image, and only a PATH is visible to the server. Without this rule
+	# the page still WORKS (the frontend's nginx SPA fallback serves
+	# index.html and the app routes client-side) - it just unfurls with
+	# the site default image instead of the list. See
+	# server/src/routes/tierLists.js.
+	@tierlist path /tier-list/*
+	reverse_proxy @tierlist rs3_node:3000
+
 	# Public PostgREST API (anon insert-only + the short-link RPC) -
 	# stripped of the /rest prefix too, so e.g. /Leagues/rest/page_events
 	# maps to PostgREST's own /page_events route. The frontend calls

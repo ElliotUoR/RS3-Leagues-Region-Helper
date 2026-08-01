@@ -199,6 +199,46 @@ export async function getUserBuildBySlug(slug) {
   return res.json();
 }
 
+// Stores a finished tier list and returns { code, type }. Saving the same
+// list twice returns the code that already exists rather than a second one -
+// deduped server-side by a hash of the content (see routes/tierLists.js), so
+// Finish then Share then Export is one row, not three.
+export async function saveTierList(list) {
+  const res = await fetch(`${APP_BASE_PATH}api/tier-lists`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(list),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `save tier list failed: ${res.status}`);
+  return data;
+}
+
+// One shared list, for the read-only page. Rejects on 404 so the caller can
+// tell "no such list" from "backend down".
+export async function getTierList(type, code) {
+  const res = await fetch(`${APP_BASE_PATH}api/tier-lists/${type}/${encodeURIComponent(code)}`);
+  if (!res.ok) throw new Error(`get tier list failed: ${res.status}`);
+  return res.json();
+}
+
+// Where a saved tier list's PNG lives. The same URL the shared page's preview
+// image points at, so an export and an unfurl are always the same picture.
+export function tierListImageUrl(type, code) {
+  return `${APP_BASE_PATH}api/og-image/tier-list/${type}/${encodeURIComponent(code)}.png`;
+}
+
+export async function reportTierList(type, code, reason) {
+  const res = await fetch(`${APP_BASE_PATH}api/tier-lists/${encodeURIComponent(code)}/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, reason }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `report failed: ${res.status}`);
+  return data;
+}
+
 // The admin session cookie is httpOnly (can't be read from JS directly, by
 // design), so this is the only way the frontend can know "is the current
 // visitor logged in as admin" - used to show a "logged in as admin" badge

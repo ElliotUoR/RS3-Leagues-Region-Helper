@@ -9,6 +9,8 @@ import BlessingsPage from './pages/BlessingsPage';
 import BuildGuidesPage from './pages/BuildGuidesPage';
 import CreateBuildPage from './pages/CreateBuildPage';
 import UserBuildsPage from './pages/UserBuildsPage';
+import TierListMakerPage from './pages/TierListMakerPage';
+import SharedTierListPage from './pages/SharedTierListPage';
 import EditBuildPage from './pages/EditBuildPage';
 import RelicImportDocsPage from './pages/RelicImportDocsPage';
 import ReportIssueButton from './components/ReportIssueButton';
@@ -27,6 +29,7 @@ import {
 } from './hooks/useLeagueRelicSelection';
 import { BLESSINGS_STORAGE_KEY, useBlessingSelection } from './hooks/useBlessingSelection';
 import { isBuildGuidePath, leaveBuildGuidePath } from './utils/buildGuideRoute';
+import { leaveTierListPath, tierListFromLocation } from './utils/tierListRoute';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { useTheme } from './hooks/useTheme';
 import { useHeartbeat } from './hooks/useHeartbeat';
@@ -100,6 +103,10 @@ function currentRoute() {
   if (window.location.hash.split('/')[0] === '#build-guides') return 'buildGuides';
   if (window.location.hash === '#create-build') return 'createBuild';
   if (window.location.hash === '#user-builds') return 'userBuilds';
+  if (window.location.hash === '#tier-list-maker') return 'tierListMaker';
+  // A shared list has a path form and a hash form, same as Build Guides -
+  // path first so a stale hash cannot outrank it. See utils/tierListRoute.js.
+  if (tierListFromLocation()) return 'sharedTierList';
   if (window.location.hash.split('/')[0] === '#edit-build') return 'editBuild';
   if (window.location.hash === '#relic-import-docs') return 'relicImportDocs';
   if (window.location.hash === '#assumptions') return 'assumptions';
@@ -236,6 +243,9 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         <a href="#build-guides" className={route === 'buildGuides' ? 'active' : ''}>
           Build Guides
         </a>
+        <a href="#tier-list-maker" className={route === 'tierListMaker' ? 'active' : ''}>
+          Tier Lists
+        </a>
         <a href="#character" className={route === 'character' ? 'active' : ''}>
           Character
         </a>
@@ -305,6 +315,8 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         />
       )}
       {route === 'userBuilds' && <UserBuildsPage />}
+      {route === 'tierListMaker' && <TierListMakerPage />}
+      {route === 'sharedTierList' && <SharedTierListPage />}
       {route === 'editBuild' && (
         <EditBuildPage
           onSubmitted={() => {
@@ -368,6 +380,8 @@ function App() {
     // recomputing, is what makes leaving the tab work at all.
     const onHashChange = () => {
       leaveBuildGuidePath(window.location.hash);
+      // A shared tier list has a path form too, and the same trap.
+      leaveTierListPath(window.location.hash);
       setRoute(currentRoute());
     };
     // Back/forward across the path form fires popstate, never hashchange.

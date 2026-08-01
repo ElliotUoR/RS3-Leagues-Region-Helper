@@ -66,6 +66,39 @@ export function renderBuildGuidePage(buildId, { name }) {
   return html;
 }
 
+// Same swap for a shared tier list (see routes/tierLists.js). `title` is
+// "<author>'s blessing tier list" and the description line is their angle -
+// between them an unfurl says whose ranking it is and what it is for, which is
+// most of what makes one worth clicking.
+export function renderTierListPage(type, code, { title, angle }) {
+  if (!type || !code) return template;
+
+  const shareUrl = `${SITE_ORIGIN}${APP_BASE_PATH}tier-list/${type}/${code}`;
+  const imageUrl = `${SITE_ORIGIN}${APP_BASE_PATH}api/og-image/tier-list/${type}/${code}.png`;
+  let html = withShareTags(shareUrl, imageUrl);
+  if (title) html = setMetaContent(html, 'og:title', (current) => `${escapeAttribute(title)} - ${current}`);
+  if (angle) html = setMetaContent(html, 'og:description', () => escapeAttribute(angle));
+  return html;
+}
+
+// Rewrites one <meta property="..."> tag's content.
+//
+// `[^>]*` between the attributes on purpose: og:description is written across
+// THREE lines in index.html while og:title is on one, and a pattern that
+// assumed `property` and `content` were adjacent silently matched neither -
+// which is exactly how an unfurl ends up quietly showing the generic site
+// blurb instead of this list's angle.
+//
+// Throws rather than returning the html unchanged, for the same reason
+// replaceMetaContent above does: a template edit that breaks this should fail
+// the request loudly, not degrade to a wrong-looking preview nobody notices.
+function setMetaContent(html, property, nextValue) {
+  const pattern = new RegExp(`(<meta[^>]*property="${property}"[^>]*content=")([^"]*)(")`);
+  const match = pattern.exec(html);
+  if (!match) throw new Error(`shareLinkTemplate: no ${property} meta tag in dist/index.html`);
+  return html.slice(0, match.index) + match[1] + nextValue(match[2]) + match[3] + html.slice(match.index + match[0].length);
+}
+
 // HTML-escapes a value being interpolated into a double-quoted attribute.
 // Build names are authored in-repo rather than user input, but a stray quote
 // would silently break the tag, and this is the kind of thing that should never

@@ -9,6 +9,7 @@ import { ogImageRouter } from './routes/ogImage.js';
 import { shareLinkPageRouter } from './routes/shareLinkPage.js';
 import { buildGuidePageRouter } from './routes/buildGuidePage.js';
 import { userBuildsRouter } from './routes/userBuilds.js';
+import { tierListsRouter } from './routes/tierLists.js';
 import { scheduleAnalyticsRollup } from './lib/analyticsRollup.js';
 
 const PORT = process.env.PORT ?? 3000;
@@ -33,6 +34,7 @@ app.use(ogImageRouter);
 app.use(shareLinkPageRouter);
 app.use(buildGuidePageRouter);
 app.use(userBuildsRouter);
+app.use(tierListsRouter);
 
 app.listen(PORT, () => {
   console.log(`rs3-leagues-server listening on :${PORT}`);
