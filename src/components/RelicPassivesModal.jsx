@@ -102,14 +102,17 @@ export default function RelicPassivesModal() {
                 tier.
               </p>
               <div className="relic-passives-track" ref={trackRef} onMouseDown={handleMouseDown}>
-                {/* `width: max-content` (see index.css) makes this wrapper's own
-                    box exactly as wide as the 7 stops it lays out - the
-                    connecting line below is a child of THIS element (not of
-                    .relic-passives-track itself), so its left/right positioning
-                    resolves against that full content width rather than just
-                    the track's visible, pre-scroll viewport width. */}
+                {/* One short connecting segment per stop (each stop's own
+                    ::before in index.css) rather than a single line spanning
+                    the whole row - a lone absolutely-positioned bar measured
+                    against the row's own computed width kept disagreeing
+                    between Chrome and Firefox (both the pre-scroll-viewport
+                    bug and, after that fix, a Firefox-specific shrink-wrap
+                    discrepancy). Each segment's containing block is instead
+                    its own fixed-width stop, a value every layout engine
+                    agrees on identically, so there's nothing left to disagree
+                    about. */}
                 <div className="relic-passives-path">
-                  <span className="relic-passives-line" aria-hidden="true" />
                   {RELIC_PASSIVE_TIERS.map(({ tier, xpMultiplier, passives }) => (
                     <div key={tier} className={`relic-passives-stop${xpMultiplier ? ' has-multiplier' : ''}`}>
                       <span className="relic-passives-node" aria-hidden="true" />

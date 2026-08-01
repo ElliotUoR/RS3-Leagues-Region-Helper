@@ -63,6 +63,8 @@ export default function ReadOnlyLoadout({
   armourTotalElder,
   elderSources,
   lifeTotal,
+  aegis,
+  bigBonedBonus,
   isUnlocked,
   selectedLeagueRelics,
 }) {
@@ -132,6 +134,37 @@ export default function ReadOnlyLoadout({
           )}
         </p>
       )}
+      {/* Teragard's Aegis turns armour into base ability damage, so it belongs
+          directly under the armour it is derived from. Quoted at each potion
+          state for the same reason the armour above is: you are overloaded for
+          essentially all PvM, and the unboosted figure is the one you will
+          never actually be hitting at. */}
+      {aegis && (
+        <p className="read-only-loadout-armour">
+          Ability damage <strong className="gear-stat-dmg">+{aegis.base.toLocaleString()}</strong>
+          <span className="read-only-loadout-armour-note">
+            {' '}from Teragard's Aegis ({aegis.multiplier}x, {aegis.offhandClass})
+          </span>
+          {aegis.overloaded != null && (
+            <>
+              <br />
+              <strong className="read-only-loadout-armour-ovl">+{aegis.overloaded.toLocaleString()}</strong>
+              <span className="read-only-loadout-armour-note"> overloaded</span>
+            </>
+          )}
+          {aegis.elder != null && (
+            <>
+              <br />
+              <strong className="read-only-loadout-armour-elder">+{aegis.elder.toLocaleString()}</strong>
+              <span className="read-only-loadout-armour-note">
+                {' '}elder overloaded
+                {elderSources?.length ? ` - via ${elderSources.join(' or ')}` : ''}
+              </span>
+            </>
+          )}
+        </p>
+      )}
+
       {/* Only ever passed by a user-submitted build (see UserBuildCard) whose
           author picked Big Boned - that's the one blessing that reads its
           value straight off total life points, so it's the only case this
@@ -140,6 +173,17 @@ export default function ReadOnlyLoadout({
         <p className="read-only-loadout-armour">
           Total health <strong className="gear-stat-lp">{lifeTotal.toLocaleString()}</strong>
           <span className="read-only-loadout-armour-note"> at 99 Hitpoints</span>
+        </p>
+      )}
+
+      {/* Big Boned's bonus damage is a flat share of the health total above, so
+          it sits under it. Per HIT, not per ability - a multi-hit ability
+          collects it once per hit, which is most of why the blessing is worth
+          taking. */}
+      {bigBonedBonus != null && (
+        <p className="read-only-loadout-armour">
+          Bonus damage <strong className="gear-stat-dmg">+{bigBonedBonus.toLocaleString()}</strong>
+          <span className="read-only-loadout-armour-note"> per hit, from Big Boned</span>
         </p>
       )}
     </figure>

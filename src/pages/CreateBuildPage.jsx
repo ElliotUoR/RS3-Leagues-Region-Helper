@@ -22,7 +22,10 @@ import { isGearItemAvailable } from '../data/gearAvailability';
 import {
   ARMOUR_SCALING_BLESSINGS,
   LIFE_SCALING_BLESSINGS,
+  getAegisBreakdown,
   getArmourRating,
+  getBigBonedBonusDamage,
+  getElderOverloadSources,
   getTotalArmour,
   getTotalLifePoints,
 } from '../utils/gearStats';
@@ -309,6 +312,8 @@ function StageEditor({
   isUnlocked,
   selectedLeagueRelics,
   blessings,
+  archRelics,
+  elderSources,
   thumbnailPick,
   onPickThumbnail,
 }) {
@@ -319,6 +324,9 @@ function StageEditor({
   // so this is the same check for every block below.
   const showArmour = blessings.some((name) => ARMOUR_SCALING_BLESSINGS.has(name));
   const showHealth = blessings.some((name) => LIFE_SCALING_BLESSINGS.has(name));
+  // Teragard's Aegis is one of the armour-scaling blessings, but unlike the
+  // others it has a stateable number of its own, so it gets its own check.
+  const showAegis = blessings.includes("Teragard's Aegis");
   // Per-style, not per-stage-wide - each style has its own equipped items and
   // its own Total armour line, so its own potion choice. Clicking the
   // already-active mode turns it off; clicking the other one switches
@@ -355,7 +363,20 @@ function StageEditor({
         const overloadMode = overloadModeByStyle[style] ?? 'none';
         const effectiveDefenceLevel = 99 + OVERLOAD_DEFENCE_BONUS_BY_MODE[overloadMode];
         const armourTotal = showArmour ? getTotalArmour(equipped, style, effectiveDefenceLevel) : null;
-        const lifeTotal = showHealth ? getTotalLifePoints(equipped, { bigBoned: true }) : null;
+        const lifeTotal = showHealth ? getTotalLifePoints(equipped, { bigBoned: true, archRelics }) : null;
+        const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
+        // Aegis quotes every potion state at once rather than following the
+        // overload toggle above: the toggle answers "how much armour do I have
+        // right now", this answers "what is this blessing worth to me", and
+        // that is a question about the whole range.
+        const aegis = showAegis
+          ? getAegisBreakdown({
+              equipped,
+              style,
+              offhandName: names.offhand,
+              hasElder: elderSources.length > 0,
+            })
+          : null;
         return (
           <div key={style} className="create-build-style-block">
             <div className="create-build-style-block-head">
@@ -375,6 +396,37 @@ function StageEditor({
                 )}
               </span>
             </div>
+            {/* The two blessings with a stateable number of their own. Kept on
+                their own line under the armour/health totals they are derived
+                from, rather than crammed into that line - each needs its own
+                caveat (which multiplier, per hit, at which potion state) and
+                the totals line is already dense. */}
+            {(aegis || bigBonedBonus != null) && (
+              <p className="create-build-blessing-note">
+                {aegis && (
+                  <span className="create-build-blessing-line">
+                    <span className="gear-stat gear-stat-dmg">
+                      Teragard&apos;s Aegis: +{aegis.base.toLocaleString()} ability damage
+                    </span>
+                    <span className="create-build-blessing-detail">
+                      {' '}({aegis.multiplier}x - {aegis.offhandClass} in the off-hand)
+                      {' · '}+{aegis.overloaded.toLocaleString()} overloaded
+                      {aegis.elder != null && (
+                        <> {'· '}+{aegis.elder.toLocaleString()} elder overloaded - via {elderSources.join(' or ')}</>
+                      )}
+                    </span>
+                  </span>
+                )}
+                {bigBonedBonus != null && (
+                  <span className="create-build-blessing-line">
+                    <span className="gear-stat gear-stat-dmg">
+                      Big Boned: +{bigBonedBonus.toLocaleString()} bonus damage
+                    </span>
+                    <span className="create-build-blessing-detail"> per hit (5% of max life points)</span>
+                  </span>
+                )}
+              </p>
+            )}
             {/* A share thumbnail renders ONE loadout, so this is really a radio
                 group spread across every stage and style - ticking any box
                 unticks whichever was ticked before, even in the other stage.
@@ -480,6 +532,14 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
     initialDefaultStyle,
   });
   const gearStages = [gearStage0, gearStage1];
+
+  // Whether this build can brew an elder overload at all - Tirannwn or the
+  // Divine Druid relic. Decides whether the Aegis line quotes an elder figure
+  // or stops at overloaded.
+  const elderSources = getElderOverloadSources({
+    leagueRelics: relicSelection.selected,
+    regions: regionSelection.selected,
+  });
 
   const relicTierGroups = useMemo(() => groupRelicsByTier(LEAGUE_RELICS), []);
   const blessingTierGroups = useMemo(() => groupBlessingsByTier(BLESSINGS), []);
@@ -958,6 +1018,8 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
               isUnlocked={regionSelection.isUnlocked}
               selectedLeagueRelics={relicSelection.selected}
               blessings={blessingSelection.selected}
+              archRelics={archRelicSelection.selected}
+              elderSources={elderSources}
               thumbnailPick={thumbnailPick}
               onPickThumbnail={pickThumbnail}
             />

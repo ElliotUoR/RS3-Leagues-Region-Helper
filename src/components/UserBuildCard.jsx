@@ -7,7 +7,15 @@ import PicksHeading from './PicksHeading';
 import { ARCH_RELIC_BY_NAME, LEAGUE_RELIC_BY_NAME } from '../data/buildLookups';
 import { REGIONS, FIXED_REGIONS, GATEWAY_REGIONS } from '../data/regions';
 import { GEAR } from '../data/gear';
-import { ARMOUR_SCALING_BLESSINGS, LIFE_SCALING_BLESSINGS, getTotalArmour, getTotalLifePoints } from '../utils/gearStats';
+import {
+  ARMOUR_SCALING_BLESSINGS,
+  LIFE_SCALING_BLESSINGS,
+  getAegisBreakdown,
+  getBigBonedBonusDamage,
+  getElderOverloadSources,
+  getTotalArmour,
+  getTotalLifePoints,
+} from '../utils/gearStats';
 import { hasEditAccess } from '../utils/myBuilds';
 
 const STYLE_LABELS = { melee: 'Melee', ranged: 'Ranged', magic: 'Magic', necromancy: 'Necromancy' };
@@ -82,7 +90,25 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
   const showArmour = build.blessings.some((name) => ARMOUR_SCALING_BLESSINGS.has(name));
   const showHealth = build.blessings.some((name) => LIFE_SCALING_BLESSINGS.has(name));
   const armourTotal = loadout && showArmour ? getTotalArmour(equipped, style, 99) : null;
-  const lifeTotal = loadout && showHealth ? getTotalLifePoints(equipped, { bigBoned: true }) : null;
+  const lifeTotal =
+    loadout && showHealth
+      ? getTotalLifePoints(equipped, { bigBoned: true, archRelics: build.archRelics })
+      : null;
+  const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
+
+  // Teragard's Aegis reads TOTAL armour, so it moves with a Defence boost -
+  // and with what is in the off-hand, which decides the x1/x2/x3 multiplier.
+  // The elder row only appears when the build can actually brew one.
+  const elderSources = getElderOverloadSources({ leagueRelics: build.relics, regions: build.regions });
+  const aegis =
+    loadout && build.blessings.includes("Teragard's Aegis")
+      ? getAegisBreakdown({
+          equipped,
+          style,
+          offhandName: loadout.slots.offhand,
+          hasElder: elderSources.length > 0,
+        })
+      : null;
 
   // The hint and its expand-all toggle belong above the first pick list that
   // actually renders - all three sections are optional here, so "first" is not
@@ -224,8 +250,10 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
                   armourTotal={armourTotal}
                   armourTotalOverloaded={null}
                   armourTotalElder={null}
-                  elderSources={[]}
+                  elderSources={elderSources}
                   lifeTotal={lifeTotal}
+                  aegis={aegis}
+                  bigBonedBonus={bigBonedBonus}
                   isUnlocked={buildIsUnlocked}
                   selectedLeagueRelics={build.relics}
                 />

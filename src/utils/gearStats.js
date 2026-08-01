@@ -5,6 +5,10 @@
 // item's own armour rating" depends on which combat style tab it's being
 // viewed under. Necromancy has no dedicated key in this dataset and
 // piggybacks on `magic`, matching the convention used for its weapons.
+// Explicit .js extension: this module is COPY'd into the server image (see
+// server/Dockerfile) and Node's ESM resolver, unlike Vite's, will not guess it.
+import { getAegisMultiplier, getOffhandClass } from '../data/offhandClass.js';
+
 export const DEFENCE_KEY_BY_STYLE = { melee: 'stab', ranged: 'ranged', magic: 'magic', necromancy: 'magic' };
 
 export function getArmourRating(item, style) {
@@ -42,17 +46,91 @@ export const BASE_LIFE_POINTS_99_HP = 9900;
 // blessing pairs with high-LP gear.
 export const BIG_BONED_LIFE_MULTIPLIER = 1.5;
 
+// The Arch relic "Font of Life" (The Mortal Cup): "Increases the player's
+// maximum life points by 500." It is the only Arch relic that raises the
+// MAXIMUM - the others in that area are healing or damage-threshold effects,
+// which do not belong in this total.
+export const FONT_OF_LIFE_RELIC = 'Font of Life';
+export const FONT_OF_LIFE_LIFE_POINTS = 500;
+
 // `bigBoned` is not optional in spirit: this total is only ever displayed when
 // Big Boned is picked (see LIFE_SCALING_BLESSINGS below and its callers), so
 // leaving it out shows the visitor the number they would have had WITHOUT the
 // blessing that caused the number to appear at all.
-export function getTotalLifePoints(equipped, { bigBoned = false } = {}) {
+//
+// `archRelics` is the build's Arch relic picks. Font of Life is added BEFORE
+// Big Boned's multiplier, not after: "maximum life points are increased by 50%"
+// scales the finished maximum, so the relic's 500 is worth 750 here - and
+// because Big Boned's bonus damage is a share of this same total, that 750
+// carries into damage as well.
+export function getTotalLifePoints(equipped, { bigBoned = false, archRelics = [] } = {}) {
   let bonus = 0;
   for (const item of Object.values(equipped)) {
     bonus += item.stats?.lifeBonus || 0;
   }
+  if (archRelics.includes(FONT_OF_LIFE_RELIC)) bonus += FONT_OF_LIFE_LIFE_POINTS;
   const total = BASE_LIFE_POINTS_99_HP + bonus;
   return bigBoned ? Math.round(total * BIG_BONED_LIFE_MULTIPLIER) : total;
+}
+
+// Big Boned's second effect: "All damage you deal gains 5% of your maximum life
+// points as bonus damage." Flat and PER HIT, so a multi-hit ability collects it
+// once per hit - which is why it is worth stating next to the health total that
+// drives it rather than leaving the reader to take 5% of a number themselves.
+export const BIG_BONED_DAMAGE_SHARE = 0.05;
+
+export function getBigBonedBonusDamage(totalLifePoints) {
+  return Math.round(totalLifePoints * BIG_BONED_DAMAGE_SHARE);
+}
+
+// Teragard's Aegis: "Your base ability damage is increased by 25% of your total
+// armour value. This bonus is doubled while wielding a defender and tripled
+// while wielding a shield."
+//
+// `totalArmour` is the same figure the loadout displays, Defence-skill baseline
+// included - that baseline is part of the in-game Total Armour stat, which is
+// what the blessing reads. It follows that boosting Defence raises this: an
+// overload is worth ~+540 armour and an elder overload ~+849, so the bonus is
+// quoted at each state rather than only unboosted (see getAegisAbilityDamage's
+// callers).
+export const AEGIS_ARMOUR_SHARE = 0.25;
+
+export function getAegisAbilityDamage(totalArmour, multiplier) {
+  return Math.round(totalArmour * AEGIS_ARMOUR_SHARE * multiplier);
+}
+
+// Elder overloads are Meilyr potions: reachable via Tirannwn (Prifddinas) or
+// the Divine Druid league relic, which unlocks every Meilyr recipe. Derived
+// from a build's own picks rather than stored, so it stays correct when those
+// picks change.
+export const ELDER_OVERLOAD_RELIC = 'Divine Druid';
+export const ELDER_OVERLOAD_REGION = 'tirannwn';
+
+export function getElderOverloadSources({ leagueRelics = [], regions = [] } = {}) {
+  return [
+    leagueRelics.includes(ELDER_OVERLOAD_RELIC) && ELDER_OVERLOAD_RELIC,
+    regions.includes(ELDER_OVERLOAD_REGION) && 'Tirannwn',
+  ].filter(Boolean);
+}
+
+// Defence levels each potion state puts you at, relative to 99. Elder overload
+// is only reachable with a source above.
+export const OVERLOAD_DEFENCE_BONUS = { none: 0, overload: 17, elder: 25 };
+
+// Everything a loadout needs to state its Teragard's Aegis bonus, in one shape:
+// the multiplier and what earned it, plus the bonus at each potion state.
+// `elder` is null when the build has no way to brew an elder overload, so the
+// row simply does not appear rather than quoting a number it cannot reach.
+export function getAegisBreakdown({ equipped, style, offhandName, hasElder }) {
+  const multiplier = getAegisMultiplier(offhandName);
+  const at = (defenceLevel) => getAegisAbilityDamage(getTotalArmour(equipped, style, defenceLevel), multiplier);
+  return {
+    multiplier,
+    offhandClass: getOffhandClass(offhandName),
+    base: at(99),
+    overloaded: at(99 + OVERLOAD_DEFENCE_BONUS.overload),
+    elder: hasElder ? at(99 + OVERLOAD_DEFENCE_BONUS.elder) : null,
+  };
 }
 
 // Which of the two totals above a blessing actually reads its value from -

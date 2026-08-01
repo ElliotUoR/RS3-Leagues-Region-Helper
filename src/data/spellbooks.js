@@ -23,6 +23,17 @@
 // and Ancient Curses / Seren Prayers / Knight Waves / the Nex curses are
 // prayer-book unlocks, not spells. Do not "fix" that asymmetry.
 //
+// League passives Tier 6 (per the passive table released alongside launch):
+// "at tier 6 you unlock the Seren spells and prayers." Modeled as a 'tier6'
+// pseudo-region (see gearAvailability.js's ALWAYS_UNLOCKED / RegionTags.jsx's
+// isRegionUnlocked) - unconditionally satisfied, same mechanism as 'global'/
+// 'relic'. Seren spells still needs Ancient Magicks' own Desert Treasure
+// requirement on top of it (Tier 6 only replaces the old extra Tirannwn/
+// Light Within requirement, so it now reads Desert AND Tier 6 - effectively
+// just Desert, since Tier 6 is always satisfied). Seren Prayers has no such
+// parent requirement, so it's Tirannwn OR Tier 6 - effectively always
+// unlocked, same as its Ancient Curses parent.
+//
 // Each `*_GROUPS` array is a set of independent unlock lines, one per panel
 // - a parent card plus the sub-unlocks/extensions layered on top of it.
 // Rendered as N side-by-side panels (3 for spellbooks, 2 for prayers),
@@ -66,14 +77,12 @@ export const SPELLBOOK_GROUPS = [
         name: 'Seren spells',
         icons: [{ name: 'Seren spells', icon: FP('Crystal_Mask.png') }],
         source: {
-          // Both AND-groups carry the relic, so Crystal Grace satisfies the
-          // whole requirement rather than only half of it.
           region: [
             { anyOf: ['kharidianDesert'], leagueRelic: 'Crystal Grace' },
-            { anyOf: ['tirannwn'], leagueRelic: 'Crystal Grace' },
+            { anyOf: ['tier6'] },
           ],
           detail:
-            "Requires The Light Within (tirannwn) on top of Ancient Magicks' own Desert Treasure requirement - or the Crystal Grace relic instead of either.",
+            "Auto-unlocked at League passives Tier 6, on top of Ancient Magicks' own Desert Treasure requirement - or the Crystal Grace relic instead of Desert.",
         },
       },
     ],
@@ -137,7 +146,10 @@ export const PRAYER_GROUPS = [
       {
         name: 'Seren Prayers',
         icons: [{ name: 'Seren Prayers', icon: FP('Light_Form.png') }],
-        source: { region: 'tirannwn', detail: 'Unlocked via The Light Within.' },
+        source: {
+          region: { anyOf: ['tirannwn', 'tier6'] },
+          detail: 'Auto-unlocked at League passives Tier 6, or via The Light Within (tirannwn).',
+        },
         softRegion: 'kharidianDesert',
         softNote: 'Possibly also requires Desert for base Ancient Curses access - not confirmed.',
       },

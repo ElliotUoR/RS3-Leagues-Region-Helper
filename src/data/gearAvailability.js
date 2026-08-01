@@ -3,7 +3,12 @@
 // this for an item that doesn't say which specific league relic grants it -
 // see the `leagueRelic` field/isGearItemAvailable's `selectedLeagueRelics`
 // option below for the two (Seren's Crystal Tiara, Goldenhawk boots) that do.
-const ALWAYS_UNLOCKED = new Set(['global', 'relic']);
+// 'tier6' is the League passives track's Tier 6 milestone (per the passive
+// table released alongside the Leagues launch) - not tied to any region
+// pick, so it's unconditionally satisfied the same way. Currently only used
+// by data/spellbooks.js's Seren spells/Seren Prayers entries, as an
+// OR-alternative alongside their old region-only requirement.
+const ALWAYS_UNLOCKED = new Set(['global', 'relic', 'tier6']);
 
 // Splits an item's `source.region` into an ordered list of AND-groups, where
 // each group is `{ regions: [...], label?, component?, artefact?, note? }` -

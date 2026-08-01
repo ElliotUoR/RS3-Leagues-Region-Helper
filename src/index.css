@@ -2086,15 +2086,10 @@ main.abilities-page .gear-item-rows {
   font-size: 12px;
 }
 
-/* The scroll viewport. `.relic-passives-path` (not this element) is the flex
-   row that actually lays the 7 stops out - keeping the two separate matters
-   for .relic-passives-line below: an absolutely positioned child measures
-   left/right against its containing block's own box, which for a scrolling
-   overflow:auto element is its clipped, PRE-scroll viewport width, not the
-   full scrolled content width. Putting the line inside .path instead (whose
-   own box, thanks to width: max-content, IS exactly as wide as all 7 stops)
-   means it spans the true full width instead of stopping wherever the
-   visible viewport happened to end. */
+/* The scroll viewport - `.relic-passives-path` is the (inline-)flex row that
+   actually lays the 7 stops out. See each stop's own `::after` connecting
+   segment further down for why the connecting line is per-stop rather than
+   one bar spanning this whole scrollable row. */
 .relic-passives-track {
   overflow-x: auto;
   padding-bottom: 14px;
@@ -2131,30 +2126,27 @@ main.abilities-page .gear-item-rows {
   background-clip: padding-box;
 }
 
+/* `inline-flex` rather than `flex` + `width: max-content` - both should shrink-
+   wrap this row to exactly its content's width (letting the ancestor's
+   overflow-x: auto handle the rest), but Firefox and Chrome resolve
+   `width: max-content` on a flex container differently in practice, which
+   is what let extra dead scroll space appear after Tier 7 in Firefox even
+   though the same markup measured correctly in Chrome. Inline-level boxes
+   have shrunk-to-fit their content by default in every browser since CSS2,
+   long before `max-content` existed as a keyword, so this sidesteps the
+   inconsistency entirely rather than working around it. */
 .relic-passives-path {
   --relic-stop-width: 175px;
   position: relative;
-  display: flex;
+  display: inline-flex;
+  /* Inline-level boxes default to baseline alignment within their line box,
+     which can add a few px of unaccounted-for space below an inline-flex
+     element depending on its content's line-height - top-aligning removes
+     that ambiguity entirely rather than relying on it happening not to
+     matter. */
+  vertical-align: top;
   gap: 16px;
   padding-top: 6px;
-  width: max-content;
-}
-
-/* Endpoints are half a stop's width in from each edge - exactly the node's
-   own centre point within the first/last stop (nodes are centred via that
-   stop's `align-items: center`, and symmetric left/right padding on each
-   stop doesn't shift that centre either way) - not a guessed pixel value
-   that happened to look close. Ties the line's true endpoint to Tier 7's
-   actual column, so scrolling stops exactly where its text does rather than
-   at some separately-tuned constant. */
-.relic-passives-line {
-  position: absolute;
-  left: calc(var(--relic-stop-width) / 2);
-  right: calc(var(--relic-stop-width) / 2);
-  top: 25px;
-  height: 2px;
-  background: linear-gradient(90deg, #3fbf6f, #f0c04a 50%, #3fbf6f);
-  opacity: 0.6;
 }
 
 .relic-passives-stop {
@@ -2165,6 +2157,33 @@ main.abilities-page .gear-item-rows {
   flex-direction: column;
   align-items: center;
   padding: 0 10px 14px;
+}
+
+/* One short segment per stop (except the last, which has nothing after it
+   to connect to) rather than a single line spanning the whole row. A lone
+   absolutely-positioned bar has to be measured against the FULL row's own
+   computed width, and that's exactly what disagreed between Chrome and
+   Firefox twice over (first the pre-scroll-viewport bug, then a Firefox-
+   specific shrink-wrap discrepancy even after fixing that). Each segment's
+   containing block is this single stop instead - a fixed, explicit
+   `--relic-stop-width`, not an intrinsic/computed size - so every browser
+   agrees on it identically and there's nothing left to disagree about.
+   Starts at this stop's own node centre (half its width in) and reaches
+   exactly to the NEXT stop's node centre: this stop's remaining half-width,
+   plus the full gap, plus the next stop's leading half-width. `z-index: -1`
+   keeps it under this stop's own node/medallion (both normal-flow flex
+   children, so an unpositioned/negative z-index descendant paints below
+   them by default) without needing to touch their styling at all. */
+.relic-passives-stop:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 25px;
+  left: calc(var(--relic-stop-width) / 2);
+  width: calc(var(--relic-stop-width) + 16px);
+  height: 2px;
+  background: #3fbf6f;
+  opacity: 0.6;
 }
 
 .relic-passives-node {
@@ -2267,7 +2286,7 @@ main.abilities-page .gear-item-rows {
 }
 
 @media (max-width: 700px) {
-  .relic-passives-line {
+  .relic-passives-stop:not(:last-child)::after {
     display: none;
   }
 }
@@ -5794,6 +5813,24 @@ main.abilities-page .gear-item-rows {
 .create-build-thumbnail-toggle input:checked + span {
   color: var(--style-ranged);
   font-weight: 600;
+}
+
+/* The blessing-derived numbers (Teragard's Aegis, Big Boned) - one line each,
+   under the armour/health totals they read from. */
+.create-build-blessing-note {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+}
+
+.create-build-blessing-line {
+  display: block;
+}
+
+.create-build-blessing-detail {
+  opacity: 0.7;
 }
 
 .create-build-armour-note {

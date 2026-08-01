@@ -34,6 +34,7 @@ COPY src/data/regions.js ./src/data/regions.js
 COPY src/data/blessings.js ./src/data/blessings.js
 COPY src/data/leagueRelics.js ./src/data/leagueRelics.js
 COPY src/data/blessingBuilds.js ./src/data/blessingBuilds.js
+COPY src/data/offhandClass.js ./src/data/offhandClass.js
 COPY src/utils/gearStats.js ./src/utils/gearStats.js
 COPY src/utils/usageKeys.js ./src/utils/usageKeys.js
 COPY public/icons ./public/icons

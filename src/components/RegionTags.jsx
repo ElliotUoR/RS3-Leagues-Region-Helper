@@ -3,7 +3,7 @@ import { REGION_COLORS, REGION_SHORT_LABELS, RESOURCE_TAG_COLORS } from '../data
 import TagTooltip from './TagTooltip';
 
 function isRegionUnlocked(regionId, isUnlocked) {
-  return regionId === 'global' || regionId === 'relic' || isUnlocked(regionId);
+  return regionId === 'global' || regionId === 'relic' || regionId === 'tier6' || isUnlocked(regionId);
 }
 
 function RegionPill({ regionId, unlocked }) {

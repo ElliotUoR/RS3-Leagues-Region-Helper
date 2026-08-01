@@ -16,6 +16,10 @@ export const REGION_COLORS = {
   tirannwn: '#2fa66b',
   global: '#8a8a94',
   relic: '#c9962e',
+  // League passives Tier 6 milestone (see gearAvailability.js's
+  // ALWAYS_UNLOCKED) - a distinct cyan, not shared with any real region's
+  // colour, since it's a progression unlock rather than a place.
+  tier6: '#22b8cf',
 };
 
 // Custom colour overrides for specific resource tags (the `label` field on
@@ -79,4 +83,5 @@ export const REGION_SHORT_LABELS = {
   tirannwn: 'Tirannwn',
   global: 'Global',
   relic: '★ Relic',
+  tier6: 'Tier 6',
 };
