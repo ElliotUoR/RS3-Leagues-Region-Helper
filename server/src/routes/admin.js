@@ -468,3 +468,62 @@ adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
     res.status(502).json({ error: 'could not load usage stats right now' });
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────
+// User-build moderation
+//
+// Reads go through the `analytics` role's direct pg connection rather than
+// PostgREST-as-anon, because anon's RLS policy hides exactly the rows an admin
+// needs to see (see 013_user_build_votes_and_moderation.sql). Hiding is a
+// SECURITY DEFINER function granted only to that same role, so it is
+// unreachable from a browser even though PostgREST is directly addressable.
+// ─────────────────────────────────────────────────────────────────────────
+
+// GET /api/admin/user-builds - every build INCLUDING hidden ones, with scores.
+adminRouter.get('/api/admin/user-builds', requireAdmin, async (req, res) => {
+  const pool = getAnalyticsPool();
+  try {
+    const { rows } = await pool.query(
+      `select b.id, b.name, b.tagline, b.author_name, b.styles, b.hidden, b.created_at,
+              coalesce(sum(v.vote), 0)::int as raw_score,
+              count(v.*) filter (where v.vote = 1)::int as upvotes,
+              count(v.*) filter (where v.vote = -1)::int as downvotes
+         from public.user_builds b
+         left join public.user_build_votes v on v.build_id = b.id
+        group by b.id
+        order by b.created_at desc`,
+    );
+    res.json(
+      rows.map((row) => ({
+        ...row,
+        // The public score is floored at 0; the admin view also carries the
+        // true total, because "this one is sitting at -14" is the thing worth
+        // acting on and the floor would hide it.
+        score: Math.max(row.raw_score, 0),
+      })),
+    );
+  } catch (err) {
+    console.error('admin user-builds query failed:', err);
+    res.status(502).json({ error: 'could not load user builds right now' });
+  }
+});
+
+// PATCH /api/admin/user-builds/:id   body: { hidden: boolean }
+// Hiding removes it from every public read (the anon RLS policy in 012), and
+// from voting too - cast_user_build_vote refuses a hidden build.
+adminRouter.patch('/api/admin/user-builds/:id', requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
+  const { hidden } = req.body ?? {};
+  if (typeof hidden !== 'boolean') return res.status(400).json({ error: 'hidden must be a boolean' });
+
+  const pool = getAnalyticsPool();
+  try {
+    const { rows } = await pool.query('select * from public.set_user_build_hidden($1, $2)', [id, hidden]);
+    if (rows.length === 0) return res.status(404).json({ error: 'not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('admin hide build failed:', err);
+    res.status(502).json({ error: 'could not update that build right now' });
+  }
+});

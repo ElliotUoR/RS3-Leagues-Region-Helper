@@ -134,7 +134,14 @@ export async function createUserBuild({ name, tagline, authorName, styles, paylo
     body: JSON.stringify({ name, tagline, authorName, styles, payload }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `create build failed: ${res.status}`);
+  if (!res.ok) {
+    const err = new Error(data.error || `create build failed: ${res.status}`);
+    // Carried so the auto-filed issue can say WHICH failure this was without
+    // the caller having to re-read the response (see utils/autoReport.js).
+    err.status = res.status;
+    err.reason = data.reason;
+    throw err;
+  }
   return data;
 }
 
@@ -183,4 +190,67 @@ export async function fetchIsAdmin() {
   } catch {
     return false;
   }
+}
+
+// Every visible build's score plus what THIS browser already voted, in one
+// call - so the buttons paint in their correct state instead of flashing
+// un-voted. Returns {} on any failure: scores are decoration and must never
+// stop the listing rendering.
+export async function fetchBuildVotes() {
+  try {
+    const res = await fetch(`${APP_BASE_PATH}api/user-builds/votes`);
+    if (!res.ok) return {};
+    return await res.json();
+  } catch {
+    return {};
+  }
+}
+
+// `vote` is 1, -1, or 0 to retract. Identity is decided server-side from the
+// same pseudonymous session id analytics uses - nothing here identifies the
+// voter, and a client cannot claim to be a different one.
+export async function voteOnBuild(id, vote) {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds/${id}/vote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ vote }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `vote failed: ${res.status}`);
+  return data;
+}
+
+// Files a GitHub issue about a specific build, with its id/name/link attached
+// server-side (see server/src/routes/userBuilds.js) - the reporter only
+// supplies the reason.
+export async function reportUserBuild(id, reason) {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds/${id}/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `report failed: ${res.status}`);
+  return data;
+}
+
+// Admin-only. Returns every build including hidden ones, with true (unfloored)
+// scores - 403s for anyone else.
+export async function adminListUserBuilds() {
+  const res = await fetch(`${APP_BASE_PATH}api/admin/user-builds`, { credentials: 'include' });
+  if (!res.ok) throw new Error(`admin list failed: ${res.status}`);
+  return res.json();
+}
+
+export async function adminSetBuildHidden(id, hidden) {
+  const res = await fetch(`${APP_BASE_PATH}api/admin/user-builds/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ hidden }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `hide failed: ${res.status}`);
+  return data;
 }

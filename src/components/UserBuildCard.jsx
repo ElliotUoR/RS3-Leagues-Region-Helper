@@ -115,7 +115,7 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
   const showArmour = build.blessings.some((name) => ARMOUR_SCALING_BLESSINGS.has(name));
   const showHealth = build.blessings.some((name) => LIFE_SCALING_BLESSINGS.has(name));
   const armourTotal = loadout && showArmour ? getTotalArmour(equipped, style, 99) : null;
-  const lifeTotal = loadout && showHealth ? getTotalLifePoints(equipped) : null;
+  const lifeTotal = loadout && showHealth ? getTotalLifePoints(equipped, { bigBoned: true }) : null;
 
   return (
     <article className={`build-card user-build-card${expanded ? ' expanded' : ''}`}>

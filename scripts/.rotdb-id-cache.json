@@ -1,0 +1,4453 @@
+{
+  "weapon|Noxious Scythe": {
+    "id": 5768,
+    "rotdbName": "Noxious scythe",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Zaros Godsword": {
+    "id": 9205,
+    "rotdbName": "Zaros godsword",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Tumeken's Light": {
+    "id": 8680,
+    "rotdbName": "Tumeken's Light",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Ek-ZekKil": {
+    "id": 3119,
+    "rotdbName": "Ek-ZekKil",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Dark Shard of Leng": {
+    "id": 2563,
+    "rotdbName": "Dark Shard of Leng",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Dark Ice Shard": {
+    "id": 2583,
+    "rotdbName": "Dark ice shard",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Abyssal Scourge": {
+    "id": 44,
+    "rotdbName": "Abyssal scourge",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Spear of Annihilation": {
+    "id": 7837,
+    "rotdbName": "Spear of Annihilation",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Masterwork Spear of Annihilation": {
+    "id": 5315,
+    "rotdbName": "Masterwork Spear of Annihilation",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Primal 2h Sword + 5": {
+    "id": 6450,
+    "rotdbName": "Primal 2h sword + 5",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Primal Warhammer + 5": {
+    "id": 6529,
+    "rotdbName": "Primal warhammer + 5",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Chaotic Rapier": {
+    "id": 2060,
+    "rotdbName": "Chaotic rapier",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Attuned Crystal Halberd": {
+    "id": 543,
+    "rotdbName": "Attuned crystal halberd",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Linza's Hammer": {
+    "id": 5000,
+    "rotdbName": "Linza's hammer",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Terrasaur Maul": {
+    "id": 8454,
+    "rotdbName": "Terrasaur maul",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Khopesh of the Kharidian": {
+    "id": 4886,
+    "rotdbName": "Khopesh of the Kharidian",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Laniakea's Spear": {
+    "id": 4926,
+    "rotdbName": "Laniakea's spear",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Lava Whip": {
+    "id": 4938,
+    "rotdbName": "Lava whip",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Blade of Nymora": {
+    "id": 1596,
+    "rotdbName": "Blade of Nymora",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Ripper Claw": {
+    "id": 6846,
+    "rotdbName": "Ripper claw",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Superior Statius's Warhammer": {
+    "id": 8282,
+    "rotdbName": "Superior Statius's warhammer",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Superior Vesta's Longsword": {
+    "id": 8284,
+    "rotdbName": "Superior Vesta's longsword",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Superior Vesta's Spear": {
+    "id": 8328,
+    "rotdbName": "Superior Vesta's spear",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Varanus's Mercy": {
+    "id": 8752,
+    "rotdbName": "Varanus's Mercy",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Ruinous Maul": {
+    "id": 9407,
+    "rotdbName": "Ruinous maul",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Ruinous rapier": {
+    "id": 9408,
+    "rotdbName": "Ruinous rapier",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Khopesh of Tumeken": {
+    "id": 4878,
+    "rotdbName": "Khopesh of Tumeken",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Drygore Rapier": {
+    "id": 3038,
+    "rotdbName": "Drygore rapier",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Drygore Longsword": {
+    "id": 3022,
+    "rotdbName": "Drygore longsword",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Drygore Mace": {
+    "id": 3030,
+    "rotdbName": "Drygore mace",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Dragon Rider Lance": {
+    "id": 2961,
+    "rotdbName": "Dragon Rider lance",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Zamorakian Spear": {
+    "id": 9203,
+    "rotdbName": "Zamorakian spear",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Bandos Godsword": {
+    "id": 1294,
+    "rotdbName": "Bandos godsword",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Saradomin Sword": {
+    "id": 7401,
+    "rotdbName": "Saradomin sword",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Saradomin Godsword": {
+    "id": 7388,
+    "rotdbName": "Saradomin godsword",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Armadyl Godsword": {
+    "id": 472,
+    "rotdbName": "Armadyl godsword",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Zamorak Godsword": {
+    "id": 9186,
+    "rotdbName": "Zamorak godsword",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Masuta's Warspear": {
+    "id": 5319,
+    "rotdbName": "Masuta's warspear",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Dharok's Greataxe": {
+    "id": 2808,
+    "rotdbName": "Dharok's greataxe",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Guthan's Warspear": {
+    "id": 4240,
+    "rotdbName": "Guthan's warspear",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Verac's Flail": {
+    "id": 8759,
+    "rotdbName": "Verac's flail",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Torag's Hammer": {
+    "id": 8583,
+    "rotdbName": "Torag's hammer",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Bonecrusher Maul": {
+    "id": 9288,
+    "rotdbName": "Bonecrusher maul",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Elder Rune Longsword": {
+    "id": 3166,
+    "rotdbName": "Elder rune longsword",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Sunspear": {
+    "id": 8236,
+    "rotdbName": "Sunspear",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Vanquish (melee)": {
+    "id": 8750,
+    "rotdbName": "Vanquish (melee)",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Masterwork 2h Sword": {
+    "id": 5305,
+    "rotdbName": "Masterwork 2h sword",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Statius's Warhammer": {
+    "id": 8026,
+    "rotdbName": "Statius's warhammer",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Korasi's sword": {
+    "id": 4890,
+    "rotdbName": "Korasi's sword",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Dragon Dagger": {
+    "id": 2921,
+    "rotdbName": "Dragon dagger",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Annihilation": {
+    "id": 369,
+    "rotdbName": "Annihilation",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Dragon 2h Sword": {
+    "id": 2895,
+    "rotdbName": "Dragon 2h sword",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Granite Maul": {
+    "id": 4157,
+    "rotdbName": "Granite maul",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Vesta's Spear": {
+    "id": 8767,
+    "rotdbName": "Vesta's spear",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Vesta's longsword": {
+    "id": 8765,
+    "rotdbName": "Vesta's longsword",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Dragon Mace": {
+    "id": 2943,
+    "rotdbName": "Dragon mace",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Dragon Longsword": {
+    "id": 2942,
+    "rotdbName": "Dragon longsword",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Dragon Hatchet": {
+    "id": 2933,
+    "rotdbName": "Dragon hatchet",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Crystal Hatchet": {
+    "id": 2479,
+    "rotdbName": "Crystal hatchet",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Abyssal vine whip": {
+    "id": 50,
+    "rotdbName": "Abyssal vine whip",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Abyssal whip": {
+    "id": 56,
+    "rotdbName": "Abyssal whip",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Elite tetsu katana": {
+    "id": 3323,
+    "rotdbName": "Elite tetsu katana",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Tetsu katana": {
+    "id": 8465,
+    "rotdbName": "Tetsu katana",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Crystal dagger": {
+    "id": 2473,
+    "rotdbName": "Crystal dagger",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Chaotic longsword": {
+    "id": 2056,
+    "rotdbName": "Chaotic longsword",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Akrisae's war mace": {
+    "id": 283,
+    "rotdbName": "Akrisae's war mace",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Attuned crystal dagger": {
+    "id": 540,
+    "rotdbName": "Attuned crystal dagger",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Chaotic maul": {
+    "id": 2057,
+    "rotdbName": "Chaotic maul",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Crystal halberd": {
+    "id": 2477,
+    "rotdbName": "Crystal halberd",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Sunspear (melee)": {
+    "id": 8238,
+    "rotdbName": "Sunspear (melee)",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Mizuyari": {
+    "id": 5532,
+    "rotdbName": "Mizuyari",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "offhand|Dark Sliver of Leng": {
+    "id": 2571,
+    "rotdbName": "Dark Sliver of Leng",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Dark Ice Sliver": {
+    "id": 2584,
+    "rotdbName": "Dark ice sliver",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Drygore Rapier": {
+    "id": 5941,
+    "rotdbName": "Off-hand drygore rapier",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Drygore Longsword": {
+    "id": 5925,
+    "rotdbName": "Off-hand drygore longsword",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Drygore Mace": {
+    "id": 5933,
+    "rotdbName": "Off-hand drygore mace",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Khopesh of Elidinis": {
+    "id": 4870,
+    "rotdbName": "Khopesh of Elidinis",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Dragon defender": {
+    "id": 2923,
+    "rotdbName": "Dragon defender",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Kalphite Defender": {
+    "id": 4821,
+    "rotdbName": "Kalphite defender",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Dragon kiteshield": {
+    "id": 2938,
+    "rotdbName": "Dragon kiteshield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Corrupted defender": {
+    "id": 2303,
+    "rotdbName": "Corrupted defender",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Ancient defender": {
+    "id": 329,
+    "rotdbName": "Ancient defender",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Blade of Avaryss": {
+    "id": 1595,
+    "rotdbName": "Blade of Avaryss",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Khopesh of the Kharidian": {
+    "id": 5993,
+    "rotdbName": "Off-hand khopesh of the Kharidian",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand ruinous rapier": {
+    "id": 9401,
+    "rotdbName": "Off-hand ruinous rapier",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Ripper Claw": {
+    "id": 6037,
+    "rotdbName": "Off-hand ripper claw",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Primal Off Hand Warhammer + 5": {
+    "id": 6498,
+    "rotdbName": "Primal off hand warhammer + 5",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Malevolent Kiteshield": {
+    "id": 5191,
+    "rotdbName": "Malevolent kiteshield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Primal kiteshield + 5": {
+    "id": 6489,
+    "rotdbName": "Primal kiteshield + 5",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Bandos Warshield": {
+    "id": 1302,
+    "rotdbName": "Bandos warshield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Elder rune round shield + 5": {
+    "id": 3202,
+    "rotdbName": "Elder rune round shield + 5",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Spirit shield": {
+    "id": 7882,
+    "rotdbName": "Spirit shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Divine spirit shield": {
+    "id": 2864,
+    "rotdbName": "Divine spirit shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Elite tetsu wakizashi": {
+    "id": 3324,
+    "rotdbName": "Elite tetsu wakizashi",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Enhanced Excalibur": {
+    "id": 3366,
+    "rotdbName": "Enhanced Excalibur",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand attuned crystal dagger": {
+    "id": 5857,
+    "rotdbName": "Off-hand attuned crystal dagger",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand chaotic longsword": {
+    "id": 5898,
+    "rotdbName": "Off-hand chaotic longsword",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Tetsu wakizashi": {
+    "id": 8467,
+    "rotdbName": "Tetsu wakizashi",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Attuned crystal shield": {
+    "id": 547,
+    "rotdbName": "Attuned crystal shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Chaotic kiteshield": {
+    "id": 2055,
+    "rotdbName": "Chaotic kiteshield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Bane square shield": {
+    "id": 1350,
+    "rotdbName": "Bane square shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Dragonfire shield": {
+    "id": 2990,
+    "rotdbName": "Dragonfire shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Orikalkum kiteshield": {
+    "id": 6158,
+    "rotdbName": "Orikalkum kiteshield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "ammo|Armour Spikes": {
+    "id": 484,
+    "rotdbName": "Armour spikes",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Abyssal armour spikes": {
+    "id": 19,
+    "rotdbName": "Abyssal armour spikes",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Armour spikes (alloy)": {
+    "id": 485,
+    "rotdbName": "Armour spikes (alloy)",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Abyssal armour spikes (alloy)": {
+    "id": 20,
+    "rotdbName": "Abyssal armour spikes (alloy)",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "head|Vestments of havoc hood": {
+    "id": 8769,
+    "rotdbName": "Vestments of havoc hood",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Malevolent helm": {
+    "id": 5183,
+    "rotdbName": "Malevolent helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Primal full helm + 5": {
+    "id": 6473,
+    "rotdbName": "Primal full helm + 5",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Torva full helm": {
+    "id": 8591,
+    "rotdbName": "Torva full helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Anima core helm of Zaros": {
+    "id": 357,
+    "rotdbName": "Anima core helm of Zaros",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Elder rune full helm": {
+    "id": 3153,
+    "rotdbName": "Elder rune full helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Linza's helm": {
+    "id": 5001,
+    "rotdbName": "Linza's helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Statius's full helm": {
+    "id": 8023,
+    "rotdbName": "Statius's full helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Jaws of the Abyss": {
+    "id": 4798,
+    "rotdbName": "Jaws of the Abyss",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Superior Statius's full helm": {
+    "id": 8279,
+    "rotdbName": "Superior Statius's full helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Bane full helm": {
+    "id": 1313,
+    "rotdbName": "Bane full helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Necronium full helm": {
+    "id": 5689,
+    "rotdbName": "Necronium full helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Bandos helmet": {
+    "id": 1296,
+    "rotdbName": "Bandos helmet",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Dharok's helm": {
+    "id": 2809,
+    "rotdbName": "Dharok's helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Guthan's helm": {
+    "id": 4238,
+    "rotdbName": "Guthan's helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Torag's helm": {
+    "id": 8584,
+    "rotdbName": "Torag's helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Verac's helm": {
+    "id": 8760,
+    "rotdbName": "Verac's helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Teralith helmet": {
+    "id": 8452,
+    "rotdbName": "Teralith helmet",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Achto Teralith helmet": {
+    "id": 98,
+    "rotdbName": "Achto Teralith helmet",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Orikalkum full helm": {
+    "id": 6149,
+    "rotdbName": "Orikalkum full helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Superior tetsu helm": {
+    "id": 8322,
+    "rotdbName": "Superior tetsu helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Tetsu helm": {
+    "id": 8464,
+    "rotdbName": "Tetsu helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Refined anima core helm of Zaros": {
+    "id": 6725,
+    "rotdbName": "Refined anima core helm of Zaros",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Slayer helmet": {
+    "id": 7739,
+    "rotdbName": "Slayer helmet",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Anima core helm of Sliske": {
+    "id": 355,
+    "rotdbName": "Anima core helm of Sliske",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Refined anima core helm of Sliske": {
+    "id": 6723,
+    "rotdbName": "Refined anima core helm of Sliske",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "torso|Vestments of havoc robe top": {
+    "id": 8771,
+    "rotdbName": "Vestments of havoc robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Malevolent cuirass": {
+    "id": 5167,
+    "rotdbName": "Malevolent cuirass",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Primal platebody + 5": {
+    "id": 6512,
+    "rotdbName": "Primal platebody + 5",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Torva platebody": {
+    "id": 8593,
+    "rotdbName": "Torva platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Anima core body of Zaros": {
+    "id": 353,
+    "rotdbName": "Anima core body of Zaros",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Elder rune platebody": {
+    "id": 3185,
+    "rotdbName": "Elder rune platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Linza's cuirass": {
+    "id": 4998,
+    "rotdbName": "Linza's cuirass",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Vesta's chainbody": {
+    "id": 8764,
+    "rotdbName": "Vesta's chainbody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Superior Vesta's Chainbody": {
+    "id": 8283,
+    "rotdbName": "Superior Vesta's Chainbody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Statius's platebody": {
+    "id": 8024,
+    "rotdbName": "Statius's platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Superior Statius's platebody": {
+    "id": 8280,
+    "rotdbName": "Superior Statius's platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Bane platebody": {
+    "id": 1340,
+    "rotdbName": "Bane platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Necronium platebody": {
+    "id": 5716,
+    "rotdbName": "Necronium platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Bandos chestplate": {
+    "id": 1290,
+    "rotdbName": "Bandos chestplate",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Dharok's platebody": {
+    "id": 2810,
+    "rotdbName": "Dharok's platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Guthan's platebody": {
+    "id": 4239,
+    "rotdbName": "Guthan's platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Torag's platebody": {
+    "id": 8585,
+    "rotdbName": "Torag's platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Verac's brassard": {
+    "id": 8758,
+    "rotdbName": "Verac's brassard",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Teralith cuirass": {
+    "id": 8450,
+    "rotdbName": "Teralith cuirass",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Achto Teralith cuirass": {
+    "id": 96,
+    "rotdbName": "Achto Teralith cuirass",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Orikalkum platebody": {
+    "id": 6171,
+    "rotdbName": "Orikalkum platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Granite body": {
+    "id": 4153,
+    "rotdbName": "Granite body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Initiate hauberk": {
+    "id": 4621,
+    "rotdbName": "Initiate hauberk",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Proselyte hauberk": {
+    "id": 6596,
+    "rotdbName": "Proselyte hauberk",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Refined anima core body of Zaros": {
+    "id": 6721,
+    "rotdbName": "Refined anima core body of Zaros",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Superior tetsu body": {
+    "id": 8321,
+    "rotdbName": "Superior tetsu body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Tetsu body": {
+    "id": 8463,
+    "rotdbName": "Tetsu body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Anima core body of Sliske": {
+    "id": 351,
+    "rotdbName": "Anima core body of Sliske",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Refined anima core body of Sliske": {
+    "id": 6719,
+    "rotdbName": "Refined anima core body of Sliske",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "legs|Vestments of havoc robe bottom": {
+    "id": 8770,
+    "rotdbName": "Vestments of havoc robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Malevolent greaves": {
+    "id": 5175,
+    "rotdbName": "Malevolent greaves",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Primal platelegs + 5": {
+    "id": 6519,
+    "rotdbName": "Primal platelegs + 5",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Torva platelegs": {
+    "id": 8594,
+    "rotdbName": "Torva platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Anima core legs of Zaros": {
+    "id": 361,
+    "rotdbName": "Anima core legs of Zaros",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Elder rune platelegs": {
+    "id": 3191,
+    "rotdbName": "Elder rune platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Linza's greaves": {
+    "id": 4999,
+    "rotdbName": "Linza's greaves",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Vesta's plateskirt": {
+    "id": 8766,
+    "rotdbName": "Vesta's plateskirt",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Superior Vesta's plateskirt": {
+    "id": 8327,
+    "rotdbName": "Superior Vesta's plateskirt",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Statius's platelegs": {
+    "id": 8025,
+    "rotdbName": "Statius's platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Superior Statius's platelegs": {
+    "id": 8281,
+    "rotdbName": "Superior Statius's platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Bane platelegs": {
+    "id": 1345,
+    "rotdbName": "Bane platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Necronium platelegs": {
+    "id": 5721,
+    "rotdbName": "Necronium platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Bandos tassets": {
+    "id": 1301,
+    "rotdbName": "Bandos tassets",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Dharok's platelegs": {
+    "id": 2811,
+    "rotdbName": "Dharok's platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Guthan's chainskirt": {
+    "id": 4237,
+    "rotdbName": "Guthan's chainskirt",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Torag's platelegs": {
+    "id": 8586,
+    "rotdbName": "Torag's platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Verac's plateskirt": {
+    "id": 8761,
+    "rotdbName": "Verac's plateskirt",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Teralith leggings": {
+    "id": 8453,
+    "rotdbName": "Teralith leggings",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Achto Teralith leggings": {
+    "id": 99,
+    "rotdbName": "Achto Teralith leggings",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Orikalkum platelegs": {
+    "id": 6175,
+    "rotdbName": "Orikalkum platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Refined anima core legs of Zaros": {
+    "id": 6729,
+    "rotdbName": "Refined anima core legs of Zaros",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Tetsu platelegs": {
+    "id": 8466,
+    "rotdbName": "Tetsu platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Superior tetsu platelegs": {
+    "id": 8325,
+    "rotdbName": "Superior tetsu platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Anima core legs of Sliske": {
+    "id": 359,
+    "rotdbName": "Anima core legs of Sliske",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Refined anima core legs of Sliske": {
+    "id": 6727,
+    "rotdbName": "Refined anima core legs of Sliske",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "hands|Dragon Rider gloves": {
+    "id": 2959,
+    "rotdbName": "Dragon Rider gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Torva gloves": {
+    "id": 8592,
+    "rotdbName": "Torva gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Pneumatic gloves": {
+    "id": 6403,
+    "rotdbName": "Pneumatic gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Razorback gauntlets": {
+    "id": 6678,
+    "rotdbName": "Razorback gauntlets",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Bandos gloves": {
+    "id": 1293,
+    "rotdbName": "Bandos gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Gloves of passage": {
+    "id": 3940,
+    "rotdbName": "Gloves of passage",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Enhanced gloves of passage": {
+    "id": 3376,
+    "rotdbName": "Enhanced gloves of passage",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Teralith gauntlets": {
+    "id": 8451,
+    "rotdbName": "Teralith gauntlets",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Achto Teralith gauntlets": {
+    "id": 97,
+    "rotdbName": "Achto Teralith gauntlets",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Orikalkum gauntlets": {
+    "id": 6153,
+    "rotdbName": "Orikalkum gauntlets",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Elder rune gauntlets": {
+    "id": 3159,
+    "rotdbName": "Elder rune gauntlets",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Primal gauntlets + 5": {
+    "id": 6480,
+    "rotdbName": "Primal gauntlets + 5",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Vampyrism gloves": {
+    "id": 9333,
+    "rotdbName": "Vampyrism gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Deathtouch bracelet": {
+    "id": 2654,
+    "rotdbName": "Deathtouch bracelet",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Cinderbane gloves": {
+    "id": 2114,
+    "rotdbName": "Cinderbane gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Culinaromancer's gloves 10": {
+    "id": 2496,
+    "rotdbName": "Culinaromancer's gloves 10",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Regen bracelet": {
+    "id": 6731,
+    "rotdbName": "Regen bracelet",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Combat bracelet": {
+    "id": 2212,
+    "rotdbName": "Combat bracelet",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "feet|Dragon Rider boots": {
+    "id": 2956,
+    "rotdbName": "Dragon Rider boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Vestments of havoc boots": {
+    "id": 8768,
+    "rotdbName": "Vestments of havoc boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Torva boots": {
+    "id": 8590,
+    "rotdbName": "Torva boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Laceration boots": {
+    "id": 4925,
+    "rotdbName": "Laceration boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Enhanced laceration boots": {
+    "id": 3378,
+    "rotdbName": "Enhanced laceration boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Steadfast boots": {
+    "id": 8028,
+    "rotdbName": "Steadfast boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Emberkeen boots": {
+    "id": 3332,
+    "rotdbName": "Emberkeen boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Bandos boots": {
+    "id": 1289,
+    "rotdbName": "Bandos boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Teralith boots": {
+    "id": 8449,
+    "rotdbName": "Teralith boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Achto Teralith boots": {
+    "id": 95,
+    "rotdbName": "Achto Teralith boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Orikalkum armoured boots": {
+    "id": 6145,
+    "rotdbName": "Orikalkum armoured boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Elder rune armoured boots": {
+    "id": 3147,
+    "rotdbName": "Elder rune armoured boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Primal armoured boots + 5": {
+    "id": 6458,
+    "rotdbName": "Primal armoured boots + 5",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Goldenhawk boots": {
+    "id": 4114,
+    "rotdbName": "Goldenhawk boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "back|Igneous Kal-Zuk": {
+    "id": 4552,
+    "rotdbName": "Igneous Kal-Zuk",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|Igneous Kal-Ket": {
+    "id": 4548,
+    "rotdbName": "Igneous Kal-Ket",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|Fire cape": {
+    "id": 3571,
+    "rotdbName": "Fire cape",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|Agility cape": {
+    "id": 262,
+    "rotdbName": "Agility cape",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|TokHaar-Kal-Ket": {
+    "id": 8561,
+    "rotdbName": "TokHaar-Kal-Ket",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|Max cape": {
+    "id": 5322,
+    "rotdbName": "Max cape",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "neck|Salve amulet (e)": {
+    "id": 7302,
+    "rotdbName": "Salve amulet (e)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of the Forsaken": {
+    "id": 317,
+    "rotdbName": "Amulet of the forsaken",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Dragon Rider amulet": {
+    "id": 2908,
+    "rotdbName": "Dragon Rider amulet",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of souls": {
+    "id": 313,
+    "rotdbName": "Amulet of souls",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of glory": {
+    "id": 304,
+    "rotdbName": "Amulet of glory",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of power": {
+    "id": 311,
+    "rotdbName": "Amulet of power",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of strength": {
+    "id": 315,
+    "rotdbName": "Amulet of strength",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Essence of Finality amulet": {
+    "id": 3395,
+    "rotdbName": "Essence of Finality amulet",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Desert amulet 2": {
+    "id": 2777,
+    "rotdbName": "Desert amulet 2",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Desert amulet 3": {
+    "id": 2778,
+    "rotdbName": "Desert amulet 3",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Desert amulet 4": {
+    "id": 2779,
+    "rotdbName": "Desert amulet 4",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Necklace of Charos": {
+    "id": 5666,
+    "rotdbName": "Necklace of Charos",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of glory (t)": {
+    "id": 306,
+    "rotdbName": "Amulet of glory (t)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Strength amulet (t)": {
+    "id": 8159,
+    "rotdbName": "Strength amulet (t)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of fury": {
+    "id": 301,
+    "rotdbName": "Amulet of fury",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of fury (t)": {
+    "id": 303,
+    "rotdbName": "Amulet of fury (t)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of fury (or)": {
+    "id": 302,
+    "rotdbName": "Amulet of fury (or)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Blood amulet of fury": {
+    "id": 1656,
+    "rotdbName": "Blood amulet of fury",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Saradomin's whisper": {
+    "id": 7397,
+    "rotdbName": "Saradomin's whisper",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of souls (or)": {
+    "id": 314,
+    "rotdbName": "Amulet of souls (or)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Berserker necklace": {
+    "id": 1454,
+    "rotdbName": "Berserker necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Am-zi": {
+    "id": 292,
+    "rotdbName": "Am-zi",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Am-hej": {
+    "id": 291,
+    "rotdbName": "Am-hej",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Reaper necklace": {
+    "id": 6679,
+    "rotdbName": "Reaper necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Reaper necklace (or)": {
+    "id": 6680,
+    "rotdbName": "Reaper necklace (or)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Essence of Finality amulet (or)": {
+    "id": 3399,
+    "rotdbName": "Essence of Finality amulet (or)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Brawler's hook necklace": {
+    "id": 1803,
+    "rotdbName": "Brawler's hook necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Brawler's knockout necklace": {
+    "id": 1805,
+    "rotdbName": "Brawler's knockout necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Brawler's blood necklace": {
+    "id": 1802,
+    "rotdbName": "Brawler's blood necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Super dominion medallion": {
+    "id": 8245,
+    "rotdbName": "Super dominion medallion",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Extreme dominion medallion": {
+    "id": 3460,
+    "rotdbName": "Extreme dominion medallion",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "ring|Reaver's ring": {
+    "id": 6682,
+    "rotdbName": "Reaver's ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Champion's ring": {
+    "id": 2039,
+    "rotdbName": "Champion's ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Berserker ring": {
+    "id": 1455,
+    "rotdbName": "Berserker ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Warrior ring": {
+    "id": 8913,
+    "rotdbName": "Warrior ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Sixth-Age circuit": {
+    "id": 7690,
+    "rotdbName": "Sixth-Age circuit",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Asylum surgeon's ring": {
+    "id": 521,
+    "rotdbName": "Asylum surgeon's ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|TokKul-Zo": {
+    "id": 8565,
+    "rotdbName": "TokKul-Zo",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Hazelmere's signet ring": {
+    "id": 4334,
+    "rotdbName": "Hazelmere's signet ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Ring of death": {
+    "id": 6788,
+    "rotdbName": "Ring of death",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Ring of Vigour": {
+    "id": 6839,
+    "rotdbName": "Ring of vigour",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Superior leviathan ring": {
+    "id": 8275,
+    "rotdbName": "Superior leviathan ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Ring of Wealth": {
+    "id": 6805,
+    "rotdbName": "Ring of Wealth",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Ring of Fortune": {
+    "id": 6783,
+    "rotdbName": "Ring of Fortune",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Luck of the Dwarves": {
+    "id": 5021,
+    "rotdbName": "Luck of the Dwarves",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "pocket|Scripture of Ful": {
+    "id": 7429,
+    "rotdbName": "Scripture of Ful",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Scripture of Wen": {
+    "id": 7431,
+    "rotdbName": "Scripture of Wen",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Scripture of Jas": {
+    "id": 7430,
+    "rotdbName": "Scripture of Jas",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Scripture of Amascut": {
+    "id": 7426,
+    "rotdbName": "Scripture of Amascut",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Erethdor's grimoire": {
+    "id": 3394,
+    "rotdbName": "Erethdor's grimoire",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Chaotic grimoire": {
+    "id": 9338,
+    "rotdbName": "Chaotic grimoire",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Attacker's insignia": {
+    "id": 530,
+    "rotdbName": "Attacker's insignia",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Illuminated book of war": {
+    "id": 4558,
+    "rotdbName": "Illuminated Book of War",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Superior scrimshaw of attack": {
+    "id": 8298,
+    "rotdbName": "Superior scrimshaw of attack",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Book of Death": {
+    "id": 1747,
+    "rotdbName": "Book of Death",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Underworld Grimoire 4": {
+    "id": 8723,
+    "rotdbName": "Underworld Grimoire 4",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "pocket|Superior scrimshaw of vampyrism": {
+    "id": 8305,
+    "rotdbName": "Superior scrimshaw of vampyrism",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "weapon|Bow of the Last Guardian": {
+    "id": 1785,
+    "rotdbName": "Bow of the Last Guardian",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Seren godbow": {
+    "id": 7487,
+    "rotdbName": "Seren godbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Eldritch crossbow": {
+    "id": 3206,
+    "rotdbName": "Eldritch crossbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Noxious longbow": {
+    "id": 5760,
+    "rotdbName": "Noxious longbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Zaryte bow": {
+    "id": 9214,
+    "rotdbName": "Zaryte bow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Royal crossbow": {
+    "id": 6945,
+    "rotdbName": "Royal crossbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Karil's crossbow": {
+    "id": 4831,
+    "rotdbName": "Karil's crossbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Seercull": {
+    "id": 7468,
+    "rotdbName": "Seercull",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Hand cannon": {
+    "id": 4275,
+    "rotdbName": "Hand cannon",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Sunspear (ranged)": {
+    "id": 8239,
+    "rotdbName": "Sunspear (ranged)",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Vanquish (ranged)": {
+    "id": 8751,
+    "rotdbName": "Vanquish (ranged)",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Blightbound crossbow": {
+    "id": 1627,
+    "rotdbName": "Blightbound crossbow",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Ruinous crossbow": {
+    "id": 9404,
+    "rotdbName": "Ruinous crossbow",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Ascension crossbow": {
+    "id": 504,
+    "rotdbName": "Ascension crossbow",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Dragon crossbow": {
+    "id": 2920,
+    "rotdbName": "Dragon crossbow",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Armadyl Crossbow": {
+    "id": 469,
+    "rotdbName": "Armadyl crossbow",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Shadow glaive": {
+    "id": 7534,
+    "rotdbName": "Shadow glaive",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Morrigan's javelin": {
+    "id": 5572,
+    "rotdbName": "Morrigan's javelin",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Superior Morrigan's javelin": {
+    "id": 8254,
+    "rotdbName": "Superior Morrigan's javelin",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Morrigan's throwing axe": {
+    "id": 5575,
+    "rotdbName": "Morrigan's throwing axe",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Superior Morrigan's throwing axe": {
+    "id": 8257,
+    "rotdbName": "Superior Morrigan's throwing axe",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Bone blowpipe": {
+    "id": 1738,
+    "rotdbName": "Bone blowpipe",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Upgraded bone blowpipe": {
+    "id": 8735,
+    "rotdbName": "Upgraded bone blowpipe",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Gloomfire Bow": {
+    "id": 3927,
+    "rotdbName": "Gloomfire bow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Masterwork bow": {
+    "id": 5306,
+    "rotdbName": "Masterwork bow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Decimation": {
+    "id": 2707,
+    "rotdbName": "Decimation",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Dark Bow": {
+    "id": 2555,
+    "rotdbName": "Dark bow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Strykebow": {
+    "id": 8200,
+    "rotdbName": "Strykebow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Zamorak Bow": {
+    "id": 9180,
+    "rotdbName": "Zamorak bow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Rune Throwing Axe": {
+    "id": 7220,
+    "rotdbName": "Rune throwing axe",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Chaotic crossbow": {
+    "id": 2052,
+    "rotdbName": "Chaotic crossbow",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Karil's pistol crossbow": {
+    "id": 4833,
+    "rotdbName": "Karil's pistol crossbow",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death Lotus dart": {
+    "id": 2626,
+    "rotdbName": "Death Lotus dart",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Attuned crystal chakram": {
+    "id": 539,
+    "rotdbName": "Attuned crystal chakram",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Primal crossbow Mk. 5": {
+    "id": 6465,
+    "rotdbName": "Primal crossbow Mk. 5",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Eternal magic shortbow Mk. 5": {
+    "id": 3414,
+    "rotdbName": "Eternal magic shortbow Mk. 5",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Eternal Magic longbow": {
+    "id": 9471,
+    "rotdbName": "Eternal magic longbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Elder shortbow": {
+    "id": 3205,
+    "rotdbName": "Elder shortbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Elder longbow": {
+    "id": 9460,
+    "rotdbName": "Elder longbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Crystal bow": {
+    "id": 2468,
+    "rotdbName": "Crystal bow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Attuned crystal bow": {
+    "id": 538,
+    "rotdbName": "Attuned crystal bow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Hexhunter bow": {
+    "id": 4399,
+    "rotdbName": "Hexhunter bow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Wyvern crossbow": {
+    "id": 9154,
+    "rotdbName": "Wyvern crossbow",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "offhand|Off-hand Blightbound crossbow": {
+    "id": 5854,
+    "rotdbName": "Off-hand Blightbound crossbow",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Ascension crossbow": {
+    "id": 5847,
+    "rotdbName": "Off-hand ascension crossbow",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Armadyl Crossbow": {
+    "id": 5822,
+    "rotdbName": "Off-hand Armadyl crossbow",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Tainted repriser": {
+    "id": 8357,
+    "rotdbName": "Tainted repriser",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Ancient repriser": {
+    "id": 337,
+    "rotdbName": "Ancient repriser",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Ruinous crossbow": {
+    "id": 9400,
+    "rotdbName": "Off-hand ruinous crossbow",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand dragon crossbow": {
+    "id": 5915,
+    "rotdbName": "Off-hand dragon crossbow",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand shadow glaive": {
+    "id": 6056,
+    "rotdbName": "Off-hand shadow glaive",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Armadyl buckler": {
+    "id": 465,
+    "rotdbName": "Armadyl buckler",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Vengeful kiteshield": {
+    "id": 8757,
+    "rotdbName": "Vengeful kiteshield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Elysian spirit shield": {
+    "id": 3331,
+    "rotdbName": "Elysian spirit shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand chaotic crossbow": {
+    "id": 5895,
+    "rotdbName": "Off-hand chaotic crossbow",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Karil's off-hand pistol crossbow": {
+    "id": 4832,
+    "rotdbName": "Karil's off-hand pistol crossbow",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand Death Lotus dart": {
+    "id": 5904,
+    "rotdbName": "Off-hand Death Lotus dart",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand attuned crystal chakram": {
+    "id": 5856,
+    "rotdbName": "Off-hand attuned crystal chakram",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Off-hand primal crossbow Mk. 5": {
+    "id": 6025,
+    "rotdbName": "Off-hand primal crossbow Mk. 5",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Kalphite repriser": {
+    "id": 4823,
+    "rotdbName": "Kalphite repriser",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Dragonfire deflector": {
+    "id": 2989,
+    "rotdbName": "Dragonfire deflector",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Crystal deflector": {
+    "id": 2474,
+    "rotdbName": "Crystal deflector",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Attuned crystal deflector": {
+    "id": 541,
+    "rotdbName": "Attuned crystal deflector",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "ammo|Deathspore arrows": {
+    "id": 2652,
+    "rotdbName": "Deathspore arrows",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Splintering arrows": {
+    "id": 7891,
+    "rotdbName": "Splintering arrows",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Black stone arrows": {
+    "id": 1578,
+    "rotdbName": "Black stone arrows",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Ascendri bolts": {
+    "id": 501,
+    "rotdbName": "Ascendri bolts",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Ascension bolts": {
+    "id": 503,
+    "rotdbName": "Ascension bolts",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Bane bolts": {
+    "id": 9433,
+    "rotdbName": "Bane bolts",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Blight bolts": {
+    "id": 1626,
+    "rotdbName": "Blight bolts",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Bakriminel bolts": {
+    "id": 1257,
+    "rotdbName": "Bakriminel bolts",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Hydrix bakriminel bolts (e)": {
+    "id": 4526,
+    "rotdbName": "Hydrix bakriminel bolts (e)",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Rune arrow": {
+    "id": 6988,
+    "rotdbName": "Rune arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Wild arrow": {
+    "id": 9016,
+    "rotdbName": "Wild arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Araxyte arrow": {
+    "id": 388,
+    "rotdbName": "Araxyte arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Primal arrow": {
+    "id": 6459,
+    "rotdbName": "Primal arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Dinarrow": {
+    "id": 2832,
+    "rotdbName": "Dinarrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Wen arrow": {
+    "id": 8925,
+    "rotdbName": "Wen arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Bik arrow": {
+    "id": 1465,
+    "rotdbName": "Bik arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Ful arrow": {
+    "id": 3737,
+    "rotdbName": "Ful arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Jas demonbane arrow": {
+    "id": 4795,
+    "rotdbName": "Jas demonbane arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Jas dragonbane arrow": {
+    "id": 4796,
+    "rotdbName": "Jas dragonbane arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "head|Pernix cowl": {
+    "id": 6277,
+    "rotdbName": "Pernix cowl",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Karil's coif": {
+    "id": 4830,
+    "rotdbName": "Karil's coif",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Armadyl helmet": {
+    "id": 474,
+    "rotdbName": "Armadyl helmet",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Sirenic mask": {
+    "id": 7682,
+    "rotdbName": "Sirenic mask",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Elite sirenic mask": {
+    "id": 3291,
+    "rotdbName": "Elite sirenic mask",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Dracolich coif": {
+    "id": 2891,
+    "rotdbName": "Dracolich coif",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Elite dracolich coif": {
+    "id": 3263,
+    "rotdbName": "Elite Dracolich coif",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Undead dragonhide coif": {
+    "id": 8717,
+    "rotdbName": "Undead dragonhide coif",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Tempest cowl": {
+    "id": 8447,
+    "rotdbName": "Tempest cowl",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Achto Tempest cowl": {
+    "id": 93,
+    "rotdbName": "Achto Tempest cowl",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Apex hide cowl": {
+    "id": 9275,
+    "rotdbName": "Apex hide cowl",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Anima core helm of Zamorak": {
+    "id": 356,
+    "rotdbName": "Anima core helm of Zamorak",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Masterwork ranged cowl": {
+    "id": 9322,
+    "rotdbName": "Masterwork ranged cowl",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Black dragonhide coif": {
+    "id": 1499,
+    "rotdbName": "Black dragonhide coif",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Death Lotus hood": {
+    "id": 2627,
+    "rotdbName": "Death Lotus hood",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Superior Death Lotus hood": {
+    "id": 8248,
+    "rotdbName": "Superior Death Lotus hood",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Refined anima core helm of Zamorak": {
+    "id": 6724,
+    "rotdbName": "Refined anima core helm of Zamorak",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Morrigan's coif": {
+    "id": 5571,
+    "rotdbName": "Morrigan's coif",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Superior Morrigan's coif": {
+    "id": 8253,
+    "rotdbName": "Superior Morrigan's coif",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Focus sight": {
+    "id": 3647,
+    "rotdbName": "Focus sight",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "torso|Pernix body": {
+    "id": 6274,
+    "rotdbName": "Pernix body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Armadyl chestplate": {
+    "id": 467,
+    "rotdbName": "Armadyl chestplate",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Sirenic hauberk": {
+    "id": 7674,
+    "rotdbName": "Sirenic hauberk",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Elite sirenic hauberk": {
+    "id": 3283,
+    "rotdbName": "Elite sirenic hauberk",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Dracolich hauberk": {
+    "id": 2892,
+    "rotdbName": "Dracolich hauberk",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Elite dracolich hauberk": {
+    "id": 3264,
+    "rotdbName": "Elite Dracolich hauberk",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Tempest body": {
+    "id": 8444,
+    "rotdbName": "Tempest body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Achto Tempest body": {
+    "id": 90,
+    "rotdbName": "Achto Tempest body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Apex hide body": {
+    "id": 9257,
+    "rotdbName": "Apex hide body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Morrigan's leather body": {
+    "id": 5573,
+    "rotdbName": "Morrigan's leather body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Superior Morrigan's leather body": {
+    "id": 8255,
+    "rotdbName": "Superior Morrigan's leather body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Anima core body of Zamorak": {
+    "id": 352,
+    "rotdbName": "Anima core body of Zamorak",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Masterwork ranged body": {
+    "id": 9318,
+    "rotdbName": "Masterwork ranged body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Carapace torso": {
+    "id": 1984,
+    "rotdbName": "Carapace torso",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Leather body": {
+    "id": 4949,
+    "rotdbName": "Leather body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Black dragonhide body": {
+    "id": 1496,
+    "rotdbName": "Black dragonhide body",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Death Lotus chestplate": {
+    "id": 2625,
+    "rotdbName": "Death Lotus chestplate",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Superior Death Lotus chestplate": {
+    "id": 8247,
+    "rotdbName": "Superior Death Lotus chestplate",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Refined anima core body of Zamorak": {
+    "id": 6720,
+    "rotdbName": "Refined anima core body of Zamorak",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "legs|Pernix chaps": {
+    "id": 6276,
+    "rotdbName": "Pernix chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Armadyl chainskirt": {
+    "id": 466,
+    "rotdbName": "Armadyl chainskirt",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Sirenic chaps": {
+    "id": 7666,
+    "rotdbName": "Sirenic chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Elite sirenic chaps": {
+    "id": 3275,
+    "rotdbName": "Elite sirenic chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Dracolich chaps": {
+    "id": 2890,
+    "rotdbName": "Dracolich chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Elite dracolich chaps": {
+    "id": 3262,
+    "rotdbName": "Elite Dracolich chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Tempest chaps": {
+    "id": 8446,
+    "rotdbName": "Tempest chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Achto Tempest chaps": {
+    "id": 92,
+    "rotdbName": "Achto Tempest chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Apex hide chaps": {
+    "id": 9269,
+    "rotdbName": "Apex hide chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Morrigan's leather chaps": {
+    "id": 5574,
+    "rotdbName": "Morrigan's leather chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Superior Morrigan's leather chaps": {
+    "id": 8256,
+    "rotdbName": "Superior Morrigan's leather chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Anima core legs of Zamorak": {
+    "id": 360,
+    "rotdbName": "Anima core legs of Zamorak",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Masterwork ranged chaps": {
+    "id": 9321,
+    "rotdbName": "Masterwork ranged chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Black dragonhide chaps": {
+    "id": 1498,
+    "rotdbName": "Black dragonhide chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Superior Death Lotus chaps": {
+    "id": 8246,
+    "rotdbName": "Superior Death Lotus chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Refined anima core legs of Zamorak": {
+    "id": 6728,
+    "rotdbName": "Refined anima core legs of Zamorak",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Death Lotus chaps": {
+    "id": 2624,
+    "rotdbName": "Death Lotus chaps",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "hands|Pernix gloves": {
+    "id": 6278,
+    "rotdbName": "Pernix gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Tracking gloves": {
+    "id": 8601,
+    "rotdbName": "Tracking gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Nightmare gauntlets": {
+    "id": 5727,
+    "rotdbName": "Nightmare gauntlets",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Enhanced Nightmare gauntlets": {
+    "id": 3379,
+    "rotdbName": "Enhanced nightmare gauntlets",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Ascension grips": {
+    "id": 512,
+    "rotdbName": "Ascension grips",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Armadyl gloves": {
+    "id": 471,
+    "rotdbName": "Armadyl gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Masterwork ranged vambraces": {
+    "id": 9323,
+    "rotdbName": "Masterwork ranged vambraces",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Dracolich vambraces": {
+    "id": 2893,
+    "rotdbName": "Dracolich vambraces",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Elite dracolich vambraces": {
+    "id": 3265,
+    "rotdbName": "Elite Dracolich vambraces",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Tempest gloves": {
+    "id": 8448,
+    "rotdbName": "Tempest gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Achto Tempest gloves": {
+    "id": 94,
+    "rotdbName": "Achto Tempest gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Apex hide vambraces": {
+    "id": 9281,
+    "rotdbName": "Apex hide vambraces",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Black dragonhide vambraces": {
+    "id": 1501,
+    "rotdbName": "Black dragonhide vambraces",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "feet|Pernix boots": {
+    "id": 6275,
+    "rotdbName": "Pernix boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Armadyl boots": {
+    "id": 464,
+    "rotdbName": "Armadyl boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Dracolich boots": {
+    "id": 2889,
+    "rotdbName": "Dracolich boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Glaiven boots": {
+    "id": 3920,
+    "rotdbName": "Glaiven boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Flarefrost boots": {
+    "id": 3632,
+    "rotdbName": "Flarefrost boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Elite dracolich boots": {
+    "id": 3261,
+    "rotdbName": "Elite Dracolich boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Fleeting boots": {
+    "id": 3633,
+    "rotdbName": "Fleeting boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Enhanced fleeting boots": {
+    "id": 3375,
+    "rotdbName": "Enhanced fleeting boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Tempest boots": {
+    "id": 8445,
+    "rotdbName": "Tempest boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Achto Tempest boots": {
+    "id": 91,
+    "rotdbName": "Achto Tempest boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Apex hide boots": {
+    "id": 9263,
+    "rotdbName": "Apex hide boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Masterwork ranged boots": {
+    "id": 9319,
+    "rotdbName": "Masterwork ranged boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Black dragonhide boots": {
+    "id": 1497,
+    "rotdbName": "Black dragonhide boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "back|Igneous Kal-Xil": {
+    "id": 4551,
+    "rotdbName": "Igneous Kal-Xil",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|TokHaar-Kal-Xil": {
+    "id": 8564,
+    "rotdbName": "TokHaar-Kal-Xil",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "neck|Stalker's charm": {
+    "id": 7948,
+    "rotdbName": "Stalker's charm",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of ranging": {
+    "id": 312,
+    "rotdbName": "Amulet of ranging",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Saradomin's murmur": {
+    "id": 7396,
+    "rotdbName": "Saradomin's murmur",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Farsight snap shot necklace": {
+    "id": 3504,
+    "rotdbName": "Farsight snap shot necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Farsight sniper necklace": {
+    "id": 3505,
+    "rotdbName": "Farsight sniper necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Farsight blood necklace": {
+    "id": 3502,
+    "rotdbName": "Farsight blood necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "ring|Stalker's ring": {
+    "id": 7949,
+    "rotdbName": "Stalker's ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Archers' ring": {
+    "id": 411,
+    "rotdbName": "Archers' ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "pocket|Superior scrimshaw of ranging": {
+    "id": 8302,
+    "rotdbName": "Superior scrimshaw of ranging",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "weapon|Roar of Awakening": {
+    "id": 6852,
+    "rotdbName": "Roar of Awakening",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Wand of the Praesul": {
+    "id": 8845,
+    "rotdbName": "Wand of the praesul",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Seismic wand": {
+    "id": 7479,
+    "rotdbName": "Seismic wand",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Virtus wand": {
+    "id": 8808,
+    "rotdbName": "Virtus wand",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Sunspear (magic)": {
+    "id": 8237,
+    "rotdbName": "Sunspear (magic)",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Vanquish (magic)": {
+    "id": 8749,
+    "rotdbName": "Vanquish (magic)",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Master wand": {
+    "id": 5304,
+    "rotdbName": "Master wand",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Wand of the Cywir elders": {
+    "id": 8844,
+    "rotdbName": "Wand of the Cywir elders",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Staff of Sliske": {
+    "id": 7938,
+    "rotdbName": "Staff of Sliske",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Fractured Staff of Armadyl": {
+    "id": 3682,
+    "rotdbName": "Fractured Staff of Armadyl",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Noxious staff": {
+    "id": 5776,
+    "rotdbName": "Noxious staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Superior Zuriel's staff": {
+    "id": 8332,
+    "rotdbName": "Superior Zuriel's staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Zuriel's staff": {
+    "id": 9255,
+    "rotdbName": "Zuriel's staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Attuned crystal staff": {
+    "id": 548,
+    "rotdbName": "Attuned crystal staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Inquisitor staff": {
+    "id": 4625,
+    "rotdbName": "Inquisitor staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Armadyl battlestaff": {
+    "id": 463,
+    "rotdbName": "Armadyl battlestaff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Ahrim's staff": {
+    "id": 269,
+    "rotdbName": "Ahrim's staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Crystal staff": {
+    "id": 2490,
+    "rotdbName": "Crystal staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Toktz-mej-tal": {
+    "id": 8567,
+    "rotdbName": "Toktz-mej-tal",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Lunar staff": {
+    "id": 5131,
+    "rotdbName": "Lunar staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Iban's staff": {
+    "id": 4532,
+    "rotdbName": "Iban's staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Slayer's staff": {
+    "id": 7742,
+    "rotdbName": "Slayer's staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Battlestaff": {
+    "id": 1432,
+    "rotdbName": "Battlestaff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Mud battlestaff": {
+    "id": 5589,
+    "rotdbName": "Mud battlestaff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Ruinous staff": {
+    "id": 9409,
+    "rotdbName": "Ruinous staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Gravite staff": {
+    "id": 4170,
+    "rotdbName": "Gravite staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Legatus's Emberstaff": {
+    "id": 4969,
+    "rotdbName": "Legatus's Emberstaff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Masterwork staff": {
+    "id": 5318,
+    "rotdbName": "Masterwork staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Guthix Staff": {
+    "id": 4252,
+    "rotdbName": "Guthix staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Zamorak Staff": {
+    "id": 9196,
+    "rotdbName": "Zamorak staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Staff of Light": {
+    "id": 7927,
+    "rotdbName": "Staff of light",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Penance Trident": {
+    "id": 6221,
+    "rotdbName": "Penance trident",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Obliteration": {
+    "id": 5797,
+    "rotdbName": "Obliteration",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Polypore staff": {
+    "id": 6411,
+    "rotdbName": "Polypore staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Blisterwood staff": {
+    "id": 1647,
+    "rotdbName": "Blisterwood staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Camel staff": {
+    "id": 1953,
+    "rotdbName": "Camel staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Chaotic staff": {
+    "id": 2064,
+    "rotdbName": "Chaotic staff",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Abyssal wand": {
+    "id": 55,
+    "rotdbName": "Abyssal wand",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Ahrim's wand": {
+    "id": 270,
+    "rotdbName": "Ahrim's wand",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Attuned crystal wand": {
+    "id": 550,
+    "rotdbName": "Attuned crystal wand",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Crystal wand": {
+    "id": 2492,
+    "rotdbName": "Crystal wand",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Blisterwood wand": {
+    "id": 1653,
+    "rotdbName": "Blisterwood wand",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Seasinger kiba": {
+    "id": 7442,
+    "rotdbName": "Seasinger kiba",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Elite seasinger kiba": {
+    "id": 3273,
+    "rotdbName": "Elite seasinger kiba",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Eternal magic wand (meagre)": {
+    "id": 3417,
+    "rotdbName": "Eternal magic wand (meagre)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Eternal magic wand (saturated)": {
+    "id": 3418,
+    "rotdbName": "Eternal magic wand (saturated)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "offhand|Ode to Deceit": {
+    "id": 5821,
+    "rotdbName": "Ode to Deceit",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Imperium core": {
+    "id": 4570,
+    "rotdbName": "Imperium core",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Seismic singularity": {
+    "id": 7471,
+    "rotdbName": "Seismic singularity",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Kalphite rebounder": {
+    "id": 4822,
+    "rotdbName": "Kalphite rebounder",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Orb of the Cywir elders": {
+    "id": 6139,
+    "rotdbName": "Orb of the Cywir elders",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Virtus book": {
+    "id": 8802,
+    "rotdbName": "Virtus book",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Attuned crystal orb": {
+    "id": 546,
+    "rotdbName": "Attuned crystal orb",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Blighted rebounder": {
+    "id": 1635,
+    "rotdbName": "Blighted rebounder",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Ahrim's book of magic": {
+    "id": 265,
+    "rotdbName": "Ahrim's book of magic",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Mages' book": {
+    "id": 5142,
+    "rotdbName": "Mages' book",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Tome of frost": {
+    "id": 8571,
+    "rotdbName": "Tome of frost",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Ancient lantern": {
+    "id": 332,
+    "rotdbName": "Ancient lantern",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Merciless kiteshield": {
+    "id": 5350,
+    "rotdbName": "Merciless kiteshield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Arcane spirit shield": {
+    "id": 397,
+    "rotdbName": "Arcane spirit shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Abyssal orb": {
+    "id": 42,
+    "rotdbName": "Abyssal orb",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Crystal orb": {
+    "id": 2484,
+    "rotdbName": "Crystal orb",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Blisterwood orb": {
+    "id": 1643,
+    "rotdbName": "Blisterwood orb",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Seasinger makigai": {
+    "id": 7443,
+    "rotdbName": "Seasinger makigai",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Elite seasinger makigai": {
+    "id": 3274,
+    "rotdbName": "Elite seasinger makigai",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Eternal magic orb (meagre)": {
+    "id": 3411,
+    "rotdbName": "Eternal magic orb (meagre)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Eternal magic orb (saturated)": {
+    "id": 3412,
+    "rotdbName": "Eternal magic orb (saturated)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Grifolic shield": {
+    "id": 4217,
+    "rotdbName": "Grifolic shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Crystal ward": {
+    "id": 2493,
+    "rotdbName": "Crystal ward",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Ward of subjugation": {
+    "id": 8861,
+    "rotdbName": "Ward of subjugation",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Dragonfire ward": {
+    "id": 2992,
+    "rotdbName": "Dragonfire ward",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Farseer kiteshield": {
+    "id": 3501,
+    "rotdbName": "Farseer kiteshield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Attuned crystal ward": {
+    "id": 551,
+    "rotdbName": "Attuned crystal ward",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "ammo|Grasping rune pouch": {
+    "id": 4159,
+    "rotdbName": "Grasping rune pouch",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "head|Virtus mask": {
+    "id": 8805,
+    "rotdbName": "Virtus mask",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Tectonic mask": {
+    "id": 8419,
+    "rotdbName": "Tectonic mask",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Elite Tectonic mask": {
+    "id": 3299,
+    "rotdbName": "Elite tectonic mask",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Starbloom hat + 5": {
+    "id": 7968,
+    "rotdbName": "Starbloom hat + 5",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Cryptbloom helm": {
+    "id": 2462,
+    "rotdbName": "Cryptbloom helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Primeval mask": {
+    "id": 6533,
+    "rotdbName": "Primeval mask",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Hood of subjugation": {
+    "id": 4470,
+    "rotdbName": "Hood of subjugation",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Zuriel's hood": {
+    "id": 9252,
+    "rotdbName": "Zuriel's hood",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Superior Zuriel's hood": {
+    "id": 8329,
+    "rotdbName": "Superior Zuriel's hood",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Mask of Tumeken's resplendence": {
+    "id": 5266,
+    "rotdbName": "Mask of Tumeken's resplendence",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Ahrim's hood": {
+    "id": 266,
+    "rotdbName": "Ahrim's hood",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Mystic hat": {
+    "id": 5644,
+    "rotdbName": "Mystic hat",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Anima core helm of Seren": {
+    "id": 354,
+    "rotdbName": "Anima core helm of Seren",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Lunar helm": {
+    "id": 5117,
+    "rotdbName": "Lunar helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Magic skull mask": {
+    "id": 9317,
+    "rotdbName": "Magic skull mask",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Ganodermic visor": {
+    "id": 3797,
+    "rotdbName": "Ganodermic visor",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Refined anima core helm of Seren": {
+    "id": 6722,
+    "rotdbName": "Refined anima core helm of Seren",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Seasinger's hood": {
+    "id": 7441,
+    "rotdbName": "Seasinger's hood",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Superior seasinger's hood": {
+    "id": 8306,
+    "rotdbName": "Superior seasinger's hood",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Hexcrest": {
+    "id": 4398,
+    "rotdbName": "Hexcrest",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "torso|Virtus robe top": {
+    "id": 8807,
+    "rotdbName": "Virtus robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Tectonic robe top": {
+    "id": 8435,
+    "rotdbName": "Tectonic robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Elite Tectonic robe top": {
+    "id": 3315,
+    "rotdbName": "Elite tectonic robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Starbloom robe top + 5": {
+    "id": 7980,
+    "rotdbName": "Starbloom robe top + 5",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Cryptbloom top": {
+    "id": 2463,
+    "rotdbName": "Cryptbloom top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Primeval robe top": {
+    "id": 6535,
+    "rotdbName": "Primeval robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Garb of subjugation": {
+    "id": 3798,
+    "rotdbName": "Garb of subjugation",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Zuriel's robe top": {
+    "id": 9254,
+    "rotdbName": "Zuriel's robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Superior Zuriel's robe top": {
+    "id": 8331,
+    "rotdbName": "Superior Zuriel's robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Robe top of Tumeken's resplendence": {
+    "id": 6884,
+    "rotdbName": "Robe top of Tumeken's resplendence",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Ahrim's robe top": {
+    "id": 268,
+    "rotdbName": "Ahrim's robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Mystic robe top": {
+    "id": 5649,
+    "rotdbName": "Mystic robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Anima core body of Seren": {
+    "id": 350,
+    "rotdbName": "Anima core body of Seren",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Lunar torso": {
+    "id": 5135,
+    "rotdbName": "Lunar torso",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Ganodermic poncho": {
+    "id": 3796,
+    "rotdbName": "Ganodermic poncho",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Refined anima core body of Seren": {
+    "id": 6718,
+    "rotdbName": "Refined anima core body of Seren",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Seasinger's robe top": {
+    "id": 7445,
+    "rotdbName": "Seasinger's robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Superior seasinger's robe top": {
+    "id": 8308,
+    "rotdbName": "Superior seasinger's robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "legs|Virtus robe legs": {
+    "id": 8806,
+    "rotdbName": "Virtus robe legs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Tectonic robe bottom": {
+    "id": 8427,
+    "rotdbName": "Tectonic robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Elite Tectonic robe bottom": {
+    "id": 3307,
+    "rotdbName": "Elite tectonic robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Starbloom robe bottom + 5": {
+    "id": 7974,
+    "rotdbName": "Starbloom robe bottom + 5",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Cryptbloom bottoms": {
+    "id": 2460,
+    "rotdbName": "Cryptbloom bottoms",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Primeval robe legs": {
+    "id": 6534,
+    "rotdbName": "Primeval robe legs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Gown of subjugation": {
+    "id": 4147,
+    "rotdbName": "Gown of subjugation",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Zuriel's robe bottom": {
+    "id": 9253,
+    "rotdbName": "Zuriel's robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Superior Zuriel's robe bottom": {
+    "id": 8330,
+    "rotdbName": "Superior Zuriel's robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Robe bottom of Tumeken's resplendence": {
+    "id": 6858,
+    "rotdbName": "Robe bottom of Tumeken's resplendence",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Ahrim's robe skirt": {
+    "id": 267,
+    "rotdbName": "Ahrim's robe skirt",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Mystic robe bottom": {
+    "id": 5648,
+    "rotdbName": "Mystic robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Anima core legs of Seren": {
+    "id": 358,
+    "rotdbName": "Anima core legs of Seren",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Lunar legs": {
+    "id": 5124,
+    "rotdbName": "Lunar legs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Ganodermic leggings": {
+    "id": 3795,
+    "rotdbName": "Ganodermic leggings",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Refined anima core legs of Seren": {
+    "id": 6726,
+    "rotdbName": "Refined anima core legs of Seren",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Seasinger's robe bottom": {
+    "id": 7444,
+    "rotdbName": "Seasinger's robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Superior seasinger's robe bottom": {
+    "id": 8307,
+    "rotdbName": "Superior seasinger's robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "hands|Virtus gloves": {
+    "id": 8804,
+    "rotdbName": "Virtus gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Static gloves": {
+    "id": 8022,
+    "rotdbName": "Static gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Celestial handwraps": {
+    "id": 2019,
+    "rotdbName": "Celestial handwraps",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Kerapac's wrist wraps": {
+    "id": 4865,
+    "rotdbName": "Kerapac's wrist wraps",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Enhanced Kerapac's wrist wraps": {
+    "id": 3367,
+    "rotdbName": "Enhanced Kerapac's wrist wraps",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Cryptbloom gloves": {
+    "id": 2461,
+    "rotdbName": "Cryptbloom gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Primeval gloves": {
+    "id": 6532,
+    "rotdbName": "Primeval gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Starbloom gloves + 5": {
+    "id": 7962,
+    "rotdbName": "Starbloom gloves + 5",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Gloves of subjugation": {
+    "id": 3942,
+    "rotdbName": "Gloves of subjugation",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Gloves of Tumeken's resplendence": {
+    "id": 3938,
+    "rotdbName": "Gloves of Tumeken's resplendence",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Mystic gloves": {
+    "id": 5643,
+    "rotdbName": "Mystic gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Lunar gloves": {
+    "id": 5112,
+    "rotdbName": "Lunar gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Ganodermic gloves": {
+    "id": 3794,
+    "rotdbName": "Ganodermic gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "feet|Virtus boots": {
+    "id": 8803,
+    "rotdbName": "Virtus boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Blast diffusion boots": {
+    "id": 1598,
+    "rotdbName": "Blast diffusion boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Enhanced blast diffusion boots": {
+    "id": 3373,
+    "rotdbName": "Enhanced blast diffusion boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Ragefire boots": {
+    "id": 6646,
+    "rotdbName": "Ragefire boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Hailfire boots": {
+    "id": 4261,
+    "rotdbName": "Hailfire boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Cryptbloom boots": {
+    "id": 2459,
+    "rotdbName": "Cryptbloom boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Primeval boots": {
+    "id": 6531,
+    "rotdbName": "Primeval boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Starbloom boots + 5": {
+    "id": 7956,
+    "rotdbName": "Starbloom boots + 5",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Boots of subjugation": {
+    "id": 1761,
+    "rotdbName": "Boots of subjugation",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Boots of Tumeken's resplendence": {
+    "id": 1758,
+    "rotdbName": "Boots of Tumeken's resplendence",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Mystic boots": {
+    "id": 5640,
+    "rotdbName": "Mystic boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Lunar boots": {
+    "id": 5102,
+    "rotdbName": "Lunar boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Ganodermic boots": {
+    "id": 3793,
+    "rotdbName": "Ganodermic boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "back|Igneous Kal-Mej": {
+    "id": 4549,
+    "rotdbName": "Igneous Kal-Mej",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|TokHaar-Kal-Mej": {
+    "id": 8562,
+    "rotdbName": "TokHaar-Kal-Mej",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|Lunar cape": {
+    "id": 5107,
+    "rotdbName": "Lunar cape",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "neck|Amulet of magic": {
+    "id": 307,
+    "rotdbName": "Amulet of magic",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Third age amulet": {
+    "id": 8524,
+    "rotdbName": "Third age amulet",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Lunar amulet": {
+    "id": 5101,
+    "rotdbName": "Lunar amulet",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Amulet of magic (t)": {
+    "id": 308,
+    "rotdbName": "Amulet of magic (t)",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Saradomin's hiss": {
+    "id": 7395,
+    "rotdbName": "Saradomin's hiss",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Arcane blast necklace": {
+    "id": 392,
+    "rotdbName": "Arcane blast necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Arcane stream necklace": {
+    "id": 398,
+    "rotdbName": "Arcane stream necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Arcane blood necklace": {
+    "id": 393,
+    "rotdbName": "Arcane blood necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "ring|Channeller's ring": {
+    "id": 2040,
+    "rotdbName": "Channeller's ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Seers' ring": {
+    "id": 7469,
+    "rotdbName": "Seers' ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Lunar ring": {
+    "id": 5129,
+    "rotdbName": "Lunar ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "pocket|Superior scrimshaw of magic": {
+    "id": 8301,
+    "rotdbName": "Superior scrimshaw of magic",
+    "match": "exact",
+    "rotdbSlot": "POCKET"
+  },
+  "weapon|Death guard (tier 10)": {
+    "id": 2608,
+    "rotdbName": "Death guard (tier 10)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death guard (tier 20)": {
+    "id": 2609,
+    "rotdbName": "Death guard (tier 20)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death guard (tier 30)": {
+    "id": 2610,
+    "rotdbName": "Death guard (tier 30)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death guard (tier 40)": {
+    "id": 2611,
+    "rotdbName": "Death guard (tier 40)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death guard (tier 50)": {
+    "id": 2612,
+    "rotdbName": "Death guard (tier 50)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death guard (tier 60)": {
+    "id": 2628,
+    "rotdbName": "Death guard (tier 60)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death guard (tier 70)": {
+    "id": 2629,
+    "rotdbName": "Death guard (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death guard (tier 80)": {
+    "id": 2630,
+    "rotdbName": "Death guard (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Death guard (tier 90)": {
+    "id": 2631,
+    "rotdbName": "Death guard (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Omni guard": {
+    "id": 6098,
+    "rotdbName": "Omni guard",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Devourer's Guard": {
+    "id": 2807,
+    "rotdbName": "Devourer's Guard",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Ruinous guard": {
+    "id": 9405,
+    "rotdbName": "Ruinous guard",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "weapon|Gravite guard": {
+    "id": 9381,
+    "rotdbName": "Gravite guard",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "offhand|Skull lantern (tier 10)": {
+    "id": 7717,
+    "rotdbName": "Skull lantern (tier 10)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Skull lantern (tier 20)": {
+    "id": 7718,
+    "rotdbName": "Skull lantern (tier 20)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Skull lantern (tier 30)": {
+    "id": 7719,
+    "rotdbName": "Skull lantern (tier 30)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Skull lantern (tier 40)": {
+    "id": 7720,
+    "rotdbName": "Skull lantern (tier 40)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Skull lantern (tier 50)": {
+    "id": 7721,
+    "rotdbName": "Skull lantern (tier 50)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Skull lantern (tier 60)": {
+    "id": 7722,
+    "rotdbName": "Skull lantern (tier 60)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Skull lantern (tier 70)": {
+    "id": 7723,
+    "rotdbName": "Skull lantern (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Skull lantern (tier 80)": {
+    "id": 7724,
+    "rotdbName": "Skull lantern (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Skull lantern (tier 90)": {
+    "id": 7725,
+    "rotdbName": "Skull lantern (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Soulbound lantern": {
+    "id": 7818,
+    "rotdbName": "Soulbound lantern",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Ruinous lantern": {
+    "id": 9406,
+    "rotdbName": "Ruinous lantern",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Gravite lantern": {
+    "id": 9382,
+    "rotdbName": "Gravite lantern",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Spectral spirit shield": {
+    "id": 7840,
+    "rotdbName": "Spectral spirit shield",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "offhand|Dragonfire shroud": {
+    "id": 2991,
+    "rotdbName": "Dragonfire shroud",
+    "match": "exact",
+    "rotdbSlot": "OFFHAND"
+  },
+  "ammo|Deathwarden nexus": {
+    "id": 2683,
+    "rotdbName": "Deathwarden nexus",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|The Devourer's Nexus": {
+    "id": 8470,
+    "rotdbName": "The Devourer's Nexus",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Zemouregal's nexus": {
+    "id": 9215,
+    "rotdbName": "Zemouregal's nexus",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "head|Deathwarden hood (tier 90)": {
+    "id": 2682,
+    "rotdbName": "Deathwarden hood (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Deathwarden hood (tier 70)": {
+    "id": 2680,
+    "rotdbName": "Deathwarden hood (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Deathdealer hood (tier 90)": {
+    "id": 2645,
+    "rotdbName": "Deathdealer hood (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Deathdealer hood (tier 70)": {
+    "id": 2643,
+    "rotdbName": "Deathdealer hood (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Crown of the First Necromancer": {
+    "id": 2449,
+    "rotdbName": "Crown of the First Necromancer",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Misalionar's death mask": {
+    "id": 5420,
+    "rotdbName": "Misalionar's death mask",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Visage of the First Necromancer": {
+    "id": 8809,
+    "rotdbName": "Visage of the First Necromancer",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Deathwarden hood (tier 50)": {
+    "id": 2678,
+    "rotdbName": "Deathwarden hood (tier 50)",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Deathwarden hood (tier 60)": {
+    "id": 2679,
+    "rotdbName": "Deathwarden hood (tier 60)",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Deathwarden hood (tier 80)": {
+    "id": 2681,
+    "rotdbName": "Deathwarden hood (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Deathdealer hood (tier 80)": {
+    "id": 2644,
+    "rotdbName": "Deathdealer hood (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Ensouled spectral lens": {
+    "id": 3389,
+    "rotdbName": "Ensouled spectral lens",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "torso|Deathwarden robe top (tier 90)": {
+    "id": 2701,
+    "rotdbName": "Deathwarden robe top (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Deathdealer robe top (tier 90)": {
+    "id": 2651,
+    "rotdbName": "Deathdealer robe top (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Robe top of the First Necromancer": {
+    "id": 6885,
+    "rotdbName": "Robe top of the First Necromancer",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Deathwarden robe top (tier 50)": {
+    "id": 2697,
+    "rotdbName": "Deathwarden robe top (tier 50)",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Deathwarden robe top (tier 60)": {
+    "id": 2698,
+    "rotdbName": "Deathwarden robe top (tier 60)",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Deathwarden robe top (tier 70)": {
+    "id": 2699,
+    "rotdbName": "Deathwarden robe top (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Deathwarden robe top (tier 80)": {
+    "id": 2700,
+    "rotdbName": "Deathwarden robe top (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Deathdealer robe top (tier 70)": {
+    "id": 2649,
+    "rotdbName": "Deathdealer robe top (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Deathdealer robe top (tier 80)": {
+    "id": 2650,
+    "rotdbName": "Deathdealer robe top (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "legs|Deathwarden robe bottom (tier 90)": {
+    "id": 2692,
+    "rotdbName": "Deathwarden robe bottom (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Deathdealer robe bottom (tier 90)": {
+    "id": 2648,
+    "rotdbName": "Deathdealer robe bottom (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Robe bottom of the First Necromancer": {
+    "id": 6859,
+    "rotdbName": "Robe bottom of the First Necromancer",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Deathwarden robe bottom (tier 50)": {
+    "id": 2688,
+    "rotdbName": "Deathwarden robe bottom (tier 50)",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Deathwarden robe bottom (tier 60)": {
+    "id": 2689,
+    "rotdbName": "Deathwarden robe bottom (tier 60)",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Deathwarden robe bottom (tier 70)": {
+    "id": 2690,
+    "rotdbName": "Deathwarden robe bottom (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Deathwarden robe bottom (tier 80)": {
+    "id": 2691,
+    "rotdbName": "Deathwarden robe bottom (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Deathdealer robe bottom (tier 70)": {
+    "id": 2646,
+    "rotdbName": "Deathdealer robe bottom (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Deathdealer robe bottom (tier 80)": {
+    "id": 2647,
+    "rotdbName": "Deathdealer robe bottom (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "hands|Deathwarden gloves (tier 90)": {
+    "id": 2673,
+    "rotdbName": "Deathwarden gloves (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Deathdealer gloves (tier 90)": {
+    "id": 2642,
+    "rotdbName": "Deathdealer gloves (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Hand wrap of the First Necromancer": {
+    "id": 4277,
+    "rotdbName": "Hand wrap of the First Necromancer",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Deathwarden gloves (tier 50)": {
+    "id": 2669,
+    "rotdbName": "Deathwarden gloves (tier 50)",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Deathwarden gloves (tier 60)": {
+    "id": 2670,
+    "rotdbName": "Deathwarden gloves (tier 60)",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Deathwarden gloves (tier 70)": {
+    "id": 2671,
+    "rotdbName": "Deathwarden gloves (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Deathwarden gloves (tier 80)": {
+    "id": 2672,
+    "rotdbName": "Deathwarden gloves (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Deathdealer gloves (tier 70)": {
+    "id": 2640,
+    "rotdbName": "Deathdealer gloves (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Deathdealer gloves (tier 80)": {
+    "id": 2641,
+    "rotdbName": "Deathdealer gloves (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "feet|Deathwarden boots (tier 90)": {
+    "id": 2664,
+    "rotdbName": "Deathwarden boots (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Deathdealer boots (tier 90)": {
+    "id": 2639,
+    "rotdbName": "Deathdealer boots (tier 90)",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Foot wraps of the First Necromancer": {
+    "id": 3648,
+    "rotdbName": "Foot wraps of the First Necromancer",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Deathwarden boots (tier 50)": {
+    "id": 2660,
+    "rotdbName": "Deathwarden boots (tier 50)",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Deathwarden boots (tier 60)": {
+    "id": 2661,
+    "rotdbName": "Deathwarden boots (tier 60)",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Deathwarden boots (tier 70)": {
+    "id": 2662,
+    "rotdbName": "Deathwarden boots (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Deathwarden boots (tier 80)": {
+    "id": 2663,
+    "rotdbName": "Deathwarden boots (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Deathdealer boots (tier 70)": {
+    "id": 2637,
+    "rotdbName": "Deathdealer boots (tier 70)",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Deathdealer boots (tier 80)": {
+    "id": 2638,
+    "rotdbName": "Deathdealer boots (tier 80)",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "back|Igneous Kal-Mor": {
+    "id": 4550,
+    "rotdbName": "Igneous Kal-Mor",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "back|TokHaar-Kal-Mor": {
+    "id": 8563,
+    "rotdbName": "TokHaar-Kal-Mor",
+    "match": "exact",
+    "rotdbSlot": "CAPE"
+  },
+  "neck|Saradomin's hum": {
+    "id": 9410,
+    "rotdbName": "Saradomin's hum",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Conjurer's raising amulet": {
+    "id": 2238,
+    "rotdbName": "Conjurer's raising amulet",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Occultist's revival necklace": {
+    "id": 9398,
+    "rotdbName": "Occultist's revival necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Occultist's hex necklace": {
+    "id": 9397,
+    "rotdbName": "Occultist's hex necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "neck|Occultist's blood necklace": {
+    "id": 9396,
+    "rotdbName": "Occultist's blood necklace",
+    "match": "exact",
+    "rotdbSlot": "NECK"
+  },
+  "ring|Occultist's ring": {
+    "id": 5815,
+    "rotdbName": "Occultist's ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "ring|Zorgoth's soul ring": {
+    "id": 9251,
+    "rotdbName": "Zorgoth's soul ring",
+    "match": "exact",
+    "rotdbSlot": "RING"
+  },
+  "head|Masterwork helm": {
+    "id": 5314,
+    "rotdbName": "Masterwork melee helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "head|Trimmed masterwork helm": {
+    "id": 8672,
+    "rotdbName": "Trimmed masterwork melee helm",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "torso|Masterwork platebody": {
+    "id": 5316,
+    "rotdbName": "Masterwork melee platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "torso|Trimmed masterwork platebody": {
+    "id": 8673,
+    "rotdbName": "Trimmed masterwork melee platebody",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "legs|Masterwork platelegs": {
+    "id": 5317,
+    "rotdbName": "Masterwork melee platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "legs|Trimmed masterwork platelegs": {
+    "id": 8674,
+    "rotdbName": "Trimmed masterwork melee platelegs",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "hands|Masterwork gloves": {
+    "id": 5313,
+    "rotdbName": "Masterwork melee gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "hands|Trimmed masterwork gloves": {
+    "id": 8671,
+    "rotdbName": "Trimmed masterwork melee gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "feet|Masterwork boots": {
+    "id": 5312,
+    "rotdbName": "Masterwork melee boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "feet|Trimmed masterwork boots": {
+    "id": 8670,
+    "rotdbName": "Trimmed masterwork melee boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "ammo|Bane arrows": {
+    "id": 9432,
+    "rotdbName": "Bane arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Havensilver bolts": {
+    "id": 9305,
+    "rotdbName": "Havensilver bolt",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "ammo|Elder rune arrows": {
+    "id": 9462,
+    "rotdbName": "Elder rune arrow",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "torso|Karil's leathertop": {
+    "id": 4835,
+    "rotdbName": "Karil's top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "legs|Karil's leatherskirt": {
+    "id": 4834,
+    "rotdbName": "Karil's skirt",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "weapon|Meagre eternal magic staff": {
+    "id": 3415,
+    "rotdbName": "Eternal magic staff (meagre)",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "weapon|Saturated eternal magic staff": {
+    "id": 3416,
+    "rotdbName": "Eternal magic staff (saturated)",
+    "match": "exact",
+    "rotdbSlot": "TWOHANDED"
+  },
+  "ammo|Large rune pouch (unsealed)": {
+    "id": 4932,
+    "rotdbName": "Large rune pouch",
+    "match": "exact",
+    "rotdbSlot": "AMMO"
+  },
+  "head|Masterwork hat": {
+    "id": 5309,
+    "rotdbName": "Masterwork magic hat",
+    "match": "exact",
+    "rotdbSlot": "HEAD"
+  },
+  "torso|Masterwork robe top": {
+    "id": 5311,
+    "rotdbName": "Masterwork magic robe top",
+    "match": "exact",
+    "rotdbSlot": "BODY"
+  },
+  "legs|Masterwork robe bottom": {
+    "id": 5310,
+    "rotdbName": "Masterwork magic robe bottom",
+    "match": "exact",
+    "rotdbSlot": "LEGS"
+  },
+  "hands|Masterwork gloves (magic)": {
+    "id": 5308,
+    "rotdbName": "Masterwork magic gloves",
+    "match": "exact",
+    "rotdbSlot": "GLOVES"
+  },
+  "feet|Masterwork boots (magic)": {
+    "id": 5307,
+    "rotdbName": "Masterwork magic boots",
+    "match": "exact",
+    "rotdbSlot": "BOOTS"
+  },
+  "weapon|Dragon Claws": {
+    "id": 2918,
+    "rotdbName": "Dragon claw",
+    "match": "exact",
+    "rotdbSlot": "MAINHAND"
+  },
+  "ammo|Nodon spike harness": {
+    "id": 5737,
+    "rotdbName": "Nodon spike harness",
+    "match": "exact",
+    "rotdbSlot": "QUIVER"
+  },
+  "head|Seren's Crystal Tiara": {
+    "id": null,
+    "rotdbName": null,
+    "match": "miss"
+  }
+}

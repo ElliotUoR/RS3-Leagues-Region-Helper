@@ -27,6 +27,7 @@ import {
   getTotalLifePoints,
 } from '../utils/gearStats';
 import { createUserBuild, updateUserBuild } from '../utils/api';
+import { reportPublishFailure } from '../utils/autoReport';
 import { saveMyBuildToken } from '../utils/myBuilds';
 import { MAX_LENGTHS, MAX_STAGES, MAX_TRADEOFFS } from '../utils/userBuildShape';
 
@@ -342,7 +343,7 @@ function StageEditor({ index, label, onLabelChange, onRemove, activeStyles, gear
         const overloadMode = overloadModeByStyle[style] ?? 'none';
         const effectiveDefenceLevel = 99 + OVERLOAD_DEFENCE_BONUS_BY_MODE[overloadMode];
         const armourTotal = showArmour ? getTotalArmour(equipped, style, effectiveDefenceLevel) : null;
-        const lifeTotal = showHealth ? getTotalLifePoints(equipped) : null;
+        const lifeTotal = showHealth ? getTotalLifePoints(equipped, { bigBoned: true }) : null;
         return (
           <div key={style} className="create-build-style-block">
             <div className="create-build-style-block-head">
@@ -584,6 +585,24 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
     } catch (err) {
       setStatus('error');
       setError(err.message || 'Could not submit this build. Try again.');
+      // A failed publish is the one error here that costs the visitor real
+      // work, and nobody stops to write a bug report at that moment - so file
+      // one for them. Shape only, never their content. See utils/autoReport.js.
+      reportPublishFailure({
+        action: editing ? 'Edit build' : 'Publish build',
+        error: err,
+        reason: err.reason,
+        context: {
+          'HTTP status': err.status,
+          Styles: payload.styles.join(', '),
+          'Payload size': `${JSON.stringify(payload).length} bytes`,
+          Stages: Object.keys(payload.stages ?? {}).join(', '),
+          Regions: payload.regions.length,
+          Blessings: payload.blessings.length,
+          'League relics': payload.relics.length,
+          'Arch relics': payload.archRelics.length,
+        },
+      });
     }
   }
 

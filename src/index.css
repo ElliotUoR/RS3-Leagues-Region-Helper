@@ -6615,3 +6615,201 @@ main.abilities-page .gear-item-rows {
     opacity: 0;
   }
 }
+
+/* ---- user build voting / reporting / moderation ---- */
+
+.user-build-entry {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Admin-only state: a build nobody else can see. Dashed and dimmed so it is
+   obvious at a glance which rows are not public. */
+.user-build-entry.is-hidden-build .build-card {
+  border-style: dashed;
+  opacity: 0.72;
+}
+
+.user-build-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 14px 10px;
+  border: 1px solid var(--border);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  background: color-mix(in srgb, var(--panel-bg) 60%, transparent);
+}
+
+.build-vote-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.build-vote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms, background 120ms;
+}
+
+.build-vote:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.build-vote:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Semantic, and deliberately not the page accent - "I approve" and "I do not"
+   need to be distinguishable from each other at a glance, and from a link. */
+.build-vote-up.is-active {
+  border-color: #3fbf6f;
+  color: #3fbf6f;
+  background: color-mix(in srgb, #3fbf6f 14%, transparent);
+}
+
+.build-vote-down.is-active {
+  border-color: var(--warning);
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+}
+
+.build-vote-score {
+  min-width: 2ch;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+}
+
+.build-vote-failed {
+  font-size: 0.74rem;
+  color: var(--warning);
+}
+
+.build-report-button {
+  margin-left: 4px;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.74rem;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: color 120ms, border-color 120ms, opacity 120ms;
+}
+
+.build-report-button:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  opacity: 1;
+}
+
+.user-build-hide-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--warning);
+  cursor: pointer;
+}
+
+.user-build-hide-note {
+  font-weight: 400;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.user-build-admin-note {
+  margin: 0 0 4px;
+  padding: 7px 12px;
+  border-left: 2px solid var(--warning);
+  border-radius: 0 5px 5px 0;
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  font-size: 0.82rem;
+}
+
+/* ---- report a build ---- */
+
+.report-build-modal {
+  max-width: 30rem;
+}
+
+.report-build-heading {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.report-build-body {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.report-build-label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.report-build-textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.86rem;
+  resize: vertical;
+}
+
+.report-build-textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.report-build-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 0.72rem;
+  color: var(--text);
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.report-build-error {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--danger);
+}
+
+.report-build-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}

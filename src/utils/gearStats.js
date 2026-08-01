@@ -36,12 +36,23 @@ export function getTotalArmour(equipped, style, defenceLevel) {
 // baseline is. Gear's own `lifeBonus` stat then adds on top of this flat.
 export const BASE_LIFE_POINTS_99_HP = 9900;
 
-export function getTotalLifePoints(equipped) {
+// Big Boned's first effect: "Your maximum life points are increased by 50%."
+// Applied to the finished total (base + every piece's lifeBonus), so a tank
+// setup gains more from it than a power one - which is the whole reason the
+// blessing pairs with high-LP gear.
+export const BIG_BONED_LIFE_MULTIPLIER = 1.5;
+
+// `bigBoned` is not optional in spirit: this total is only ever displayed when
+// Big Boned is picked (see LIFE_SCALING_BLESSINGS below and its callers), so
+// leaving it out shows the visitor the number they would have had WITHOUT the
+// blessing that caused the number to appear at all.
+export function getTotalLifePoints(equipped, { bigBoned = false } = {}) {
   let bonus = 0;
   for (const item of Object.values(equipped)) {
     bonus += item.stats?.lifeBonus || 0;
   }
-  return BASE_LIFE_POINTS_99_HP + bonus;
+  const total = BASE_LIFE_POINTS_99_HP + bonus;
+  return bigBoned ? Math.round(total * BIG_BONED_LIFE_MULTIPLIER) : total;
 }
 
 // Which of the two totals above a blessing actually reads its value from -
