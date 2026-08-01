@@ -189,6 +189,16 @@ export async function getUserBuild(id) {
   return res.json();
 }
 
+// The full row behind a shared /Leagues/build-guides/<slug> link. Rejects on
+// 404 so the caller can tell "no such build" from "backend is down" - the
+// Build Guides page treats the first as "nothing to show" and the second as
+// nothing at all, since the rest of that page is static and must still render.
+export async function getUserBuildBySlug(slug) {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds/by-slug/${encodeURIComponent(slug)}`);
+  if (!res.ok) throw new Error(`get user build by slug failed: ${res.status}`);
+  return res.json();
+}
+
 // The admin session cookie is httpOnly (can't be read from JS directly, by
 // design), so this is the only way the frontend can know "is the current
 // visitor logged in as admin" - used to show a "logged in as admin" badge

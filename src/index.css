@@ -5799,7 +5799,8 @@ main.abilities-page .gear-item-rows {
 .god-tally-red,
 .blessing-key-red,
 .blessing-tier-picked-red,
-.god-panel-red {
+.god-panel-red,
+.blessing-passives-column-red {
   --bl-accent: #ef5350;
   --bl-soft: rgb(239 83 80 / 10%);
   --bl-glow: rgb(239 83 80 / 45%);
@@ -5810,7 +5811,9 @@ main.abilities-page .gear-item-rows {
 .god-tally-green,
 .blessing-key-green,
 .blessing-tier-picked-green,
-.god-panel-green {
+.god-panel-green,
+.blessing-passives-toggle,
+.blessing-passives-column-green {
   --bl-accent: #3fbf6f;
   --bl-soft: rgb(63 191 111 / 10%);
   --bl-glow: rgb(63 191 111 / 45%);
@@ -5821,7 +5824,8 @@ main.abilities-page .gear-item-rows {
 .god-tally-blue,
 .blessing-key-blue,
 .blessing-tier-picked-blue,
-.god-panel-blue {
+.god-panel-blue,
+.blessing-passives-column-blue {
   --bl-accent: #4a90e2;
   --bl-soft: rgb(74 144 226 / 10%);
   --bl-glow: rgb(74 144 226 / 45%);
@@ -5832,7 +5836,8 @@ main.abilities-page .gear-item-rows {
 :root[data-theme='light'] .god-tally-red,
 :root[data-theme='light'] .blessing-key-red,
 :root[data-theme='light'] .blessing-tier-picked-red,
-:root[data-theme='light'] .god-panel-red {
+:root[data-theme='light'] .god-panel-red,
+:root[data-theme='light'] .blessing-passives-column-red {
   --bl-accent: #c0392b;
 }
 
@@ -5841,7 +5846,9 @@ main.abilities-page .gear-item-rows {
 :root[data-theme='light'] .god-tally-green,
 :root[data-theme='light'] .blessing-key-green,
 :root[data-theme='light'] .blessing-tier-picked-green,
-:root[data-theme='light'] .god-panel-green {
+:root[data-theme='light'] .god-panel-green,
+:root[data-theme='light'] .blessing-passives-toggle,
+:root[data-theme='light'] .blessing-passives-column-green {
   --bl-accent: #15803d;
 }
 
@@ -5850,7 +5857,8 @@ main.abilities-page .gear-item-rows {
 :root[data-theme='light'] .god-tally-blue,
 :root[data-theme='light'] .blessing-key-blue,
 :root[data-theme='light'] .blessing-tier-picked-blue,
-:root[data-theme='light'] .god-panel-blue {
+:root[data-theme='light'] .god-panel-blue,
+:root[data-theme='light'] .blessing-passives-column-blue {
   --bl-accent: #1d4ed8;
 }
 
@@ -5911,42 +5919,61 @@ main.abilities-page .gear-item-rows {
   opacity: 0.75;
 }
 
-/* Pushed to the far right of the key row rather than given a row of its own -
-   same placement logic as League Relics' toggle sitting on the tier heading. */
+/* .blessing-passives-toggle carries margin-left: auto now (it comes first in
+   DOM order in this row) - .blessing-mode-toggle just follows normally right
+   after it, same placement logic as League Relics' toggle sitting on the
+   tier heading, just handed off to the new button instead. */
 .blessing-mode-toggle {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 /* ---- Blessing Passives modal ---- */
 
-/* Same pill shape as .share-button (accent border/tint) - a reference lookup
-   button, not a destructive one like Clear picks, so it doesn't borrow that
-   button's warning colouring. */
+/* Guthix green (via the shared --bl-accent scoping above) rather than the
+   site's usual purple .share-button pill - asked to stand out from its
+   neighbours here, and green reads as "reference/info" without borrowing
+   Clear picks' warning colouring. */
 .blessing-passives-toggle {
+  margin-left: auto;
   padding: 8px 16px;
   border-radius: 999px;
-  border: 1px solid var(--accent);
-  background: var(--accent-bg);
-  color: var(--accent);
-  font-weight: 600;
+  border: 1px solid var(--bl-accent);
+  background: var(--bl-soft);
+  color: var(--bl-accent);
+  font-weight: 700;
   font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
+  box-shadow: 0 0 14px -8px var(--bl-glow);
+  transition: background 120ms, color 120ms, box-shadow 120ms;
 }
 
 .blessing-passives-toggle:hover {
-  background: var(--accent);
+  background: var(--bl-accent);
   color: #fff;
+  box-shadow: 0 0 20px -6px var(--bl-glow);
 }
 
 /* Wider than the default .modal-panel (440px) - same reasoning as
-   .relic-drop-table-modal, this needs room for an 8-column reference table. */
+   .relic-drop-table-modal, this needs room for an 8-column reference table.
+   The radial glows are a fixed backdrop (not tied to any single column's
+   colour) suggesting all three gods' light behind the whole table, echoing
+   god-panel's single-colour glow treatment but scaled up to all three at
+   once since this table spans every colour, not one resolved outcome. */
 .blessing-passives-modal {
-  max-width: min(920px, 92vw);
+  position: relative;
+  max-width: min(980px, 94vw);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 0%, rgb(239 83 80 / 12%), transparent 40%),
+    radial-gradient(circle at 50% -10%, rgb(63 191 111 / 12%), transparent 45%),
+    radial-gradient(circle at 88% 0%, rgb(74 144 226 / 12%), transparent 40%),
+    var(--panel-bg);
 }
 
 .blessing-passives-hint {
-  margin: 0 0 14px;
+  position: relative;
+  margin: 0 0 16px;
   opacity: 0.75;
   font-size: 12px;
 }
@@ -5955,34 +5982,96 @@ main.abilities-page .gear-item-rows {
    Tier 1, then Tier 5/6/7/God Tier 2) - the same grouping the reveal image
    itself uses, without needing two separately-rendered grids. */
 .blessing-passives-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
 }
 
 .blessing-passives-column {
-  padding: 12px;
+  position: relative;
+  padding: 14px 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel-bg-2, var(--panel-bg));
+  border-radius: 10px;
+  background: var(--bl-soft, var(--panel-bg-2, var(--panel-bg)));
+  border-top: 3px solid var(--bl-accent, var(--border));
+  box-shadow: 0 0 20px -14px var(--bl-glow, transparent);
+  transition: transform 140ms, box-shadow 140ms;
 }
 
-.blessing-passives-column.god-tier {
-  border-color: var(--accent);
-  background: var(--accent-bg);
+.blessing-passives-column:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px -12px var(--bl-glow, transparent);
+}
+
+/* God Tier columns don't belong to one colour - the reward for going all the
+   way regardless of which colour you favoured - so instead of --bl-accent
+   they get a literal red-green-blue gradient top edge (a ::before bar rather
+   than border-image, which renders unevenly when only one side has a
+   different width than the others) and a faint tri-colour background wash,
+   standing apart from the three cycling colour columns. */
+.blessing-passives-column-god {
+  border-top-color: var(--border);
+  background:
+    linear-gradient(160deg, rgb(239 83 80 / 8%), rgb(63 191 111 / 8%) 50%, rgb(74 144 226 / 8%));
+}
+
+.blessing-passives-column-god::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 3px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, #ef5350, #3fbf6f, #4a90e2);
 }
 
 .blessing-passives-column-head {
   margin: 0 0 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
   font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   text-align: center;
-  color: var(--accent);
+  color: var(--bl-accent, var(--text-h));
 }
 
-.blessing-passives-column.god-tier .blessing-passives-column-head {
-  border-bottom-color: var(--accent);
+/* Scoped to just the tier-name span (not the whole heading) - the heading
+   also contains the ornament flourish below, which is drawn with `background:
+   currentColor` and would silently vanish if the heading itself were given
+   `color: transparent` for this gradient-text trick. */
+.blessing-passives-column-god .blessing-passives-column-head > span:first-child {
+  background: linear-gradient(90deg, #ef5350, #3fbf6f, #4a90e2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Small flanking-dash-and-diamond flourish under each tier name, echoing the
+   reveal image's own header ornament - purely decorative (aria-hidden). */
+.blessing-passives-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.blessing-passives-ornament-line {
+  width: 20px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.blessing-passives-ornament-diamond {
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  opacity: 0.7;
+  transform: rotate(45deg);
+  flex-shrink: 0;
 }
 
 .blessing-passives-list {
@@ -5994,10 +6083,29 @@ main.abilities-page .gear-item-rows {
 }
 
 .blessing-passives-item {
-  padding: 10px 0;
+  position: relative;
+  padding: 10px 0 10px 14px;
   font-size: 12px;
-  text-align: center;
+  text-align: left;
   line-height: 1.4;
+}
+
+/* A small accent-coloured tick standing in for a bullet, rather than a
+   generic list-style disc, so each line still reads as "belonging" to its
+   column's colour even once it's plain body text. */
+.blessing-passives-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bl-accent, var(--accent));
+}
+
+.blessing-passives-column-god .blessing-passives-item::before {
+  background: linear-gradient(135deg, #ef5350, #3fbf6f, #4a90e2);
 }
 
 .blessing-passives-item + .blessing-passives-item {
@@ -6362,7 +6470,8 @@ main.abilities-page .gear-item-rows {
   }
 
   .blessing-tier-picked,
-  .blessing-mode-toggle {
+  .blessing-mode-toggle,
+  .blessing-passives-toggle {
     margin-left: 0;
   }
 }
@@ -6813,6 +6922,51 @@ main.abilities-page .gear-item-rows {
   color: var(--danger);
   border-color: var(--danger);
   opacity: 1;
+}
+
+.build-share-button {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.build-share-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.build-share-button.shared {
+  border-color: var(--style-ranged);
+  color: var(--style-ranged);
+}
+
+/* Individual up/down counts, admin only - the public score is floored at 0 and
+   merges the two directions, so it cannot distinguish "nobody voted" from
+   "twelve each way". */
+.user-build-vote-split {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.user-build-vote-up {
+  color: var(--style-ranged);
+}
+
+.user-build-vote-down {
+  color: var(--danger);
+}
+
+.user-build-vote-raw {
+  font-weight: 400;
+  opacity: 0.75;
 }
 
 /* The admin controls sit at the far end of the footer, past the vote bar.

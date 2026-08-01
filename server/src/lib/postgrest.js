@@ -62,13 +62,18 @@ export async function callVoidRpc(name, args) {
 // 012_user_builds.sql) then fails the whole INSERT with
 // `42501 permission denied for table`, not just the column. Naming the columns
 // keeps the read inside what anon is actually allowed to see.
-export async function insertRowReturning(table, row, { select } = {}) {
+// `signalConflict` makes a unique-constraint violation (PostgREST 409) resolve
+// to `{ conflict: true }` instead of throwing, for callers that generate a
+// candidate value and retry - short link codes and user build slugs both do
+// this. Off by default so an unexpected conflict stays loud.
+export async function insertRowReturning(table, row, { select, signalConflict = false } = {}) {
   if (!select) throw new Error(`insertRowReturning(${table}) needs an explicit select list`);
   const res = await fetch(`${POSTGREST_URL}/${table}?select=${encodeURIComponent(select)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' },
     body: JSON.stringify(row),
   });
+  if (signalConflict && res.status === 409) return { conflict: true };
   if (!res.ok) {
     throw new Error(`PostgREST insert into ${table} failed: ${res.status} ${await res.text()}`);
   }

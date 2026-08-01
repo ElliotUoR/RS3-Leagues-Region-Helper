@@ -13,7 +13,8 @@ import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { isBuildTextEditable, isBuildVisible } from '../utils/buildTextEdit';
 import { buildGuideUrl, buildIdFromLocation } from '../utils/buildGuideRoute';
-import { fetchBuildVotes, listFeaturedUserBuilds, trackUsage } from '../utils/api';
+import { fetchBuildVotes, getUserBuildBySlug, listFeaturedUserBuilds, trackUsage } from '../utils/api';
+import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
 import { IS_PAGES_BUILD } from '../utils/deployTarget';
 
 const BLESSING_ICONS = new Map([...BLESSINGS, ...GOD_TIER_BLESSINGS].map((b) => [b.name, b.icon]));
@@ -73,31 +74,84 @@ function openBuildIdFromUrl() {
 // isBuildTextEditable falls out of the bundle entirely.
 const CAN_EDIT = import.meta.env.DEV && isBuildTextEditable();
 
+// /build-guides/<x> is ONE namespace covering this site's curated guides and
+// user-submitted builds, which is why a user build's slug can never equal a
+// curated id (the generator reserves them - see server/src/lib/userBuildSlug.js).
+// A segment that isn't a curated id is therefore a user build slug, and this
+// resolves it so a shared link opens that build here, expanded.
+//
+// Fails silently on both "no such slug" and "backend down": the rest of this
+// page is static reference material and must render either way.
+function useSharedUserBuild() {
+  const [shared, setShared] = useState(null);
+
+  useEffect(() => {
+    if (IS_PAGES_BUILD) return;
+    const segment = buildIdFromLocation();
+    if (!segment || BUILD_IDS.has(segment)) return;
+
+    getUserBuildBySlug(segment)
+      .then((row) => {
+        const build = sanitizeUserBuildPayload(row.payload);
+        if (!build) return;
+        // The card's collapsed header reads the payload-derived fields the
+        // LISTING endpoint supplies; this row carries the whole payload
+        // instead, so they are taken off the sanitized build - which is where
+        // the listing's copies came from in the first place.
+        setShared({
+          summary: {
+            ...row,
+            styles: build.styles,
+            blessings: build.blessings,
+            relics: build.relics,
+            difficultyLabel: build.difficultyLabel,
+            difficultyNote: build.difficultyNote,
+          },
+          build,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  return shared;
+}
+
 // The featured strip is the one part of this page that isn't static data, and
 // it is deliberately optional: listFeaturedUserBuilds resolves to [] on any
 // failure, and the whole fetch is skipped on the GitHub Pages mirror, which
 // has no backend at all. Nothing below depends on it having loaded.
 function useFeaturedBuilds() {
   const [featured, setFeatured] = useState([]);
-  const [votes, setVotes] = useState({});
 
   useEffect(() => {
     if (IS_PAGES_BUILD) return;
-    listFeaturedUserBuilds().then((rows) => {
-      setFeatured(rows);
-      // Only worth a request once we know something is actually featured -
-      // this page has no vote bars at all otherwise.
-      if (rows.length > 0) fetchBuildVotes().then(setVotes);
-    });
+    listFeaturedUserBuilds().then(setFeatured);
   }, []);
 
-  return { featured, votes, setVotes };
+  return featured;
+}
+
+// Scores for whichever user builds ended up on this page - the featured strip,
+// a shared build, or both. Deliberately waits until something is actually
+// there: a page showing only curated guides has no vote bars to paint, so the
+// request would be pure waste.
+function useVotesWhenNeeded(needed) {
+  const [votes, setVotes] = useState({});
+
+  useEffect(() => {
+    if (!needed) return;
+    fetchBuildVotes().then(setVotes);
+  }, [needed]);
+
+  return [votes, setVotes];
 }
 
 export default function BuildGuidesPage() {
   const [editing, setEditing] = useState(false);
   const [reporting, setReporting] = useState(null);
-  const { featured, votes, setVotes } = useFeaturedBuilds();
+  const featured = useFeaturedBuilds();
+  const shared = useSharedUserBuild();
+  const [votes, setVotes] = useVotesWhenNeeded(featured.length > 0 || Boolean(shared));
   // Multiple cards may be open at once - readers commonly want to compare two
   // builds side by side, so this is a Set rather than a single active id. Only
   // the most recently opened one is reflected in the URL.
@@ -183,6 +237,34 @@ export default function BuildGuidesPage() {
               Localhost only. Edits write straight back into <code>src/data/blessingBuilds.js</code>.
             </span>
           </div>
+        )}
+
+        {/* Someone followed a link to a specific player build. It goes above
+            this site's own guides rather than in the featured strip below -
+            it is the reason they opened the page, and it may not be featured
+            at all. */}
+        {shared && (
+          <section className="featured-builds shared-user-build">
+            <header className="featured-builds-header">
+              <h2>Shared build</h2>
+              <p>
+                A build made by another player. See{' '}
+                <a href="#user-builds" className="notice-link">
+                  all user made builds
+                </a>.
+              </p>
+            </header>
+            <div className="build-list">
+              <UserBuildListItem
+                summary={shared.summary}
+                initialBuild={shared.build}
+                defaultExpanded
+                vote={votes[shared.summary.id]}
+                onVoted={(id, next) => setVotes((prev) => ({ ...prev, [id]: next }))}
+                onReport={setReporting}
+              />
+            </div>
+          </section>
         )}
 
         <section className="build-list">

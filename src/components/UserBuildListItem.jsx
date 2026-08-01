@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import UserBuildCard from './UserBuildCard';
 import BuildCardMeta from './BuildCardMeta';
 import BuildVoteBar from './BuildVoteBar';
+import ShareBuildButton from './ShareBuildButton';
 import { getUserBuild, trackUsage } from '../utils/api';
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
 import { userBuildCounterKey } from '../utils/usageKeys';
@@ -49,6 +50,10 @@ function adminNoteFor(summary) {
 // The footer sits OUTSIDE the expand button, never inside it: a nested button
 // is invalid HTML and browsers silently break click handling on it - the same
 // reason RelicDropTablePanel's toggle is a sibling of its row button.
+// `initialBuild` + `defaultExpanded` are for the shared-link case: the page
+// following a /build-guides/<slug> link has already fetched the whole row to
+// resolve the slug, so re-fetching it on mount just to open the card would be
+// a second request for something already in hand.
 export default function UserBuildListItem({
   summary,
   vote,
@@ -57,11 +62,21 @@ export default function UserBuildListItem({
   isAdmin = false,
   onToggleHidden,
   onToggleFeatured,
+  initialBuild = null,
+  defaultExpanded = false,
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const [build, setBuild] = useState(null);
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [build, setBuild] = useState(initialBuild);
   const [status, setStatus] = useState('idle'); // idle | loading | error
   const meta = summaryMeta(summary);
+
+  // Landing on a shared link counts as a view of that build, the same way
+  // BuildGuidesPage already counts a direct "#build-guides/<id>" load for a
+  // curated guide - handleToggle below only ever sees deliberate clicks.
+  useEffect(() => {
+    if (defaultExpanded) trackUsage([{ category: 'build_guide', key: userBuildCounterKey(summary.id) }]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleToggle() {
     const opening = !expanded;
@@ -97,8 +112,19 @@ export default function UserBuildListItem({
         onVoted={(next) => onVoted?.(summary.id, next)}
         onReport={() => onReport?.(summary)}
       />
+      <ShareBuildButton slug={summary.slug} />
       {isAdmin && (
         <div className="user-build-admin-controls">
+          {/* The public score is floored at 0 and merges the two directions, so
+              it cannot answer "is this 12-up-12-down or has nobody voted".
+              Admins get the raw split. */}
+          <span className="user-build-vote-split" title="Individual up and down votes">
+            <span className="user-build-vote-up">▲ {summary.upvotes ?? 0}</span>
+            <span className="user-build-vote-down">▼ {summary.downvotes ?? 0}</span>
+            {typeof summary.raw_score === 'number' && summary.raw_score < 0 && (
+              <span className="user-build-vote-raw">net {summary.raw_score}</span>
+            )}
+          </span>
           <label className="user-build-hide-toggle">
             <input
               type="checkbox"

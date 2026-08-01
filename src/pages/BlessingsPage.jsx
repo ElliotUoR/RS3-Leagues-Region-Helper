@@ -85,7 +85,6 @@ export default function BlessingsPage({
         <div className="blessings-heading">
           <h1>Blessings</h1>
           <div className="blessings-actions">
-            <BlessingPassivesModal />
             <button
               type="button"
               className="clear-loadout-button"
@@ -124,6 +123,7 @@ export default function BlessingsPage({
               </span>
             );
           })}
+          <BlessingPassivesModal />
           <button
             type="button"
             className="league-relic-mode-toggle blessing-mode-toggle"

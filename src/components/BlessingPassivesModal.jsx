@@ -45,12 +45,16 @@ export default function BlessingPassivesModal() {
                 tier above.
               </p>
               <div className="blessing-passives-grid">
-                {BLESSING_PASSIVE_TIERS.map(({ tier, passives }) => (
-                  <div
-                    key={tier}
-                    className={`blessing-passives-column${tier.startsWith('God Tier') ? ' god-tier' : ''}`}
-                  >
-                    <h3 className="blessing-passives-column-head">{tier}</h3>
+                {BLESSING_PASSIVE_TIERS.map(({ tier, colour, passives }) => (
+                  <div key={tier} className={`blessing-passives-column blessing-passives-column-${colour}`}>
+                    <h3 className="blessing-passives-column-head">
+                      <span>{tier}</span>
+                      <span className="blessing-passives-ornament" aria-hidden="true">
+                        <span className="blessing-passives-ornament-line" />
+                        <span className="blessing-passives-ornament-diamond" />
+                        <span className="blessing-passives-ornament-line" />
+                      </span>
+                    </h3>
                     <ul className="blessing-passives-list">
                       {passives.map((passive) => (
                         <li key={passive} className="blessing-passives-item">

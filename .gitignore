@@ -33,3 +33,4 @@ export-example.png
 deploy/.migrations-dev
 # Local backend env for development
 server/.env
+/.playwright-mcp

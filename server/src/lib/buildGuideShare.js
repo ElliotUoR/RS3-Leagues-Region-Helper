@@ -10,7 +10,7 @@ import { BLESSING_BUILDS_EXAMPLES } from '../../../src/data/blessingBuilds.js';
 import { BLESSINGS, GOD_TIER_BLESSINGS, resolveGodTier } from '../../../src/data/blessings.js';
 import { LEAGUE_RELICS } from '../../../src/data/leagueRelics.js';
 import { GATEWAY_REGIONS, OPTIONAL_REGIONS, REGIONS } from '../../../src/data/regions.js';
-import { COMBAT_STYLES } from '../../../src/data/gear.js';
+import { COMBAT_STYLES, ESSENCE_OF_FINALITY_NAMES } from '../../../src/data/gear.js';
 
 const MAX_OPTIONAL_REGIONS = 3;
 const MAX_LEAGUE_RELICS = 7;
@@ -30,8 +30,8 @@ export function findBuildGuide(id) {
 // Same "settled or nothing" rule the Blessings page uses: the God Tier One
 // power only joins the icons once a colour has two picks or all three tiers are
 // in, because resolveGodTier falls back to green whenever no colour has two.
-function blessingIconsFor(build) {
-  const picks = (build.blessings ?? [])
+function blessingIconsFor(blessingNames) {
+  const picks = (blessingNames ?? [])
     .map((name) => BLESSINGS.find((b) => b.name === name))
     .filter(Boolean);
   const colours = picks.map((b) => b.colour);
@@ -44,12 +44,22 @@ function blessingIconsFor(build) {
   return all.filter(Boolean).map((b) => ({ icon: b.icon, colour: b.colour, name: b.name }));
 }
 
-function leagueRelicIconsFor(build) {
-  return (build.relics ?? [])
+function leagueRelicIconsFor(relicNames) {
+  return (relicNames ?? [])
     .map((name) => LEAGUE_RELICS.find((r) => r.name === name))
     .filter((relic) => relic?.icon)
     .slice(0, MAX_LEAGUE_RELICS)
     .map((relic) => ({ icon: relic.icon, name: relic.name }));
+}
+
+// Guides and user builds both store only their OPTIONAL region picks; the
+// fixed three and the gateway are implied.
+function unlockedRegionIdsFor(optionalPicks) {
+  return [
+    ...Object.keys(REGIONS).filter((id) => REGIONS[id].fixed),
+    ...GATEWAY_REGIONS,
+    ...OPTIONAL_REGIONS.filter((id) => (optionalPicks ?? []).includes(id)).slice(0, MAX_OPTIONAL_REGIONS),
+  ];
 }
 
 export function buildGuideImageInput(build) {
@@ -58,23 +68,48 @@ export function buildGuideImageInput(build) {
   const style = COMBAT_STYLES.includes(build.styles?.[0]) ? build.styles[0] : 'melee';
   const loadout = build.loadouts?.late?.[style] ?? {};
 
-  const unlockedRegionIds = [
-    ...Object.keys(REGIONS).filter((id) => REGIONS[id].fixed),
-    // Guides always take the gateway region; `build.regions` holds only the
-    // optional picks (see BuildGuideCard's shareFieldsFor).
-    ...GATEWAY_REGIONS,
-    ...OPTIONAL_REGIONS.filter((id) => (build.regions ?? []).includes(id)).slice(0, MAX_OPTIONAL_REGIONS),
-  ];
-
   return {
-    unlockedRegionIds,
+    unlockedRegionIds: unlockedRegionIdsFor(build.regions),
     equippedNames: loadout.slots ?? {},
     // Rendered in the grid's top-left EOF cell, same as on the card. No
     // necklace check needed the way the short-link decoder does one: a guide's
     // loadout is authored data, so an `eof` here always has its amulet.
     eofWeaponName: loadout.eof ?? null,
     defaultStyle: style,
-    blessings: blessingIconsFor(build),
-    leagueRelics: leagueRelicIconsFor(build),
+    blessings: blessingIconsFor(build.blessings),
+    leagueRelics: leagueRelicIconsFor(build.relics),
+  };
+}
+
+// The same, for a user-submitted build's stored payload (see
+// src/utils/userBuildShape.js). Kept separate rather than folded into the
+// above because the two shapes genuinely differ: a guide has a fixed
+// midLate/late split with `loadouts.late`, a user build has up to two
+// author-named `stages`, each with its own per-style loadouts.
+//
+// Everything here is defensive. The payload is opaque JSON server-side -
+// validated only for size on the way in and sanitized only in the browser on
+// the way out - so this renders whatever it can recognise and drops the rest,
+// rather than trusting a shape a crafted POST could break.
+export function userBuildImageInput(payload) {
+  const styles = Array.isArray(payload?.styles) ? payload.styles.filter((s) => COMBAT_STYLES.includes(s)) : [];
+  const style = styles[0] ?? 'melee';
+  // Stage 0 and the first style: exactly what UserBuildCard opens on, so the
+  // preview matches the first thing a visitor following the link will see.
+  const stages = Array.isArray(payload?.stages) ? payload.stages : [];
+  const loadout = stages[0]?.loadouts?.[style] ?? {};
+  const slots = loadout.slots && typeof loadout.slots === 'object' ? loadout.slots : {};
+
+  return {
+    unlockedRegionIds: unlockedRegionIdsFor(payload?.regions),
+    equippedNames: slots,
+    // Unlike a curated guide, this IS user input, so the EOF cell only fills
+    // when the amulet that reveals it is actually worn - the same check
+    // ReadOnlyLoadout makes on the page. Without it a payload could show a
+    // weapon in a slot the card itself would not render.
+    eofWeaponName: ESSENCE_OF_FINALITY_NAMES.includes(slots.neck) ? loadout.eof ?? null : null,
+    defaultStyle: style,
+    blessings: blessingIconsFor(payload?.blessings),
+    leagueRelics: leagueRelicIconsFor(payload?.relics),
   };
 }

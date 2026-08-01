@@ -53,6 +53,13 @@ export function buildGuideUrl(buildId) {
   return buildId ? `${BASE}build-guides/${buildId}` : `${BASE}build-guides`;
 }
 
+// The same URL, absolute, for a Share button to put on the clipboard - a
+// relative one is useless the moment it leaves the page. Works for both forms
+// because buildGuideUrl always returns something resolvable against the origin.
+export function absoluteBuildGuideUrl(buildId) {
+  return new URL(buildGuideUrl(buildId), window.location.origin).href;
+}
+
 // Restores the pathname when leaving Build Guides for another tab. Without
 // this, navigating away via a "#home" link would leave the build-guides path in
 // place underneath the new hash, and currentRoute() reads the path first - so

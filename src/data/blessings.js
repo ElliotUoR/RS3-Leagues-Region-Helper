@@ -66,9 +66,18 @@ export const BLESSING_TIERS = [1, 2, 3];
 // itself at Tier 1/God Tier 1/God Tier 2. Tier 4 is not a gap in this data -
 // the reveal image itself jumps straight from Tier 3 to God Tier 1, then
 // Tier 5-7 to God Tier 2, with no Tier 4 shown at all.
+//
+// `colour` is NOT from Jagex - the reveal image doesn't assign a god/colour
+// to any of these tiers, they're a flat account-wide progression. It's a
+// purely decorative red/green/blue cycle (BlessingPassivesModal.jsx) so this
+// table reuses the same three-god palette as the tier picker above it on the
+// page, rather than a claim that e.g. Tier 1 "belongs to" Zamorak. The two
+// God Tier rows get `colour: 'god'` for a distinct combined-palette treatment
+// instead of any single colour.
 export const BLESSING_PASSIVE_TIERS = [
   {
     tier: 'Tier 1',
+    colour: 'red',
     passives: [
       '50% chance to save runes in combat',
       '50% chance to save ammunition in combat',
@@ -78,6 +87,7 @@ export const BLESSING_PASSIVE_TIERS = [
   },
   {
     tier: 'Tier 2',
+    colour: 'green',
     passives: [
       'The Dive ability is automatically unlocked',
       'Your attack range for all combat styles is increased by 1 tile. Maximum range is capped at 10 tiles',
@@ -85,6 +95,7 @@ export const BLESSING_PASSIVE_TIERS = [
   },
   {
     tier: 'Tier 3',
+    colour: 'blue',
     passives: [
       '75% chance to save runes in combat',
       '75% chance to save ammunition in combat',
@@ -95,10 +106,12 @@ export const BLESSING_PASSIVE_TIERS = [
   },
   {
     tier: 'God Tier 1',
+    colour: 'god',
     passives: ['1x Blessing progression reset'],
   },
   {
     tier: 'Tier 5',
+    colour: 'red',
     passives: [
       "All War's Wares rewards are unlocked",
       'Your maximum adrenaline is increased by +25%',
@@ -106,6 +119,7 @@ export const BLESSING_PASSIVE_TIERS = [
   },
   {
     tier: 'Tier 6',
+    colour: 'green',
     passives: [
       'God books, scriptures, grimoires and scrimshaws no longer use charge',
       'Equipment no longer degrades',
@@ -113,6 +127,7 @@ export const BLESSING_PASSIVE_TIERS = [
   },
   {
     tier: 'Tier 7',
+    colour: 'blue',
     passives: [
       '95% chance to save runes in combat',
       '95% chance to save ammunition in combat',
@@ -121,6 +136,7 @@ export const BLESSING_PASSIVE_TIERS = [
   },
   {
     tier: 'God Tier 2',
+    colour: 'god',
     passives: ['1x Blessing progression reset'],
   },
 ];

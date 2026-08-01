@@ -520,7 +520,7 @@ adminRouter.get('/api/admin/user-builds', requireAdmin, async (req, res) => {
   const pool = getAnalyticsPool();
   try {
     const { rows } = await pool.query(
-      `select b.id, b.name, b.tagline, b.author_name, b.styles, b.hidden,
+      `select b.id, b.slug, b.name, b.tagline, b.author_name, b.styles, b.hidden,
               b.featured, b.featured_at, b.created_at,
               b.payload->'blessings'           as blessings,
               b.payload->'relics'              as relics,

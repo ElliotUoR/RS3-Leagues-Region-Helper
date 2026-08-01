@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import UserBuildListItem from '../components/UserBuildListItem';
 import ReportBuildModal from '../components/ReportBuildModal';
 import {
@@ -22,15 +22,27 @@ export default function UserBuildsPage() {
   // everyone else - that is the only way to un-hide one. Falls back to the
   // public list if that call fails, so a broken admin endpoint degrades to a
   // normal view rather than an empty page.
+  //
+  // The sequence guard is load-bearing, not defensive tidiness. useIsAdmin
+  // starts `false` and settles asynchronously, so this runs TWICE on every
+  // admin visit - once for the public list, once for the admin one - and
+  // without it whichever response happened to land last won. An admin would
+  // intermittently get the public listing: no hidden builds, no vote split,
+  // every Hidden box unchecked, with nothing to indicate it had happened.
+  const requestSeq = useRef(0);
   const load = useCallback(async () => {
+    const seq = requestSeq.current + 1;
+    requestSeq.current = seq;
+    const isStale = () => seq !== requestSeq.current;
     try {
       const rows = isAdmin
         ? await adminListUserBuilds().catch(() => listUserBuilds())
         : await listUserBuilds();
+      if (isStale()) return;
       setBuilds(rows);
       setError(false);
     } catch {
-      setError(true);
+      if (!isStale()) setError(true);
     }
   }, [isAdmin]);
 

@@ -4,6 +4,7 @@ import rateLimit from 'express-rate-limit';
 import { callScalarRpc, callTableRpc, insertRow, insertRowReturning, selectRows } from '../lib/postgrest.js';
 import { fileIssue } from '../lib/github.js';
 import { sessionIdFor } from '../lib/session.js';
+import { isReservedSlug, slugCandidate, slugify } from '../lib/userBuildSlug.js';
 import { isAdminSession, ADMIN_COOKIE_NAME } from '../lib/adminAuth.js';
 
 export const userBuildsRouter = Router();
@@ -22,7 +23,10 @@ const APP_BASE_PATH = '/Leagues/';
 // `edit_token_hash`. Postgres itself already refuses to SELECT that column
 // for `anon` (see the column-scoped grant in 012_user_builds.sql), so this
 // is belt-and-braces rather than the only thing stopping a leak.
-const PUBLIC_COLUMNS = 'id,name,tagline,styles,author_name,payload,hidden,featured,created_at';
+const PUBLIC_COLUMNS = 'id,slug,name,tagline,styles,author_name,payload,hidden,featured,created_at';
+// How many "-2", "-3", ... suffixes to try before giving up on a name. Only
+// reached when that many builds already share a name, which is a lot.
+const SLUG_ATTEMPTS = 25;
 
 // What a collapsed card on the listing shows. The blessings/relics/difficulty
 // live inside `payload`, so they are read out as jsonb paths rather than
@@ -35,7 +39,7 @@ const PUBLIC_COLUMNS = 'id,name,tagline,styles,author_name,payload,hidden,featur
 // sanitizeUserBuildPayload), so the card derives it too rather than reading a
 // field that is always null.
 const LIST_SELECT = [
-  'id,name,tagline,styles,author_name,created_at,featured',
+  'id,slug,name,tagline,styles,author_name,created_at,featured',
   'blessings:payload->blessings',
   'relics:payload->relics',
   'difficultyLabel:payload->>difficultyLabel',
@@ -136,22 +140,37 @@ userBuildsRouter.post('/api/user-builds', createLimiter, async (req, res) => {
   if (validated.error) return res.status(400).json(validated);
 
   const token = crypto.randomBytes(24).toString('hex');
+  const base = slugify(validated.name);
   try {
-    const row = await insertRowReturning(
-      'user_builds',
-      {
-        name: validated.name,
-        tagline: validated.tagline,
-        author_name: validated.authorName,
-        styles: validated.styles,
-        payload: validated.payload,
-        edit_token_hash: hashToken(token),
-      },
-      // Only the id - anon has no grant on edit_token_hash, and asking for the
-      // default `*` makes Postgres refuse the whole insert.
-      { select: 'id' },
-    );
-    res.status(201).json({ id: row.id, token });
+    // Generate-and-retry rather than check-then-insert: the unique index is
+    // what actually enforces uniqueness, so two simultaneous "Big Boned Tank"
+    // submissions cannot both take the same slug - one loses the insert and
+    // tries the next suffix. Same pattern short link codes use.
+    let row = null;
+    for (let attempt = 0; attempt < SLUG_ATTEMPTS && !row; attempt += 1) {
+      const slug = slugCandidate(base, attempt);
+      // A curated guide's id wins the /build-guides/<x> lookup, so a user
+      // build sitting on one would be unreachable - skip to the next suffix.
+      if (isReservedSlug(slug)) continue;
+      const inserted = await insertRowReturning(
+        'user_builds',
+        {
+          slug,
+          name: validated.name,
+          tagline: validated.tagline,
+          author_name: validated.authorName,
+          styles: validated.styles,
+          payload: validated.payload,
+          edit_token_hash: hashToken(token),
+        },
+        // Only these two - anon has no grant on edit_token_hash, and asking for
+        // the default `*` makes Postgres refuse the whole insert.
+        { select: 'id,slug', signalConflict: true },
+      );
+      if (!inserted.conflict) row = inserted;
+    }
+    if (!row) throw new Error(`could not find a free slug for "${base}" in ${SLUG_ATTEMPTS} attempts`);
+    res.status(201).json({ id: row.id, slug: row.slug, token });
   } catch (err) {
     console.error('create user build failed:', err);
     // `reason` is a fixed, non-sensitive code the client can put in an
@@ -262,6 +281,27 @@ userBuildsRouter.get('/api/user-builds/votes', async (req, res) => {
     console.error('vote lookup failed:', err);
     // Scores are decoration - a failure here must not stop the list rendering.
     res.json({});
+  }
+});
+
+// MUST be declared before ':id' below, same reason as /featured and /votes.
+// GET /api/user-builds/by-slug/:slug - the full build behind a shared
+// /Leagues/build-guides/<slug> link. Separate from the :id route because the
+// slug is what a link carries and the id is what the app works in; resolving
+// one to the other server-side keeps the frontend from having to fetch the
+// whole listing just to translate.
+userBuildsRouter.get('/api/user-builds/by-slug/:slug', async (req, res) => {
+  const { slug } = req.params;
+  if (typeof slug !== 'string' || !/^[a-z0-9-]{1,80}$/.test(slug)) {
+    return res.status(400).json({ error: 'invalid slug' });
+  }
+  try {
+    const rows = await selectRows('user_builds', { select: PUBLIC_COLUMNS, slug: `eq.${slug}`, limit: '1' });
+    if (rows.length === 0) return res.status(404).json({ error: 'not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('get user build by slug failed:', err);
+    res.status(502).json({ error: 'could not load this build right now' });
   }
 });
 
