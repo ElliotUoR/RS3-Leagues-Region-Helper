@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import LeagueRelicRow from '../components/LeagueRelicRow';
+import RelicPassivesModal from '../components/RelicPassivesModal';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 
 // Groups relics by tier - numeric tiers ascending, then a trailing "unknown"
@@ -47,13 +48,16 @@ export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
                   so it sits inline, right-aligned, on the same row as "Tier
                   1 - pick one" instead of stacked above it. */}
               {index === 0 && (
-                <button
-                  type="button"
-                  className="league-relic-mode-toggle"
-                  onClick={() => setCompactMode((prev) => !prev)}
-                >
-                  {compactMode ? 'Toggle to detailed mode' : 'Toggle to compact mode'}
-                </button>
+                <>
+                  <RelicPassivesModal />
+                  <button
+                    type="button"
+                    className="league-relic-mode-toggle"
+                    onClick={() => setCompactMode((prev) => !prev)}
+                  >
+                    {compactMode ? 'Toggle to detailed mode' : 'Toggle to compact mode'}
+                  </button>
+                </>
               )}
             </h2>
             <div className={`gear-item-rows${compactMode ? ' compact' : ''}`}>

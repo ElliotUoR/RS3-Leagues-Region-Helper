@@ -2007,11 +2007,11 @@ main.abilities-page .gear-item-rows {
    see line ~1504) for the outer layout - only the card's own inner content
    changes here, swapping the full effects list for a single summarised
    line (data/leagueRelics.js's `summary` field).
-   Lives inside the first tier heading's flex row (see LeagueRelicsPage) -
-   margin-left: auto pushes it flush right on that same line, wrapping onto
-   its own row on narrow screens instead of squeezing "Tier 1 pick one". */
+   Lives inside the first tier heading's flex row (see LeagueRelicsPage),
+   right after .relic-passives-toggle - that button carries margin-left:
+   auto now (it comes first in DOM order), so this one just follows normally
+   right after it instead of pushing itself. */
 .league-relic-mode-toggle {
-  margin-left: auto;
   align-self: center;
   padding: 6px 14px;
   border: 1px solid var(--border);
@@ -2025,6 +2025,251 @@ main.abilities-page .gear-item-rows {
 
 .league-relic-mode-toggle:hover {
   border-color: var(--accent);
+}
+
+/* ── Relic Passives modal ─────────────────────────────────────────────── */
+
+/* A vivid, unmissable gold pill - deliberately not sharing any of the
+   site's existing accent tokens, since this needs to stand out on sight
+   rather than blend in as "just another toggle". */
+.relic-passives-toggle {
+  margin-left: auto;
+  align-self: center;
+  padding: 6px 16px;
+  border: 1px solid #f0c04a;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f7d774, #d4a017);
+  color: #3a2600;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 0 14px -4px rgb(212 160 23 / 65%);
+  transition: transform 120ms, box-shadow 120ms;
+}
+
+.relic-passives-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px -4px rgb(212 160 23 / 85%);
+}
+
+:root[data-theme='light'] .relic-passives-toggle {
+  color: #2b1900;
+}
+
+/* The modal itself: a forest-to-treasure backdrop (teal/green flowing into
+   warm gold, echoing the reveal image's own background) inside a gilt
+   frame, rather than the plain neutral .modal-panel every other modal uses -
+   this one is meant to feel like an in-game reward screen. */
+.relic-passives-modal {
+  position: relative;
+  max-width: min(1080px, 95vw);
+  overflow: hidden;
+  border: 1px solid #a9791f;
+  background:
+    radial-gradient(circle at 0% 0%, rgb(63 191 111 / 16%), transparent 45%),
+    radial-gradient(circle at 100% 100%, rgb(212 160 23 / 16%), transparent 50%),
+    var(--panel-bg);
+}
+
+.relic-passives-modal .modal-header h2 {
+  background: linear-gradient(135deg, #f7d774, #3fbf6f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.relic-passives-hint {
+  position: relative;
+  margin: 0 0 26px;
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+/* The scroll viewport. `.relic-passives-path` (not this element) is the flex
+   row that actually lays the 7 stops out - keeping the two separate matters
+   for .relic-passives-line below: an absolutely positioned child measures
+   left/right against its containing block's own box, which for a scrolling
+   overflow:auto element is its clipped, PRE-scroll viewport width, not the
+   full scrolled content width. Putting the line inside .path instead (whose
+   own box, thanks to width: max-content, IS exactly as wide as all 7 stops)
+   means it spans the true full width instead of stopping wherever the
+   visible viewport happened to end. */
+.relic-passives-track {
+  overflow-x: auto;
+  padding-bottom: 14px;
+  cursor: grab;
+  /* Firefox's scrollbar theming - Chromium ignores these in favour of the
+     ::-webkit-scrollbar rules below. */
+  scrollbar-color: #d4a017 rgb(63 191 111 / 18%);
+  scrollbar-width: thin;
+}
+
+.relic-passives-track.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.relic-passives-track::-webkit-scrollbar {
+  height: 10px;
+}
+
+.relic-passives-track::-webkit-scrollbar-track {
+  background: rgb(63 191 111 / 15%);
+  border-radius: 999px;
+}
+
+.relic-passives-track::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #3fbf6f, #d4a017);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.relic-passives-track::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #4fd482, #f0c04a);
+  background-clip: padding-box;
+}
+
+.relic-passives-path {
+  --relic-stop-width: 175px;
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-top: 6px;
+  width: max-content;
+}
+
+/* Endpoints are half a stop's width in from each edge - exactly the node's
+   own centre point within the first/last stop (nodes are centred via that
+   stop's `align-items: center`, and symmetric left/right padding on each
+   stop doesn't shift that centre either way) - not a guessed pixel value
+   that happened to look close. Ties the line's true endpoint to Tier 7's
+   actual column, so scrolling stops exactly where its text does rather than
+   at some separately-tuned constant. */
+.relic-passives-line {
+  position: absolute;
+  left: calc(var(--relic-stop-width) / 2);
+  right: calc(var(--relic-stop-width) / 2);
+  top: 25px;
+  height: 2px;
+  background: linear-gradient(90deg, #3fbf6f, #f0c04a 50%, #3fbf6f);
+  opacity: 0.6;
+}
+
+.relic-passives-stop {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 var(--relic-stop-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px 14px;
+}
+
+.relic-passives-node {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  background: var(--border);
+  box-shadow: 0 0 0 3px var(--panel-bg);
+}
+
+.relic-passives-stop.has-multiplier .relic-passives-node {
+  background: #f0c04a;
+  box-shadow: 0 0 0 3px var(--panel-bg), 0 0 10px -2px rgb(240 192 74 / 80%);
+}
+
+/* A wax-seal-style medallion for the 4 milestone tiers - the reveal image's
+   own maroon "XP Multiplier" callout box, reimagined as a round gold seal
+   rather than a rectangle so it reads as a distinct "reward" shape against
+   the plain tier stops either side of it. Non-milestone stops get an
+   invisible spacer of the same height instead, so every tier name still
+   lines up on the same row regardless of which stops have one. */
+.relic-passives-medallion,
+.relic-passives-medallion-spacer {
+  height: 64px;
+  margin-bottom: 8px;
+}
+
+.relic-passives-medallion {
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fbe6a8, #d4a017 70%, #8a6511);
+  border: 2px solid #fff2c4;
+  box-shadow: 0 0 18px -4px rgb(240 192 74 / 70%), inset 0 0 8px rgb(0 0 0 / 25%);
+}
+
+.relic-passives-medallion-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #3a2600;
+  line-height: 1.1;
+}
+
+.relic-passives-medallion-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #5c4108;
+}
+
+.relic-passives-stop-head {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #d4a017;
+}
+
+:root[data-theme='light'] .relic-passives-stop-head {
+  color: #8a6511;
+}
+
+.relic-passives-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.relic-passives-item {
+  position: relative;
+  padding-left: 14px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+/* A small leaf-green diamond rather than a plain bullet dot - ties the list
+   markers back to the green half of the gold/green theme, leaving gold for
+   the milestones alone so the two colours each carry distinct meaning
+   (green = a passive line, gold = a tier's headline reward) rather than
+   being decoration for its own sake. */
+.relic-passives-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.4em;
+  width: 6px;
+  height: 6px;
+  background: #3fbf6f;
+  transform: rotate(45deg);
+}
+
+@media (max-width: 700px) {
+  .relic-passives-line {
+    display: none;
+  }
 }
 
 .league-relic-row-main-compact {
@@ -5873,7 +6118,6 @@ main.abilities-page .gear-item-rows {
 .blessing-key-green,
 .blessing-tier-picked-green,
 .god-panel-green,
-.blessing-passives-toggle,
 .blessing-passives-column-green {
   --bl-accent: #3fbf6f;
   --bl-soft: rgb(63 191 111 / 10%);
@@ -5908,7 +6152,6 @@ main.abilities-page .gear-item-rows {
 :root[data-theme='light'] .blessing-key-green,
 :root[data-theme='light'] .blessing-tier-picked-green,
 :root[data-theme='light'] .god-panel-green,
-:root[data-theme='light'] .blessing-passives-toggle,
 :root[data-theme='light'] .blessing-passives-column-green {
   --bl-accent: #15803d;
 }
@@ -5990,29 +6233,29 @@ main.abilities-page .gear-item-rows {
 
 /* ---- Blessing Passives modal ---- */
 
-/* Guthix green (via the shared --bl-accent scoping above) rather than the
-   site's usual purple .share-button pill - asked to stand out from its
-   neighbours here, and green reads as "reference/info" without borrowing
-   Clear picks' warning colouring. */
+/* Same vivid, gradient-filled treatment as .relic-passives-toggle (League
+   Relics' gold equivalent) - a solid green fill rather than the site's usual
+   purple .share-button pill, so it reads as an equally unmissable "reference"
+   button rather than blending in as just another toggle. */
 .blessing-passives-toggle {
   margin-left: auto;
-  padding: 8px 16px;
+  padding: 6px 16px;
+  border: 1px solid #57d98a;
   border-radius: 999px;
-  border: 1px solid var(--bl-accent);
-  background: var(--bl-soft);
-  color: var(--bl-accent);
+  background: linear-gradient(135deg, #7de8a4, #1f9e52);
+  color: #04321a;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 0 14px -8px var(--bl-glow);
-  transition: background 120ms, color 120ms, box-shadow 120ms;
+  box-shadow: 0 0 14px -4px rgb(31 158 82 / 65%);
+  transition: transform 120ms, box-shadow 120ms;
 }
 
 .blessing-passives-toggle:hover {
-  background: var(--bl-accent);
-  color: #fff;
-  box-shadow: 0 0 20px -6px var(--bl-glow);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px -4px rgb(31 158 82 / 85%);
 }
 
 /* Wider than the default .modal-panel (440px) - same reasoning as

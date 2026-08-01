@@ -660,3 +660,80 @@ export const LEAGUE_RELICS = [
     icon: FP('Assassins_Insight.png'),
   },
 ];
+
+// Transcribed verbatim from Jagex's "Relic Passives Revealed" promo image -
+// a SEPARATE progression track from LEAGUE_RELICS above, same relationship
+// BLESSING_PASSIVE_TIERS has to BLESSING_TIERS (see data/blessings.js). All
+// passives for a tier unlock regardless of which relic you actually pick in
+// that tier - the promo image's own header line says so explicitly. Only
+// tiers 1, 2, 4 and 6 have a headline XP multiplier reward; 3, 5 and 7 are
+// plain passive-only tiers (not a data gap - the reveal image itself has no
+// multiplier box under those columns).
+export const RELIC_PASSIVE_TIERS = [
+  {
+    tier: 'Tier 1',
+    xpMultiplier: '5X XP Multiplier',
+    passives: [
+      'All farming crops grow 5x faster',
+      'Run energy rapidly replenishes to 100%',
+      'The Archaeology Guild shop is fully available',
+      'Receive 5x as many Chronotes when handing in artefacts and collections',
+      'Souls earned from Necromancy rituals are increased by +400%',
+      'Bosses respawn faster on all speed presets',
+      'The Invention tutorial is auto-completed',
+    ],
+  },
+  {
+    tier: 'Tier 2',
+    xpMultiplier: '8X XP Multiplier',
+    passives: [
+      'Thaler quantity earned is 10x',
+      'Rare items are 2x more common',
+      'Slayer points and Reaper points are multiplied x5 when completing tasks',
+      'Heart of Gielinor, Menaphos, and Farming reputation gain is multiplied by 4x',
+      'Archaeology lore pages are 30% more common',
+    ],
+  },
+  {
+    tier: 'Tier 3',
+    xpMultiplier: null,
+    passives: [
+      "Where applicable skillcape perks, except Defence, are passive as long as you have level 99 or 120 in the skill",
+      "When defeating enemies there's a 10% chance to obtain 8x common or uncommon invention materials",
+    ],
+  },
+  {
+    tier: 'Tier 4',
+    xpMultiplier: '12X XP Multiplier',
+    passives: [
+      'Rare items are 4x more common',
+      'Unlock all items on the toolbelt',
+      "When defeating enemies there's a 20% chance to obtain 12x common or uncommon invention materials",
+      'Killcount is no longer required to enter God Wars Dungeon encounters',
+      'Killcount is no longer required to enter Heart of Gielinor encounters',
+      'Ascension keystones are no longer required to fight the Legiones',
+      'Keys to the Crossing are no longer required to fight the Magister',
+    ],
+  },
+  {
+    tier: 'Tier 5',
+    xpMultiplier: null,
+    passives: [
+      'Rare items are 6x more common',
+      'You can swap spellbooks and prayers at the League Sage',
+      'When getting assigned a Soul Reaper task from Death, you will be able to choose which task you want',
+      "When defeating enemies, there's a 20% chance to obtain 20x common or uncommon invention materials",
+      'Augmented items gain experience 4x faster',
+    ],
+  },
+  {
+    tier: 'Tier 6',
+    xpMultiplier: '16X XP Multiplier',
+    passives: ['Rare items are 8x more common', 'All Seren spells and prayers are unlocked'],
+  },
+  {
+    tier: 'Tier 7',
+    xpMultiplier: null,
+    passives: ["Rare items are 10x more common", "The 'Advance Time' spell can be cast without limit"],
+  },
+];
