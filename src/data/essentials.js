@@ -115,6 +115,14 @@ export const ESSENTIALS = [
     },
   },
   {
+    name: 'Totem of Vitality',
+    icon: FP('Totem_of_Vitality.webp'),
+    summary: 'Increases maximum life points by 1500.',
+    why:
+      "A flat +1500 max LP that scales directly with Big Boned, giving you a total of +2250 health and 112.5 bonus damage.",
+    source: { region: 'anachronia', detail: 'Requires Anachronia.' },
+  },
+  {
     name: 'Aggression potion',
     icon: FP('Aggression_potion.png'),
     summary: 'Pulls aggro nearby monsters onto you for six minutes.',
