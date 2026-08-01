@@ -65,6 +65,12 @@ export function absoluteBuildGuideUrl(buildId) {
 // place underneath the new hash, and currentRoute() reads the path first - so
 // the app would stay stuck on Build Guides.
 export function leaveBuildGuidePath(hash) {
+  // An EMPTY hash is not a navigation. Removing the hash is exactly what
+  // entering the path form does, and Chrome fires `hashchange` for that - so
+  // without this guard the rewrite immediately looks like "the visitor left"
+  // and bounces them to the site root. Verified: replaceState('/build-guides')
+  // was followed straight away by replaceState('/').
+  if (!hash) return;
   if (!USE_PATH_ROUTING || !isBuildGuidePath()) return;
   window.history.replaceState(null, '', `${BASE}${hash}`);
 }

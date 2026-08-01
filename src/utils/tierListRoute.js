@@ -37,6 +37,23 @@ export function isTierListMakerPath() {
   return MAKER_PATH_RE.test(window.location.pathname);
 }
 
+// Pairs with leaveTierListPath below. Swaps the address bar from "#tier-list-maker" to "/Leagues/tier-list/"
+// without navigating - the same trick Build Guides plays, and for the same
+// reason: copying the address bar should give you a URL that unfurls with a
+// picture, and only the path form can.
+//
+// The hash stays the thing links POINT at. It navigates in-app with no server
+// round trip, it is what the GitHub Pages mirror can serve, and every link
+// already shared with it has to keep working. This only changes what you see
+// once you are there.
+//
+// No hash is left behind on the path form: two sources of truth for the same
+// route would eventually disagree.
+export function enterTierListMakerPath() {
+  if (!USE_PATH_ROUTING || isTierListMakerPath()) return;
+  window.history.replaceState(null, '', `${BASE}tier-list/`);
+}
+
 // Absolute, because this only ever exists to be copied somewhere else.
 export function tierListShareUrl(type, code) {
   const relative = USE_PATH_ROUTING
@@ -50,6 +67,12 @@ export function tierListShareUrl(type, code) {
 // new hash, and currentRoute() reads the path first - so the app would stay
 // stuck on the shared list. Same fix leaveBuildGuidePath makes.
 export function leaveTierListPath(hash) {
+  // An EMPTY hash is not a navigation. Removing the hash is exactly what
+  // entering the path form does, and Chrome fires `hashchange` for that - so
+  // without this guard the rewrite immediately looks like "the visitor left"
+  // and bounces them to the site root. Verified: replaceState('/tier-list/')
+  // was followed straight away by replaceState('/').
+  if (!hash) return;
   if (!USE_PATH_ROUTING || (!isTierListPath() && !isTierListMakerPath())) return;
   window.history.replaceState(null, '', `${BASE}${hash}`);
 }

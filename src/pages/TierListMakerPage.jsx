@@ -6,7 +6,7 @@ import { TIER_LIST_LABELS, itemNamesFor, itemsFor, tierListTitle } from '../data
 import { IS_PAGES_BUILD } from '../utils/deployTarget';
 import { saveTierList, tierListImageUrl } from '../utils/api';
 import { copyShareLink } from '../utils/shareLink';
-import { tierListShareUrl } from '../utils/tierListRoute';
+import { tierListShareUrl, enterTierListMakerPath } from '../utils/tierListRoute';
 import {
   ANGLE_EXAMPLES,
   MAX_LENGTHS,
@@ -109,6 +109,12 @@ export default function TierListMakerPage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [exportStatus, setExportStatus] = useState('idle');
+
+  // Upgrade "#tier-list-maker" to the shareable "/Leagues/tier-list/" in the
+  // address bar. Nothing navigates - see enterTierListMakerPath.
+  useEffect(() => {
+    enterTierListMakerPath();
+  }, []);
 
   // A shared link points at a snapshot. The moment the draft changes it stops
   // describing what is on screen, so it is cleared rather than left to mislead.
