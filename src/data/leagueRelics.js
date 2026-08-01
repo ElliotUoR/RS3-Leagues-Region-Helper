@@ -562,12 +562,17 @@ export const LEAGUE_RELICS = [
   //
   // Filenames were normalised on copy from image/league relics/ and
   // deliberately differ from the source - do not "fix" these back:
-  //   Assasin's_Insight.PNG -> Assassins_Insight.png  (spelling, apostrophe)
-  //   Natures_Network.PNG   -> Natures_Network.png    (extension case)
-  //   Voidwalker.PNG        -> Voidwalker.png         (extension case)
-  // The lowercase .png matters: these are served from a Linux container where
-  // the filesystem is case-sensitive, unlike the Windows machine they were
-  // authored on, so a ".PNG" reference would 404 only in production.
+  //   Assassin's_Insight_(Equilibrium_League).webp -> Assassins_Insight.webp  (spelling, apostrophe, dropped suffix)
+  //   Nature's_Network.webp                         -> Natures_Network.webp   (apostrophe)
+  //   Voidwalker_(Equilibrium_League).webp          -> Voidwalker.webp        (dropped suffix)
+  // All-lowercase matters: these are served from a Linux container where the
+  // filesystem is case-sensitive, unlike the Windows machine they were
+  // authored on, so a mixed-case reference would 404 only in production.
+  // (Re-cropped 2026-08-01 with properly-cropped .webp source images,
+  // replacing the original rougher .png crops - every reference to the old
+  // .png filenames was updated alongside the file swap, including the
+  // Divine geodes placeholder in Voidwalker's own drop table below, which
+  // reuses this same icon.)
   //
   // Tier 3 with no Tier 2 revealed yet, so these render as the second group on
   // the page - both tier-grouping helpers sort numerically and put unknown
@@ -613,7 +618,7 @@ export const LEAGUE_RELICS = [
           name: 'Divine energy & charge',
           icon: 'icons/voidshard/Divine_charge.png',
           detail:
-            'Core energies from Pale all the way to Incandescent, plus Divine Charge. 50/50 chance of either - 150-300 Energy, or 10-20 Charge.',
+            'Core energies from Pale all the way to Incandescent, plus Divine Charge. 50/50 chance of either - 150-300 Energy, or 10-20 Charges.',
         },
         {
           name: 'Dragon equipment',
@@ -645,13 +650,13 @@ export const LEAGUE_RELICS = [
         },
         {
           name: 'Divine geodes',
-          icon: 'icons/Voidwalker.png',
+          icon: 'icons/Voidwalker.webp',
           detail: 'Contents not revealed yet. 1-5 dropped.',
           hidden: true,
         },
       ],
     },
-    icon: FP('Voidwalker.png'),
+    icon: FP('Voidwalker.webp'),
   },
   {
     name: "Nature's Network",
@@ -666,7 +671,7 @@ export const LEAGUE_RELICS = [
       '25% chance to save planted seeds when sowing.',
       'Herb seeds are planted at max amount, with only the base amount of seeds used.',
     ],
-    icon: FP('Natures_Network.png'),
+    icon: FP('Natures_Network.webp'),
   },
   {
     name: "Assassin's Insight",
@@ -683,7 +688,7 @@ export const LEAGUE_RELICS = [
       'Elite slayer monsters give 5x slayer XP when defeated (before league modifiers).',
       "Monsters are captured into Ushabti's 100% of the time.",
     ],
-    icon: FP('Assassins_Insight.png'),
+    icon: FP('Assassins_Insight.webp'),
   },
 ];
 

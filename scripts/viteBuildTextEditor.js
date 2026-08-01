@@ -18,7 +18,16 @@ import path from 'node:path';
 //   string literal at the requested path and rewrites only that span, leaving
 //   the rest of the file - comments, formatting, key order - byte-identical.
 const ENDPOINT = '/__edit-build-text';
+const TIER_ENDPOINT = '/__edit-tier-list';
 const TARGET = 'src/data/blessingBuilds.js';
+
+// Which export each tier list on the Build Guides page lives in. Named here
+// rather than taken from the request so a crafted body cannot point the
+// rewriter at an arbitrary identifier.
+const TIER_LIST_EXPORTS = {
+  blessings: 'BLESSING_TIER_LIST',
+  relics: 'LEAGUE_RELIC_TIER_LIST',
+};
 
 // --- source scanning -------------------------------------------------------
 
@@ -193,13 +202,167 @@ function toLiteral(value) {
   return `'${escaped}'`;
 }
 
+// --- tier lists ------------------------------------------------------------
+//
+// The same rewrite-the-literal-in-place approach as the build prose above, but
+// keyed on an entry's `name` inside a tier list's `entries` array rather than
+// on a build id. Only `grade` (which row it sits in) and `note` (its tooltip)
+// are writable - everything else in an entry is reference data.
+
+// The span of the `entries: [...]` array inside a named export.
+function findEntriesArray(src, exportName) {
+  const marker = `export const ${exportName} = {`;
+  const start = src.indexOf(marker);
+  if (start === -1) throw new Error(`export ${exportName} not found`);
+  const objOpen = start + marker.length - 1;
+  const objClose = matchBracket(src, objOpen);
+  if (objClose === -1) throw new Error(`unbalanced object in ${exportName}`);
+  const after = findKey(src, objOpen, objClose, 'entries');
+  if (after === -1) throw new Error(`no entries array in ${exportName}`);
+  const arrOpen = skipWs(src, after);
+  if (src[arrOpen] !== '[') throw new Error(`entries in ${exportName} is not an array`);
+  const arrClose = matchBracket(src, arrOpen);
+  if (arrClose === -1) throw new Error(`unbalanced entries array in ${exportName}`);
+  return { start: arrOpen, end: arrClose };
+}
+
+// Each top-level `{ ... }` element of that array, in source order.
+function* objectElements(src, arrOpen, arrClose) {
+  let i = arrOpen + 1;
+  while (i < arrClose) {
+    const skipped = skipNonCode(src, i);
+    if (skipped !== i) { i = skipped; continue; }
+    if (src[i] === '{') {
+      const close = matchBracket(src, i);
+      if (close === -1 || close > arrClose) return;
+      yield { start: i, end: close + 1 };
+      i = close + 1;
+      continue;
+    }
+    i += 1;
+  }
+}
+
+// Enough unescaping to compare a name and echo a note back. The literals here
+// are hand-written JS strings, not arbitrary input.
+function literalValue(src, lit) {
+  return src
+    .slice(lit.start + 1, lit.end - 1)
+    .replace(/\\n/g, '\n')
+    .replace(/\\(['"`\\])/g, '$1');
+}
+
+// The span of the string literal at `key` within one entry object.
+function findStringLiteral(src, start, end, key) {
+  const after = findKey(src, start, end, key);
+  if (after === -1) return null;
+  const at = skipWs(src, after);
+  return readLiteral(src, at);
+}
+
+// Applies `changes` ([{ name, grade?, note? }]) to one tier list export.
+// Edits are collected first and applied from the END of the file backwards, so
+// every offset stays valid while earlier spans are still being rewritten.
+function applyTierListChanges(src, exportName, changes) {
+  const { start: arrOpen, end: arrClose } = findEntriesArray(src, exportName);
+
+  const byName = new Map();
+  for (const element of objectElements(src, arrOpen, arrClose)) {
+    const nameLit = findStringLiteral(src, element.start, element.end, 'name');
+    if (nameLit) byName.set(literalValue(src, nameLit), element);
+  }
+
+  const edits = [];
+  for (const change of changes) {
+    const element = byName.get(change.name);
+    if (!element) throw new Error(`no entry named "${change.name}" in ${exportName}`);
+    for (const key of ['grade', 'note']) {
+      if (typeof change[key] !== 'string') continue;
+      const lit = findStringLiteral(src, element.start, element.end, key);
+      if (!lit) throw new Error(`entry "${change.name}" has no ${key} to rewrite`);
+      edits.push({ start: lit.start, end: lit.end, text: toLiteral(change[key]) });
+    }
+  }
+
+  let updated = src;
+  for (const edit of edits.sort((a, b) => b.start - a.start)) {
+    updated = updated.slice(0, edit.start) + edit.text + updated.slice(edit.end);
+  }
+  return { updated, count: edits.length };
+}
+
 // --- plugin ----------------------------------------------------------------
+
+// Shared by both endpoints: loopback-only, POST-only, JSON body.
+function localJsonPost(handler) {
+  return (req, res) => {
+    const remote = req.socket.remoteAddress ?? '';
+    const isLocal = ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(remote);
+    const fail = (code, message) => {
+      res.statusCode = code;
+      res.setHeader('content-type', 'application/json');
+      res.end(JSON.stringify({ ok: false, error: message }));
+    };
+    const ok = (extra = {}) => {
+      res.setHeader('content-type', 'application/json');
+      res.end(JSON.stringify({ ok: true, ...extra }));
+    };
+    if (!isLocal) return fail(403, 'local requests only');
+    if (req.method !== 'POST') return fail(405, 'POST only');
+
+    let body = '';
+    req.on('data', (chunk) => { body += chunk; });
+    req.on('end', () => {
+      let payload;
+      try {
+        payload = JSON.parse(body);
+      } catch {
+        return fail(400, 'invalid JSON');
+      }
+      handler(payload, { fail, ok });
+    });
+  };
+}
 
 export default function buildTextEditor() {
   return {
     name: 'build-text-editor',
     apply: 'serve', // belt and braces: never active for `vite build`
     configureServer(server) {
+      // Rewrites `grade` and/or `note` on named entries of one tier list.
+      // Body: { list: 'blessings' | 'relics', changes: [{ name, grade?, note? }] }
+      server.middlewares.use(
+        TIER_ENDPOINT,
+        localJsonPost((payload, { fail, ok }) => {
+          const exportName = TIER_LIST_EXPORTS[payload?.list];
+          if (!exportName) return fail(400, `list must be one of: ${Object.keys(TIER_LIST_EXPORTS).join(', ')}`);
+          const changes = payload?.changes;
+          if (!Array.isArray(changes) || changes.length === 0) return fail(400, 'changes must be a non-empty array');
+          if (!changes.every((c) => c && typeof c.name === 'string')) return fail(400, 'every change needs a name');
+
+          const file = path.resolve(server.config.root, TARGET);
+          let src;
+          try {
+            src = fs.readFileSync(file, 'utf8');
+          } catch {
+            return fail(500, 'could not read ' + TARGET);
+          }
+
+          let result;
+          try {
+            result = applyTierListChanges(src, exportName, changes);
+          } catch (err) {
+            return fail(422, err.message);
+          }
+          try {
+            fs.writeFileSync(file, result.updated);
+          } catch {
+            return fail(500, 'could not write ' + TARGET);
+          }
+          ok({ edits: result.count });
+        }),
+      );
+
       server.middlewares.use(ENDPOINT, (req, res) => {
         const remote = req.socket.remoteAddress ?? '';
         const isLocal = ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(remote);

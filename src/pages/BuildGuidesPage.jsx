@@ -11,7 +11,7 @@ import {
 } from '../data/blessingBuilds';
 import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
-import { isBuildTextEditable, isBuildVisible } from '../utils/buildTextEdit';
+import { isBuildVisible, isSourceEditable } from '../utils/buildTextEdit';
 import { buildGuideUrl, buildIdFromLocation } from '../utils/buildGuideRoute';
 import { fetchBuildVotes, getUserBuildBySlug, listFeaturedUserBuilds, trackUsage } from '../utils/api';
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
@@ -71,8 +71,8 @@ function openBuildIdFromUrl() {
 
 // `import.meta.env.DEV` is a compile-time literal, so in production this folds
 // to `false && ...` -> `false`, the toggle JSX below becomes unreachable, and
-// isBuildTextEditable falls out of the bundle entirely.
-const CAN_EDIT = import.meta.env.DEV && isBuildTextEditable();
+// isSourceEditable falls out of the bundle entirely.
+const CAN_EDIT = import.meta.env.DEV && isSourceEditable();
 
 // /build-guides/<x> is ONE namespace covering this site's curated guides and
 // user-submitted builds, which is why a user build's slug can never equal a
@@ -316,6 +316,7 @@ export default function BuildGuidesPage() {
           entries={blessingTierEntries}
           renderBadges={BlessingBadges}
           footnote="* Demon's Mark is graded on the weaker reading of its effect - tap it for detail."
+          listId="blessings"
         />
 
         <TierList
@@ -325,6 +326,7 @@ export default function BuildGuidesPage() {
           entries={relicTierEntries}
           renderBadges={RelicBadges}
           gradeLabels={{ unranked: 'Unranked' }}
+          listId="relics"
         />
       </main>
 

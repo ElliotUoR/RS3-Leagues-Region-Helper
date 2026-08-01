@@ -4572,6 +4572,142 @@ main.abilities-page .gear-item-rows {
   color: var(--text-h);
 }
 
+/* ---- localhost-only tier list customiser (see components/TierList.jsx) ----
+   Never present in a production build: every rule below is only reachable when
+   isSourceEditable() is true, which folds to false at compile time. */
+
+.tier-list-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.tier-customise-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+  font-size: 0.78rem;
+}
+
+.tier-customise-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+  color: var(--warning);
+  cursor: pointer;
+}
+
+.tier-customise-hint {
+  opacity: 0.75;
+}
+
+.tier-customise-save,
+.tier-customise-cancel {
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tier-customise-save {
+  border: 1px solid var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.tier-customise-save:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tier-customise-save:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.tier-customise-cancel {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.tier-customise-note {
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  border-left: 2px solid var(--warning);
+  border-radius: 0 4px 4px 0;
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  font-size: 0.78rem;
+}
+
+.tier-customise-error {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+
+/* A row accepting a drop. Dashed rather than a colour swap so an empty row and
+   a full one read the same way while dragging. */
+.tier-entries-droppable {
+  border-style: dashed;
+}
+
+.tier-entries-droppable.drag-over {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel-bg));
+}
+
+.tier-entry-draggable {
+  cursor: grab;
+}
+
+.tier-entry-draggable:active {
+  cursor: grabbing;
+}
+
+/* An entry changed but not yet saved. Outlined in the warning colour so it is
+   obvious what is still only in the browser when you go to press Save. */
+.tier-entry-dirty {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 1px var(--warning);
+}
+
+.tier-note-modal {
+  max-width: 34rem;
+}
+
+.tier-note-modal-hint {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.tier-note-modal-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.tier-note-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 .tier-list-standfirst {
   margin: 0 0 14px;
   font-size: 0.85rem;
