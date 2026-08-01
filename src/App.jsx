@@ -28,7 +28,7 @@ import {
   useLeagueRelicSelection,
 } from './hooks/useLeagueRelicSelection';
 import { BLESSINGS_STORAGE_KEY, useBlessingSelection } from './hooks/useBlessingSelection';
-import { isBuildGuidePath, leaveBuildGuidePath } from './utils/buildGuideRoute';
+import { buildIdFromLocation, isBuildGuidePath, leaveBuildGuidePath } from './utils/buildGuideRoute';
 import { isTierListMakerPath, leaveTierListPath, tierListFromLocation } from './utils/tierListRoute';
 import { useIsAdmin } from './hooks/useIsAdmin';
 import { useTheme } from './hooks/useTheme';
@@ -113,6 +113,35 @@ function currentRoute() {
   if (window.location.hash === '#relic-import-docs') return 'relicImportDocs';
   if (window.location.hash === '#assumptions') return 'assumptions';
   return 'home';
+}
+
+// What to record a visit as.
+//
+// Pageviews are keyed by hash, which was fine when every route had one. The
+// PATH-form routes do not: /Leagues/build-guides/the-ironclad and
+// /Leagues/tier-list/ both carry an empty hash, so `hash || '#home'` filed
+// every one of them under the Regions page - including every visit that
+// arrived by a shared build-guide link, which is exactly the traffic worth
+// measuring.
+//
+// Each path form maps onto the hash its own in-app links use, so the two forms
+// of the same page aggregate into one row rather than competing.
+//
+// Shared tier lists collapse to one row per TYPE rather than one per code:
+// there is no ceiling on how many exist, and a top-pages list flooded with
+// four-word codes answers nothing. Per-list numbers already live in the admin
+// dashboard's tier list panel.
+function trackedPath() {
+  const hash = window.location.hash;
+  if (hash) return hash;
+  if (isBuildGuidePath()) {
+    const id = buildIdFromLocation();
+    return id ? `#build-guides/${id}` : '#build-guides';
+  }
+  if (isTierListMakerPath()) return '#tier-list-maker';
+  const sharedList = tierListFromLocation();
+  if (sharedList) return `#tier-list/${sharedList.type}`;
+  return '#home';
 }
 
 // Owns the region-selection and gear-loadout hooks. Rendered with a `key`
@@ -397,7 +426,7 @@ function App() {
   // wherever the backend isn't deployed yet (e.g. GitHub Pages), see
   // utils/api.js.
   useEffect(() => {
-    trackPageview(window.location.hash || '#home');
+    trackPageview(trackedPath());
   }, [route]);
 
   // Resolves a /s/CODE short link client-side, entirely in the background -
