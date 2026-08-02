@@ -1,5 +1,4 @@
 import EquipmentSlot from './EquipmentSlot';
-import LeaguesEffectsPanel from './LeaguesEffectsPanel';
 import { ESSENCE_OF_FINALITY_NAMES, GEAR } from '../data/gear';
 
 // Non-interactive twin of the gear planner's equipment grid, used by the
@@ -54,24 +53,10 @@ function findEofWeapon(styleId, name) {
   return findItem(styleId, name);
 }
 
-export default function ReadOnlyLoadout({
-  styleId,
-  styleLabel,
-  slots,
-  eof,
-  armourTotal,
-  armourTotalOverloaded,
-  armourTotalElder,
-  elderSources,
-  lifeTotal,
-  prayerTotal,
-  aegis,
-  bigBonedBonus,
-  icyeneBonus,
-  blessings,
-  isUnlocked,
-  selectedLeagueRelics,
-}) {
+// Purely the equipment grid now. Every derived figure it used to carry moved
+// to LeaguesEffectsPanel, which the cards render full-width below the whole
+// body rather than inside this ~260px column - see that file for why.
+export default function ReadOnlyLoadout({ styleId, styleLabel, slots, eof, isUnlocked, selectedLeagueRelics }) {
   const neckItem = findItem(styleId, slots.neck);
   const eofWeapon = findEofWeapon(styleId, eof);
   // Only meaningful when an Essence of Finality amulet is actually worn -
@@ -107,19 +92,6 @@ export default function ReadOnlyLoadout({
           />
         ))}
       </div>
-      {/* Every figure these blessings and relics produce, behind one button -
-          see LeaguesEffectsPanel. The potion state is a toggle there rather
-          than three rows of numbers here. */}
-      <LeaguesEffectsPanel
-        blessings={blessings}
-        armour={{ none: armourTotal, overload: armourTotalOverloaded, elder: armourTotalElder }}
-        aegis={aegis && { multiplier: aegis.multiplier, source: aegis.source, none: aegis.base, overload: aegis.overloaded, elder: aegis.elder }}
-        elderSources={elderSources}
-        lifeTotal={lifeTotal}
-        bigBonedBonus={bigBonedBonus}
-        prayerTotal={prayerTotal}
-        icyeneBonus={icyeneBonus}
-      />
     </figure>
   );
 }

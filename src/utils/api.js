@@ -158,6 +158,37 @@ export async function updateUserBuild(id, token, { name, tagline, authorName, st
   return data;
 }
 
+// Sets a build's one-time edit password (see CreateBuildPage's publish
+// confirmation step) - `token` proves this browser just created (or already
+// unlocked) the build. Fails if a password is already set: there is no
+// "change password" flow, matching "cannot change it after being set".
+export async function setUserBuildPassword(id, token, password) {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds/${id}/set-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `set password failed: ${res.status}`);
+  return data;
+}
+
+// Exchanges a correct edit password for a brand-new edit token (see
+// EditBuildPage.jsx) - used when this browser has no token in localStorage
+// for the build (a different device, cleared storage, etc). Resolves to
+// `{ id, token }`; the caller saves the token exactly like one from
+// createUserBuild. Throws (with a user-facing message) on a wrong password.
+export async function loginUserBuild(id, password) {
+  const res = await fetch(`${APP_BASE_PATH}api/user-builds/${id}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `login failed: ${res.status}`);
+  return data;
+}
+
 // The listing view (name/tagline/styles/author/created_at only, no payload -
 // see the Node route) for the "User made builds" page's cards.
 export async function listUserBuilds() {

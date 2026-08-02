@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import crypto from 'node:crypto';
+import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
 import { callScalarRpc, callTableRpc, insertRow, insertRowReturning, selectRows } from '../lib/postgrest.js';
 import { fileIssue } from '../lib/github.js';
@@ -13,6 +14,12 @@ const MAX_NAME_LENGTH = 100;
 const MAX_TAGLINE_LENGTH = 200;
 const MAX_AUTHOR_LENGTH = 60;
 const MAX_PAYLOAD_JSON_LENGTH = 40_000;
+// The "opt out" path (see /set-password below) submits the 48-char hex edit
+// token itself as the password, so the max has to comfortably clear that -
+// a genuinely typed password is realistically never anywhere near this long.
+const MIN_PASSWORD_LENGTH = 4;
+const MAX_PASSWORD_LENGTH = 200;
+const BCRYPT_COST = 10;
 const VALID_STYLES = new Set(['melee', 'ranged', 'magic', 'necromancy']);
 const LIST_LIMIT = 100;
 const FEATURED_LIMIT = 12;
@@ -83,6 +90,16 @@ const createLimiter = rateLimit({
 const updateLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Stricter than updateLimiter - this is the one endpoint here an attacker
+// gains something from hammering (guessing a password), rather than just
+// being generally disruptive, so it gets its own tighter ceiling.
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -216,6 +233,86 @@ userBuildsRouter.patch('/api/user-builds/:id', updateLimiter, async (req, res) =
   } catch (err) {
     console.error('update user build failed:', err);
     res.status(502).json({ error: 'could not save these changes right now, try again later' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Edit password: a second, tokenless way back into a build's edit access -
+// see 018_user_build_password.sql for the full reasoning. Every new build
+// sets one at publish time (CreateBuildPage's confirmation step), either
+// something the author typed or - if they opted out - their own edit token
+// used as the password verbatim; either way this route never has to know or
+// care which, it just hashes whatever string it's given.
+// ─────────────────────────────────────────────────────────────────────────
+
+// POST /api/user-builds/:id/set-password
+// Body: { token, password }
+// Sets the one-time edit password, proven via the SAME edit token this
+// browser already has (from creating the build moments earlier). Refuses if
+// a password is already set - see set_user_build_password()'s own WHERE
+// clause, which is the actual "cannot change it after being set" gate, not
+// just this route declining to offer the form twice.
+userBuildsRouter.post('/api/user-builds/:id/set-password', updateLimiter, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: 'invalid id' });
+  }
+  const { token, password } = req.body ?? {};
+  if (typeof token !== 'string' || token.length === 0) {
+    return res.status(400).json({ error: 'missing edit token' });
+  }
+  if (!isNonEmptyString(password, MAX_PASSWORD_LENGTH) || password.trim().length < MIN_PASSWORD_LENGTH) {
+    return res.status(400).json({ error: `password must be ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} characters` });
+  }
+  try {
+    const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
+    const updatedId = await callScalarRpc('set_user_build_password', {
+      p_id: id,
+      p_token_hash: hashToken(token),
+      p_password_hash: passwordHash,
+    });
+    if (updatedId === null) {
+      return res.status(403).json({ error: 'invalid edit token, or a password is already set for this build' });
+    }
+    res.status(200).json({ id: updatedId });
+  } catch (err) {
+    console.error('set user build password failed:', err);
+    res.status(502).json({ error: 'could not set a password right now, try again later' });
+  }
+});
+
+// POST /api/user-builds/:id/login
+// Body: { password }
+// Verifies the password (via pgcrypto's crypt() inside login_user_build() -
+// see that function's own comment for why the comparison happens in SQL
+// rather than here) and, only on a match, rotates the build's edit token to
+// a brand new one and returns it - the server never kept the original raw
+// token, so this issues a fresh credential rather than trying to recover the
+// old one. The caller stores it exactly like one obtained at creation.
+userBuildsRouter.post('/api/user-builds/:id/login', loginLimiter, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: 'invalid id' });
+  }
+  const { password } = req.body ?? {};
+  if (typeof password !== 'string' || password.length === 0) {
+    return res.status(400).json({ error: 'missing password' });
+  }
+
+  const newToken = crypto.randomBytes(24).toString('hex');
+  try {
+    const updatedId = await callScalarRpc('login_user_build', {
+      p_id: id,
+      p_password: password,
+      p_new_token_hash: hashToken(newToken),
+    });
+    if (updatedId === null) {
+      return res.status(403).json({ error: 'incorrect password, or no password is set for this build' });
+    }
+    res.status(200).json({ id: updatedId, token: newToken });
+  } catch (err) {
+    console.error('login user build failed:', err);
+    res.status(502).json({ error: 'could not log in right now, try again later' });
   }
 });
 

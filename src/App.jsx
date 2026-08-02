@@ -13,6 +13,7 @@ import TierListMakerPage from './pages/TierListMakerPage';
 import SharedTierListPage from './pages/SharedTierListPage';
 import AdminDevToggle from './components/AdminDevToggle';
 import EditBuildPage from './pages/EditBuildPage';
+import CopyBuildPage from './pages/CopyBuildPage';
 import RelicImportDocsPage from './pages/RelicImportDocsPage';
 import ReportIssueButton from './components/ReportIssueButton';
 import ThemeToggle from './components/ThemeToggle';
@@ -111,6 +112,11 @@ function currentRoute() {
   // path first so a stale hash cannot outrank it. See utils/tierListRoute.js.
   if (tierListFromLocation()) return 'sharedTierList';
   if (window.location.hash.split('/')[0] === '#edit-build') return 'editBuild';
+  // "Copy into new build" (see UserBuildListItem.jsx) - a fresh Create-a-Build
+  // form pre-filled from another build's data, distinct from #edit-build:
+  // this always publishes as a brand new build, never updates the one it was
+  // copied from. See pages/CopyBuildPage.jsx.
+  if (window.location.hash.split('/')[0] === '#create-build-from') return 'copyBuild';
   if (window.location.hash === '#relic-import-docs') return 'relicImportDocs';
   if (window.location.hash === '#assumptions') return 'assumptions';
   return 'home';
@@ -348,6 +354,13 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
       {route === 'sharedTierList' && <SharedTierListPage />}
       {route === 'editBuild' && (
         <EditBuildPage
+          onSubmitted={() => {
+            window.location.hash = '#user-builds';
+          }}
+        />
+      )}
+      {route === 'copyBuild' && (
+        <CopyBuildPage
           onSubmitted={() => {
             window.location.hash = '#user-builds';
           }}

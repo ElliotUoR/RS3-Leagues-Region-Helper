@@ -77,8 +77,16 @@ export const FONT_OF_LIFE_LIFE_POINTS = 500;
 // scales the finished maximum, so the relic's 500 is worth 750 here - and
 // because Big Boned's bonus damage is a share of this same total, that 750
 // carries into damage as well.
-export function getTotalLifePoints(equipped, { bigBoned = false, archRelics = [] } = {}) {
-  let bonus = 0;
+//
+// `extraLifePoints` is the same story for the build's Extras (the Totem of
+// Vitality's +1,500 - see data/buildExtras.js), and lands in the same place for
+// the same reason: 1,500 becomes 2,250 under Big Boned, and +112.5 bonus damage
+// per hit on top. Passed in as a plain number rather than a list of names
+// because this module is COPY'd into the server image by name (see
+// server/Dockerfile) and importing the catalogue here would drag another file
+// into that list.
+export function getTotalLifePoints(equipped, { bigBoned = false, archRelics = [], extraLifePoints = 0 } = {}) {
+  let bonus = extraLifePoints;
   for (const item of Object.values(equipped)) {
     bonus += item.stats?.lifeBonus || 0;
   }

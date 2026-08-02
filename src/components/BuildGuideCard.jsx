@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import RetryImage from './RetryImage';
 import ReadOnlyLoadout from './ReadOnlyLoadout';
+import LeaguesEffectsPanel from './LeaguesEffectsPanel';
 import TagTooltip from './TagTooltip';
 import EditableText from './EditableText';
 import BuildProse from './BuildProse';
@@ -18,16 +19,7 @@ import { ABILITIES } from '../data/abilities';
 import { PRAYER_GROUPS, SPELLBOOK_GROUPS } from '../data/spellbooks';
 import { FIXED_REGIONS, GATEWAY_REGIONS, REGIONS } from '../data/regions';
 import { normalizeRegionGroups } from '../data/gearAvailability';
-import {
-  ICYENIC_FAITH_RELIC,
-  equippedItemsFor,
-  getAegisFromArmour,
-  getBigBonedBonusDamage,
-  getElderOverloadSources,
-  getIcyeneBonusPercent,
-  getTotalLifePoints,
-  getTotalPrayerBonus,
-} from '../utils/gearStats';
+import { getAegisFromArmour, getElderOverloadSources } from '../utils/gearStats';
 import { copyShareLink, shareLinkFor } from '../utils/shareLink';
 import { saveBuildText } from '../utils/buildTextEdit';
 
@@ -251,20 +243,6 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
         })
       : null;
 
-  const lifeTotal =
-    loadout && build.blessings.includes('Big Boned')
-      ? getTotalLifePoints(equippedItemsFor(style, loadout.slots), {
-          bigBoned: true,
-          archRelics: archRelicNames,
-        })
-      : null;
-  const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
-
-  const icyeneEquipped = loadout && build.relics.includes(ICYENIC_FAITH_RELIC)
-    ? equippedItemsFor(style, loadout.slots)
-    : null;
-  const prayerTotal = icyeneEquipped ? getTotalPrayerBonus(icyeneEquipped) : null;
-  const icyeneBonus = icyeneEquipped ? getIcyeneBonusPercent(icyeneEquipped) : null;
 
   // Detected from the relic data rather than hardcoded, so adding an
   // artefact-gated relic to any build surfaces the explanation automatically.
@@ -538,16 +516,6 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                     styleLabel={`${STYLE_LABELS[style]} - ${BLESSING_BUILD_STAGES.find((s) => s.id === stage)?.label}`}
                     slots={loadout.slots}
                     eof={loadout.eof}
-                    armourTotal={loadout.armourTotal}
-                    armourTotalOverloaded={loadout.armourTotalOverloaded}
-                    armourTotalElder={elderSources.length ? loadout.armourTotalElder : null}
-                    elderSources={elderSources}
-                    lifeTotal={lifeTotal}
-                    prayerTotal={prayerTotal}
-                    aegis={aegis}
-                    bigBonedBonus={bigBonedBonus}
-                    blessings={build.blessings}
-                    icyeneBonus={icyeneBonus}
                     isUnlocked={buildIsUnlocked}
                     selectedLeagueRelics={build.relics}
                   />
@@ -570,6 +538,35 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
               )}
             </div>
           </div>
+
+          {/* Full width, below both columns: what this build's picks actually
+              pay out. Follows the style and stage tabs above, so it always
+              describes the loadout on screen. */}
+          {loadout && (
+            <LeaguesEffectsPanel
+              style={style}
+              slots={loadout.slots}
+              blessings={build.blessings}
+              godTier={build.godTier}
+              leagueRelics={build.relics}
+              archRelics={archRelicNames}
+              armour={{
+                none: loadout.armourTotal,
+                overload: loadout.armourTotalOverloaded,
+                elder: elderSources.length > 0 ? loadout.armourTotalElder : null,
+              }}
+              aegis={
+                aegis && {
+                  multiplier: aegis.multiplier,
+                  source: aegis.source,
+                  none: aegis.base,
+                  overload: aegis.overloaded,
+                  elder: aegis.elder,
+                }
+              }
+              elderSources={elderSources}
+            />
+          )}
 
           {/* Unlocks: same three-column treatment, filtered to the chosen style. */}
           <div className="build-setup-grid build-setup-grid-unlocks">

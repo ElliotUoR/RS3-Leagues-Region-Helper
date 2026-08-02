@@ -5,6 +5,7 @@ import BuildVoteBar from './BuildVoteBar';
 import ShareBuildButton from './ShareBuildButton';
 import { getUserBuild, trackUsage } from '../utils/api';
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
+import { hasEditAccess } from '../utils/myBuilds';
 import { userBuildCounterKey } from '../utils/usageKeys';
 import { sanitizeBlessingSelection } from '../hooks/useBlessingSelection';
 import { sanitizeLeagueRelicSelection } from '../hooks/useLeagueRelicSelection';
@@ -131,6 +132,24 @@ export default function UserBuildListItem({
         onReport={() => onReport?.(summary)}
       />
       <ShareBuildButton slug={summary.slug} />
+      {/* Every build also has an edit password (see deploy/migrations/
+          018_user_build_password.sql), so this always leads somewhere useful -
+          straight through for this browser's own builds, a password prompt for
+          everyone else's (see EditBuildPage.jsx) - never a dead end. Skipped
+          for admins: they already have their own Edit link in the admin
+          controls below, and showing both here would just be two links to the
+          same place. */}
+      {!isAdmin && (
+        <a href={`#edit-build/${summary.id}`} className="user-build-edit-button">
+          {hasEditAccess(summary.id) ? 'Edit' : 'Edit…'}
+        </a>
+      )}
+      {/* Opens a fresh Create-a-Build form pre-filled from this build's data -
+          always publishes as a brand new build with its own id, edit link and
+          password, never changes this one. See pages/CopyBuildPage.jsx. */}
+      <a href={`#create-build-from/${summary.id}`} className="user-build-copy-button">
+        Copy into new build
+      </a>
       {isAdmin && (
         <div className="user-build-admin-controls">
           {/* The public score is floored at 0 and merges the two directions, so

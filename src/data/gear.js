@@ -593,6 +593,13 @@ const UNIVERSAL_ACCESSORIES = [
     stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Restores 1 life point per 15 melee damage dealt (capped at 200 LP per hit) while active (4hr), then degrades to dust.' },
     icon: 'icons/Superior_scrimshaw_of_vampyrism.png',
     source: { type: 'skilling', detail: 'Crafted at a Player-Owned Ports scrimshaw crafter (92 Fletching, 10 ancient bones; requires unlocking the Vampyrism eastern scroll). Also a rare find in the secret trunk, Temple of Aminishi.', region: 'asgarnia' } },
+  // A pure rune-storage pouch with only a prayer bonus - no offensive or
+  // style-specific stat, so by explicit user decision it's wearable by any
+  // style rather than staying magic-exclusive like the rest of the ammo slot.
+  { name: 'Grasping rune pouch', slot: 'ammo', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: { skill: 'Magic', level: null },
+    stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 4, setEffect: 'Rune-storage pouch; no offensive/defensive combat bonus beyond the prayer bonus.' },
+    icon: 'icons/Grasping_rune_pouch.png',
+    source: { type: 'boss', boss: 'Croesus (flakes) + Abyss-sourced magical thread', region: 'misthalin', note: 'Only the Croesus flakes component is a hard region lock; magical thread is obtainable multiple non-exclusive ways.' } },
 ];
 
 export const GEAR = {
@@ -3736,10 +3743,6 @@ export const GEAR = {
       },
     ],
     ammo: [
-      { name: 'Grasping rune pouch', slot: 'ammo', level: { skill: 'Magic', level: null },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 4, setEffect: 'Rune-storage pouch; no offensive/defensive combat bonus beyond the prayer bonus.' },
-        icon: 'icons/Grasping_rune_pouch.png',
-        source: { type: 'boss', boss: 'Croesus (flakes) + Abyss-sourced magical thread', region: 'misthalin', note: 'Only the Croesus flakes component is a hard region lock; magical thread is obtainable multiple non-exclusive ways.' } },
       { name: 'Large rune pouch (unsealed)', slot: 'ammo', level: { skill: 'Magic', level: null },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: 'Rune-storage pouch; no stat bonuses.' },
         icon: 'icons/Large_rune_pouch.png',

@@ -8,6 +8,8 @@ import LeagueRelicRow from '../components/LeagueRelicRow';
 import RelicRow from '../components/RelicRow';
 import BlessingCard from '../components/BlessingCard';
 import BlessingGodPanel from '../components/BlessingGodPanel';
+import PasswordField from '../components/PasswordField';
+import LeaguesEffectsPanel from '../components/LeaguesEffectsPanel';
 import { useGearLoadout } from '../hooks/useGearLoadout';
 import { useRegionSelection } from '../hooks/useRegionSelection';
 import { useLeagueRelicSelection } from '../hooks/useLeagueRelicSelection';
@@ -20,6 +22,7 @@ import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { RELICS, RELIC_CATEGORIES } from '../data/relics';
 import { GATEWAY_REGIONS, REGIONS } from '../data/regions';
 import { isGearItemAvailable } from '../data/gearAvailability';
+import { availableBuildExtras, extraLifePoints } from '../data/buildExtras';
 import {
   ARMOUR_SCALING_BLESSINGS,
   LIFE_SCALING_BLESSINGS,
@@ -33,7 +36,7 @@ import {
   getTotalArmour,
   getTotalLifePoints,
 } from '../utils/gearStats';
-import { adminUpdateUserBuild, createUserBuild, updateUserBuild } from '../utils/api';
+import { adminUpdateUserBuild, createUserBuild, setUserBuildPassword, updateUserBuild } from '../utils/api';
 import { reportPublishFailure } from '../utils/autoReport';
 import { saveMyBuildToken } from '../utils/myBuilds';
 import { MAX_LENGTHS, MAX_STAGES, MAX_TRADEOFFS } from '../utils/userBuildShape';
@@ -325,6 +328,7 @@ function StageEditor({
   blessings,
   archRelics,
   leagueRelics,
+  extras,
   elderSources,
   thumbnailPick,
   onPickThumbnail,
@@ -378,7 +382,7 @@ function StageEditor({
         const overloadMode = overloadModeByStyle[style] ?? 'none';
         const effectiveDefenceLevel = 99 + OVERLOAD_DEFENCE_BONUS_BY_MODE[overloadMode];
         const armourTotal = showArmour ? getTotalArmour(equipped, style, effectiveDefenceLevel) : null;
-        const lifeTotal = showHealth ? getTotalLifePoints(equipped, { bigBoned: true, archRelics }) : null;
+        const lifeTotal = showHealth ? getTotalLifePoints(equipped, { bigBoned: true, archRelics, extraLifePoints: extraLifePoints(extras) }) : null;
         const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
         const prayerTotal = showPrayer ? getTotalPrayerBonus(equipped) : null;
         // Null unless the Tome is actually in the pocket slot - see
@@ -485,6 +489,44 @@ function StageEditor({
                 Edit {STYLE_LABELS[style]} loadout
               </button>
             )}
+            {/* The same panel build guides show, so the creator sees what the
+                build is worth while building it rather than after publishing.
+                It reads the loadout directly above it - hence the caption, since
+                a build with two stages and three styles has several. */}
+            <LeaguesEffectsPanel
+              style={style}
+              slots={names}
+              blessings={blessings}
+              leagueRelics={leagueRelics}
+              archRelics={archRelics}
+              extras={extras}
+              armour={
+                // Same gate as the totals line above - armour is only worth
+                // stating once a blessing reads its value. The potion buttons
+                // stay either way, since they move ability damage regardless.
+                showArmour
+                  ? {
+                      none: getTotalArmour(equipped, style, 99),
+                      overload: getTotalArmour(equipped, style, 99 + OVERLOAD_DEFENCE_BONUS_BY_MODE.overload),
+                      elder:
+                        elderSources.length > 0
+                          ? getTotalArmour(equipped, style, 99 + OVERLOAD_DEFENCE_BONUS_BY_MODE.elder)
+                          : null,
+                    }
+                  : null
+              }
+              aegis={
+                aegis && {
+                  multiplier: aegis.multiplier,
+                  source: aegis.source,
+                  none: aegis.base,
+                  overload: aegis.overloaded,
+                  elder: aegis.elder,
+                }
+              }
+              elderSources={elderSources}
+              caption={`Effects of the ${STYLE_LABELS[style]} gear loadout above, in ${label.trim() || `Stage ${index + 1}`}.`}
+            />
           </div>
         );
       })}
@@ -499,9 +541,25 @@ function StageEditor({
 // the existing build instead of blank, and submitting calls updateUserBuild /
 // adminUpdateUserBuild instead of createUserBuild. See pages/EditBuildPage.jsx,
 // which works out which credential applies and passes this prop.
-export default function CreateBuildPage({ onSubmitted, editing }) {
-  const build = editing?.build;
-  const [name, setName] = useState(build?.name ?? '');
+//
+// `copyFrom`, when present (and `editing` is not), is just a sanitized build
+// to seed every field from - same shape as `editing.build`. Unlike `editing`,
+// nothing downstream keys off it: submitting still goes through the
+// `createUserBuild` branch below, so a copy always becomes a brand new build
+// with its own id, edit token and password, never an update to the build it
+// was copied from. See pages/CopyBuildPage.jsx, which resolves
+// "#create-build-from/<id>" into this prop.
+export default function CreateBuildPage({ onSubmitted, editing, copyFrom }) {
+  const build = editing?.build ?? copyFrom;
+  // Copying (not editing) seeds the name field with a "- copy" suffix rather
+  // than the exact original - the two builds are about to coexist publicly,
+  // and an unedited duplicate title would read as if the original had been
+  // moved rather than cloned. Truncated to leave room for the suffix rather
+  // than dropped when the original name is already at MAX_LENGTHS.name.
+  const initialName = copyFrom && !editing && copyFrom.name
+    ? `${copyFrom.name.slice(0, MAX_LENGTHS.name - ' - copy'.length)} - copy`
+    : build?.name ?? '';
+  const [name, setName] = useState(initialName);
   const [tagline, setTagline] = useState(build?.tagline ?? '');
   const [authorName, setAuthorName] = useState(build?.authorName ?? '');
   const [difficultyLabel, setDifficultyLabel] = useState(build?.difficultyLabel ?? '');
@@ -539,6 +597,28 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
     // new visitor gets - almost no build is meant to assume it's off.
     initialGatewaySelection: [...GATEWAY_REGIONS],
   });
+  // Kept as raw names rather than pruned on every region change: unticking a
+  // region by accident and re-ticking it should not silently lose the pick.
+  // sanitizeUserBuildPayload drops anything the final regions cannot reach, and
+  // `offeredExtras` below is what decides what is on screen, so an
+  // out-of-reach name can never be submitted or displayed.
+  const [extras, setExtras] = useState(() => build?.extras ?? []);
+  const offeredExtras = useMemo(
+    () => availableBuildExtras(regionSelection.selected),
+    [regionSelection.selected],
+  );
+  const toggleExtra = (name) =>
+    setExtras((prev) => (prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]));
+  // What the build actually HAS right now - raw ticks intersected with what the
+  // current regions reach. Everything downstream reads this rather than
+  // `extras`, so untick Anachronia and the totem stops counting towards health
+  // the same instant its tickbox disappears. Re-tick the region and it is back,
+  // still ticked, because the raw state above never lost it.
+  const activeExtras = useMemo(
+    () => offeredExtras.filter((extra) => extras.includes(extra.name)).map((extra) => extra.name),
+    [offeredExtras, extras],
+  );
+
   const relicSelection = useLeagueRelicSelection({ persist: false, initialSelection: build?.relics ?? [] });
   const archRelicSelection = useRelicSelection({ persist: false, initialSelection: build?.archRelics ?? [] });
   const blessingSelection = useBlessingSelection({ persist: false, initialSelection: build?.blessings ?? [] });
@@ -688,6 +768,15 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
   // page from data typed over several minutes with no going back to check it
   // first.
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  // The same confirmation step also collects the build's one-time edit
+  // password (see setUserBuildPassword call in submitBuild below) - every
+  // build gets one, so "Yes" stays disabled until either a password is
+  // typed or the opt-out box is ticked (which uses the edit token itself as
+  // the password - see submitBuild).
+  const [publishPassword, setPublishPassword] = useState('');
+  const [publishNoPassword, setPublishNoPassword] = useState(false);
+  const MIN_BUILD_PASSWORD_LENGTH = 4;
+  const canConfirmPublish = publishNoPassword || publishPassword.trim().length >= MIN_BUILD_PASSWORD_LENGTH;
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -718,6 +807,7 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
       archRelicReasons,
       regions: regionSelection.selected,
       regionReasons,
+      extras: activeExtras,
       whyItsGood: whyItsGood.trim(),
       howToPlay: howToPlay.trim(),
       tradeoffs: tradeoffs.filter((t) => t.trim()),
@@ -756,6 +846,18 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
           payload,
         });
         saveMyBuildToken(id, token);
+        // The opt-out box submits the edit token itself as the password -
+        // impractical to type back in by hand, but it guarantees
+        // edit_password_hash is always populated (see 018_user_build_
+        // password.sql) without forcing a real password on an author who
+        // doesn't want one. Best-effort: the build is already live and the
+        // token already works for editing regardless of whether this
+        // succeeds, so a failure here must not surface as a publish failure.
+        try {
+          await setUserBuildPassword(id, token, publishNoPassword ? token : publishPassword.trim());
+        } catch (err) {
+          console.error('set build password failed:', err);
+        }
         setStatus('idle');
         onSubmitted(id);
       }
@@ -803,6 +905,12 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
             </>
           )}
         </p>
+        {!editing && copyFrom && (
+          <p className="create-build-copy-note">
+            Pre-filled by copying &ldquo;{copyFrom.name}&rdquo; - review everything before publishing. This will
+            create a brand new build with its own id, edit link and password, not change the one it was copied from.
+          </p>
+        )}
       </header>
 
       <form className="create-build-page" onSubmit={handleSubmit}>
@@ -901,6 +1009,34 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
               </li>
             ))}
           </ul>
+
+          {/* Appears only once the regions actually reach something - there is
+              nothing to say to a build that cannot take any of it, and an
+              always-visible empty section reads as a bug. See
+              data/buildExtras.js for why these are not gear, relics or
+              blessings. */}
+          {offeredExtras.length > 0 && (
+            <div className="create-build-extras">
+              <h3>Extras</h3>
+              <p className="create-build-hint">
+                Unlocked by the regions above, and counted into this build&apos;s totals if taken.
+              </p>
+              {offeredExtras.map((extra) => (
+                <label key={extra.name} className="create-build-extra">
+                  <input
+                    type="checkbox"
+                    checked={extras.includes(extra.name)}
+                    onChange={() => toggleExtra(extra.name)}
+                  />
+                  {extra.icon && <RetryImage src={extra.icon} alt="" className="create-build-extra-icon" />}
+                  <span className="create-build-extra-text">
+                    <strong>{extra.name}</strong>
+                    {extra.summary && <span className="create-build-extra-summary">{extra.summary}</span>}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="create-build-section">
@@ -1065,6 +1201,7 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
               blessings={blessingSelection.selected}
               archRelics={archRelicSelection.selected}
               leagueRelics={relicSelection.selected}
+              extras={activeExtras}
               elderSources={elderSources}
               thumbnailPick={thumbnailPick}
               onPickThumbnail={pickThumbnail}
@@ -1139,11 +1276,40 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
           <div className="modal-overlay" onClick={() => setShowPublishConfirm(false)}>
             <div className="modal-panel publish-confirm-modal" onClick={(event) => event.stopPropagation()}>
               <p className="publish-confirm-message">Are you sure you want to publish your build?</p>
+
+              <div className="publish-confirm-password">
+                <p className="publish-confirm-password-label">
+                  Set an edit password - you'll need this to edit this guide from a browser that doesn't already have
+                  edit access. You cannot change it after being set.
+                </p>
+                <PasswordField
+                  id="publish-password"
+                  value={publishPassword}
+                  onChange={(value) => {
+                    setPublishPassword(value);
+                    if (value) setPublishNoPassword(false);
+                  }}
+                  placeholder="Edit password"
+                  disabled={publishNoPassword}
+                />
+                <label className="publish-confirm-no-password">
+                  <input
+                    type="checkbox"
+                    checked={publishNoPassword}
+                    onChange={(event) => {
+                      setPublishNoPassword(event.target.checked);
+                      if (event.target.checked) setPublishPassword('');
+                    }}
+                  />
+                  <span>I don't want to set a password</span>
+                </label>
+              </div>
+
               <div className="publish-confirm-actions">
                 <button type="button" className="publish-confirm-not-yet" onClick={() => setShowPublishConfirm(false)}>
                   Not Yet
                 </button>
-                <button type="button" className="publish-confirm-yes" onClick={submitBuild}>
+                <button type="button" className="publish-confirm-yes" onClick={submitBuild} disabled={!canConfirmPublish}>
                   Yes
                 </button>
               </div>

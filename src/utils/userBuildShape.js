@@ -17,6 +17,7 @@ import { sanitizeLeagueRelicSelection } from '../hooks/useLeagueRelicSelection';
 import { sanitizeRelicSelection } from '../hooks/useRelicSelection';
 import { sanitizeBlessingSelection } from '../hooks/useBlessingSelection';
 import { resolveGodTier } from '../data/blessings';
+import { sanitizeBuildExtras } from '../data/buildExtras';
 
 export const MAX_LENGTHS = {
   name: 100,
@@ -160,6 +161,11 @@ export function sanitizeUserBuildPayload(raw) {
     archRelicReasons: sanitizeReasons(raw.archRelicReasons, archRelics),
     regions,
     regionReasons: sanitizeReasons(raw.regionReasons, regions),
+    // Validated against the regions ABOVE, not against the catalogue alone: an
+    // extra is something a region paid for, so dropping the region has to drop
+    // it too. Otherwise a build edited down to two regions keeps quoting health
+    // it can no longer reach.
+    extras: sanitizeBuildExtras(raw.extras, regions),
     whyItsGood: trimTo(raw.whyItsGood, MAX_LENGTHS.prose),
     howToPlay: trimTo(raw.howToPlay, MAX_LENGTHS.prose),
     tradeoffs,

@@ -62,6 +62,7 @@ export const SHIELD_OFFHANDS = new Set([
   'Primal kiteshield + 5',
   // ranged
   'Armadyl buckler',
+  'Eagle-eye kiteshield',
   'Vengeful kiteshield',
   'Elysian spirit shield',
   'Dragonfire deflector',
