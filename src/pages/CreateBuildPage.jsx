@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import RetryImage from '../components/RetryImage';
 import EquipmentSlot from '../components/EquipmentSlot';
 import GearItemRow from '../components/GearItemRow';
@@ -681,9 +682,25 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
   const stylesWithGear = [...activeStyles].filter((style) => stagesPreview.some((stage) => stage.loadouts[style]));
   const canSubmit = name.trim().length > 0 && stagesPreview.length > 0 && status !== 'working';
 
-  async function handleSubmit(event) {
+  // Only a brand-new publish asks for confirmation - `editing` is "Save
+  // changes" on a build that's already live, a much lower-stakes action the
+  // author can already see and undo, whereas publishing creates a new public
+  // page from data typed over several minutes with no going back to check it
+  // first.
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+
+  function handleSubmit(event) {
     event.preventDefault();
     if (!canSubmit) return;
+    if (!editing) {
+      setShowPublishConfirm(true);
+      return;
+    }
+    submitBuild();
+  }
+
+  async function submitBuild() {
+    setShowPublishConfirm(false);
     setStatus('working');
     setError(null);
 
@@ -1117,6 +1134,23 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
           </button>
         </div>
       </form>
+      {showPublishConfirm &&
+        createPortal(
+          <div className="modal-overlay" onClick={() => setShowPublishConfirm(false)}>
+            <div className="modal-panel publish-confirm-modal" onClick={(event) => event.stopPropagation()}>
+              <p className="publish-confirm-message">Are you sure you want to publish your build?</p>
+              <div className="publish-confirm-actions">
+                <button type="button" className="publish-confirm-not-yet" onClick={() => setShowPublishConfirm(false)}>
+                  Not Yet
+                </button>
+                <button type="button" className="publish-confirm-yes" onClick={submitBuild}>
+                  Yes
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

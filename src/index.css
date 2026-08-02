@@ -6427,6 +6427,55 @@ main.abilities-page .gear-item-rows {
   border-color: var(--accent-2);
 }
 
+/* Confirmation modal shown before a brand-new build actually publishes -
+   not shown for "Save changes" on an existing one, see CreateBuildPage.jsx. */
+.publish-confirm-modal {
+  max-width: 380px;
+  text-align: center;
+}
+
+.publish-confirm-message {
+  margin: 4px 0 18px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.publish-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.publish-confirm-not-yet,
+.publish-confirm-yes {
+  padding: 9px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.publish-confirm-not-yet {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.publish-confirm-not-yet:hover {
+  border-color: var(--text);
+}
+
+.publish-confirm-yes {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.publish-confirm-yes:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
 @media (max-width: 720px) {
   .create-build-loadout-editor {
     grid-template-columns: 1fr;
