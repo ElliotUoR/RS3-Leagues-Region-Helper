@@ -521,7 +521,7 @@ adminRouter.get('/api/admin/tier-lists', requireAdmin, async (req, res) => {
   const pool = getAnalyticsPool();
   try {
     const { rows } = await pool.query(
-      `select code, type, payload, author_name, angle, hidden, created_at
+      `select code, type, payload, author_name, angle, hidden, refused, created_at
          from public.tier_lists
         where type = $1
         order by created_at desc`,
@@ -529,16 +529,15 @@ adminRouter.get('/api/admin/tier-lists', requireAdmin, async (req, res) => {
     );
     res.json({
       type,
-      // Hidden lists stay in the stats deliberately: hiding is about a name or
-      // an angle line being unacceptable, not about the ranking being invalid,
-      // and silently dropping them would make the averages depend on
-      // moderation decisions.
+      // Refused lists are dropped from the stats and hidden ones are not - see
+      // summariseTierLists for why the two flags differ.
       stats: summariseTierLists(type, rows),
       lists: rows.map((row) => ({
         code: row.code,
         authorName: row.author_name,
         angle: row.angle,
         hidden: row.hidden,
+        refused: row.refused,
         createdAt: row.created_at,
         rowLabels: row.payload?.rowLabels ?? [],
         placements: row.payload?.placements ?? {},
@@ -550,20 +549,35 @@ adminRouter.get('/api/admin/tier-lists', requireAdmin, async (req, res) => {
   }
 });
 
-// PATCH /api/admin/tier-lists/:code  body: { hidden: boolean }
+// PATCH /api/admin/tier-lists/:code  body: { hidden?: boolean, refused?: boolean }
+// Two independent flags - hidden takes a list away from visitors, refused takes
+// it out of the community ranking. See 017_tier_list_refused.sql.
 adminRouter.patch('/api/admin/tier-lists/:code', requireAdmin, async (req, res) => {
   const { code } = req.params;
   if (!CODE_RE.test(code)) return res.status(400).json({ error: 'invalid code' });
-  const { hidden } = req.body ?? {};
-  if (typeof hidden !== 'boolean') return res.status(400).json({ error: 'hidden must be a boolean' });
+
+  const { hidden, refused } = req.body ?? {};
+  for (const [key, value] of [['hidden', hidden], ['refused', refused]]) {
+    if (value !== undefined && typeof value !== 'boolean') {
+      return res.status(400).json({ error: `${key} must be a boolean` });
+    }
+  }
+  if (hidden === undefined && refused === undefined) {
+    return res.status(400).json({ error: 'nothing to update - pass hidden and/or refused' });
+  }
 
   const pool = getAnalyticsPool();
   try {
-    const { rows } = await pool.query('select * from public.set_tier_list_hidden($1, $2)', [code, hidden]);
-    if (rows.length === 0) return res.status(404).json({ error: 'not found' });
-    res.json(rows[0]);
+    const result = {};
+    for (const [value, fn] of [[hidden, 'set_tier_list_hidden'], [refused, 'set_tier_list_refused']]) {
+      if (value === undefined) continue;
+      const { rows } = await pool.query(`select * from public.${fn}($1, $2)`, [code, value]);
+      if (rows.length === 0) return res.status(404).json({ error: 'not found' });
+      Object.assign(result, rows[0]);
+    }
+    res.json(result);
   } catch (err) {
-    console.error('admin hide tier list failed:', err);
+    console.error('admin moderate tier list failed:', err);
     res.status(502).json({ error: 'could not update that tier list right now' });
   }
 });

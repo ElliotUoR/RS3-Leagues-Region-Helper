@@ -44,10 +44,21 @@ function round(value, places = 2) {
   return Number(value.toFixed(places));
 }
 
-// `lists` is [{ payload }] for one type.
-export function summariseTierLists(type, lists) {
+// `allLists` is every stored list of one type, refused ones included - the
+// filtering happens HERE rather than at the query, so the one place that
+// decides what a "community ranking" is made of is the same place that
+// computes it.
+//
+// Refused lists are excluded from every figure below: a joke list or ten
+// submissions from one person would otherwise move the averages, which is the
+// entire reason the flag exists (see 017_tier_list_refused.sql). Hidden lists
+// are NOT excluded - hiding is about an unacceptable name, not an invalid
+// ranking, and dropping them would make the numbers depend on moderation.
+export function summariseTierLists(type, allLists) {
   const items = itemsFor(type);
   const curated = curatedGrades(type);
+  const lists = allLists.filter((list) => !list.refused);
+  const refusedCount = allLists.length - lists.length;
   const totalLists = lists.length;
 
   const perItem = items.map((item) => {
@@ -99,6 +110,7 @@ export function summariseTierLists(type, lists) {
   return {
     type,
     totalLists,
+    refusedCount,
     // Average number of entries a list bothers to place - a proxy for whether
     // people finish these or abandon them half-sorted.
     averagePlaced:
