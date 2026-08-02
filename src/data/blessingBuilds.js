@@ -100,6 +100,9 @@ export const RELIC_COLOURS = {
   Voidwalker: { hue: 260, label: 'void' },
   "Nature's Network": { hue: 165, label: 'jade' },
   "Assassin's Insight": { hue: 340, label: 'crimson' },
+  // Unknown tier, added after the above - see leagueRelics.js.
+  'Animal Wrangler': { hue: 220, label: 'azure' },
+  'Icyenic Faith': { hue: 305, label: 'orchid' },
 };
 
 // Shown under the Arch relics column. Some relics list a second region that is
@@ -922,6 +925,16 @@ export const LEAGUE_RELIC_TIER_LIST = {
     {
       name: 'Voidwalker', relicTier: 3, grade: 'C', unlocksGear: 0,
       note: 'Generic teleports, but offers valuable resources like ancient summoning pouches, invention components, dragon items (e.g. claws), and divine charges. But can only be triggered once every 3 minutes, and at a 1/8 chance of getting each type of item; targetting specific items is awkward.',
+    },
+    // Just revealed, unknown tier - genuinely unranked (see the `grades`
+    // comment above), not assessed yet rather than assumed weak.
+    {
+      name: 'Animal Wrangler', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      note: 'Just revealed - not yet assessed for combat viability. A skilling/Hunter-focused relic on its face; no obvious combat impact yet.',
+    },
+    {
+      name: 'Icyenic Faith', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      note: 'Just revealed - not yet assessed for combat viability. Scales crit chance and ability damage off Prayer bonus, and makes protection prayers/Deflect curses block 50% more damage while doubling as Soul Split - looks like it could be strong, but needs real numbers worked out first.',
     },
   ],
 };

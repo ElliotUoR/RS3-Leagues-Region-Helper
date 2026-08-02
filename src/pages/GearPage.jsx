@@ -51,12 +51,15 @@ const SORT_OPTIONS = [
   { id: 'accuracy', label: 'Acc' },
   { id: 'armour', label: 'Tank (Arm)' },
   { id: 'lifeBonus', label: 'Tank (LP)' },
+  { id: 'prayerBonus', label: 'Prayer' },
 ];
 
 // Neck and ring items are largely flat-damage accessories with no level
-// requirement at all and no armour/accuracy/LP spread - Level sorting groups
-// almost everything at 0 and does nothing useful, so Dmg is the only sort
-// (and the default) offered for these two slots.
+// requirement at all and no armour/accuracy spread - Level sorting groups
+// almost everything at 0 and does nothing useful, so these two slots offer a
+// reduced set of sorts (with Dmg the default). Prayer is in that set: unlike
+// the others it really does spread them out, since most neck items carry a
+// prayer bonus.
 const NO_LEVEL_SLOTS = new Set(['neck', 'ring']);
 
 function sortItems(items, sortBy, style) {
@@ -144,15 +147,22 @@ export default function GearPage({
   // attack text instead of stats, so it never has sort tabs.
   const visibleSortOptions = useMemo(() => {
     if (activeSlot === 'eof') return [];
-    if (NO_LEVEL_SLOTS.has(activeSlot)) return SORT_OPTIONS.filter((opt) => opt.id === 'damage');
+    if (NO_LEVEL_SLOTS.has(activeSlot)) {
+      // Damage AND prayer: unlike level/accuracy/armour/LP, prayer bonus really
+      // does spread these out - most neck items carry one, and picking a neck
+      // slot for its prayer bonus is a normal thing to be doing.
+      return SORT_OPTIONS.filter((opt) => opt.id === 'damage' || opt.id === 'prayerBonus');
+    }
     const items = GEAR[style]?.[activeSlot] ?? [];
     const hasAccuracy = items.some((item) => item.stats?.accuracy);
     const hasArmour = items.some((item) => getArmourRating(item, style));
     const hasLifeBonus = items.some((item) => item.stats?.lifeBonus);
+    const hasPrayerBonus = items.some((item) => item.stats?.prayerBonus);
     return SORT_OPTIONS.filter((opt) => {
       if (opt.id === 'accuracy') return hasAccuracy;
       if (opt.id === 'armour') return hasArmour;
       if (opt.id === 'lifeBonus') return hasLifeBonus;
+      if (opt.id === 'prayerBonus') return hasPrayerBonus;
       return true;
     });
   }, [style, activeSlot]);

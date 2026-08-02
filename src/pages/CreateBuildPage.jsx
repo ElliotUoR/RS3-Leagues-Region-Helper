@@ -64,6 +64,7 @@ const SORT_OPTIONS = [
   { id: 'accuracy', label: 'Acc' },
   { id: 'armour', label: 'Tank (Arm)' },
   { id: 'lifeBonus', label: 'Tank (LP)' },
+  { id: 'prayerBonus', label: 'Prayer' },
 ];
 const NO_LEVEL_SLOTS = new Set(['neck', 'ring']);
 
@@ -150,19 +151,25 @@ function StyleLoadoutEditor({ style, gear, isUnlocked, selectedLeagueRelics, sho
   // "Acc" tab for a pure armour slot), same as GearPage.jsx's own
   // visibleSortOptions. Neck and ring are a deliberate special case: most
   // items in those slots have no level requirement at all and no armour/
-  // accuracy/LP spread, so Level/Acc/Tank sorting does nothing useful there -
-  // Dmg is the only sort that actually differentiates them.
+  // accuracy spread, so Level/Acc/Tank sorting does nothing useful there.
   const visibleSortOptions = useMemo(() => {
     if (activeSlot === 'eof') return [];
-    if (NO_LEVEL_SLOTS.has(activeSlot)) return SORT_OPTIONS.filter((opt) => opt.id === 'damage');
+    if (NO_LEVEL_SLOTS.has(activeSlot)) {
+      // Damage AND prayer: unlike level/accuracy/armour/LP, prayer bonus really
+      // does spread these out - most neck items carry one, and picking a neck
+      // slot for its prayer bonus is a normal thing to be doing.
+      return SORT_OPTIONS.filter((opt) => opt.id === 'damage' || opt.id === 'prayerBonus');
+    }
     const slotItems = GEAR[style]?.[activeSlot] ?? [];
     const hasAccuracy = slotItems.some((item) => item.stats?.accuracy);
     const hasArmour = slotItems.some((item) => getArmourRating(item, style));
     const hasLifeBonus = slotItems.some((item) => item.stats?.lifeBonus);
+    const hasPrayerBonus = slotItems.some((item) => item.stats?.prayerBonus);
     return SORT_OPTIONS.filter((opt) => {
       if (opt.id === 'accuracy') return hasAccuracy;
       if (opt.id === 'armour') return hasArmour;
       if (opt.id === 'lifeBonus') return hasLifeBonus;
+      if (opt.id === 'prayerBonus') return hasPrayerBonus;
       return true;
     });
   }, [style, activeSlot]);

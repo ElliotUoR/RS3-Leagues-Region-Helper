@@ -446,6 +446,17 @@ const UNIVERSAL_ACCESSORIES = [
     stats: { damage: 14.8, accuracy: 0, lifeBonus: 0, prayerBonus: 2, setEffect: 'Highest-tier Underworld Grimoire upgrade; not tradeable.' },
     icon: 'icons/Underworld_Grimoire_4.png',
     source: { type: 'skilling', note: 'Assembled from lower-tier Grimoires found in the Underworld (requires Missing, Presumed Death access).', region: 'misthalin' } },
+  // Same "granted by a League relic, no normal region path" pattern as
+  // Seren's Crystal Tiara above (Crystal Grace) - `region: 'relic'` is
+  // always-unlocked (see gearAvailability.js's ALWAYS_UNLOCKED), with
+  // `source.leagueRelic` naming which relic actually grants it so the UI's
+  // relic-requirement note is accurate rather than just "no region needed".
+  // No icon yet - Icyenic Faith has no wiki page or item art as of writing,
+  // only the relic's own reveal-image icon (see leagueRelics.js).
+  { name: 'Tome of the Icyene', slot: 'pocket', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
+    stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 50, setEffect: 'When worn, gain 0.2% critical strike chance and 0.2% base ability damage per 1 Prayer bonus you have.' },
+    icon: 'icons/Tome_of_the_Icyene.png',
+    source: { type: 'shop', shop: 'Obtained from picking Icyenic Faith relic - When worn, gain 0.2% critical strike and 0.2% base ability damage per 1 Prayer bonus you have', region: 'relic', leagueRelic: 'Icyenic Faith' } },
 
   // BACK
   { name: 'Igneous Kal-Zuk', slot: 'back', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,

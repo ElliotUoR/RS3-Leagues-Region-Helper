@@ -553,6 +553,72 @@ export const LEAGUE_RELICS = [
     ],
     icon: FP('Divine_Druid.png'),
   },
+  {
+    // Transcribed from the reveal image directly (not the wiki - not
+    // published there yet), same "Unknown Tier" treatment as Crystal Grace/
+    // Superheated/Divine Druid above. Tier is unconfirmed as of writing -
+    // update once Jagex states it.
+    //
+    // Two mechanical typos in the reveal image were corrected here rather
+    // than preserved verbatim: "HUNTER LOOT QUANTITY IS INCREASE BY 5X" ->
+    // "increased", and "HUNTER MARKS ARE EINCREASED BY 5X" -> "increased".
+    // "HUNTER CATCH CHANGE IS 100%" was also read as "chance", the obvious
+    // intended word. No wording or meaning was otherwise added.
+    //
+    // No wiki page exists for this relic yet - icon is a manually-cropped
+    // reveal-image icon saved locally, same as Crystal Grace/Superheated/
+    // Divine Druid/Transmutation above, so scripts/download-icons.mjs will
+    // never re-fetch it from runescape.wiki.
+    name: 'Animal Wrangler',
+    tier: null,
+    summary:
+      'Automates Fishing/Hunter banking, boosts Hunter and farm animal yields and rates by up to 20x, guarantees Hunter catches, and occasionally gifts bonus farm animals or Farming materials.',
+    effects: [
+      'Bank fish automatically when fishing and Hunter loot when hunting. (Toggleable)',
+      'When capturing Hunter creatures or fishing, there is a 2% chance to receive a random farm animal, sent to your bank.',
+      'When gaining a bonus baby animal from this relic, you can instead receive an Anachronia dinosaur farm animal. (Toggleable)',
+      'When catching fish, capturing Hunter creatures, or harvesting farm animals, there is a 33% chance to obtain a random clean herb, or herb, tree, or fruit tree seed sent to your bank.',
+      'Farm animals always have 100% stats & never get hungry.',
+      'Hunter catch chance is 100%.',
+      'Buyers always pay the highest amount of beans for sold animals, regardless of age or disease.',
+      'Hunter loot quantity is increased by 5x.',
+      'Hunter traps attract creatures faster.',
+      'Hunter marks are increased by 5x.',
+      'Fishing no longer requires bait, always catch an additional fish.',
+      'Anachronia and Havenhythe big game Hunter creatures no longer require bait and are twice as slow to catch you.',
+      'Spirit moths give you 10x charms.',
+      'Farm animals are 20x more common from their sources.',
+    ],
+    icon: FP('Animal_Wrangler.png'),
+  },
+  {
+    // Transcribed from the reveal image directly (not the wiki - not
+    // published there yet), same "Unknown Tier" treatment as Animal Wrangler
+    // above. Tier is unconfirmed as of writing - update once Jagex states it.
+    //
+    // The reveal image groups three "When worn" bonuses under one shared
+    // header rather than repeating the phrase three times as three visually
+    // separate bullets - reworded here as three parallel "When worn, ..."
+    // sentences so each stays its own list item (this file's existing
+    // convention, e.g. Divine Druid's "(Toggleable)" bullets above) rather
+    // than one run-on sentence or an unlabelled sub-list.
+    //
+    // Icon is a manually-cropped reveal-image icon, same situation as
+    // Animal Wrangler above.
+    name: 'Icyenic Faith',
+    tier: null,
+    summary:
+      'Grants the Tome of the Icyene: +50 Prayer bonus, 0.2% crit chance and ability damage per Prayer bonus, and makes protection prayers/Deflect curses block 50% more damage while also acting as Soul Split.',
+    effects: [
+      'Grants you the Tome of the Icyene.',
+      'When worn, the Tome of the Icyene provides +50 Prayer bonus.',
+      'When worn, gain 0.2% critical strike chance per 1 Prayer bonus you have.',
+      'When worn, gain 0.2% base ability damage per 1 Prayer bonus you have.',
+      'Protection prayers and Deflect curses block an additional 50% of damage.',
+      'Protection prayers and Deflect curses act as though Soul Split is active.',
+    ],
+    icon: FP('Icyenic_Faith.png'),
+  },
   // ------------------------------------------------------------- TIER THREE
   // Transcribed verbatim from Jagex's "Relic Reveal" promo images, same as
   // Divine Druid/Transmutation above - none of these three are on the wiki yet,
