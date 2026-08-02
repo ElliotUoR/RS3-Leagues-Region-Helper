@@ -212,9 +212,15 @@ export default function BuildGuidesPage() {
 
       <main className="build-guides-page">
         <div className="build-guides-user-cta">
-          <a href="#create-build" className="build-create-button">
-            + Create a build
-          </a>
+          {/* Publishing needs the backend, which the GitHub Pages mirror does
+              not have - the form would fill in and then fail on submit. "See
+              user made builds" stays: that page explains where to go instead
+              (see UserBuildsPage), which is worth more there than nothing. */}
+          {!IS_PAGES_BUILD && (
+            <a href="#create-build" className="build-create-button">
+              + Create a build
+            </a>
+          )}
           <a href="#user-builds" className="build-see-user-builds-button">
             See user made builds
           </a>

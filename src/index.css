@@ -2077,7 +2077,13 @@ main.abilities-page .gear-item-rows {
 .relic-passives-modal {
   position: relative;
   max-width: min(1080px, 95vw);
-  overflow: hidden;
+  /* NOT `overflow: hidden` - that is shorthand for BOTH axes and so silently
+     cancelled .modal-panel's `overflow-y: auto`, leaving anything past the
+     viewport unreachable (on a phone the last tier's list was simply cut off,
+     with no way to scroll to it). Horizontal clipping is what was actually
+     wanted, to keep the background gradients inside the rounded corners. */
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 1px solid #a9791f;
   background:
     radial-gradient(circle at 0% 0%, rgb(63 191 111 / 16%), transparent 45%),
@@ -6647,7 +6653,13 @@ main.abilities-page .gear-item-rows {
 .blessing-passives-modal {
   position: relative;
   max-width: min(980px, 94vw);
-  overflow: hidden;
+  /* NOT `overflow: hidden` - that is shorthand for BOTH axes and so silently
+     cancelled .modal-panel's `overflow-y: auto`, leaving anything past the
+     viewport unreachable (on a phone the last tier's list was simply cut off,
+     with no way to scroll to it). Horizontal clipping is what was actually
+     wanted, to keep the background gradients inside the rounded corners. */
+  overflow-x: hidden;
+  overflow-y: auto;
   background:
     radial-gradient(circle at 12% 0%, rgb(239 83 80 / 12%), transparent 40%),
     radial-gradient(circle at 50% -10%, rgb(63 191 111 / 12%), transparent 45%),
@@ -6815,6 +6827,15 @@ main.abilities-page .gear-item-rows {
 @media (max-width: 700px) {
   .blessing-passives-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* One column on a phone. Two 1fr columns inside a ~400px modal leaves each
+   tier about 170px wide, which wraps "automatically" onto its own line and
+   makes the table harder to read than the paragraph it replaced. */
+@media (max-width: 600px) {
+  .blessing-passives-grid {
+    grid-template-columns: 1fr;
   }
 }
 
