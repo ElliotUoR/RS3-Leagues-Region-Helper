@@ -7875,6 +7875,52 @@ main.abilities-page .gear-item-rows {
   opacity: 0.85;
 }
 
+/* Full chain shown on desktop, first-step-to-last-step summary shown on
+   mobile (see firstAndLastStep in RelicDropTablePanel.jsx) - a full 18-step
+   herb chain wraps into an unreadable wall of text at phone widths. Same
+   700px breakpoint the rest of the site uses for this show/hide-a-pair
+   technique (e.g. .region-name-full/.region-name-short). */
+.drop-table-menagerie-chain-compact {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .drop-table-menagerie-chain-full {
+    display: none;
+  }
+
+  .drop-table-menagerie-chain-compact {
+    display: block;
+  }
+
+  /* The "Seeds" wrapper category's whole header (leaf marker, name,
+     "varies by seed - see below" quantity hint) is redundant on a narrow
+     screen - its three subcategories (Herb Seeds, Tree Seeds, Fruit Tree
+     Seeds) already say what it is and what each one drops, so there's
+     nothing left worth the header's own line once mobile is this tight.
+     Desktop keeps it in full. */
+  .drop-table-menagerie-head-hide-mobile {
+    display: none;
+  }
+
+  /* Hiding the header above (display: none) collapses its own box, but
+     doesn't touch the outer card's top padding or .drop-table-menagerie-
+     subcategories' own margin/border-top - both exist purely to space the
+     subcategory list away from that header, so with it gone they just
+     leave a dead gap and an orphaned dashed line above "Herb Seeds".
+     Zeroed here so the subcategories sit flush with the card's own top
+     edge instead. */
+  .drop-table-menagerie-category-head-hidden {
+    padding-top: 0;
+  }
+
+  .drop-table-menagerie-category-head-hidden > .drop-table-menagerie-subcategories {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+}
+
 .drop-table-menagerie-tags {
   list-style: none;
   margin: 6px 0 0;
@@ -8458,6 +8504,127 @@ main.abilities-page .gear-item-rows {
 .leagues-effects-elder-note {
   font-size: 0.72rem;
   opacity: 0.65;
+}
+
+/* Sort control and pager for the user-made builds listing
+   (pages/UserBuildsPage.jsx). See utils/userBuildSort.js for what the three
+   modes actually do. */
+.user-build-sort {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 14px;
+  /* The pager scrolls back to this element, so give it clearance from the
+     sticky nav rather than landing flush against it. */
+  scroll-margin-top: 16px;
+}
+
+.user-build-sort-modes {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel-bg);
+}
+
+.user-build-sort-mode {
+  padding: 5px 16px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms, color 140ms;
+}
+
+.user-build-sort-mode:hover {
+  color: var(--text-h);
+}
+
+.user-build-sort-mode.active {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text-h);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.user-build-sort-hint {
+  margin: 0;
+  font-size: 0.76rem;
+  opacity: 0.65;
+}
+
+/* Standard-sort score in the admin controls (components/UserBuildListItem.jsx).
+   Sits alongside the raw vote split, which is the other admin-only figure the
+   public listing cannot show. */
+.user-build-score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.user-build-score strong {
+  color: var(--text-h);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.user-build-score-parts {
+  opacity: 0.65;
+}
+
+.user-build-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.user-build-page,
+.user-build-page-step {
+  min-width: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 140ms, background 140ms;
+}
+
+.user-build-page:hover:not(.active),
+.user-build-page-step:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text-h);
+}
+
+.user-build-page.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text-h);
+  font-weight: 700;
+  cursor: default;
+}
+
+/* Kept visible rather than hidden at the ends - a pager that changes width as
+   you move through it makes the page numbers move under the cursor. */
+.user-build-page-step:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 /* Extras picker (pages/CreateBuildPage.jsx) - appears under the region map once

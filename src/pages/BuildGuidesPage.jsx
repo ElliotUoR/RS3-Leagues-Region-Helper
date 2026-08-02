@@ -204,9 +204,7 @@ export default function BuildGuidesPage() {
         <h1>Build Guides</h1>
         <p>
           Complete example builds - gear, league relics, Arch relics, blessings, abilities, spellbook
-          and prayers. Every build fits inside one Leagues run: the three fixed regions (Misthalin,
-          Karamja, Havenhythe) plus at most three optional picks, one blessing per tier, one Tier 1
-          league relic and up to two unknown-tier ones.
+          and prayers. 
         </p>
       </header>
 

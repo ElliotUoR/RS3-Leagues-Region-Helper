@@ -65,6 +65,7 @@ export default function UserBuildListItem({
   onToggleFeatured,
   initialBuild = null,
   defaultExpanded = false,
+  score = null,
 }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [build, setBuild] = useState(initialBuild);
@@ -162,6 +163,22 @@ export default function UserBuildListItem({
               <span className="user-build-vote-raw">net {summary.raw_score}</span>
             )}
           </span>
+          {/* Only supplied while the listing is in Standard order (see
+              UserBuildsPage) - it is the one mode whose ordering cannot be read
+              off the card itself. Shown with its working, because "why is this
+              above that" is the actual question, and 1,300 on its own does not
+              answer it. */}
+          {score && (
+            <span className="user-build-score" title="Standard sort score">
+              <strong>{score.total.toLocaleString()}</strong> pts
+              {score.hidden && <span className="user-build-score-parts">hidden builds score nothing</span>}
+              {!score.hidden && score.parts.length > 0 && (
+                <span className="user-build-score-parts">
+                  {score.parts.map((part) => `${part.points.toLocaleString()} ${part.label}`).join(' + ')}
+                </span>
+              )}
+            </span>
+          )}
           <label className="user-build-hide-toggle">
             <input
               type="checkbox"

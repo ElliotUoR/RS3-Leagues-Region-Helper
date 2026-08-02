@@ -527,15 +527,40 @@ function VoidDropTable({ dropTable }) {
 // (reusing the same "→" string convention Superheated/Transmutation already
 // use in `detail`, not a new interactive widget), or a flat list shown as a
 // row of small pressed leaf-shaped tags.
+// Collapses a long "A → B → C → ... → Z" tier chain, or a plain "A, B, C,
+// ..., Z" comma list (Tree Seeds/Fruit Tree Seeds aren't tier chains, just
+// flat lists - see leagueRelics.js), down to just "A → Z" either way - used
+// for the mobile rendering (see index.css's 700px breakpoint), where the
+// full chain/list wraps into an unreadable wall of text on a narrow screen.
+// Desktop keeps showing the full text; both are rendered and CSS picks
+// which one is visible, same show/hide-at-700px technique used elsewhere in
+// this app (e.g. region-name-full/region-name-short).
+function firstAndLastStep(detail) {
+  const steps = detail.includes(' → ') ? detail.split(' → ') : detail.split(', ');
+  if (steps.length <= 2) return detail;
+  return `${steps[0]} → ${steps[steps.length - 1]}`;
+}
+
 function MenagerieCategory({ category, isSub }) {
   return (
-    <div className={`drop-table-menagerie-category${isSub ? ' is-sub' : ''}`}>
-      <div className="drop-table-menagerie-category-head">
+    <div
+      className={`drop-table-menagerie-category${isSub ? ' is-sub' : ''}${category.hideHeaderOnMobile ? ' drop-table-menagerie-category-head-hidden' : ''}`}
+    >
+      <div
+        className={`drop-table-menagerie-category-head${category.hideHeaderOnMobile ? ' drop-table-menagerie-head-hide-mobile' : ''}`}
+      >
         <span className="drop-table-menagerie-leaf" aria-hidden="true" />
         <span className="drop-table-menagerie-category-name">{category.name ?? category.label}</span>
         <span className="drop-table-menagerie-quantity">×{category.quantity}</span>
       </div>
-      {category.detail && <p className="drop-table-menagerie-chain">{category.detail}</p>}
+      {category.detail && (
+        <>
+          <p className="drop-table-menagerie-chain drop-table-menagerie-chain-full">{category.detail}</p>
+          <p className="drop-table-menagerie-chain drop-table-menagerie-chain-compact">
+            {firstAndLastStep(category.detail)}
+          </p>
+        </>
+      )}
       {category.items && (
         <ul className="drop-table-menagerie-tags">
           {category.items.map((item) => (

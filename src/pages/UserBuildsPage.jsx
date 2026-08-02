@@ -1,6 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UserBuildListItem from '../components/UserBuildListItem';
 import ReportBuildModal from '../components/ReportBuildModal';
+import {
+  DEFAULT_SORT_MODE,
+  SORT_MODES,
+  isSortMode,
+  scoreBreakdown,
+  sortUserBuilds,
+  topVoteCount,
+} from '../utils/userBuildSort';
 import {
   adminListUserBuilds,
   adminSetBuildFeatured,
@@ -11,11 +19,32 @@ import {
 import { useIsAdmin } from '../hooks/useIsAdmin';
 import { IS_PAGES_BUILD, LIVE_SITE_URL } from '../utils/deployTarget';
 
+// Ten to a page. The server hands back up to 100 rows in one request (see
+// LIST_LIMIT), so paging is purely a display concern - switching page costs no
+// request and every mode sorts the WHOLE list before it is sliced, not just the
+// page on screen.
+const BUILDS_PER_PAGE = 10;
+
+const SORT_STORAGE_KEY = 'rs3-leagues-user-builds-sort';
+
+function loadInitialSortMode() {
+  if (typeof window === 'undefined') return DEFAULT_SORT_MODE;
+  try {
+    const stored = window.localStorage.getItem(SORT_STORAGE_KEY);
+    return isSortMode(stored) ? stored : DEFAULT_SORT_MODE;
+  } catch {
+    return DEFAULT_SORT_MODE;
+  }
+}
+
 export default function UserBuildsPage() {
   const [builds, setBuilds] = useState(null); // null = loading
   const [error, setError] = useState(false);
   const [votes, setVotes] = useState({});
   const [reporting, setReporting] = useState(null);
+  const [sortMode, setSortMode] = useState(loadInitialSortMode);
+  const [page, setPage] = useState(1);
+  const listRef = useRef(null);
   const isAdmin = useIsAdmin();
 
   // Admins get the moderation listing, which includes builds hidden from
@@ -56,6 +85,53 @@ export default function UserBuildsPage() {
     // blocking the list.
     fetchBuildVotes().then(setVotes);
   }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(SORT_STORAGE_KEY, sortMode);
+    } catch {
+      // A browser with storage blocked still sorts, it just forgets the choice.
+    }
+  }, [sortMode]);
+
+  // Re-sorts when the votes land, which is a moment after the list itself -
+  // Standard and Best both read scores, so the order settles once rather than
+  // being wrong until someone switches mode.
+  const sorted = useMemo(
+    () => (builds ? sortUserBuilds(builds, sortMode, votes) : null),
+    [builds, sortMode, votes],
+  );
+
+  // Admin-only, and only in Standard - the other two modes sort on a figure
+  // already on screen (the vote count, the publish order), so there is nothing
+  // hidden to explain. Standard is the one whose ordering is otherwise opaque.
+  const scores = useMemo(() => {
+    if (!isAdmin || sortMode !== 'standard' || !sorted) return null;
+    const topVotes = topVoteCount(sorted, votes);
+    const now = Date.now();
+    return new Map(sorted.map((build) => [build.id, scoreBreakdown(build, { votes, topVotes, now })]));
+  }, [isAdmin, sortMode, sorted, votes]);
+
+  const pageCount = Math.max(1, Math.ceil((sorted?.length ?? 0) / BUILDS_PER_PAGE));
+  // Clamped rather than corrected in an effect: hiding the last build on page 4
+  // as an admin drops the list to 3 pages, and deriving the safe value renders
+  // the right page immediately instead of painting an empty one first.
+  const currentPage = Math.min(page, pageCount);
+  const visible = sorted?.slice((currentPage - 1) * BUILDS_PER_PAGE, currentPage * BUILDS_PER_PAGE) ?? [];
+
+  function changeSort(mode) {
+    setSortMode(mode);
+    // A different order makes the old page number meaningless.
+    setPage(1);
+  }
+
+  function goToPage(next) {
+    setPage(next);
+    // Without this you land halfway down page 2, since the page you came from
+    // was as tall as the viewport. Matches how opening a build scrolls it to
+    // the top.
+    listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   function handleVoted(id, next) {
     setVotes((prev) => ({ ...prev, [id]: next }));
@@ -121,21 +197,78 @@ export default function UserBuildsPage() {
             No builds yet - <a href="#create-build" className="notice-link">be the first to publish one</a>.
           </p>
         )}
-        {!error && builds && builds.length > 0 && (
-          <section className="build-list">
-            {builds.map((summary) => (
-              <UserBuildListItem
-                key={summary.id}
-                summary={summary}
-                vote={votes[summary.id]}
-                onVoted={handleVoted}
-                onReport={setReporting}
-                isAdmin={isAdmin}
-                onToggleHidden={handleToggleHidden}
-                onToggleFeatured={handleToggleFeatured}
-              />
-            ))}
-          </section>
+        {!error && sorted && sorted.length > 0 && (
+          <>
+            <div className="user-build-sort" ref={listRef}>
+              <div className="user-build-sort-modes" role="tablist" aria-label="Sort builds">
+                {SORT_MODES.map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={sortMode === mode.id}
+                    className={`user-build-sort-mode${sortMode === mode.id ? ' active' : ''}`}
+                    onClick={() => changeSort(mode.id)}
+                    title={mode.hint}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+              <p className="user-build-sort-hint">
+                {SORT_MODES.find((mode) => mode.id === sortMode)?.hint}
+              </p>
+            </div>
+
+            <section className="build-list">
+              {visible.map((summary) => (
+                <UserBuildListItem
+                  key={summary.id}
+                  summary={summary}
+                  vote={votes[summary.id]}
+                  onVoted={handleVoted}
+                  onReport={setReporting}
+                  isAdmin={isAdmin}
+                  onToggleHidden={handleToggleHidden}
+                  onToggleFeatured={handleToggleFeatured}
+                  score={scores?.get(summary.id)}
+                />
+              ))}
+            </section>
+
+            {/* One page of builds needs no pager. */}
+            {pageCount > 1 && (
+              <nav className="user-build-pager" aria-label="Build list pages">
+                <button
+                  type="button"
+                  className="user-build-page-step"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  ‹ Prev
+                </button>
+                {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={`user-build-page${n === currentPage ? ' active' : ''}`}
+                    aria-current={n === currentPage ? 'page' : undefined}
+                    onClick={() => goToPage(n)}
+                  >
+                    {n}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className="user-build-page-step"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === pageCount}
+                >
+                  Next ›
+                </button>
+              </nav>
+            )}
+          </>
         )}
       </main>
 

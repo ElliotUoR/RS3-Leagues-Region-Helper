@@ -624,6 +624,14 @@ export const LEAGUE_RELICS = [
               name: 'Seeds',
               column: 1,
               quantity: 'varies by seed - see below',
+              // This whole header (leaf marker + "Seeds" name + "varies by
+              // seed" quantity hint) is redundant on mobile specifically -
+              // the three subcategories below (Herb Seeds/Tree Seeds/Fruit
+              // Tree Seeds) already say what this wrapper is and what each
+              // one drops, so there's nothing left worth its own line once
+              // mobile is this tight (see RelicDropTablePanel.jsx/index.css's
+              // 700px breakpoint). Desktop still shows it in full.
+              hideHeaderOnMobile: true,
               // These three groups are NOT three separate 33%-each
               // sub-tables - every seed across all three is one flat,
               // equal-chance pool (see the relic's own effects bullet).
