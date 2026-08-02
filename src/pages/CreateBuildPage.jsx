@@ -22,10 +22,13 @@ import { isGearItemAvailable } from '../data/gearAvailability';
 import {
   ARMOUR_SCALING_BLESSINGS,
   LIFE_SCALING_BLESSINGS,
+  ICYENIC_FAITH_RELIC,
   getAegisBreakdown,
   getArmourRating,
   getBigBonedBonusDamage,
   getElderOverloadSources,
+  getIcyeneBonusPercent,
+  getTotalPrayerBonus,
   getTotalArmour,
   getTotalLifePoints,
 } from '../utils/gearStats';
@@ -320,6 +323,7 @@ function StageEditor({
   selectedLeagueRelics,
   blessings,
   archRelics,
+  leagueRelics,
   elderSources,
   thumbnailPick,
   onPickThumbnail,
@@ -334,6 +338,9 @@ function StageEditor({
   // Teragard's Aegis is one of the armour-scaling blessings, but unlike the
   // others it has a stateable number of its own, so it gets its own check.
   const showAegis = blessings.includes("Teragard's Aegis");
+  // Prayer bonus is only worth a line when something reads it - Icyenic Faith
+  // turns it into crit chance and ability damage, and nothing else does.
+  const showPrayer = leagueRelics.includes(ICYENIC_FAITH_RELIC);
   // Per-style, not per-stage-wide - each style has its own equipped items and
   // its own Total armour line, so its own potion choice. Clicking the
   // already-active mode turns it off; clicking the other one switches
@@ -372,6 +379,10 @@ function StageEditor({
         const armourTotal = showArmour ? getTotalArmour(equipped, style, effectiveDefenceLevel) : null;
         const lifeTotal = showHealth ? getTotalLifePoints(equipped, { bigBoned: true, archRelics }) : null;
         const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
+        const prayerTotal = showPrayer ? getTotalPrayerBonus(equipped) : null;
+        // Null unless the Tome is actually in the pocket slot - see
+        // getIcyeneBonusPercent for why that matters.
+        const icyeneBonus = showPrayer ? getIcyeneBonusPercent(equipped) : null;
         // Aegis quotes every potion state at once rather than following the
         // overload toggle above: the toggle answers "how much armour do I have
         // right now", this answers "what is this blessing worth to me", and
@@ -402,6 +413,9 @@ function StageEditor({
                 {lifeTotal != null && (
                   <span className="gear-stat gear-stat-lp">Total health: {lifeTotal.toLocaleString()} at 99 Hitpoints</span>
                 )}
+                {prayerTotal != null && (
+                  <span className="gear-stat gear-stat-prayer">Prayer bonus: {prayerTotal.toLocaleString()}</span>
+                )}
               </span>
             </div>
             {/* The two blessings with a stateable number of their own. Kept on
@@ -409,11 +423,11 @@ function StageEditor({
                 from, rather than crammed into that line - each needs its own
                 caveat (which multiplier, per hit, at which potion state) and
                 the totals line is already dense. */}
-            {(aegis || bigBonedBonus != null) && (
+            {(aegis || bigBonedBonus != null || icyeneBonus != null) && (
               <p className="create-build-blessing-note">
                 {aegis && (
                   <span className="create-build-blessing-line">
-                    <span className="gear-stat gear-stat-dmg">
+                    <span className="gear-stat gear-stat-aegis">
                       Teragard&apos;s Aegis: +{aegis.base.toLocaleString()} ability damage
                     </span>
                     <span className="create-build-blessing-detail">
@@ -427,10 +441,16 @@ function StageEditor({
                 )}
                 {bigBonedBonus != null && (
                   <span className="create-build-blessing-line">
-                    <span className="gear-stat gear-stat-dmg">
+                    <span className="gear-stat gear-stat-bigboned">
                       Big Boned: +{bigBonedBonus.toLocaleString()} bonus damage
                     </span>
                     <span className="create-build-blessing-detail"> per hit (5% of max life points)</span>
+                  </span>
+                )}
+                {icyeneBonus != null && (
+                  <span className="create-build-blessing-line">
+                    <span className="gear-stat gear-stat-icyenic">Icyenic Faith: +{icyeneBonus.toFixed(1)}% Crit &amp; Ability bonus</span>
+                    <span className="create-build-blessing-detail"> (0.2% per 1 prayer bonus)</span>
                   </span>
                 )}
               </p>
@@ -1027,6 +1047,7 @@ export default function CreateBuildPage({ onSubmitted, editing }) {
               selectedLeagueRelics={relicSelection.selected}
               blessings={blessingSelection.selected}
               archRelics={archRelicSelection.selected}
+              leagueRelics={relicSelection.selected}
               elderSources={elderSources}
               thumbnailPick={thumbnailPick}
               onPickThumbnail={pickThumbnail}

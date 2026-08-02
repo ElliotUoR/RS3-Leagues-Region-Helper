@@ -113,6 +113,39 @@ export function getAegisAbilityDamage(totalArmour, multiplier) {
   return Math.round(totalArmour * AEGIS_ARMOUR_SHARE * multiplier);
 }
 
+// Icyenic Faith (tier 7) grants the Tome of the Icyene - a pocket item worth
+// +50 Prayer bonus that also converts your TOTAL prayer bonus into damage:
+//
+//   "When worn, gain 0.2% critical strike chance per 1 Prayer bonus you have."
+//   "When worn, gain 0.2% base ability damage per 1 Prayer bonus you have."
+//
+// Both scale off the same number and at the same rate, so they are reported as
+// one figure rather than two identical ones.
+export const ICYENIC_FAITH_RELIC = 'Icyenic Faith';
+export const TOME_OF_THE_ICYENE = 'Tome of the Icyene';
+export const ICYENE_PERCENT_PER_PRAYER = 0.2;
+
+export function getTotalPrayerBonus(equipped) {
+  let total = 0;
+  for (const item of Object.values(equipped)) total += item.stats?.prayerBonus || 0;
+  return total;
+}
+
+// "WHEN WORN" is load-bearing, not decoration. Picking the relic grants the
+// tome; it only pays out while the tome is actually in the pocket slot. A
+// loadout with 40 prayer from other gear and no tome gets nothing, so quoting
+// 8% there would be inventing a bonus the build does not have.
+export function isIcyeneTomeWorn(equipped) {
+  return equipped?.pocket?.name === TOME_OF_THE_ICYENE;
+}
+
+// One decimal: prayer bonuses are whole numbers and 0.2% of one is 0.2%, so
+// anything finer is false precision.
+export function getIcyeneBonusPercent(equipped) {
+  if (!isIcyeneTomeWorn(equipped)) return null;
+  return Number((getTotalPrayerBonus(equipped) * ICYENE_PERCENT_PER_PRAYER).toFixed(1));
+}
+
 // Elder overloads are Meilyr potions: reachable via Tirannwn (Prifddinas) or
 // the Divine Druid league relic, which unlocks every Meilyr recipe. Derived
 // from a build's own picks rather than stored, so it stays correct when those

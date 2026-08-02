@@ -3195,6 +3195,37 @@ main.abilities-page .gear-item-rows {
   color: var(--stat-armour-color, #a8c5dd);
 }
 
+/* Bonus figures coloured by the thing that grants them, so a line is
+   identifiable before you read it. The blessing colours are the same hexes the
+   blessing cards and passives columns use (--bl-accent per colour), so Big
+   Boned is Guthix green and Teragard's Aegis is Saradomin blue wherever either
+   appears. Icyenic Faith is a league relic rather than a blessing, so it takes
+   a lighter blue of its own - close enough to read as kin to Aegis, far enough
+   apart to tell them apart on adjacent lines. */
+.gear-stat-bigboned {
+  color: var(--stat-bigboned-color, #3fbf6f);
+}
+
+.gear-stat-aegis {
+  color: var(--stat-aegis-color, #4a90e2);
+}
+
+.gear-stat-icyenic {
+  color: var(--stat-icyenic-color, #6fd3f7);
+}
+
+:root[data-theme='light'] .gear-stat-bigboned {
+  color: var(--stat-bigboned-color, #15803d);
+}
+
+:root[data-theme='light'] .gear-stat-aegis {
+  color: var(--stat-aegis-color, #1d4ed8);
+}
+
+:root[data-theme='light'] .gear-stat-icyenic {
+  color: var(--stat-icyenic-color, #0e7490);
+}
+
 .gear-stat-prayer {
   color: var(--stat-prayer-color, #f2f2f7);
 }
@@ -4550,7 +4581,10 @@ main.abilities-page .gear-item-rows {
   border-color: var(--border);
 }
 
+/* Sits directly under the Leagues effects expander - without the margin the
+   two buttons touch and read as one control. */
 .build-share-button {
+  margin-top: 10px;
   padding: 8px 14px;
   border: 1px solid var(--accent);
   border-radius: 6px;
@@ -7536,6 +7570,167 @@ main.abilities-page .gear-item-rows {
   }
 }
 
+/* ======================================================================
+   Animal Wrangler's "menagerie" drop table (RelicDropTablePanel.jsx,
+   dropTable.theme === 'menagerie') - a field-journal look: warm parchment-
+   on-forest palette, leaf-shaped category markers, tier chains written out
+   as an arrowed trail rather than an interactive widget (this table's
+   chains are informational, unlike Transmutation's chain-stepping relic
+   power, so they don't need Transmutation's hover-to-expand mechanic).
+   ====================================================================== */
+
+.drop-table-menagerie-modal {
+  --menagerie-leaf: #6fbf5a;
+  --menagerie-bark: #8a6a3f;
+  border-color: color-mix(in srgb, var(--menagerie-leaf) 35%, transparent);
+  background:
+    radial-gradient(120% 70% at 10% -10%, rgb(111 191 90 / 14%), transparent 55%),
+    radial-gradient(90% 60% at 100% 110%, rgb(138 106 63 / 16%), transparent 60%),
+    var(--panel-bg);
+}
+
+.drop-table-menagerie-heading {
+  margin-bottom: 4px;
+}
+
+.drop-table-menagerie-table {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--menagerie-leaf) 30%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--menagerie-leaf) 5%, transparent);
+}
+
+.drop-table-menagerie-table-head {
+  margin-bottom: 12px;
+}
+
+.drop-table-menagerie-table-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--menagerie-leaf);
+}
+
+.drop-table-menagerie-odds-note {
+  margin: 0;
+  font-size: 11.5px;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+.drop-table-menagerie-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+/* Explicit two-column layout (see MenagerieCategoryList) - flexbox rather
+   than a CSS grid with row-spanning, so column 2's two shorter cards just
+   stack with a normal gap instead of needing to line up row-for-row with
+   column 1's single taller one. */
+.drop-table-menagerie-columns {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.drop-table-menagerie-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drop-table-menagerie-category {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-bg-2, var(--panel-bg));
+}
+
+/* Nested inside a "Seeds"-style category (see leagueRelics.js's
+   `subcategories`) - flattened onto the parent's own background rather than
+   another nested card, so three subcategories don't read as three more
+   full-weight cards competing with the outer one. */
+.drop-table-menagerie-category.is-sub {
+  padding: 8px 0 0;
+  border: none;
+  background: none;
+}
+
+.drop-table-menagerie-subcategories {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drop-table-menagerie-category-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* A pressed leaf shape (two opposite corners rounded to a point) rather
+   than a plain dot or diamond - ties the marker to the relic's
+   farming/nature theme specifically instead of being generic decoration. */
+.drop-table-menagerie-leaf {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  background: var(--menagerie-leaf);
+  border-radius: 0 60% 0 60%;
+  transform: rotate(-20deg);
+}
+
+.drop-table-menagerie-category-name {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.drop-table-menagerie-quantity {
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--menagerie-bark);
+  opacity: 0.9;
+}
+
+:root[data-theme='light'] .drop-table-menagerie-quantity {
+  color: color-mix(in srgb, var(--menagerie-bark) 80%, black);
+}
+
+.drop-table-menagerie-chain {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
+.drop-table-menagerie-tags {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.drop-table-menagerie-tag {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--menagerie-bark) 40%, var(--border));
+  background: color-mix(in srgb, var(--menagerie-bark) 10%, transparent);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
 /* ---- user build voting / reporting / moderation ---- */
 
 .user-build-entry {
@@ -7946,4 +8141,210 @@ main.abilities-page .gear-item-rows {
 .tier-maker-cta-hint {
   font-size: 0.82rem;
   opacity: 0.75;
+}
+
+/* ==========================================================================
+   Leagues effects (components/LeaguesEffectsPanel.jsx) - the expander under a
+   build's loadout holding every figure its blessings and relics produce.
+   `--effects-accent` is the build's dominant blessing colour; the gradients
+   are its full colour balance, god power included (see utils/blessingTheme.js).
+   ========================================================================== */
+
+.leagues-effects {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* The gradient is the BACKGROUND of the button, dimmed hard so the label stays
+   readable over any colour mix - a full-strength blessing gradient behind
+   13px text is unreadable at every combination. */
+.leagues-effects-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid color-mix(in srgb, var(--effects-accent, var(--accent)) 55%, transparent);
+  border-radius: 8px;
+  background-color: var(--panel-bg);
+  background-blend-mode: overlay;
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  isolation: isolate;
+  transition: border-color 140ms, box-shadow 140ms;
+}
+
+/* Dims the gradient without touching the text, which sits above it. */
+.leagues-effects-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--panel-bg);
+  opacity: 0.78;
+  z-index: -1;
+}
+
+.leagues-effects-toggle:hover,
+.leagues-effects-toggle.open {
+  border-color: var(--effects-accent, var(--accent));
+  box-shadow: 0 0 14px -5px var(--effects-accent, var(--accent));
+}
+
+.leagues-effects-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--effects-accent, var(--accent));
+}
+
+.leagues-effects-chevron {
+  margin-left: 2px;
+  opacity: 0.8;
+}
+
+.leagues-effects-panel {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-bg);
+}
+
+/* The build's colour balance as a bar across the top of the panel. */
+.leagues-effects-bar {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+}
+
+.leagues-effects-potions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 12px;
+}
+
+.leagues-effects-potion {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.leagues-effects-potion:hover {
+  border-color: var(--effects-accent, var(--accent));
+}
+
+.leagues-effects-potion.active {
+  border-color: var(--effects-accent, var(--accent));
+  background: color-mix(in srgb, var(--effects-accent, var(--accent)) 18%, transparent);
+  color: var(--text-h);
+}
+
+.leagues-effects-potion-defence {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.leagues-effects-elder-note {
+  font-size: 0.72rem;
+  opacity: 0.65;
+}
+
+.leagues-effects-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+}
+
+.leagues-effects-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* Label left, figure right - a column of values lines up for comparison in a
+   way a run of sentences never does. The note sits underneath rather than
+   alongside: this panel is in the ~260px loadout column, where a third item on
+   the line shreds into fragments. */
+.leagues-effects-row-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.8rem;
+}
+
+.leagues-effects-row-main dt {
+  opacity: 0.85;
+}
+
+.leagues-effects-row-main dd {
+  margin: 0;
+  text-align: right;
+}
+
+.leagues-effects-row-main dd strong {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.leagues-effects-note {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  opacity: 0.6;
+}
+
+/* Localhost-only admin switch (components/AdminDevToggle.jsx). Fixed top-right
+   so it never moves between pages, and out of the way of the admin badge in
+   the opposite corner. Compiled out of any production build. */
+.admin-dev-toggle {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 900;
+  padding: 4px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+.admin-dev-toggle:hover:not(:disabled) {
+  opacity: 1;
+  border-color: var(--accent);
+}
+
+.admin-dev-toggle.is-admin {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+  opacity: 1;
+}
+
+.admin-dev-toggle:disabled {
+  cursor: wait;
 }

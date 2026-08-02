@@ -5,7 +5,11 @@ import { trackUsage } from '../utils/api';
 
 // Extra class on the modal shell for themes that restyle the whole panel
 // rather than just its contents.
-const THEME_MODAL_CLASS = { forge: ' drop-table-forge-panel', void: ' drop-table-void-modal' };
+const THEME_MODAL_CLASS = {
+  forge: ' drop-table-forge-panel',
+  void: ' drop-table-void-modal',
+  menagerie: ' drop-table-menagerie-modal',
+};
 
 // Per-item stagger delay for AlchemyCategoryCard's expand/collapse animation,
 // scaled down as chain length grows so the whole sequence always finishes
@@ -508,6 +512,100 @@ function VoidDropTable({ dropTable }) {
   );
 }
 
+// Animal Wrangler's rendering (dropTable.theme === 'menagerie'). Its own
+// component for the same reason HerbloreDropTable/VoidDropTable are: the
+// generic path stays untouched.
+//
+// The design problem here is different from the other four tables again:
+// this relic genuinely has TWO independent tables (a 33%-per-roll gathering
+// table, and a separate equal-chance farm-animal gift table), and one of
+// those tables (Seeds) is itself three named groups rolled as a single flat
+// pool rather than three separate sub-tables - see the `subcategories`
+// shape in leagueRelics.js. So the layout is a field-journal style: each
+// table gets its own earthy card with a stated odds note, and categories
+// inside read as journal entries - a tier chain shown as an arrowed trail
+// (reusing the same "→" string convention Superheated/Transmutation already
+// use in `detail`, not a new interactive widget), or a flat list shown as a
+// row of small pressed leaf-shaped tags.
+function MenagerieCategory({ category, isSub }) {
+  return (
+    <div className={`drop-table-menagerie-category${isSub ? ' is-sub' : ''}`}>
+      <div className="drop-table-menagerie-category-head">
+        <span className="drop-table-menagerie-leaf" aria-hidden="true" />
+        <span className="drop-table-menagerie-category-name">{category.name ?? category.label}</span>
+        <span className="drop-table-menagerie-quantity">×{category.quantity}</span>
+      </div>
+      {category.detail && <p className="drop-table-menagerie-chain">{category.detail}</p>}
+      {category.items && (
+        <ul className="drop-table-menagerie-tags">
+          {category.items.map((item) => (
+            <li key={item} className="drop-table-menagerie-tag">
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
+      {category.subcategories && (
+        <div className="drop-table-menagerie-subcategories">
+          {category.subcategories.map((sub) => (
+            <MenagerieCategory key={sub.label} category={sub} isSub />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Renders a table's categories either as an auto-fitting row (the default -
+// see Farm Animals, whose two categories are naturally the same weight), or
+// as two explicit stacked columns when any category names one via `column`
+// (see Gathering table's `Seeds` sitting alone in column 1, and Clean
+// Herbs/Wood Spirits stacked together in column 2 - a plain auto-fit row
+// would put all three side by side as equal-width cards, which buries that
+// Seeds is the one with three subcategories underneath it).
+function MenagerieCategoryList({ categories }) {
+  const hasColumns = categories.some((category) => category.column != null);
+  if (!hasColumns) {
+    return (
+      <div className="drop-table-menagerie-categories">
+        {categories.map((category) => (
+          <MenagerieCategory key={category.name} category={category} />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="drop-table-menagerie-columns">
+      {[1, 2].map((columnNumber) => (
+        <div key={columnNumber} className="drop-table-menagerie-column">
+          {categories
+            .filter((category) => category.column === columnNumber)
+            .map((category) => (
+              <MenagerieCategory key={category.name} category={category} />
+            ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MenagerieDropTable({ dropTable }) {
+  return (
+    <div className="drop-table-menagerie-panel">
+      <h3 className="relic-drop-table-heading drop-table-menagerie-heading">{dropTable.heading}</h3>
+      {dropTable.tables.map((table) => (
+        <section key={table.title} className="drop-table-menagerie-table">
+          <div className="drop-table-menagerie-table-head">
+            <h4 className="drop-table-menagerie-table-title">{table.title}</h4>
+            <p className="drop-table-menagerie-odds-note">{table.oddsNote}</p>
+          </div>
+          <MenagerieCategoryList categories={table.categories} />
+        </section>
+      ))}
+    </div>
+  );
+}
+
 export default function RelicDropTablePanel({ dropTable, relicName }) {
   const [open, setOpen] = useState(false);
 
@@ -560,6 +658,8 @@ export default function RelicDropTablePanel({ dropTable, relicName }) {
     panelContent = <HerbloreDropTable dropTable={dropTable} />;
   } else if (dropTable.theme === 'void') {
     panelContent = <VoidDropTable dropTable={dropTable} />;
+  } else if (dropTable.theme === 'menagerie') {
+    panelContent = <MenagerieDropTable dropTable={dropTable} />;
   } else if (dropTable.theme === 'alchemy') {
     panelContent = (
       <>

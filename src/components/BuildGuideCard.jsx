@@ -19,11 +19,14 @@ import { PRAYER_GROUPS, SPELLBOOK_GROUPS } from '../data/spellbooks';
 import { FIXED_REGIONS, GATEWAY_REGIONS, REGIONS } from '../data/regions';
 import { normalizeRegionGroups } from '../data/gearAvailability';
 import {
+  ICYENIC_FAITH_RELIC,
   equippedItemsFor,
   getAegisFromArmour,
   getBigBonedBonusDamage,
   getElderOverloadSources,
+  getIcyeneBonusPercent,
   getTotalLifePoints,
+  getTotalPrayerBonus,
 } from '../utils/gearStats';
 import { copyShareLink, shareLinkFor } from '../utils/shareLink';
 import { saveBuildText } from '../utils/buildTextEdit';
@@ -256,6 +259,12 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
         })
       : null;
   const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
+
+  const icyeneEquipped = loadout && build.relics.includes(ICYENIC_FAITH_RELIC)
+    ? equippedItemsFor(style, loadout.slots)
+    : null;
+  const prayerTotal = icyeneEquipped ? getTotalPrayerBonus(icyeneEquipped) : null;
+  const icyeneBonus = icyeneEquipped ? getIcyeneBonusPercent(icyeneEquipped) : null;
 
   // Detected from the relic data rather than hardcoded, so adding an
   // artefact-gated relic to any build surfaces the explanation automatically.
@@ -534,8 +543,11 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                     armourTotalElder={elderSources.length ? loadout.armourTotalElder : null}
                     elderSources={elderSources}
                     lifeTotal={lifeTotal}
+                    prayerTotal={prayerTotal}
                     aegis={aegis}
                     bigBonedBonus={bigBonedBonus}
+                    blessings={build.blessings}
+                    icyeneBonus={icyeneBonus}
                     isUnlocked={buildIsUnlocked}
                     selectedLeagueRelics={build.relics}
                   />

@@ -274,6 +274,16 @@ export const GEAR_SET_GROUPS = {
   'Primeval gloves': 'Primeval armour',
   'Primeval boots': 'Primeval armour',
 
+  // Achto Primeval is its own set, not combined with plain Primeval above -
+  // same tiered-family rule as Teralith/Achto Teralith and Tempest/Achto
+  // Tempest elsewhere in this file. Identical stats to plain Primeval; the
+  // only real difference is Achto pieces can't be Augmented.
+  'Achto Primeval mask': 'Achto Primeval armour',
+  'Achto Primeval robe top': 'Achto Primeval armour',
+  'Achto Primeval robe legs': 'Achto Primeval armour',
+  'Achto Primeval gloves': 'Achto Primeval armour',
+  'Achto Primeval boots': 'Achto Primeval armour',
+
   'Hood of subjugation': 'Subjugation armour',
   'Garb of subjugation': 'Subjugation armour',
   'Gown of subjugation': 'Subjugation armour',

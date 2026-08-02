@@ -12,9 +12,13 @@ import {
   LIFE_SCALING_BLESSINGS,
   getAegisBreakdown,
   getBigBonedBonusDamage,
+  ICYENIC_FAITH_RELIC,
+  OVERLOAD_DEFENCE_BONUS,
   getElderOverloadSources,
+  getIcyeneBonusPercent,
   getTotalArmour,
   getTotalLifePoints,
+  getTotalPrayerBonus,
 } from '../utils/gearStats';
 import { hasEditAccess } from '../utils/myBuilds';
 
@@ -90,11 +94,20 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
   const showArmour = build.blessings.some((name) => ARMOUR_SCALING_BLESSINGS.has(name));
   const showHealth = build.blessings.some((name) => LIFE_SCALING_BLESSINGS.has(name));
   const armourTotal = loadout && showArmour ? getTotalArmour(equipped, style, 99) : null;
+  // The panel's potion toggle needs a figure to switch to. Elder is only
+  // computed when the build can actually brew one.
+  const armourOverloaded =
+    armourTotal != null ? getTotalArmour(equipped, style, 99 + OVERLOAD_DEFENCE_BONUS.overload) : null;
   const lifeTotal =
     loadout && showHealth
       ? getTotalLifePoints(equipped, { bigBoned: true, archRelics: build.archRelics })
       : null;
   const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
+
+  // Prayer bonus only matters to a build that picked Icyenic Faith.
+  const showPrayer = loadout && build.relics.includes(ICYENIC_FAITH_RELIC);
+  const prayerTotal = showPrayer ? getTotalPrayerBonus(equipped) : null;
+  const icyeneBonus = showPrayer ? getIcyeneBonusPercent(equipped) : null;
 
   // Teragard's Aegis reads TOTAL armour, so it moves with a Defence boost -
   // and with what is in the off-hand, which decides the x1/x2/x3 multiplier.
@@ -249,12 +262,19 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
                   slots={loadout.slots}
                   eof={loadout.eof}
                   armourTotal={armourTotal}
-                  armourTotalOverloaded={null}
-                  armourTotalElder={null}
+                  armourTotalOverloaded={armourOverloaded}
+                  armourTotalElder={
+                    armourTotal != null && elderSources.length > 0
+                      ? getTotalArmour(equipped, style, 99 + OVERLOAD_DEFENCE_BONUS.elder)
+                      : null
+                  }
                   elderSources={elderSources}
                   lifeTotal={lifeTotal}
+                  prayerTotal={prayerTotal}
                   aegis={aegis}
                   bigBonedBonus={bigBonedBonus}
+                  blessings={build.blessings}
+                  icyeneBonus={icyeneBonus}
                   isUnlocked={buildIsUnlocked}
                   selectedLeagueRelics={build.relics}
                 />

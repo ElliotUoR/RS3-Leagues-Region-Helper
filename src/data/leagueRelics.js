@@ -590,6 +590,105 @@ export const LEAGUE_RELICS = [
       'Farm animals are 20x more common from their sources.',
     ],
     icon: FP('Animal_Wrangler.png'),
+    // Two independent tables, both app-supplied (not on the wiki - this
+    // relic isn't confirmed there yet): the 33%-per-roll gathering table
+    // from the "clean herb/seed" effect bullet above, and the farm-animal
+    // gift table from the "random farm animal" bullet. `theme: 'menagerie'`
+    // opts into RelicDropTablePanel.jsx's bespoke nature/field-journal
+    // rendering rather than the generic flat-list one every other relic's
+    // table uses, since this one genuinely has two separate tables (not one
+    // flat list), and one of those (Seeds) is itself three named groups
+    // rolled as a single pool rather than three separate sub-tables.
+    //
+    // Herb/seed tier chain matches the one already verified for
+    // Transmutation's own dropTable above (search this file for
+    // "Wergali" if that ever needs re-confirming) - Farming's herb line
+    // genuinely does run through those less-common names between Torstol
+    // and Fellstalk, this isn't a typo.
+    dropTable: {
+      heading: 'Animal Wrangler drop tables',
+      footerText: 'drop tables',
+      theme: 'menagerie',
+      tables: [
+        {
+          title: 'Gathering table',
+          oddsNote:
+            'Equal 33% chance to roll each of the three tables below when catching fish, capturing Hunter creatures, or harvesting farm animals; within a table every drop is equally likely.',
+          // `column` groups these into two explicit stacked columns rather
+          // than however-many-fit-per-row: Seeds alone in column 1 (it's the
+          // tallest, with three subcategories), Clean Herbs + Wood Spirits
+          // stacked in column 2 - see MenagerieDropTable/index.css's
+          // .drop-table-menagerie-columns.
+          categories: [
+            {
+              name: 'Seeds',
+              column: 1,
+              quantity: 'varies by seed - see below',
+              // These three groups are NOT three separate 33%-each
+              // sub-tables - every seed across all three is one flat,
+              // equal-chance pool (see the relic's own effects bullet).
+              subcategories: [
+                {
+                  label: 'Herb Seeds',
+                  quantity: '1-3',
+                  detail:
+                    'Guam seed → Marrentill seed → Tarromin seed → Harralander seed → Ranarr seed → Spirit weed seed → Toadflax seed → Irit seed → Wergali seed → Avantoe seed → Kwuarm seed → Bloodweed seed → Snapdragon seed → Cadantine seed → Lantadyme seed → Arbuck seed → Dwarf weed seed → Torstol seed → Fellstalk seed',
+                },
+                {
+                  // Plain text, not pill tags - unlike Manor Farm/Anachronia's
+                  // animal lists below, this is a flat unordered list with no
+                  // tier meaning, and keeping it as text (matching Clean
+                  // Herbs/Wood Spirits' own chains) avoids the pill styling
+                  // making this one subcategory visually heavier than its
+                  // siblings for no reason.
+                  label: 'Tree Seeds',
+                  quantity: '1',
+                  detail: 'Acorn, Willow seed, Maple seed, Yew seed, Magic seed, Spirit tree seed',
+                },
+                {
+                  label: 'Fruit Tree Seeds',
+                  quantity: '1',
+                  detail: 'Apple seed, Banana seed, Orange seed, Curry seed, Pineapple seed, Papaya seed, Palm seed, Calquat seed',
+                },
+              ],
+            },
+            {
+              name: 'Clean Herbs',
+              column: 2,
+              quantity: '1-3',
+              detail:
+                'Guam → Marrentill → Tarromin → Harralander → Ranarr → Spirit weed → Toadflax → Irit → Wergali → Avantoe → Kwuarm → Bloodweed → Snapdragon → Cadantine → Lantadyme → Arbuck → Dwarf weed → Torstol → Fellstalk',
+            },
+            {
+              name: 'Wood Spirits',
+              column: 2,
+              quantity: '5-10',
+              detail:
+                'Wood spirit → Oak wood spirit → Willow wood spirit → Teak wood spirit → Maple wood spirit → Acadia wood spirit → Mahogany wood spirit → Yew wood spirit → Magic wood spirit → Elder wood spirit → Eternal magic wood spirit',
+            },
+          ],
+        },
+        {
+          title: 'Farm Animals',
+          oddsNote: 'Equal chance between every animal below, regardless of which farm it comes from.',
+          categories: [
+            {
+              name: 'Manor Farm',
+              quantity: '1',
+              items: ['Rabbit', 'Chicken', 'Chinchompa', 'Sheep', 'Spider', 'Zygomite', 'Cow', 'Yak', 'Dragon'],
+            },
+            {
+              name: 'Anachronia Dinosaur Farm',
+              quantity: '1',
+              items: [
+                'Varanusaur', 'Brutish dinosaur', 'Apoterrasaur', 'Scimitops', 'Asciatops', 'Malletops',
+                'Bagrada rex', 'Corbicula rex', 'Pavosaurus rex', 'Frog', 'Salamander', 'Jadinko',
+              ],
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     // Transcribed from the reveal image directly (not the wiki - not
@@ -605,8 +704,14 @@ export const LEAGUE_RELICS = [
     //
     // Icon is a manually-cropped reveal-image icon, same situation as
     // Animal Wrangler above.
+    //
+    // TIER 7, and currently the only relic at it - so it is the only thing you
+    // can activate in that tier, but nothing forces the pick. Both fall out of
+    // the existing one-per-tier rule (see hooks/useLeagueRelicSelection.js):
+    // a tier with a single member has exactly one option, and a relic is only
+    // ever selected by clicking it.
     name: 'Icyenic Faith',
-    tier: null,
+    tier: 7,
     summary:
       'Grants the Tome of the Icyene: +50 Prayer bonus, 0.2% crit chance and ability damage per Prayer bonus, and makes protection prayers/Deflect curses block 50% more damage while also acting as Soul Split.',
     effects: [

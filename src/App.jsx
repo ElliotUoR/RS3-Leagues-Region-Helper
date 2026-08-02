@@ -11,6 +11,7 @@ import CreateBuildPage from './pages/CreateBuildPage';
 import UserBuildsPage from './pages/UserBuildsPage';
 import TierListMakerPage from './pages/TierListMakerPage';
 import SharedTierListPage from './pages/SharedTierListPage';
+import AdminDevToggle from './components/AdminDevToggle';
 import EditBuildPage from './pages/EditBuildPage';
 import RelicImportDocsPage from './pages/RelicImportDocsPage';
 import ReportIssueButton from './components/ReportIssueButton';
@@ -504,6 +505,7 @@ function App() {
   return (
     <div className="app">
       {isAdmin && <div className="admin-badge">Logged in as admin</div>}
+      <AdminDevToggle isAdmin={isAdmin} />
       <AppContent
         key={`${sharedBuild ? 'shared' : 'own'}-${contentGeneration}`}
         route={route}

@@ -1,4 +1,5 @@
 import EquipmentSlot from './EquipmentSlot';
+import LeaguesEffectsPanel from './LeaguesEffectsPanel';
 import { ESSENCE_OF_FINALITY_NAMES, GEAR } from '../data/gear';
 
 // Non-interactive twin of the gear planner's equipment grid, used by the
@@ -63,8 +64,11 @@ export default function ReadOnlyLoadout({
   armourTotalElder,
   elderSources,
   lifeTotal,
+  prayerTotal,
   aegis,
   bigBonedBonus,
+  icyeneBonus,
+  blessings,
   isUnlocked,
   selectedLeagueRelics,
 }) {
@@ -103,103 +107,19 @@ export default function ReadOnlyLoadout({
           />
         ))}
       </div>
-      {armourTotal != null && (
-        <p className="read-only-loadout-armour">
-          {/* Same colour coding the gear planner's own stat line uses
-              (.gear-stat-armour / .gear-stat-lp) - armour is armour-blue and
-              health is life-green wherever either number appears. */}
-          Total armour <strong className="gear-stat-armour">{armourTotal.toLocaleString()}</strong>
-          <span className="read-only-loadout-armour-note"> at 99 Defence</span>
-          {/* Armour from the Defence skill is D^3/1250 + 4D + 40, so a boost to
-              Defence is worth a lot of armour: +17 from a normal overload is
-              ~+540, and +25 from an ELDER overload is ~+849. Four blessings
-              scale off total armour and you are overloaded for essentially all
-              PvM, so the boosted figures are the honest ones for DPS. */}
-          {armourTotalOverloaded != null && (
-            <>
-              <br />
-              <strong className="read-only-loadout-armour-ovl">{armourTotalOverloaded.toLocaleString()}</strong>
-              <span className="read-only-loadout-armour-note"> overloaded (+17)</span>
-            </>
-          )}
-          {armourTotalElder != null && (
-            <>
-              <br />
-              <strong className="read-only-loadout-armour-elder">{armourTotalElder.toLocaleString()}</strong>
-              <span className="read-only-loadout-armour-note">
-                {' '}elder overloaded (+25)
-                {elderSources?.length ? ` - via ${elderSources.join(' or ')}` : ''}
-              </span>
-            </>
-          )}
-        </p>
-      )}
-      {/* Teragard's Aegis turns armour into base ability damage, so it belongs
-          directly under the armour it is derived from. Quoted at each potion
-          state for the same reason the armour above is: you are overloaded for
-          essentially all PvM, and the unboosted figure is the one you will
-          never actually be hitting at. */}
-      {aegis && (
-        <p className="read-only-loadout-armour">
-          Ability damage <strong className="gear-stat-dmg">+{aegis.base.toLocaleString()}</strong>
-          <span className="read-only-loadout-armour-note">
-            {' '}from Teragard's Aegis ({aegis.multiplier}x, {aegis.source})
-          </span>
-          {/* The armour each boosted figure came from, in armour colour, so it
-              is obvious at a glance which number is the cause and which is the
-              effect - and so an overloaded bonus is never sitting next to an
-              unboosted armour total with no way to check it divides. */}
-          {aegis.overloaded != null && (
-            <>
-              <br />
-              <strong className="read-only-loadout-armour-ovl">+{aegis.overloaded.toLocaleString()}</strong>
-              <span className="read-only-loadout-armour-note"> overloaded</span>
-              {aegis.armour?.overloaded != null && (
-                <span className="read-only-loadout-aegis-armour">
-                  {' '}({aegis.armour.overloaded.toLocaleString()} armour)
-                </span>
-              )}
-            </>
-          )}
-          {aegis.elder != null && (
-            <>
-              <br />
-              <strong className="read-only-loadout-armour-elder">+{aegis.elder.toLocaleString()}</strong>
-              <span className="read-only-loadout-armour-note"> elder overloaded</span>
-              {aegis.armour?.elder != null && (
-                <span className="read-only-loadout-aegis-armour">
-                  {' '}({aegis.armour.elder.toLocaleString()} armour)
-                </span>
-              )}
-              {elderSources?.length ? (
-                <span className="read-only-loadout-armour-note"> - via {elderSources.join(' or ')}</span>
-              ) : null}
-            </>
-          )}
-        </p>
-      )}
-
-      {/* Only ever passed by a user-submitted build (see UserBuildCard) whose
-          author picked Big Boned - that's the one blessing that reads its
-          value straight off total life points, so it's the only case this
-          number is worth showing at all. Curated builds never pass it. */}
-      {lifeTotal != null && (
-        <p className="read-only-loadout-armour">
-          Total health <strong className="gear-stat-lp">{lifeTotal.toLocaleString()}</strong>
-          <span className="read-only-loadout-armour-note"> at 99 Hitpoints</span>
-        </p>
-      )}
-
-      {/* Big Boned's bonus damage is a flat share of the health total above, so
-          it sits under it. Per HIT, not per ability - a multi-hit ability
-          collects it once per hit, which is most of why the blessing is worth
-          taking. */}
-      {bigBonedBonus != null && (
-        <p className="read-only-loadout-armour">
-          Bonus damage <strong className="gear-stat-dmg">+{bigBonedBonus.toLocaleString()}</strong>
-          <span className="read-only-loadout-armour-note"> per hit, from Big Boned</span>
-        </p>
-      )}
+      {/* Every figure these blessings and relics produce, behind one button -
+          see LeaguesEffectsPanel. The potion state is a toggle there rather
+          than three rows of numbers here. */}
+      <LeaguesEffectsPanel
+        blessings={blessings}
+        armour={{ none: armourTotal, overload: armourTotalOverloaded, elder: armourTotalElder }}
+        aegis={aegis && { multiplier: aegis.multiplier, source: aegis.source, none: aegis.base, overload: aegis.overloaded, elder: aegis.elder }}
+        elderSources={elderSources}
+        lifeTotal={lifeTotal}
+        bigBonedBonus={bigBonedBonus}
+        prayerTotal={prayerTotal}
+        icyeneBonus={icyeneBonus}
+      />
     </figure>
   );
 }

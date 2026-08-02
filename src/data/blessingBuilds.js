@@ -933,7 +933,7 @@ export const LEAGUE_RELIC_TIER_LIST = {
       note: 'Just revealed - not yet assessed for combat viability. A skilling/Hunter-focused relic on its face; no obvious combat impact yet.',
     },
     {
-      name: 'Icyenic Faith', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      name: 'Icyenic Faith', relicTier: 7, grade: 'unranked', unlocksGear: 0,
       note: 'Just revealed - not yet assessed for combat viability. Scales crit chance and ability damage off Prayer bonus, and makes protection prayers/Deflect curses block 50% more damage while doubling as Soul Split - looks like it could be strong, but needs real numbers worked out first.',
     },
   ],
