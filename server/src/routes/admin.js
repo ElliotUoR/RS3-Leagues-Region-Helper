@@ -44,9 +44,26 @@ const COOKIE_OPTIONS = {
 // Only 5 attempts per 15 minutes - this guards a single shared password, so
 // the usual per-IP report-issue-style limit (see reportIssue.js) would be
 // far too generous here.
+//
+// DEV_RELAXED_RATE_LIMITS lifts it for local development, where flipping admin
+// on and off is a normal thing to do several times a minute (see the localhost
+// admin toggle in the app) and five attempts per quarter hour makes that
+// unusable. Set only in server/.env.dev.example; production never sets it.
+//
+// Deliberately an ENV VAR rather than "skip when req.ip is loopback". This
+// service sits behind Caddy with `trust proxy: 1`, so req.ip comes from the
+// X-Forwarded-For header - which a client controls. Trusting it here would let
+// anyone on the internet turn off the brute-force limiter on the one password
+// guarding the admin API by sending `X-Forwarded-For: 127.0.0.1`.
+const RELAXED_RATE_LIMITS = process.env.DEV_RELAXED_RATE_LIMITS === 'true';
+
+if (RELAXED_RATE_LIMITS) {
+  console.warn('DEV_RELAXED_RATE_LIMITS is on - admin login rate limiting is effectively disabled.');
+}
+
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 5,
+  limit: RELAXED_RATE_LIMITS ? 1000 : 5,
   standardHeaders: true,
   legacyHeaders: false,
 });

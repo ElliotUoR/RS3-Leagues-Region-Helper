@@ -87,6 +87,22 @@ That sets the `rs3_admin_session` cookie. Admin-only behaviour worth exercising:
 hidden user builds, the moderation toggle, and the fact that an admin's votes
 and pageviews are deliberately not counted.
 
+Easier: the app itself has an **Admin: on/off** button in the top right when
+served from localhost, which logs in and out in one click. It is compiled out of
+any production build (`import.meta.env.DEV`).
+
+Logging in is rate-limited to 5 attempts per 15 minutes in production, which
+that button exhausts in seconds - after which it fails with a 429 that looks
+like the API being down. `DEV_RELAXED_RATE_LIMITS=true` in `server/.env` lifts
+it locally, and `.env.dev.example` sets it already.
+
+It is an env var rather than "skip the limit for localhost requests" on purpose:
+this service runs behind Caddy with `trust proxy: 1`, so `req.ip` comes from an
+`X-Forwarded-For` header the client controls. Skipping on a loopback IP would
+let anyone on the internet disable brute-force protection on the one password
+guarding the admin API by sending `X-Forwarded-For: 127.0.0.1`. Never set this
+variable in production.
+
 ## What to check before pushing
 
 The bugs this catches are the ones that only exist when a real database is

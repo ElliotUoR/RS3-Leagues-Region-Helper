@@ -45,8 +45,18 @@ export default function AdminDevToggle({ isAdmin }) {
           if (!typed) return;
           res = await login(typed);
         }
+        if (res.status === 429) {
+          // The most likely failure by far once you have been toggling for a
+          // while, and the one an "is the API running?" message sends you
+          // hunting in entirely the wrong place.
+          window.alert(
+            'Rate limited by the admin login endpoint (5 attempts per 15 minutes).\n\n' +
+              'Set DEV_RELAXED_RATE_LIMITS=true in server/.env and restart the API to lift this locally.',
+          );
+          return;
+        }
         if (!res.ok) {
-          window.alert('Could not log in as admin - is the API running on :3000?');
+          window.alert(`Admin login failed (HTTP ${res.status}).`);
           return;
         }
       }
