@@ -73,7 +73,7 @@ export const ASSUMPTION_GROUPS = [
       },
       {
         title: 'Mazcab -> Kharidian Desert',
-        detail: 'Mazcab (Beastmaster Durzag, the Menaphite Pantheon raid) is folded into Kharidian Desert.',
+        detail: 'Mazcab (Beastmaster Durzag, Yakamaru) is folded into Kharidian Desert.',
       },
       {
         title: 'Troll Country / God Wars Dungeon -> Asgarnia',
