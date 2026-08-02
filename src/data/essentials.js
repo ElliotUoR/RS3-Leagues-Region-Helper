@@ -71,7 +71,7 @@ export const ESSENTIALS = [
     icon: FP('Ancient_elven_ritual_shard.png'),
     summary: 'Restores prayer points on a short cooldown, forever.',
     why:
-      'Restores up to 375 prayer points every 30 seconds.',
+      'Restores up to 375 prayer points over 30 seconds. 5 minute cooldown.',
     source: { region: 'tirannwn', detail: 'From the Prifddinas ritual site, Tirannwn.' },
   },
   {
