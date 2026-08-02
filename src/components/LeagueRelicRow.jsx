@@ -18,23 +18,36 @@ function relicWikiUrl(relic) {
 // the tags shrinks in compact mode (per the "keep the tags, summarise the
 // words around them" brief), the tags/pills themselves are identical.
 function RegionTagNote({ note, compact }) {
+  const pills = note.tags.map((tag) => {
+    const customColor = RESOURCE_TAG_COLORS[tag];
+    return (
+      <span
+        key={tag}
+        className="region-tag region-tag-resource region-tag-resource-unlocked"
+        style={customColor ? { '--resource-color': customColor } : undefined}
+      >
+        {tag}
+      </span>
+    );
+  });
+
+  // Compact cards put the label on its own line above the pills rather than
+  // inline in front of them. Inline, a relic with four tags wrapped into a
+  // ragged block whose first row started at a different x than every card
+  // beside it; stacked, every card's pills start at the same edge no matter
+  // how many there are.
+  if (compact) {
+    return (
+      <li className="league-relic-tag-note league-relic-tag-note-compact">
+        <span className="league-relic-tag-label">Can obtain</span>
+        <span className="league-relic-tag-pills">{pills}</span>
+      </li>
+    );
+  }
+
   return (
     <li className="league-relic-tag-note">
-      {compact ? 'Can obtain:' : note.prefix}{' '}
-      {note.tags.map((tag) => {
-        const customColor = RESOURCE_TAG_COLORS[tag];
-        return (
-          <span
-            key={tag}
-            className="region-tag region-tag-resource region-tag-resource-unlocked"
-            style={customColor ? { '--resource-color': customColor } : undefined}
-          >
-            {tag}
-          </span>
-        );
-      })}
-      {!compact && ' '}
-      {!compact && note.suffix}
+      {note.prefix} {pills} {note.suffix}
     </li>
   );
 }

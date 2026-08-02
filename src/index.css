@@ -2310,39 +2310,133 @@ main.abilities-page .gear-item-rows {
   }
 }
 
+/* EQUAL-HEIGHT CARDS. .gear-item-rows sets align-items: start for the gear
+   grid, where a card is only as tall as its content - which for these relic
+   cards means three neighbours of wildly different heights, drop-table buttons
+   floating at three different depths, and a row that reads as debris.
+   Stretching them is safe here because the card below is a flex COLUMN with an
+   explicit filler, so the extra height goes into the summary rather than
+   leaving the content stranded at the top.
+   `:has()` rather than a modifier class so this cannot be forgotten at a third
+   render site - the League Relics page and the build editor both build this
+   grid themselves. */
+.gear-item-rows.compact:has(.league-relic-row-compact) {
+  align-items: stretch;
+  gap: 10px;
+}
+
+/* Gold, not the site accent - league relic selection is deliberately gold to
+   stay distinct from Arch relics' blue (see .league-relic-row.selected above),
+   and this rule sits later in the file so it would otherwise silently win and
+   undo that. Hover uses the same hue at lower strength so the card reads as
+   heading towards the selected state rather than towards some other one. */
+.league-relic-row-compact {
+  --relic-gold: #d4af37;
+  height: 100%;
+  border-radius: 10px;
+  transition: border-color 150ms, box-shadow 150ms, transform 150ms;
+}
+
+.league-relic-row-compact:hover {
+  border-color: color-mix(in srgb, var(--relic-gold) 45%, var(--border));
+  box-shadow: 0 4px 16px -11px var(--relic-gold);
+  transform: translateY(-1px);
+}
+
+.league-relic-row-compact.selected {
+  border-color: color-mix(in srgb, var(--relic-gold) 55%, var(--border));
+  background: color-mix(in srgb, var(--relic-gold) 10%, var(--panel-bg));
+}
+
+/* Fills the card so the pinning below has a full-height box to work in. */
 .league-relic-row-main-compact {
-  gap: 4px;
-  padding: 8px 10px;
+  flex: 1;
+  gap: 8px;
+  padding: 12px 13px;
 }
 
 .league-relic-compact-top {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
 }
 
+/* A fixed tile behind every icon. The source art is inconsistent - some crops
+   are wide, some tall, several are dark enough to vanish against the panel - so
+   without a common frame the titles beside them sat at a different x on every
+   card in the row. */
 .league-relic-compact-top .retry-image,
 .league-relic-compact-top .league-relic-icon-placeholder {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
+  padding: 3px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 
+.league-relic-row-compact.selected .league-relic-compact-top .retry-image {
+  background: color-mix(in srgb, var(--relic-gold) 22%, transparent);
+}
+
+.league-relic-compact-top .gear-item-name {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+/* The filler. Taking the slack means the tag block and the drop-table button
+   below it end up on the card's bottom edge, so they line up across the row
+   instead of floating wherever each card's prose happened to end. */
 .league-relic-summary {
+  flex: 1;
   margin: 0;
   font-size: 11.5px;
   font-weight: 500;
-  line-height: 1.35;
-  opacity: 0.8;
+  line-height: 1.45;
+  opacity: 0.78;
 }
 
 .league-relic-effects-compact {
   padding-left: 0;
   gap: 0;
+  margin-top: 2px;
 }
 
 .league-relic-effects-compact .league-relic-tag-note {
   font-size: 11px;
+}
+
+/* Label above, pills below - see RegionTagNote's compact branch for why. */
+.league-relic-tag-note-compact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.league-relic-tag-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.league-relic-tag-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* The button's own top margin is dropped - the main button's padding already
+   provides the gap, and with equal-height cards the toggles now sit on a shared
+   baseline across the row, which a second margin would only nudge out of line. */
+.league-relic-row-compact .relic-drop-table-toggle {
+  width: calc(100% - 26px);
+  margin: 0 13px 13px;
 }
 
 /* Relic drop/resource-conversion table (see RelicDropTablePanel.jsx) - the
