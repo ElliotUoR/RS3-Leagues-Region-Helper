@@ -81,7 +81,12 @@ const TEXT_ONLY_BLESSINGS = ['Avernic Rampage', 'Eternal Sustenance'];
 const BASH_ARMOUR_SHARE = [3.5, 4.5];
 const REFLECT_ARMOUR_SHARE = [0.1, 0.15];
 
-const round = (n) => Math.round(n).toLocaleString();
+// `+ 0` normalises negative zero, which is not paranoia: the ability damage
+// breakdown's last part absorbs whatever the formula's floors took off, and a
+// weapon with fractional damage (the Mechanised chinchompa is 943.3) leaves it
+// at about -0.3. Math.round takes that to -0, and (-0).toLocaleString() renders
+// the string "-0" - so the panel read "+ -0 armour".
+const round = (n) => (Math.round(n) + 0).toLocaleString();
 const iconFor = (name) => BLESSING_BY_NAME.get(name)?.icon;
 
 // Saved builds store their god power; the build editor has not settled on one
@@ -135,13 +140,14 @@ function abilityDamageCard({ baseAD, damage, aegis, aegisNow, icyeneBonus, style
           `${baseAD.ammoCap.weapon} is tier ${baseAD.ammoCap.weaponTier} but ${baseAD.ammoCap.name} is only tier ${baseAD.ammoCap.ammoTier}, so it fires at tier ${baseAD.ammoCap.ammoTier}. Ammunition caps the weapon's tier; it adds no damage of its own.`,
         ),
       chinSplash && strong(`+${SPLASH_ZONE_AOE_BONUS}% via Splash Zone with Chins`),
-      // Deliberately NOT folded into the headline. Splash Zone multiplies the
-      // damage an attack deals; everything above it changes the base ability
-      // damage STAT, which is the figure Abyssal Cinders, Grasp of Guthix and
-      // Light of Saradomin all take their share of. Multiplying it here would
-      // inflate every one of those by 30% as well, which the god power does not
-      // do - it boosts the AoE hit, not the stat the riders read.
-      chinSplash && muted('Multiplies the damage dealt, on top of the base figure above.'),
+      // Kept as a separate figure rather than rolled into Total ability damage:
+      // that total is the ability damage STAT, and Splash Zone multiplies the
+      // damage dealt rather than the stat. The distinction still matters for
+      // anyone comparing this build's stat against another - but since chins
+      // make the multiplier unconditional, Effective is the number that lands,
+      // and it is what every share below is taken of.
+      chinSplash &&
+        muted('Not part of the ability damage stat, so it is quoted separately as Effective ability damage - which every figure below is a share of.'),
       muted(`${WEAPON_MODE_LABELS[baseAD.mode]}, at ${baseAD.combatLevel} ${STYLE_STAT[style]}`),
     ].filter(Boolean),
   };
@@ -254,19 +260,19 @@ function steadfastWillCard(armourNow) {
   };
 }
 
-function strikingLightCard({ style, totalAD, armourNow }) {
+function strikingLightCard({ style, payoutAD, armourNow }) {
   const band = getBasicAttackBand(style);
   return {
     key: 'striking-light',
     name: 'Striking Light',
     icon: iconFor('Striking Light'),
     lines: [
-      strong(`Basic attack ${round((totalAD * band.boosted[0]) / 100)} - ${round((totalAD * band.boosted[1]) / 100)}`),
+      strong(`Basic attack ${round((payoutAD * band.boosted[0]) / 100)} - ${round((payoutAD * band.boosted[1]) / 100)}`),
       muted(
         `${band.boosted[0]}-${band.boosted[1]}% of ability damage - ${band.base[0]}-${band.base[1]}% for ${style}, +40 from the blessing.`,
       ),
       strong(
-        `Light of Saradomin ~${round(totalAD * LIGHT_OF_SARADOMIN_AVERAGE_AD_SHARE + armourNow * LIGHT_OF_SARADOMIN_ARMOUR_SHARE)} damage`,
+        `Light of Saradomin ~${round(payoutAD * LIGHT_OF_SARADOMIN_AVERAGE_AD_SHARE + armourNow * LIGHT_OF_SARADOMIN_ARMOUR_SHARE)} damage`,
       ),
       muted('40-60% of ability damage plus 250% of armour, 9s cooldown.'),
     ],
@@ -276,17 +282,12 @@ function strikingLightCard({ style, totalAD, armourNow }) {
 // The whole card list for a build, in reading order: what your abilities hit
 // for, then what each pick adds on top, then the god power.
 function buildCards(context) {
-  const { blessings, godTier, style, equipped, baseAD, damage, totalAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras } =
+  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash } =
     context;
   const cards = [];
   const picked = (name) => blessings.includes(name);
 
-  const resolved = godTierFor(godTier, blessings);
-  // Both the ability damage card and the god power card say something about
-  // this, so it is decided once here.
-  const chinSplash = hasChinchompaSplashZone(resolved, equipped);
-
-  if (damage) cards.push(abilityDamageCard({ ...context, chinSplash }));
+  if (damage) cards.push(abilityDamageCard(context));
   if (baseAD?.achto) cards.push(achtoCard(baseAD.achto));
   if (adrenaline) cards.push(adrenalineCard(adrenaline, blessings));
 
@@ -317,21 +318,21 @@ function buildCards(context) {
     });
   }
 
-  if (totalAD != null && picked('Abyssal Cinders')) {
+  if (payoutAD != null && picked('Abyssal Cinders')) {
     cards.push({
       key: 'abyssal-cinders',
       name: 'Abyssal Cinders',
       icon: iconFor('Abyssal Cinders'),
       lines: [
-        strong(`+${round(totalAD * ABYSSAL_CINDERS_ON_HIT_SHARE)} bonus damage on hit`),
+        strong(`+${round(payoutAD * ABYSSAL_CINDERS_ON_HIT_SHARE)} bonus damage on hit`),
         muted('15% of total ability damage.'),
-        strong(`Inferno of Zamorak ~${round(totalAD * INFERNO_OF_ZAMORAK_AVERAGE_SHARE)} damage`),
+        strong(`Inferno of Zamorak ~${round(payoutAD * INFERNO_OF_ZAMORAK_AVERAGE_SHARE)} damage`),
         muted('5% chance on hit; rolls 100-200% of ability damage, single target.'),
       ],
     });
   }
 
-  if (totalAD != null && armourNow != null && picked('Barkscales')) {
+  if (payoutAD != null && armourNow != null && picked('Barkscales')) {
     cards.push({
       key: 'barkscales',
       name: 'Barkscales',
@@ -339,13 +340,13 @@ function buildCards(context) {
       lines: [
         strong(`-${round(armourNow * BARKSCALES_REDUCTION_SHARE)} incoming damage per hit`),
         muted('10% of total armour, flat - on top of any percentage reduction.'),
-        strong(`Grasp of Guthix ~${round(totalAD * GRASP_OF_GUTHIX_AVERAGE_SHARE)} damage`),
+        strong(`Grasp of Guthix ~${round(payoutAD * GRASP_OF_GUTHIX_AVERAGE_SHARE)} damage`),
         muted('Every 5th reduction; rolls 80-120% of ability damage as poison in a 3x3.'),
       ],
     });
   }
 
-  if (totalAD != null && armourNow != null && picked('Striking Light')) {
+  if (payoutAD != null && armourNow != null && picked('Striking Light')) {
     cards.push(strikingLightCard(context));
   }
 
@@ -379,7 +380,7 @@ function buildCards(context) {
     });
   }
 
-  const godPower = resolved ? BLESSING_BY_NAME.get(resolved) : null;
+  const godPower = resolvedGodTier ? BLESSING_BY_NAME.get(resolvedGodTier) : null;
   if (godPower) {
     cards.push({
       key: 'god-power',
@@ -462,9 +463,29 @@ export default function LeaguesEffectsPanel({
   // Saradomin - is a share of the FINISHED ability damage, not of the base.
   const totalAD = damage?.compounding ?? null;
 
+  const resolvedGodTier = godTierFor(godTier, blessings);
+  const chinSplash = hasChinchompaSplashZone(resolvedGodTier, equipped);
+
+  // Splash Zone is a multiplier on damage dealt rather than on the ability
+  // damage STAT, so it sits outside the total above. With chinchompas it
+  // applies to every hit unconditionally, which makes it indistinguishable in
+  // practice from a bigger stat - so it gets its own headline, and everything
+  // that takes a share of ability damage takes it of THIS figure. Grasp of
+  // Guthix off a chin build really does hit 30% harder.
+  const effectiveAD =
+    chinSplash && totalAD != null ? Math.round(totalAD * (1 + SPLASH_ZONE_AOE_BONUS / 100)) : null;
+  const payoutAD = effectiveAD ?? totalAD;
+
   const adrenaline = getAdrenaline({ blessings, archRelics });
 
   const figures = [
+    // Leads, because when it exists it is the number that actually lands.
+    effectiveAD != null && {
+      key: 'effective-ad',
+      label: 'Effective ability damage',
+      value: round(effectiveAD),
+      className: 'gear-stat-dmg',
+    },
     damage && { key: 'ad', label: 'Total ability damage', value: round(totalAD), className: 'gear-stat-dmg' },
     armourNow != null && { key: 'armour', label: 'Total armour', value: round(armourNow), className: 'gear-stat-armour' },
     lifeTotal != null && { key: 'life', label: 'Total health', value: round(lifeTotal), className: 'gear-stat-lp' },
@@ -473,11 +494,10 @@ export default function LeaguesEffectsPanel({
 
   const cards = buildCards({
     blessings,
-    godTier,
     style,
     baseAD,
     damage,
-    totalAD,
+    payoutAD,
     aegis,
     aegisNow,
     armourNow,
@@ -486,7 +506,8 @@ export default function LeaguesEffectsPanel({
     icyeneBonus,
     adrenaline,
     extras,
-    equipped,
+    resolvedGodTier,
+    chinSplash,
   });
 
   // No gear, no panel. Every figure here is framed as "what this loadout is
