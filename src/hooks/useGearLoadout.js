@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ESSENCE_OF_FINALITY_NAMES, GEAR, GEAR_SLOTS } from '../data/gear';
+import { COMBAT_STYLES, ESSENCE_OF_FINALITY_NAMES, GEAR, GEAR_SLOTS } from '../data/gear';
 import {
   emptyEofWeaponNames,
   emptyEquippedNames,
@@ -176,6 +176,21 @@ export function useGearLoadout({
     setEofWeaponNamesByStyle(emptyEofWeaponNames());
   }
 
+  // Replaces ONE style's gear wholesale - what "Load into My Build" applies,
+  // per style, so loading a ranged build leaves your melee loadout alone.
+  //
+  // Sanitised through the same helper localStorage and share links go through,
+  // then narrowed to the one style: sanitizeEquippedNames returns the full
+  // four-style shape, and writing all of it here would silently blank the three
+  // styles the caller did not ask about.
+  function setStyleLoadout(styleId, slots, eof = null) {
+    if (!COMBAT_STYLES.includes(styleId)) return;
+    const clean = sanitizeEquippedNames({ [styleId]: slots })[styleId];
+    const cleanEof = sanitizeEofWeaponNames({ [styleId]: eof })[styleId];
+    setEquippedNamesByStyle((prev) => ({ ...prev, [styleId]: clean }));
+    setEofWeaponNamesByStyle((prev) => ({ ...prev, [styleId]: cleanEof }));
+  }
+
   return {
     style,
     setStyle,
@@ -189,6 +204,7 @@ export function useGearLoadout({
     unequipSlot,
     clearLoadout,
     clearAllLoadouts,
+    setStyleLoadout,
     offhandBlocked,
     eofVisible,
     eofWeapon,

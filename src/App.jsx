@@ -165,7 +165,7 @@ function trackedPath() {
 // scratch (re-reading real localStorage on exit, or re-seeding from the
 // shared payload on entry) instead of carrying over stale in-memory state.
 function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, onAdopted, onOpenReportIssue }) {
-  const { selected, gatewaySelected, toggleRegion, isUnlocked, overLimit, clearRegions } = useRegionSelection({
+  const { selected, gatewaySelected, toggleRegion, isUnlocked, overLimit, clearRegions, setRegions } = useRegionSelection({
     initialSelection: sharedBuild?.regions,
     initialGatewaySelection: sharedBuild?.gatewaySelected,
     persist: !sharedBuild,
@@ -176,7 +176,7 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
     initialDefaultStyle: sharedBuild?.defaultStyle,
     persist: !sharedBuild,
   });
-  const { selected: selectedRelics, toggleRelic, clearRelics } = useRelicSelection({
+  const { selected: selectedRelics, toggleRelic, clearRelics, setRelics } = useRelicSelection({
     initialSelection: sharedBuild?.relics,
     persist: !sharedBuild,
   });
@@ -188,20 +188,32 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
   // fire once more (with its stale, pre-import `selected`) before that old
   // instance actually unmounted, clobbering the import. Handing the value
   // straight to the fresh instance's initial state has no such window.
-  const { selected: selectedLeagueRelics, toggleLeagueRelic, clearLeagueRelics } = useLeagueRelicSelection({
+  const { selected: selectedLeagueRelics, toggleLeagueRelic, clearLeagueRelics, setLeagueRelics } = useLeagueRelicSelection({
     initialSelection: sharedBuild?.leagueRelics ?? importedLeagueRelics,
     persist: !sharedBuild,
   });
-  const { selected: selectedBlessings, toggleBlessing, clearBlessings } = useBlessingSelection({
+  const { selected: selectedBlessings, toggleBlessing, clearBlessings, setBlessings } = useBlessingSelection({
     initialSelection: sharedBuild?.blessings,
     persist: !sharedBuild,
   });
   // Not carried by share links (see utils/shareBuild.js), so a shared build
   // seeds this empty rather than inheriting the viewer's own Extras.
-  const { selected: selectedExtras, toggleExtra, clearExtras } = useBuildExtrasSelection({
+  const { selected: selectedExtras, toggleExtra, clearExtras, setExtras } = useBuildExtrasSelection({
     initialSelection: sharedBuild ? [] : undefined,
     persist: !sharedBuild,
   });
+
+  // The six bulk setters that "Load into My Build" writes through, bundled so
+  // the pages carrying that action take one prop rather than six. See
+  // utils/loadBuildIntoMine.js for why it goes through these and not storage.
+  const selectionSetters = {
+    setRegions,
+    setLeagueRelics,
+    setRelics,
+    setBlessings,
+    setExtras,
+    setStyleLoadout: gear.setStyleLoadout,
+  };
 
   // Tracks region picks + combos once they're "locked in" - the moment the
   // visitor navigates away from the Regions tab with exactly MAX_OPTIONAL
@@ -235,6 +247,18 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route]);
 
+  // Writes the storage keys directly rather than going through the hooks'
+  // setters, which works here for one specific reason: onAdopted() clears
+  // `sharedBuild`, which changes AppContent's key and remounts this whole
+  // subtree, so every hook re-reads storage on the way back. Anything that
+  // loads a build WITHOUT that remount must use the setters instead - see
+  // utils/loadBuildIntoMine.js.
+  //
+  // Extras are deliberately absent from this list. Share links do not carry
+  // them (see utils/shareBuild.js), so `selectedExtras` is seeded empty in
+  // shared view - writing it here would silently wipe the visitor's own Extras
+  // as the price of adopting someone else's build. Leaving the key alone is
+  // what keeps them.
   function handleAdopt() {
     window.localStorage.setItem(REGIONS_STORAGE_KEY, JSON.stringify(selected));
     window.localStorage.setItem(GATEWAY_STORAGE_KEY, JSON.stringify(gatewaySelected));
@@ -375,7 +399,7 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
       {/* Takes no props: the build guides are fixed reference examples and
           must never read or mutate the player's own region/relic/loadout
           state. The "open in gear planner" button emits a share link instead. */}
-      {route === 'buildGuides' && <BuildGuidesPage />}
+      {route === 'buildGuides' && <BuildGuidesPage setters={selectionSetters} />}
       {/* Also takes no player state, same reasoning as BuildGuidesPage above -
           a submitted build is its own independent thing, not derived from
           whatever the visitor currently has equipped. On success it hands
@@ -388,7 +412,7 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
           }}
         />
       )}
-      {route === 'userBuilds' && <UserBuildsPage />}
+      {route === 'userBuilds' && <UserBuildsPage setters={selectionSetters} />}
       {route === 'tierListMaker' && <TierListMakerPage />}
       {route === 'sharedTierList' && <SharedTierListPage />}
       {route === 'editBuild' && (

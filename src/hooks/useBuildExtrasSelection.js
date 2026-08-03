@@ -54,5 +54,7 @@ export function useBuildExtrasSelection({ initialSelection, persist = true } = {
 
   const clearExtras = useCallback(() => setSelected([]), []);
 
-  return { selected, toggleExtra, clearExtras };
+  const setExtras = useCallback((names) => setSelected(sanitizeExtraNames(names)), []);
+
+  return { selected, toggleExtra, clearExtras, setExtras };
 }

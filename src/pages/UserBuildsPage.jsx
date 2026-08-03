@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UserBuildListItem from '../components/UserBuildListItem';
 import ReportBuildModal from '../components/ReportBuildModal';
+import UseBuildModal from '../components/UseBuildModal';
+import { getUserBuild } from '../utils/api';
+import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
+import { importableFromUserBuild } from '../utils/importableBuild';
+import { applyBuildToSelections } from '../utils/loadBuildIntoMine';
 import {
   DEFAULT_SORT_MODE,
   SORT_MODES,
@@ -37,11 +42,15 @@ function loadInitialSortMode() {
   }
 }
 
-export default function UserBuildsPage() {
+export default function UserBuildsPage({ setters }) {
   const [builds, setBuilds] = useState(null); // null = loading
   const [error, setError] = useState(false);
   const [votes, setVotes] = useState({});
   const [reporting, setReporting] = useState(null);
+  // { summary, importable, loading, error } - the build the Use-this-build
+  // modal is open for. The listing row carries no payload, so a card that has
+  // never been expanded needs a fetch; one that has hands its own over.
+  const [using, setUsing] = useState(null);
   const [sortMode, setSortMode] = useState(loadInitialSortMode);
   const [page, setPage] = useState(1);
   const listRef = useRef(null);
@@ -131,6 +140,30 @@ export default function UserBuildsPage() {
     // was as tall as the viewport. Matches how opening a build scrolls it to
     // the top.
     listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function handleUse(summary, alreadyLoaded) {
+    if (alreadyLoaded) {
+      setUsing({ summary, importable: importableFromUserBuild(alreadyLoaded), loading: false, error: false });
+      return;
+    }
+    // Opened straight away with a loading state rather than after the fetch -
+    // a button that does nothing for half a second reads as broken.
+    setUsing({ summary, importable: null, loading: true, error: false });
+    try {
+      const row = await getUserBuild(summary.id);
+      const sanitized = sanitizeUserBuildPayload(row.payload);
+      if (!sanitized) throw new Error('malformed build');
+      setUsing({ summary, importable: importableFromUserBuild(sanitized), loading: false, error: false });
+    } catch {
+      setUsing((prev) => (prev ? { ...prev, loading: false, error: true } : prev));
+    }
+  }
+
+  function handleLoadIntoMine(choices) {
+    applyBuildToSelections(using.importable, choices, setters);
+    setUsing(null);
+    window.location.hash = '#my-build';
   }
 
   function handleVoted(id, next) {
@@ -232,6 +265,7 @@ export default function UserBuildsPage() {
                   onToggleHidden={handleToggleHidden}
                   onToggleFeatured={handleToggleFeatured}
                   score={scores?.get(summary.id)}
+                  onUse={handleUse}
                 />
               ))}
             </section>
@@ -273,6 +307,19 @@ export default function UserBuildsPage() {
       </main>
 
       {reporting && <ReportBuildModal build={reporting} onClose={() => setReporting(null)} />}
+      {using && (
+        <UseBuildModal
+          buildName={using.summary.name}
+          importable={using.importable}
+          loading={using.loading}
+          error={using.error}
+          onCopy={() => {
+            window.location.hash = `#create-build-from/${using.summary.id}`;
+          }}
+          onLoad={handleLoadIntoMine}
+          onClose={() => setUsing(null)}
+        />
+      )}
     </>
   );
 }

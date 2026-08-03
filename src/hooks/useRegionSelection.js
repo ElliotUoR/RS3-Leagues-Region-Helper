@@ -97,5 +97,11 @@ export function useRegionSelection({ initialSelection, initialGatewaySelection, 
 
   const overLimit = selected.length > MAX_OPTIONAL;
 
-  return { selected, gatewaySelected, toggleRegion, isUnlocked, overLimit, clearRegions };
+  // Replaces the whole selection at once - what "Load into My Build" needs.
+  // Sanitised on the way in for the same reason loadInitialSelection is: the
+  // payload it comes from is opaque JSON that a hand-crafted POST could have
+  // put anything in.
+  const setRegions = useCallback((ids) => setSelected(sanitizeRegionSelection(ids)), []);
+
+  return { selected, gatewaySelected, toggleRegion, isUnlocked, overLimit, clearRegions, setRegions };
 }

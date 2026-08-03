@@ -49,5 +49,10 @@ export function useRelicSelection({ initialSelection, persist = true } = {}) {
   // Same reason as useLeagueRelicSelection's clearLeagueRelics.
   const clearRelics = useCallback(() => setSelected([]), []);
 
-  return { selected, toggleRelic, clearRelics };
+  // Sanitised AND capped: sanitizeRelicSelection enforces MAX_RELICS, which a
+  // build carrying more than three (an older payload, a hand-edited one) would
+  // otherwise smuggle past the picker's own limit.
+  const setRelics = useCallback((names) => setSelected(sanitizeRelicSelection(names)), []);
+
+  return { selected, toggleRelic, clearRelics, setRelics };
 }

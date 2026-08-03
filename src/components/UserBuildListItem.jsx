@@ -66,6 +66,7 @@ export default function UserBuildListItem({
   initialBuild = null,
   defaultExpanded = false,
   score = null,
+  onUse,
 }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [build, setBuild] = useState(initialBuild);
@@ -145,12 +146,13 @@ export default function UserBuildListItem({
           {hasEditAccess(summary.id) ? 'Edit' : 'Edit…'}
         </a>
       )}
-      {/* Opens a fresh Create-a-Build form pre-filled from this build's data -
-          always publishes as a brand new build with its own id, edit link and
-          password, never changes this one. See pages/CopyBuildPage.jsx. */}
-      <a href={`#create-build-from/${summary.id}`} className="user-build-copy-button">
-        Copy into new build
-      </a>
+      {/* Forks into "copy into a build guide" (a fresh Create-a-Build form,
+          always publishing as a brand new build - see pages/CopyBuildPage.jsx)
+          and "load into My Build" (overwrites the chosen parts of your own
+          saved setup). See components/UseBuildModal.jsx. */}
+      <button type="button" className="user-build-copy-button" onClick={() => onUse?.(summary, build)}>
+        Use this build
+      </button>
       {isAdmin && (
         <div className="user-build-admin-controls">
           {/* The public score is floored at 0 and merges the two directions, so

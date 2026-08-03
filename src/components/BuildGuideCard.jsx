@@ -193,7 +193,7 @@ function shareFieldsFor(build) {
   };
 }
 
-export default function BuildGuideCard({ build, expanded, onToggle, editing = false }) {
+export default function BuildGuideCard({ build, expanded, onToggle, editing = false, onUse }) {
   const [stage, setStage] = useState('late');
   // One style shown at a time. Keeps every loadout the same size across every
   // guide, and lets a multi-style build be read as the style you actually play.
@@ -527,6 +527,16 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                   >
                     {BUILD_SHARE_LABELS[shareStatus]}
                   </button>
+                  {/* Same fork the user builds get - and the reason it is
+                      worth having here is that the share button beside it is a
+                      four-step dance for the same destination (copy link, open
+                      it, preview, "Load into my planner"). See
+                      components/UseBuildModal.jsx. */}
+                  {onUse && (
+                    <button type="button" className="build-use-button" onClick={() => onUse(build)}>
+                      Use this build
+                    </button>
+                  )}
                   <p className="build-share-note">
                     Copies a share link for the late-game loadout, regions, Arch relics, league
                     relics and blessings. Opening it previews the build without overwriting your own

@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import BuildGuideCard from '../components/BuildGuideCard';
 import UserBuildListItem from '../components/UserBuildListItem';
 import ReportBuildModal from '../components/ReportBuildModal';
+import UseBuildModal from '../components/UseBuildModal';
+import { importableFromCuratedBuild } from '../utils/importableBuild';
+import { applyBuildToSelections } from '../utils/loadBuildIntoMine';
 import TierList from '../components/TierList';
 import {
   BLESSING_BUILDS_EXAMPLES,
@@ -139,9 +142,12 @@ function useVotesWhenNeeded(needed) {
   return [votes, setVotes];
 }
 
-export default function BuildGuidesPage() {
+export default function BuildGuidesPage({ setters }) {
   const [editing, setEditing] = useState(false);
   const [reporting, setReporting] = useState(null);
+  // Curated guides are already in memory, so unlike the user-build listing this
+  // needs no fetch - the modal opens fully populated.
+  const [using, setUsing] = useState(null);
   const featured = useFeaturedBuilds();
   const shared = useSharedUserBuild();
   const [votes, setVotes] = useVotesWhenNeeded(featured.length > 0 || Boolean(shared));
@@ -272,6 +278,7 @@ export default function BuildGuidesPage() {
               expanded={expanded.has(build.id)}
               onToggle={() => toggle(build.id)}
               editing={editing}
+              onUse={setUsing}
             />
           ))}
         </section>
@@ -340,6 +347,27 @@ export default function BuildGuidesPage() {
       </main>
 
       {reporting && <ReportBuildModal build={reporting} onClose={() => setReporting(null)} />}
+      {using && (
+        <UseBuildModal
+          buildName={using.name}
+          importable={importableFromCuratedBuild(using)}
+          // No copy option here. Curated guides are site data, not rows in
+          // user_builds, so there is no id for #create-build-from/<id> to
+          // fetch - and seeding Create a Build by writing the guide into the
+          // visitor's own selections first would make "copy" destructive,
+          // which is the one thing that option promises it is not.
+          //
+          // The route to publishing a variant already exists and is honest
+          // about what it does: load it here, tweak it, then use My Build's own
+          // "Import into Build Guide".
+          onLoad={(choices) => {
+            applyBuildToSelections(importableFromCuratedBuild(using), choices, setters);
+            setUsing(null);
+            window.location.hash = '#my-build';
+          }}
+          onClose={() => setUsing(null)}
+        />
+      )}
     </>
   );
 }

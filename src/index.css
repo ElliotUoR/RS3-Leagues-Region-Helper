@@ -8889,6 +8889,170 @@ main.abilities-page .gear-item-rows {
   display: none;
 }
 
+/* "Use this build" (components/UseBuildModal.jsx) - the two-screen fork behind
+   a build card's footer button. */
+.use-build-modal {
+  max-width: 560px;
+}
+
+.use-build-name {
+  margin: -6px 0 14px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.use-build-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Each destination is a big target with its consequence spelled out, rather
+   than two bare words - the difference between them (one starts a draft, one
+   overwrites what you have) is the whole decision. */
+.use-build-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms, background 140ms;
+}
+
+.use-build-option:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.use-build-option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.use-build-option-title {
+  color: var(--text-h);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.use-build-option-note {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  opacity: 0.7;
+}
+
+.use-build-option-go {
+  padding: 8px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Sits under a curated guide's own share button, so it borrows that button's
+   width and spacing rather than inventing its own. */
+.build-use-button {
+  display: block;
+  width: calc(100% - 28px);
+  margin: 0 14px 4px;
+  padding: 7px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.build-use-button:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.use-build-lead {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.use-build-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+.use-build-check {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.use-build-check:hover {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.use-build-check-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+/* Truncated rather than wrapped: this is a reminder of what you are taking,
+   not the list itself, and a build with eight relics would otherwise push the
+   confirm button off the bottom of the dialog. */
+.use-build-check-values {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.76rem;
+  opacity: 0.6;
+}
+
+.use-build-stage {
+  justify-self: start;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.76rem;
+}
+
+.use-build-stage:disabled {
+  opacity: 0.45;
+}
+
+.use-build-untouched {
+  margin: 0 0 16px;
+  font-size: 0.78rem;
+  color: var(--stat-lp-color, #6fd39a);
+}
+
 /* Destructive-action dialog (components/ConfirmModal.jsx). */
 .confirm-modal {
   max-width: 460px;

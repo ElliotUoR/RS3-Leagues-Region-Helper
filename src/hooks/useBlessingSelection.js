@@ -68,5 +68,9 @@ export function useBlessingSelection({ initialSelection, persist = true } = {}) 
 
   const clearBlessings = useCallback(() => setSelected([]), []);
 
-  return { selected, toggleBlessing, clearBlessings };
+  // Sanitised, which also collapses two picks in one tier down to the first -
+  // the one-per-tier rule has to hold for a loaded build, not just for clicks.
+  const setBlessings = useCallback((names) => setSelected(sanitizeBlessingSelection(names)), []);
+
+  return { selected, toggleBlessing, clearBlessings, setBlessings };
 }

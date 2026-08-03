@@ -94,5 +94,8 @@ export function useLeagueRelicSelection({ initialSelection, persist = true } = {
   // selections - see pages/MyBuildPage.jsx.
   const clearLeagueRelics = useCallback(() => setSelected([]), []);
 
-  return { selected, toggleLeagueRelic, clearLeagueRelics };
+  // See useRegionSelection's setRegions for why this sanitises.
+  const setLeagueRelics = useCallback((names) => setSelected(sanitizeLeagueRelicSelection(names)), []);
+
+  return { selected, toggleLeagueRelic, clearLeagueRelics, setLeagueRelics };
 }
