@@ -17,6 +17,7 @@ import { RELICS, RELIC_CATEGORIES } from '../data/relics';
 import { REGIONS } from '../data/regions';
 import { isGearItemAvailable } from '../data/gearAvailability';
 import { activeBuildExtras, availableBuildExtras } from '../data/buildExtras';
+import { capForTier } from '../data/leagueRelicPicks';
 import { blessingColourTally, blessingGradient, dominantBlessingColour } from '../utils/blessingTheme';
 import { IS_PAGES_BUILD } from '../utils/deployTarget';
 import {
@@ -62,6 +63,15 @@ function loadoutOpenByDefault() {
 // The one thing that does NOT write back is publishing. "Import into Build
 // Guide" hands Create a Build a snapshot, and edits there never reach these
 // selections - see utils/myBuildSeed.js.
+
+// What a tier's heading should say. Rejuvenated widens exactly one tier to two
+// slots, so "pick one" stops being true the moment it is taken - and once the
+// bonus is spent, every OTHER tier goes back to saying "pick one". Derived from
+// the same module the toggle enforces, so the two cannot drift apart.
+function tierPickNote(tier, selectedRelics) {
+  if (tier === 'unknown' || tier == null) return 'pick any number';
+  return capForTier(selectedRelics, tier) > 1 ? 'pick up to two' : 'pick one';
+}
 
 function groupBlessingsByTier() {
   return BLESSING_TIERS.map((tier) => [
@@ -365,7 +375,10 @@ export default function MyBuildPage({
         >
           {relicTierGroups.map(([tier, relics]) => (
             <div key={tier} className="create-build-relic-tier">
-              <h3>{tier === 'unknown' ? 'Unknown tier - pick any number' : `Tier ${tier} - pick one`}</h3>
+              <h3>
+                {tier === 'unknown' ? 'Unknown tier' : `Tier ${tier}`} -{' '}
+                {tierPickNote(tier, selectedLeagueRelics)}
+              </h3>
               <div className="gear-item-rows compact">
                 {relics.map((relic) => (
                   <LeagueRelicRow

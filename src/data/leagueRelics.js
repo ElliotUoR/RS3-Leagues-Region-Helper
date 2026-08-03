@@ -5,10 +5,10 @@
 // Divine Druid/Transmutation aren't on the wiki at all yet as of writing -
 // transcribed straight from Jagex's own "Relic Reveal" promo images instead,
 // same as Crystal Grace/Superheated originally were before the wiki caught
-// up. None of these four "Unknown Tier" relics have an uploaded icon on the
-// wiki (their file link there is still a "please upload" placeholder, where
-// they exist at all) - their icons here were cropped from the reveal images
-// directly instead (see the icon note below).
+// up, as were every relic revealed since. None of the reveal-only relics have
+// an uploaded icon on the wiki (their file link there is still a "please
+// upload" placeholder, where they exist at all) - their icons here were cropped
+// from the reveal images directly instead (see the icon note below).
 //
 // Distinct from Archaeology relics (see relics.js, labelled "Arch Relics"
 // in the nav): these are picked directly from the league's own relic tree
@@ -32,12 +32,17 @@
 // `Golden_Touch.png` - that plain filename is already used by the unrelated,
 // long-existing Magic ability of the same name (see abilities.js). The wiki
 // disambiguates the two with this suffix; using the wrong file would show
-// the ability's icon here instead of the relic's. Crystal Grace, Superheated,
-// Divine Druid, and Transmutation's icons aren't on the wiki at all yet (see
-// above) - cropped directly from Jagex's reveal images instead and saved
-// locally, so unlike every other FP() reference here there's no matching
-// runescape.wiki file for scripts/download-icons.mjs to ever re-fetch for
-// these four specifically.
+// the ability's icon here instead of the relic's.
+//
+// The reveal-only relics have no wiki icon at all (see above) - Crystal Grace,
+// Superheated, Divine Druid, Transmutation, Animal Wrangler, Icyenic Faith,
+// Devout, Perkfection and Rejuvenated. Their art is cropped from Jagex's reveal
+// images, kept in `image/league relics/` and copied into public/icons/ under
+// the Title_Case_Underscored names used below. Unlike every other FP()
+// reference here there is no runescape.wiki file behind them, so
+// scripts/download-icons.mjs must never be pointed at these - it would find
+// nothing to fetch and could clobber the local crops. Listing them by name
+// rather than by count, because the count has already gone stale twice.
 const FP = (file) => `icons/${file}`;
 
 export const LEAGUE_RELICS = [
@@ -868,6 +873,67 @@ export const LEAGUE_RELICS = [
       "Monsters are captured into Ushabti's 100% of the time.",
     ],
     icon: FP('Assassins_Insight.webp'),
+  },
+
+  // --------------------------------------------------- TIER NOT YET REVEALED
+  // Transcribed verbatim from Jagex's "Relic Reveal" images for Devout,
+  // Perkfection and Rejuvenated. Those images name the relic and list its
+  // effects but state no tier, so all three take `tier: null` and sit in the
+  // "Unknown tier - pick any number" group until one is confirmed - the same
+  // treatment Crystal Grace and Superheated had before the wiki caught up.
+  //
+  // Icons cropped from the same reveal images, sitting in `image/league relics/`
+  // and copied into public/icons/ under the Title_Case_Underscored convention
+  // the rest of this file uses - so like Crystal Grace, Superheated, Divine
+  // Druid, Transmutation, Animal Wrangler and Icyenic Faith, there is no
+  // runescape.wiki file behind them for scripts/download-icons.mjs to re-fetch.
+  {
+    name: 'Devout',
+    tier: null,
+    summary:
+      'Grants the Devout Yak, a 32-slot bank-anywhere familiar, plus free summoning scrolls, cheap familiar spells and up to +500% familiar damage.',
+    effects: [
+      'Grants a Devout Yak pouch and the Ethereal Storage Scroll.',
+      'The Devout Yak is a Summoning familiar with 32 inventory slots. It can access the bank from anywhere and change items to/from notes.',
+      'The Ethereal Storage Scroll can be used to repeat the last unnote action, using the last noted item and amount.',
+      'The scroll and pouch are never consumed and do not require Summoning points.',
+      'Familiars which give you stat boosts also give 10 XP (before league multipliers) in the respective skill when gaining XP, up to every 6 seconds.',
+      'Summoning scrolls are no longer consumed when used.',
+      'Familiar spell point costs are reduced to 10% of their original value.',
+      'Familiars deal more damage based on your Summoning level, up to +500% damage at 99 Summoning.',
+    ],
+    icon: FP('Devout.png'),
+  },
+  {
+    name: 'Perkfection',
+    tier: null,
+    summary:
+      "Grants the Inventor's Toolbox with two extra gizmo slots, removes junk and charge costs, and makes disassembly and machines ten times better.",
+    effects: [
+      "Grants the Inventor's Toolbox, which acts as an XP capacitor but can store 10x max charges and also charges 10x faster.",
+      'It also has two gizmo slots which are applied in addition to any equipped perks. You must be using an augmented item for these perks to activate. These can be swapped out freely.',
+      "Additionally the toolbox allows you to teleport to Inventor's workbenches that are available in your unlocked areas.",
+      'When disassembling items, your junk chance is reduced to 0%. (Toggleable)',
+      'Machines can be built from level 1 and run 10x faster.',
+      'Obtain x10 Invention materials when disassembling items.',
+      'Augmented items and machines consume no charge.',
+      'The capacity of machines is increased by 10x.',
+      'Helpful perks will trigger 20% more often (does not stack with item level 20 benefit).',
+      'Unlocks all blueprints in the Dwarven and Goblin tech tree.',
+    ],
+    icon: FP('Perkfection.png'),
+  },
+  {
+    // The one relic whose effect the picker cannot actually model: it grants a
+    // SECOND relic from an earlier tier, and this app has no notion of a pick
+    // that yields another pick. Taking it here therefore records the choice and
+    // nothing else - whatever it would have unlocked has to be picked as if it
+    // were free. Worth knowing before reading a build's unlocks as complete.
+    name: 'Rejuvenated',
+    tier: null,
+    summary: 'Choose another relic from a previous tier.',
+    effects: ['Choose another relic from a previous tier.'],
+    icon: FP('Rejuvenated.png'),
   },
 ];
 

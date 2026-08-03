@@ -1,21 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
+import { sanitizeRelicPicks, toggleRelicPick } from '../data/leagueRelicPicks';
 import { trackUsage } from '../utils/api';
 
 export const LEAGUE_RELICS_STORAGE_KEY = 'rs3-leagues-league-relics';
 
-const LEAGUE_RELICS_BY_NAME = new Map(LEAGUE_RELICS.map((r) => [r.name, r]));
 const LEAGUE_RELICS_BY_NAME_LOWER = new Map(LEAGUE_RELICS.map((r) => [r.name.toLowerCase(), r]));
 
-// Validates an arbitrary array (from localStorage or a decoded share link)
-// down to known league relic names, collapsing any duplicate pick within
-// the same tier down to just the first one - the "one per tier" constraint
-// (see toggleLeagueRelic below) has to hold even for a hand-crafted/
-// corrupted payload, not just picks made through the UI. Relics with an
-// unknown tier (`tier: null`) have no such constraint - any number of those
-// are kept as-is.
+// Validates an arbitrary array (localStorage, a decoded share link, a stored
+// build payload) down to a legal set of picks. The rules themselves - one per
+// tier, plus Rejuvenated's single extra - live in data/leagueRelicPicks.js,
+// which every surface that enforces or describes them shares.
 export function sanitizeLeagueRelicSelection(raw) {
-  return sanitizeLeagueRelicNames(raw, LEAGUE_RELICS_BY_NAME);
+  return sanitizeRelicPicks(raw);
 }
 
 // Same validation, but matched case-insensitively (and whitespace-trimmed) -
@@ -30,23 +27,7 @@ export function sanitizeLeagueRelicSelectionLoose(raw) {
     .filter((name) => typeof name === 'string')
     .map((name) => LEAGUE_RELICS_BY_NAME_LOWER.get(name.trim().toLowerCase())?.name)
     .filter(Boolean);
-  return sanitizeLeagueRelicNames(canonicalNames, LEAGUE_RELICS_BY_NAME);
-}
-
-function sanitizeLeagueRelicNames(raw, byName) {
-  if (!Array.isArray(raw)) return [];
-  const seenTiers = new Set();
-  const result = [];
-  for (const name of raw) {
-    const relic = byName.get(name);
-    if (!relic) continue;
-    if (relic.tier != null) {
-      if (seenTiers.has(relic.tier)) continue;
-      seenTiers.add(relic.tier);
-    }
-    result.push(name);
-  }
-  return result;
+  return sanitizeRelicPicks(canonicalNames);
 }
 
 function loadInitialSelection() {
@@ -70,21 +51,20 @@ export function useLeagueRelicSelection({ initialSelection, persist = true } = {
     window.localStorage.setItem(LEAGUE_RELICS_STORAGE_KEY, JSON.stringify(selected));
   }, [selected, persist]);
 
-  // Tiered relics behave like a radio button - picking one swaps out
-  // whatever else was picked in the same tier, rather than requiring the
-  // player to manually deselect it first (there's no overall pick cap the
-  // way Arch relics have one, so a click is never simply blocked). Relics
-  // with an unknown tier just toggle freely alongside anything else.
+  // Tiered relics behave like a radio button - picking one swaps out whatever
+  // else was picked in the same tier, rather than requiring the player to
+  // deselect it first (there is no overall pick cap the way Arch relics have
+  // one, so a click is never simply blocked). Rejuvenated widens exactly one
+  // tier to two slots; see data/leagueRelicPicks.js for the whole rule.
   const toggleLeagueRelic = useCallback(
     (relic) => {
       setSelected((prev) => {
-        if (prev.includes(relic.name)) return prev.filter((n) => n !== relic.name);
-        // Only track a real pick, not exploring someone else's shared build
-        // (persist: false there - see useLeagueRelicSelection's callers).
-        if (persist) trackUsage([{ category: 'league_relic_pick', key: relic.name }]);
-        if (relic.tier == null) return [...prev, relic.name];
-        const withoutSameTier = prev.filter((n) => LEAGUE_RELICS_BY_NAME.get(n)?.tier !== relic.tier);
-        return [...withoutSameTier, relic.name];
+        // Only track a real pick, not a deselect, and not exploring someone
+        // else's shared build (persist: false there - see the callers).
+        if (persist && !prev.includes(relic.name)) {
+          trackUsage([{ category: 'league_relic_pick', key: relic.name }]);
+        }
+        return toggleRelicPick(prev, relic);
       });
     },
     [persist],

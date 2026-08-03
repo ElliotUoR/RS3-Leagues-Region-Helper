@@ -6,6 +6,7 @@ import TagTooltip from './TagTooltip';
 import EditableText from './EditableText';
 import BuildProse from './BuildProse';
 import PicksHeading from './PicksHeading';
+import RejuvenatedNote from './RejuvenatedNote';
 import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import {
   ARTEFACT_BYPASS_NOTE,
@@ -414,6 +415,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                     />
                   ))}
                 </ul>
+                  <RejuvenatedNote relics={build.relics} />
               </section>
 
               <section className="build-setup-group">

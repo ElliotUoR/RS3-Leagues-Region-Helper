@@ -8889,6 +8889,26 @@ main.abilities-page .gear-item-rows {
   display: none;
 }
 
+/* Explains two relics sharing a tier (components/RejuvenatedNote.jsx). Sits
+   under the relic pick list, quiet enough to read past once understood. */
+.rejuvenated-note {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 6px 9px;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 0 6px 6px 0;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  font-size: 0.74rem;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.rejuvenated-note-mark {
+  color: var(--accent);
+}
+
 /* "Use this build" (components/UseBuildModal.jsx) - the two-screen fork behind
    a build card's footer button. */
 .use-build-modal {

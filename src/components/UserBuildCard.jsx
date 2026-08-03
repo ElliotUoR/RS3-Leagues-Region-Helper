@@ -5,6 +5,7 @@ import LeaguesEffectsPanel from './LeaguesEffectsPanel';
 import BuildProse from './BuildProse';
 import BuildCardMeta from './BuildCardMeta';
 import PicksHeading from './PicksHeading';
+import RejuvenatedNote from './RejuvenatedNote';
 import { ARCH_RELIC_BY_NAME, LEAGUE_RELIC_BY_NAME } from '../data/buildLookups';
 import { BUILD_EXTRA_BY_NAME } from '../data/buildExtras';
 import { REGIONS, FIXED_REGIONS, GATEWAY_REGIONS } from '../data/regions';
@@ -199,6 +200,7 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
                       <PickRow key={name} icon={LEAGUE_RELIC_BY_NAME.get(name)?.icon} name={name} reason={build.relicReasons[name]} expandAll={expandAll} />
                     ))}
                   </ul>
+                  <RejuvenatedNote relics={build.relics} />
                 </section>
               )}
 

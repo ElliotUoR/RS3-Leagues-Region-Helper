@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import LeagueRelicRow from '../components/LeagueRelicRow';
+import { capForTier } from '../data/leagueRelicPicks';
 import RelicPassivesModal from '../components/RelicPassivesModal';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 
@@ -18,6 +19,15 @@ function groupByTier(relics) {
     if (b === 'unknown') return -1;
     return a - b;
   });
+}
+
+// What a tier's heading should say. Rejuvenated widens exactly one tier to two
+// slots, so "pick one" stops being true the moment it is taken - and once the
+// bonus is spent, every OTHER tier goes back to saying "pick one". Derived from
+// the same module the toggle enforces, so the two cannot drift apart.
+function tierPickNote(tier, selectedRelics) {
+  if (tier === 'unknown' || tier == null) return 'pick any number';
+  return capForTier(selectedRelics, tier) > 1 ? 'pick up to two' : 'pick one';
 }
 
 export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
@@ -43,7 +53,7 @@ export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
           <section key={tier} className="league-relic-tier-group">
             <h2 className="league-relic-tier-heading">
               {tier === 'unknown' ? 'Unknown tier' : `Tier ${tier}`}
-              <span className="league-relic-tier-note">{tier === 'unknown' ? 'pick any number' : 'pick one'}</span>
+              <span className="league-relic-tier-note">{tierPickNote(tier, selected)}</span>
               {/* Lives on the first tier heading rather than the page header
                   so it sits inline, right-aligned, on the same row as "Tier
                   1 - pick one" instead of stacked above it. */}

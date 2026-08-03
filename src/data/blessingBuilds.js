@@ -103,6 +103,12 @@ export const RELIC_COLOURS = {
   // Unknown tier, added after the above - see leagueRelics.js.
   'Animal Wrangler': { hue: 220, label: 'azure' },
   'Icyenic Faith': { hue: 305, label: 'orchid' },
+  // Tier not yet revealed - see leagueRelics.js. Hues chosen to stay apart from
+  // the twelve above; without an entry here a relic's chip renders with no
+  // accent at all, which reads as a rendering fault rather than as "new".
+  Devout: { hue: 75, label: 'olive' },
+  Perkfection: { hue: 200, label: 'steel' },
+  Rejuvenated: { hue: 320, label: 'rose' },
 };
 
 // Shown under the Arch relics column. Some relics list a second region that is
@@ -935,6 +941,18 @@ export const LEAGUE_RELIC_TIER_LIST = {
     {
       name: 'Icyenic Faith', relicTier: 7, grade: 'unranked', unlocksGear: 0,
       note: 'Just revealed - not yet assessed for combat viability. Scales crit chance and ability damage off Prayer bonus, and makes protection prayers/Deflect curses block 50% more damage while doubling as Soul Split - looks like it could be strong, but needs real numbers worked out first.',
+    },
+    {
+      name: 'Devout', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      note: 'Just revealed - not yet assessed for combat viability. Mostly a Summoning and logistics relic (bank-anywhere yak, free scrolls), but the last line is a combat one: familiars scaling to +500% damage at 99 Summoning needs its own numbers before it can be graded.',
+    },
+    {
+      name: 'Perkfection', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      note: 'Just revealed - not yet assessed for combat viability. An Invention relic on its face, but zero junk, x10 materials and no charge drain is the whole augmentation supply chain - which is what gets perked BiS gear onto a combat build. Needs assessing against Golden Touch rather than in isolation.',
+    },
+    {
+      name: 'Rejuvenated', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      note: 'Just revealed, and ungradeable on its own terms: it grants a second relic from an earlier tier, so it is worth exactly whatever the best relic you are missing is worth. Its grade would have to be read off the rest of this list rather than assigned.',
     },
   ],
 };
