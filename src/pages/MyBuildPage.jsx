@@ -29,15 +29,15 @@ import {
 
 const STYLE_LABELS = { melee: 'Melee', ranged: 'Ranged', magic: 'Magic', necromancy: 'Necromancy' };
 
+const ARCH_RELIC_CATEGORY_LABELS = { combat: 'Combat', skilling: 'Skilling', misc: 'Misc' };
+const ARCH_RELIC_TABS = [...RELIC_CATEGORIES, 'all'];
+
 // Same cutoff the rest of the site treats as mobile (see .site-nav's breakpoint
 // in index.css). The gear planner is by far the tallest thing on this page -
 // style tabs, a twelve-slot grid, the stats panel and a full scrolling item
 // list - so on a phone it buries the Leagues effects panel underneath a very
 // long scroll. Collapsed by default there, open by default on desktop where
 // there is room for both.
-const ARCH_RELIC_CATEGORY_LABELS = { combat: 'Combat', skilling: 'Skilling', misc: 'Misc' };
-const ARCH_RELIC_TABS = [...RELIC_CATEGORIES, 'all'];
-
 const MOBILE_BREAKPOINT_QUERY = '(max-width: 700px)';
 
 function loadoutOpenByDefault() {
@@ -419,19 +419,18 @@ export default function MyBuildPage({
           open={openSection === 'arch-relics'}
           onToggle={toggleSection}
         >
-          <p className="create-build-hint">
-            Archaeology relic powers - pick up to {MAX_RELICS}, greyed out until the regions you picked above
-            unlock them.
-          </p>
           <div className="abilities-controls">
-            <div className="abilities-tabs" role="tablist">
+            {/* Same classes the Arch Relics page uses for these four, so the
+                two pickers look like the same control rather than two takes
+                on it (see pages/RelicsPage.jsx). */}
+            <div className="style-tabs" role="tablist">
               {ARCH_RELIC_TABS.map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   role="tab"
                   aria-selected={archRelicTab === tab}
-                  className={`ability-tab${archRelicTab === tab ? ' active' : ''}`}
+                  className={`style-tab${archRelicTab === tab ? ' active' : ''}`}
                   onClick={() => setArchRelicTab(tab)}
                 >
                   {tab === 'all' ? 'All' : ARCH_RELIC_CATEGORY_LABELS[tab]}

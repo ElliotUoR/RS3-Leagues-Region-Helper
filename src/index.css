@@ -8870,6 +8870,21 @@ main.abilities-page .gear-item-rows {
   margin: 10px 0 2px;
 }
 
+/* One statement per line. Run inline with "·" separators these wrap mid-phrase
+   in the ~330px loadout column - "Total armour: 3,114 at 99 Defence · Prayer
+   bonus: 68" broke after "Prayer", so the second stat read as two fragments.
+   Stacked, each figure starts at the same left edge and is scannable. */
+.loadout-stat-note .create-build-armour-note {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.loadout-stat-note .create-build-armour-note .gear-stat + .gear-stat::before {
+  content: none;
+  margin: 0;
+}
+
 .loadout-stat-note:empty {
   display: none;
 }
