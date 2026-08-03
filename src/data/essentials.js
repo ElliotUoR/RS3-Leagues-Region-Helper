@@ -66,7 +66,7 @@ export const ESSENTIALS = [
     summary: 'Ancient gizmos, and the perks that only they can roll.',
     why:
       'Ancient gizmos unlock BIS weapon and armour perks',
-    source: { region: 'kandarin', detail: 'Unlocked in the Ancient Cavern / Kandarin.' },
+    source: { region: 'kandarin', detail: 'Complete Howls Floating workshop mystery in Kandarin.' },
   },
   {
     name: 'Ancient summoning',
@@ -74,26 +74,20 @@ export const ESSENTIALS = [
     summary: 'The strongest familiars in the game, via binding contracts.',
     why:
       'Ripper demons, Kalgerion demon, Nightmare muspah, blood reavers. Gargoyle and divine druid combo to provide a +36 mining boost.',
-    // Two genuinely separate ROUTES, not one AND'd requirement - a flat
-    // `source.region` can only express AND-of-OR, and this needs OR-of-AND
-    // (Voidwalker alone vs. a composite needing Asgarnia AND (Kandarin OR
-    // Animal Wrangler)), hence `source.paths` (see gearAvailability.js /
-    // RegionTags.jsx). Each path renders as its own single named pill:
-    // "Ancient pouches" - Voidwalker's Void Shard table includes every
-    // ancient Summoning pouch (see that relic's dropTable), no region needed
-    // at all. `anyOf: []` is deliberate: it's what keeps `leagueRelic` alive
-    // with no real region alternative, same idea as a pure `region: 'relic'`
-    // group elsewhere, just without that reserved keyword.
-    // "Contract claws" - the normal unlock, Asgarnia plus either Kandarin or
-    // the Animal Wrangler relic (its Farm Animals table supplies the cows
-    // Kandarin otherwise provides).
+    // Global as of the JMod confirmation (see data/assumptions.js): the
+    // "Contract Claws" mystery is auto-completed because of its own
+    // multi-region dependency, which makes "Dagon-Bye" reliably completable
+    // and takes every gate off Ancient Summoning.
+    //
+    // This entry previously carried the app's ONLY `source.paths` - an
+    // OR-of-AND that a flat `source.region` cannot express (Voidwalker alone,
+    // versus Asgarnia AND (Kandarin OR Animal Wrangler)). That machinery still
+    // exists in gearAvailability.js and RegionTags.jsx and is worth keeping;
+    // this is simply no longer a case for it.
     source: {
-      paths: [
-        { label: 'Ancient pouches', groups: [{ anyOf: [], leagueRelic: 'Voidwalker' }] },
-        { label: 'Contract claws', groups: ['asgarnia', { anyOf: ['kandarin'], leagueRelic: 'Animal Wrangler' }] },
-      ],
+      region: 'global',
       detail:
-        'Ancient pouches straight from Voidwalker - or Contract claws: Asgarnia plus either Kandarin or the Animal Wrangler relic (for its cows).',
+        'No region or relic requirement. The Contract Claws mystery is auto-completed, so Dagon-Bye - and with it Ancient Summoning - is reachable by everyone. You only need that mystery to CREATE ancient familiars from binding contracts; summoning them never required it.',
     },
   },
   {
@@ -102,7 +96,7 @@ export const ESSENTIALS = [
     summary: 'Restores prayer points on a short cooldown, forever.',
     why:
       'Restores up to 375 prayer points over 30 seconds. 5 minute cooldown.',
-    source: { region: 'tirannwn', detail: 'From the Prifddinas ritual site, Tirannwn.' },
+    source: { region: 'tirannwn', detail: 'from lost grove creatures in Tirannwn.' },
   },
   {
     name: 'Adrenaline potion',

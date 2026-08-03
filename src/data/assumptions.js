@@ -43,6 +43,11 @@ export const JMOD_CONFIRMATIONS = [
     detail: "Yes. In Leagues, you can break down items into Masterwork Essence at any anvil, so you won't need access to the Dragon Forge or the Kandarin region to use this specific feature. Confirmed from the source, so Kandarin is not required for it.",
   },
   {
+    title: 'Contract Claws auto-completed -> Ancient Summoning is global',
+    detail:
+      "The \"Contract Claws\" Archaeology mystery will be auto-completed due to its multi-region dependency. This means you'll be able to reliably complete the \"Dagon-Bye\" mystery to unlock Ancient Summoning. Reminder that you don't need this mystery to summon Ancient Summoning familiars, only to create them from Binding Contracts. This also means Ancient Summoning is now global and no longer has any regional or relic requirements.",
+  },
+  {
     title: 'Quest-point rewards (Vanquish, etc.) treated as global',
     detail: 'Since players begin Leagues with a number of Quest Points already unlocked and can earn additional Quest Points through region unlocks, some Quest Caravan rewards have been disabled. Free dice rolls and the Armour of Trials and Vanquish rewards will not be available during Leagues.',
   },

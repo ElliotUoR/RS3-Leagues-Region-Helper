@@ -796,7 +796,7 @@ export const LEAGUE_RELICS = [
           icon: 'icons/voidshard/Binding_contract_ripper_demon.webp',
           detail:
             'Every ancient Summoning familiar pouch, and almost all standard pouches - only a handful of the least useful familiars are missing. 1-5 dropped.',
-          note: 'Voidwalker can be used to access Ancient summoning without Kandarin.',
+          note: 'Ancient Summoning itself is global now that Contract Claws is auto-completed, so this is a supply shortcut rather than an unlock - pouches straight off the drop table instead of charms and contracts.',
         },
         {
           name: 'Divine energy & charge',

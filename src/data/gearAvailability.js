@@ -169,8 +169,10 @@ export function isGearItemAvailable(item, isUnlocked, options = {}) {
   // `source.paths` is for a requirement a flat AND-of-OR `source.region` can't
   // express: several alternative ROUTES to the same item, satisfied if ANY
   // ONE route is fully met, where a route can itself need more than one thing
-  // AND'd together (e.g. Ancient summoning - Voidwalker alone, or Asgarnia
-  // AND (Kandarin OR the Animal Wrangler relic)). Each path is
+  // AND'd together (e.g. relic-alone, or region X AND (region Y OR relic Z)).
+  // Currently no item uses it - Ancient summoning, the case it was written
+  // for, went global when Contract Claws became auto-completed. Kept because
+  // the shape recurs and re-deriving it costs more than carrying it. Each path is
   // `{ label, groups: [...] }`, `groups` in the exact same shape
   // normalizeRegionGroups produces from `source.region` - reused rather than
   // duplicated, so a path's own AND-logic runs through the same

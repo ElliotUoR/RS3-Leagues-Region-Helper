@@ -386,12 +386,13 @@ export const RELICS = [
     source: {
       type: 'skilling',
       detail: 'Give two hellfire katars (Byzroth remains, Infernal Source Dig Site) to Dagon the Gatekeeper',
-      region: [
-        'misthalin',
-        { anyOf: ['kandarin'], label: 'Harlequin cow' },
-        { anyOf: ['kandarin'], label: 'Goblin potion' },
-      ],
-      note: "Requires completing the Dagon Bye mystery first, which itself requires completing the Contract Claws mystery. Contract Claws needs a Harlequin cow (bred at Manor Farm, kandarin) and a Goblin potion (pharmakos berries via Land of the Goblins/Goblin Cave content, kandarin).",
+      // Kandarin used to be an AND'd requirement here, twice over: Dagon Bye
+      // needs Contract Claws, and Contract Claws needed a Harlequin cow (Manor
+      // Farm) and a Goblin potion (pharmakos berries). Jagex have confirmed
+      // Contract Claws is auto-completed precisely because of that multi-region
+      // dependency, so only the katars remain - see data/assumptions.js.
+      region: 'misthalin',
+      note: 'Requires completing the Dagon Bye mystery first. Its prerequisite, Contract Claws, is auto-completed, so the Kandarin steps it used to need (Harlequin cow, Goblin potion) no longer apply.',
     },
   },
   {
