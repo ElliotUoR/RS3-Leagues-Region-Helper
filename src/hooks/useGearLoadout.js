@@ -169,6 +169,13 @@ export function useGearLoadout({
     setEofWeaponNamesByStyle((prev) => ({ ...prev, [style]: null }));
   }
 
+  // clearLoadout empties only the style on screen, which is what the Gear
+  // Planner's button means. My Build's "Clear everything" means every style.
+  function clearAllLoadouts() {
+    setEquippedNamesByStyle(emptyEquippedNames());
+    setEofWeaponNamesByStyle(emptyEofWeaponNames());
+  }
+
   return {
     style,
     setStyle,
@@ -181,6 +188,7 @@ export function useGearLoadout({
     toggleItem,
     unequipSlot,
     clearLoadout,
+    clearAllLoadouts,
     offhandBlocked,
     eofVisible,
     eofWeapon,

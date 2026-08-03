@@ -90,5 +90,9 @@ export function useLeagueRelicSelection({ initialSelection, persist = true } = {
     [persist],
   );
 
-  return { selected, toggleLeagueRelic };
+  // My Build's "Clear everything" needs to empty this alongside the other four
+  // selections - see pages/MyBuildPage.jsx.
+  const clearLeagueRelics = useCallback(() => setSelected([]), []);
+
+  return { selected, toggleLeagueRelic, clearLeagueRelics };
 }

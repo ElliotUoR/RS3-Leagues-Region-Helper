@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import RetryImage from './RetryImage';
 import { ARCH_RELIC_BY_NAME, BLESSING_BY_NAME } from '../data/buildLookups';
 import { BLESSING_COLOURS, resolveGodTier } from '../data/blessings';
@@ -413,8 +413,26 @@ export default function LeaguesEffectsPanel({
   aegis,
   elderSources = [],
   caption,
+  // My Build opens expanded: the panel IS the reason that page exists, so
+  // hiding it behind a click there would bury the payoff. On a build card it
+  // stays shut, because a listing of several cards each unfurling a dozen
+  // effect tiles is unreadable. Only the initial state - the toggle still
+  // works, and switching style tab does not re-collapse it, because this
+  // component stays mounted across that change.
+  defaultOpen = false,
+  // A counter, not a boolean: "open this now" is an event, and a boolean would
+  // latch the panel open so the visitor could never collapse it again. Every
+  // increment opens it; the toggle keeps working in between.
+  openSignal = 0,
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
+
+  const seenSignal = useRef(openSignal);
+  useEffect(() => {
+    if (openSignal === seenSignal.current) return;
+    seenSignal.current = openSignal;
+    setOpen(true);
+  }, [openSignal]);
   // 'none' | 'overload' | 'elder'. Clicking the active one turns it off, same
   // convention GearStatsSummary's own overload toggle uses.
   const [potion, setPotion] = useState('none');

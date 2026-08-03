@@ -46,5 +46,8 @@ export function useRelicSelection({ initialSelection, persist = true } = {}) {
     });
   }, []);
 
-  return { selected, toggleRelic };
+  // Same reason as useLeagueRelicSelection's clearLeagueRelics.
+  const clearRelics = useCallback(() => setSelected([]), []);
+
+  return { selected, toggleRelic, clearRelics };
 }

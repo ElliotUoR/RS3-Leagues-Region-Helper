@@ -57,6 +57,12 @@ export function sanitizeBuildExtras(raw, regions = []) {
     .map((extra) => extra.name);
 }
 
+// What a set of picks is actually WORTH right now, given the regions currently
+// held. The same function as above under a name that says what it is for at the
+// call site: raw picks are kept whole so unticking a region does not destroy
+// them, and this is what every consumer of the effect reads instead.
+export const activeBuildExtras = sanitizeBuildExtras;
+
 // The flat max-LP these extras add, BEFORE any multiplier - see
 // getTotalLifePoints, which folds it in alongside Font of Life for the same
 // reason.

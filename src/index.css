@@ -203,29 +203,68 @@ header h1 {
   font-weight: 600;
 }
 
-/* The Tier Lists link. Same shape, glow, hover lift and sheen as the green
-   Build Guides pill beside it - the two are peers, both pointing at a
-   "you can make one too" feature - just in the site's purple. */
+/* The My Build link. Same shape, glow, hover lift and sheen as the green Build
+   Guides pill beside it - the two are peers - but wearing all THREE god colours
+   rather than one, because what it leads to is the page that shows what your
+   blessings do. Zamorak red, Guthix green and Saradomin blue are the exact
+   hexes used by the blessing cards and the effects panel (see
+   utils/blessingTheme.js), so the pill reads as belonging to that feature
+   rather than being decorative stripes. */
 .home-updated-banner {
+  --god-red: #ef5350;
+  --god-green: #3fbf6f;
+  --god-blue: #4a90e2;
   position: relative;
   overflow: hidden;
-  color: var(--accent);
+  /* Not one of the three: at 12px on a tinted background, coloured text in any
+     one god's colour reads as belonging to that god and fights the other two.
+     Plain heading white stays legible and lets the border carry the colour. */
+  color: var(--text-h);
   text-decoration: none;
+  /* Along the long axis, not diagonally: this pill is ~420px wide and 26px
+     tall, so a 120deg sweep squeezed the middle colour into a sliver and the
+     green simply did not read. Explicit stops give each god a third. */
   background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent) 20%, transparent),
-    color-mix(in srgb, var(--accent-2) 8%, transparent)
+    to right,
+    color-mix(in srgb, var(--god-red) 30%, transparent) 0%,
+    color-mix(in srgb, var(--god-green) 38%, transparent) 50%,
+    color-mix(in srgb, var(--god-blue) 32%, transparent) 100%
   );
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  box-shadow: 0 0 10px -3px color-mix(in srgb, var(--accent) 55%, transparent);
-  transition: transform 140ms, box-shadow 140ms, border-color 140ms;
+  /* Transparent, because the gradient rim is drawn by ::before below -
+     border-image cannot do a gradient border and keep the 999px radius. */
+  border: 1px solid transparent;
+  box-shadow: 0 0 10px -3px color-mix(in srgb, var(--god-green) 45%, transparent);
+  transition: transform 140ms, box-shadow 140ms, filter 140ms;
+}
+
+.home-updated-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(to right, var(--god-red) 0%, var(--god-green) 50%, var(--god-blue) 100%);
+  /* Punches out the middle so only the 1px rim of the gradient remains. */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0.85;
+  pointer-events: none;
+  transition: opacity 140ms;
 }
 
 .home-updated-banner:hover,
 .home-updated-banner:focus-visible {
   transform: translateY(-1px);
-  border-color: var(--accent);
-  box-shadow: 0 0 16px -3px color-mix(in srgb, var(--accent) 70%, transparent);
+  box-shadow:
+    0 0 14px -4px color-mix(in srgb, var(--god-red) 50%, transparent),
+    0 0 18px -3px color-mix(in srgb, var(--god-blue) 50%, transparent);
+}
+
+.home-updated-banner:hover::before,
+.home-updated-banner:focus-visible::before {
+  opacity: 1;
 }
 
 /* The Build Guides link. Guthix green, matching the Blessings nav tab, so the
@@ -304,7 +343,7 @@ header h1 {
 }
 
 .home-updated-banner {
-  --sheen-colour: var(--accent);
+  --sheen-colour: #ffffff;
 }
 
 @keyframes home-banner-sheen {
@@ -8598,6 +8637,327 @@ main.abilities-page .gear-item-rows {
 .leagues-effects-elder-note {
   font-size: 0.72rem;
   opacity: 0.65;
+}
+
+/* ==========================================================================
+   My Build (pages/MyBuildPage.jsx) - the whole setup on one page. Sections
+   collapse because five expanded pickers is a very long page and most visits
+   change one thing; the summary in each header is what makes a closed section
+   still worth reading.
+   ========================================================================== */
+
+.my-build-intro {
+  margin: 6px 0 0;
+  max-width: 78ch;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  opacity: 0.75;
+}
+
+.my-build-page {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.my-build-section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-bg);
+  overflow: hidden;
+}
+
+.my-build-section.open {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+/* The head button and its optional action sit side by side. The button takes
+   the slack so the whole strip stays clickable, leaving the action at the far
+   end where it does not compete with the summary text. */
+.my-build-section-headrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 12px;
+}
+
+.my-build-section-headrow .my-build-section-head {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Wears the build's own colour balance, like the effects panel's own toggle -
+   dimmed behind the label so the gradient never fights the text (same trick
+   and the same reason as .leagues-effects-toggle). */
+.my-build-effects-jump {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--effects-accent, var(--accent)) 55%, transparent);
+  border-radius: 999px;
+  background-color: var(--panel-bg);
+  background-blend-mode: overlay;
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  isolation: isolate;
+  transition: border-color 140ms, box-shadow 140ms, transform 140ms;
+}
+
+.my-build-effects-jump::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--panel-bg);
+  opacity: 0.72;
+  z-index: -1;
+}
+
+.my-build-effects-jump:hover {
+  transform: translateY(-1px);
+  border-color: var(--effects-accent, var(--accent));
+  box-shadow: 0 0 14px -5px var(--effects-accent, var(--accent));
+}
+
+.my-build-effects-jump span[aria-hidden] {
+  color: var(--effects-accent, var(--accent));
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+@media (max-width: 700px) {
+  .my-build-effects-jump {
+    font-size: 0.7rem;
+    padding: 5px 9px;
+  }
+}
+
+.my-build-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.my-build-section-head:hover h2 {
+  color: var(--accent);
+}
+
+.my-build-section-head h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.my-build-section-chevron {
+  opacity: 0.7;
+  font-size: 0.8rem;
+}
+
+.my-build-section-count {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--text-h);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Truncates rather than wraps: the header is a fixed-height row you scan, and
+   a build with three regions and eight relics would otherwise push the
+   sections apart by several lines each. */
+.my-build-section-summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  opacity: 0.6;
+}
+
+.my-build-section-body {
+  padding: 0 14px 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+/* An <a>, not a <button>, because it navigates - so it needs the button
+   styling applied by hand and its own disabled treatment (aria-disabled plus a
+   prevented click; the disabled attribute does not exist on a link). */
+.my-build-import-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--text-h);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.my-build-import-button:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+/* No pointer-events: none - that would suppress the title tooltip, which is
+   the only thing explaining WHY it is disabled. The click is stopped in the
+   handler instead (a link has no disabled attribute to set). */
+.my-build-import-button.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.my-build-import-button.disabled:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+/* Clearance for the smooth scrolls the planner does on a stacked layout (see
+   GearLoadoutPlanner) - without it the target lands flush against the top edge
+   with its heading half under the viewport lip. */
+@media (max-width: 700px) {
+  .equip-grid,
+  .gear-item-list {
+    scroll-margin-top: 12px;
+  }
+}
+
+.my-build-loadout {
+  margin-top: 6px;
+}
+
+.my-build-loadout > h2,
+.my-build-effects > h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.my-build-effects {
+  margin-top: 18px;
+}
+
+/* The at-a-glance line under an equip grid (components/LoadoutStatNote.jsx).
+   Sits between the grid and the stats summary in My Build, and above the grid
+   in the build editor - so it owns its spacing rather than relying on either
+   neighbour's. */
+.loadout-stat-note {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 0 2px;
+}
+
+.loadout-stat-note:empty {
+  display: none;
+}
+
+/* Destructive-action dialog (components/ConfirmModal.jsx). */
+.confirm-modal {
+  max-width: 460px;
+}
+
+.confirm-modal-body {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.confirm-modal-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  list-style: none;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.confirm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.confirm-modal-cancel,
+.confirm-modal-confirm {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.confirm-modal-cancel {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.confirm-modal-cancel:hover {
+  border-color: var(--accent);
+  color: var(--text-h);
+}
+
+/* Red, and second in the row - this one cannot be undone. */
+.confirm-modal-confirm {
+  border: 1px solid #c0392b;
+  background: color-mix(in srgb, #c0392b 22%, transparent);
+  color: #ff8a7a;
+}
+
+.confirm-modal-confirm:hover {
+  background: color-mix(in srgb, #c0392b 38%, transparent);
+  color: #fff;
+}
+
+:root[data-theme='light'] .confirm-modal-confirm {
+  color: #a02c1e;
+}
+
+/* The footer is a plain centred block, not a flex row - spacing between its
+   items comes from each one's own margin. Without this the link ran straight
+   into the version string: "…00:52 GMTAssumptions". The middot matches the
+   separators already inside that string. */
+.site-footer-link {
+  margin-left: 6px;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.site-footer-link::before {
+  content: '· ';
+}
+
+.site-footer-link:hover {
+  opacity: 1;
 }
 
 /* Sort control and pager for the user-made builds listing

@@ -18,12 +18,12 @@ export default function HomePage({ selected, toggleRegion, isUnlocked, overLimit
             screens. The second is a real link rather than a styled div so it
             keeps keyboard focus, middle-click and "open in new tab". */}
         <div className="home-banners">
-          <a href="#tier-list-maker" className="home-banner home-updated-banner">
+          <a href="#my-build" className="home-banner home-updated-banner">
             <span className="home-banner-icon" aria-hidden="true">
               ✨
             </span>
             <span>
-              <span className="home-banner-new">New:</span> Create your own relic and blessing tier lists
+              <span className="home-banner-new">New:</span> Preview blessing effects in My Build
             </span>
             <span className="home-banner-arrow" aria-hidden="true">
               →

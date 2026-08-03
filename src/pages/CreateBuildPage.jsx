@@ -10,6 +10,8 @@ import BlessingCard from '../components/BlessingCard';
 import BlessingGodPanel from '../components/BlessingGodPanel';
 import PasswordField from '../components/PasswordField';
 import LeaguesEffectsPanel from '../components/LeaguesEffectsPanel';
+import LoadoutStatNote from '../components/LoadoutStatNote';
+import BuildExtrasPicker from '../components/BuildExtrasPicker';
 import { useGearLoadout } from '../hooks/useGearLoadout';
 import { useRegionSelection } from '../hooks/useRegionSelection';
 import { useLeagueRelicSelection } from '../hooks/useLeagueRelicSelection';
@@ -22,19 +24,13 @@ import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { RELICS, RELIC_CATEGORIES } from '../data/relics';
 import { GATEWAY_REGIONS, REGIONS } from '../data/regions';
 import { isGearItemAvailable } from '../data/gearAvailability';
-import { availableBuildExtras, extraLifePoints } from '../data/buildExtras';
+import { activeBuildExtras } from '../data/buildExtras';
 import {
   ARMOUR_SCALING_BLESSINGS,
-  LIFE_SCALING_BLESSINGS,
-  ICYENIC_FAITH_RELIC,
   getAegisBreakdown,
   getArmourRating,
-  getBigBonedBonusDamage,
   getElderOverloadSources,
-  getIcyeneBonusPercent,
-  getTotalPrayerBonus,
   getTotalArmour,
-  getTotalLifePoints,
 } from '../utils/gearStats';
 import { adminUpdateUserBuild, createUserBuild, setUserBuildPassword, updateUserBuild } from '../utils/api';
 import { reportPublishFailure } from '../utils/autoReport';
@@ -333,19 +329,16 @@ function StageEditor({
   thumbnailPick,
   onPickThumbnail,
 }) {
-  // Armour/health are only meaningful to show once a blessing that actually
-  // reads its value off one of them is picked - otherwise the number is
-  // just noise (see utils/gearStats.js's ARMOUR_SCALING_BLESSINGS/
-  // LIFE_SCALING_BLESSINGS). Blessings are build-wide, not per-style/stage,
-  // so this is the same check for every block below.
+  // Armour is only meaningful to show once a blessing that actually reads its
+  // value is picked - otherwise the number is just noise (see
+  // utils/gearStats.js's ARMOUR_SCALING_BLESSINGS). Blessings are build-wide,
+  // not per-style/stage, so this is the same check for every block below.
+  // The health/prayer equivalents live in LoadoutStatNote, which gates its own
+  // lines the same way.
   const showArmour = blessings.some((name) => ARMOUR_SCALING_BLESSINGS.has(name));
-  const showHealth = blessings.some((name) => LIFE_SCALING_BLESSINGS.has(name));
   // Teragard's Aegis is one of the armour-scaling blessings, but unlike the
   // others it has a stateable number of its own, so it gets its own check.
   const showAegis = blessings.includes("Teragard's Aegis");
-  // Prayer bonus is only worth a line when something reads it - Icyenic Faith
-  // turns it into crit chance and ability damage, and nothing else does.
-  const showPrayer = leagueRelics.includes(ICYENIC_FAITH_RELIC);
   // Per-style, not per-stage-wide - each style has its own equipped items and
   // its own Total armour line, so its own potion choice. Clicking the
   // already-active mode turns it off; clicking the other one switches
@@ -380,18 +373,9 @@ function StageEditor({
           if (item) equipped[slot] = item;
         }
         const overloadMode = overloadModeByStyle[style] ?? 'none';
-        const effectiveDefenceLevel = 99 + OVERLOAD_DEFENCE_BONUS_BY_MODE[overloadMode];
-        const armourTotal = showArmour ? getTotalArmour(equipped, style, effectiveDefenceLevel) : null;
-        const lifeTotal = showHealth ? getTotalLifePoints(equipped, { bigBoned: true, archRelics, extraLifePoints: extraLifePoints(extras) }) : null;
-        const bigBonedBonus = lifeTotal != null ? getBigBonedBonusDamage(lifeTotal) : null;
-        const prayerTotal = showPrayer ? getTotalPrayerBonus(equipped) : null;
-        // Null unless the Tome is actually in the pocket slot - see
-        // getIcyeneBonusPercent for why that matters.
-        const icyeneBonus = showPrayer ? getIcyeneBonusPercent(equipped) : null;
-        // Aegis quotes every potion state at once rather than following the
-        // overload toggle above: the toggle answers "how much armour do I have
-        // right now", this answers "what is this blessing worth to me", and
-        // that is a question about the whole range.
+        // The armour/health/blessing figures all moved into LoadoutStatNote,
+        // which derives them from the same picks - see that file. What is left
+        // here is what the effects panel below needs.
         const aegis = showAegis
           ? getAegisBreakdown({
               equipped,
@@ -405,61 +389,18 @@ function StageEditor({
           <div key={style} className="create-build-style-block">
             <div className="create-build-style-block-head">
               <h3>{STYLE_LABELS[style]}</h3>
-              <span className="create-build-armour-note">
-                {/* Same colour classes GearItemRow uses for these two stats
-                    (see utils/gearItemDisplay.js's keyStats), so this note
-                    reads as the same "armour"/"health" concept everywhere. */}
-                {/* .gear-stat + .gear-stat::before already inserts the "·"
-                    separator between adjacent stats (see index.css) - no
-                    manual separator needed here. */}
-                {armourTotal != null && (
-                  <span className="gear-stat gear-stat-armour">Total armour: {armourTotal.toLocaleString()} at 99 Defence</span>
-                )}
-                {lifeTotal != null && (
-                  <span className="gear-stat gear-stat-lp">Total health: {lifeTotal.toLocaleString()} at 99 Hitpoints</span>
-                )}
-                {prayerTotal != null && (
-                  <span className="gear-stat gear-stat-prayer">Prayer bonus: {prayerTotal.toLocaleString()}</span>
-                )}
-              </span>
             </div>
-            {/* The two blessings with a stateable number of their own. Kept on
-                their own line under the armour/health totals they are derived
-                from, rather than crammed into that line - each needs its own
-                caveat (which multiplier, per hit, at which potion state) and
-                the totals line is already dense. */}
-            {(aegis || bigBonedBonus != null || icyeneBonus != null) && (
-              <p className="create-build-blessing-note">
-                {aegis && (
-                  <span className="create-build-blessing-line">
-                    <span className="gear-stat gear-stat-aegis">
-                      Teragard&apos;s Aegis: +{aegis.base.toLocaleString()} ability damage
-                    </span>
-                    <span className="create-build-blessing-detail">
-                      {' '}({aegis.multiplier}x - {aegis.source})
-                      {' · '}+{aegis.overloaded.toLocaleString()} overloaded
-                      {aegis.elder != null && (
-                        <> {'· '}+{aegis.elder.toLocaleString()} elder overloaded - via {elderSources.join(' or ')}</>
-                      )}
-                    </span>
-                  </span>
-                )}
-                {bigBonedBonus != null && (
-                  <span className="create-build-blessing-line">
-                    <span className="gear-stat gear-stat-bigboned">
-                      Big Boned: +{bigBonedBonus.toLocaleString()} bonus damage
-                    </span>
-                    <span className="create-build-blessing-detail"> per hit (5% of max life points)</span>
-                  </span>
-                )}
-                {icyeneBonus != null && (
-                  <span className="create-build-blessing-line">
-                    <span className="gear-stat gear-stat-icyenic">Icyenic Faith: +{icyeneBonus.toFixed(1)}% Crit &amp; Ability bonus</span>
-                    <span className="create-build-blessing-detail"> (0.2% per 1 prayer bonus)</span>
-                  </span>
-                )}
-              </p>
-            )}
+            {/* Shared with My Build - see components/LoadoutStatNote.jsx. */}
+            <LoadoutStatNote
+              style={style}
+              slots={names}
+              equipped={equipped}
+              blessings={blessings}
+              leagueRelics={leagueRelics}
+              archRelics={archRelics}
+              extras={extras}
+              elderSources={elderSources}
+            />
             {/* A share thumbnail renders ONE loadout, so this is really a radio
                 group spread across every stage and style - ticking any box
                 unticks whichever was ticked before, even in the other stage.
@@ -549,7 +490,9 @@ function StageEditor({
 // with its own id, edit token and password, never an update to the build it
 // was copied from. See pages/CopyBuildPage.jsx, which resolves
 // "#create-build-from/<id>" into this prop.
-export default function CreateBuildPage({ onSubmitted, editing, copyFrom }) {
+// `fromMyBuild` only changes the wording: a seed from My Build has no source
+// build to name, and nothing to suffix "- copy" onto.
+export default function CreateBuildPage({ onSubmitted, editing, copyFrom, fromMyBuild = false }) {
   const build = editing?.build ?? copyFrom;
   // Copying (not editing) seeds the name field with a "- copy" suffix rather
   // than the exact original - the two builds are about to coexist publicly,
@@ -603,10 +546,6 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom }) {
   // `offeredExtras` below is what decides what is on screen, so an
   // out-of-reach name can never be submitted or displayed.
   const [extras, setExtras] = useState(() => build?.extras ?? []);
-  const offeredExtras = useMemo(
-    () => availableBuildExtras(regionSelection.selected),
-    [regionSelection.selected],
-  );
   const toggleExtra = (name) =>
     setExtras((prev) => (prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]));
   // What the build actually HAS right now - raw ticks intersected with what the
@@ -615,8 +554,8 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom }) {
   // the same instant its tickbox disappears. Re-tick the region and it is back,
   // still ticked, because the raw state above never lost it.
   const activeExtras = useMemo(
-    () => offeredExtras.filter((extra) => extras.includes(extra.name)).map((extra) => extra.name),
-    [offeredExtras, extras],
+    () => activeBuildExtras(extras, regionSelection.selected),
+    [extras, regionSelection.selected],
   );
 
   const relicSelection = useLeagueRelicSelection({ persist: false, initialSelection: build?.relics ?? [] });
@@ -905,7 +844,14 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom }) {
             </>
           )}
         </p>
-        {!editing && copyFrom && (
+        {!editing && copyFrom && fromMyBuild && (
+          <p className="create-build-copy-note">
+            Pre-filled from <a href="#my-build" className="notice-link">My Build</a> - give it a name and a
+            write-up, and review everything before publishing. Changes here are a draft of a guide and do not
+            touch your own saved setup.
+          </p>
+        )}
+        {!editing && copyFrom && !fromMyBuild && (
           <p className="create-build-copy-note">
             Pre-filled by copying &ldquo;{copyFrom.name}&rdquo; - review everything before publishing. This will
             create a brand new build with its own id, edit link and password, not change the one it was copied from.
@@ -1010,33 +956,12 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom }) {
             ))}
           </ul>
 
-          {/* Appears only once the regions actually reach something - there is
-              nothing to say to a build that cannot take any of it, and an
-              always-visible empty section reads as a bug. See
-              data/buildExtras.js for why these are not gear, relics or
-              blessings. */}
-          {offeredExtras.length > 0 && (
-            <div className="create-build-extras">
-              <h3>Extras</h3>
-              <p className="create-build-hint">
-                Unlocked by the regions above, and counted into this build&apos;s totals if taken.
-              </p>
-              {offeredExtras.map((extra) => (
-                <label key={extra.name} className="create-build-extra">
-                  <input
-                    type="checkbox"
-                    checked={extras.includes(extra.name)}
-                    onChange={() => toggleExtra(extra.name)}
-                  />
-                  {extra.icon && <RetryImage src={extra.icon} alt="" className="create-build-extra-icon" />}
-                  <span className="create-build-extra-text">
-                    <strong>{extra.name}</strong>
-                    {extra.summary && <span className="create-build-extra-summary">{extra.summary}</span>}
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
+          <BuildExtrasPicker
+            regions={regionSelection.selected}
+            selected={extras}
+            onToggle={toggleExtra}
+            hint="Unlocked by the regions above, and counted into this build's totals if taken."
+          />
         </section>
 
         <section className="create-build-section">

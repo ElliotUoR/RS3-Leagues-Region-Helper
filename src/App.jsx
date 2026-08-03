@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import CharacterPage from './pages/CharacterPage';
 import AssumptionsPage from './pages/AssumptionsPage';
 import GearPage from './pages/GearPage';
+import MyBuildPage from './pages/MyBuildPage';
 import GearByRegionPage from './pages/GearByRegionPage';
 import HomePage from './pages/HomePage';
 import LeagueRelicsPage from './pages/LeagueRelicsPage';
@@ -30,6 +31,8 @@ import {
   useLeagueRelicSelection,
 } from './hooks/useLeagueRelicSelection';
 import { BLESSINGS_STORAGE_KEY, useBlessingSelection } from './hooks/useBlessingSelection';
+import { useBuildExtrasSelection } from './hooks/useBuildExtrasSelection';
+import { buildMyBuildSeed } from './utils/myBuildSeed';
 import { buildIdFromLocation, isBuildGuidePath, leaveBuildGuidePath } from './utils/buildGuideRoute';
 import { isTierListMakerPath, leaveTierListPath, tierListFromLocation } from './utils/tierListRoute';
 import { useIsAdmin } from './hooks/useIsAdmin';
@@ -116,8 +119,13 @@ function currentRoute() {
   // form pre-filled from another build's data, distinct from #edit-build:
   // this always publishes as a brand new build, never updates the one it was
   // copied from. See pages/CopyBuildPage.jsx.
+  // Distinct from '#create-build-from/<id>' below, which copies a PUBLISHED
+  // build - this one seeds from the visitor's own saved selections and needs no
+  // fetch at all. Tested first because the other check matches on a prefix.
+  if (window.location.hash === '#create-build-from-mine') return 'myBuildImport';
   if (window.location.hash.split('/')[0] === '#create-build-from') return 'copyBuild';
   if (window.location.hash === '#relic-import-docs') return 'relicImportDocs';
+  if (window.location.hash === '#my-build') return 'myBuild';
   if (window.location.hash === '#assumptions') return 'assumptions';
   return 'home';
 }
@@ -168,7 +176,7 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
     initialDefaultStyle: sharedBuild?.defaultStyle,
     persist: !sharedBuild,
   });
-  const { selected: selectedRelics, toggleRelic } = useRelicSelection({
+  const { selected: selectedRelics, toggleRelic, clearRelics } = useRelicSelection({
     initialSelection: sharedBuild?.relics,
     persist: !sharedBuild,
   });
@@ -180,12 +188,18 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
   // fire once more (with its stale, pre-import `selected`) before that old
   // instance actually unmounted, clobbering the import. Handing the value
   // straight to the fresh instance's initial state has no such window.
-  const { selected: selectedLeagueRelics, toggleLeagueRelic } = useLeagueRelicSelection({
+  const { selected: selectedLeagueRelics, toggleLeagueRelic, clearLeagueRelics } = useLeagueRelicSelection({
     initialSelection: sharedBuild?.leagueRelics ?? importedLeagueRelics,
     persist: !sharedBuild,
   });
   const { selected: selectedBlessings, toggleBlessing, clearBlessings } = useBlessingSelection({
     initialSelection: sharedBuild?.blessings,
+    persist: !sharedBuild,
+  });
+  // Not carried by share links (see utils/shareBuild.js), so a shared build
+  // seeds this empty rather than inheriting the viewer's own Extras.
+  const { selected: selectedExtras, toggleExtra, clearExtras } = useBuildExtrasSelection({
+    initialSelection: sharedBuild ? [] : undefined,
     persist: !sharedBuild,
   });
 
@@ -278,14 +292,14 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         <a href="#blessings" className={`blessings-tab${route === 'blessings' ? ' active' : ''}`}>
           Blessings
         </a>
+        <a href="#my-build" className={route === 'myBuild' ? 'active' : ''}>
+          My Build
+        </a>
         <a href="#build-guides" className={route === 'buildGuides' ? 'active' : ''}>
           Build Guides
         </a>
         <a href="#character" className={route === 'character' ? 'active' : ''}>
           Character
-        </a>
-        <a href="#assumptions" className={route === 'assumptions' ? 'active' : ''}>
-          Assumptions
         </a>
         <button type="button" className="site-nav-report" onClick={onOpenReportIssue}>
           Report Issue
@@ -304,6 +318,31 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
         />
       )}
       {route === 'gearByRegion' && <GearByRegionPage isUnlocked={isUnlocked} />}
+      {/* Every selection hook the site owns, handed to one page. They all
+          persist, so editing here edits the real thing - see MyBuildPage. */}
+      {route === 'myBuild' && (
+        <MyBuildPage
+          isUnlocked={isUnlocked}
+          selected={selected}
+          gatewaySelected={gatewaySelected}
+          toggleRegion={toggleRegion}
+          overLimit={overLimit}
+          clearRegions={clearRegions}
+          selectedRelics={selectedRelics}
+          toggleRelic={toggleRelic}
+          clearRelics={clearRelics}
+          selectedLeagueRelics={selectedLeagueRelics}
+          toggleLeagueRelic={toggleLeagueRelic}
+          clearLeagueRelics={clearLeagueRelics}
+          selectedBlessings={selectedBlessings}
+          toggleBlessing={toggleBlessing}
+          clearBlessings={clearBlessings}
+          selectedExtras={selectedExtras}
+          toggleExtra={toggleExtra}
+          clearExtras={clearExtras}
+          {...gear}
+        />
+      )}
       {route === 'character' && (
         <CharacterPage
           isUnlocked={isUnlocked}
@@ -354,6 +393,26 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
       {route === 'sharedTierList' && <SharedTierListPage />}
       {route === 'editBuild' && (
         <EditBuildPage
+          onSubmitted={() => {
+            window.location.hash = '#user-builds';
+          }}
+        />
+      )}
+      {/* Publishing is the one direction that does NOT write back - the seed is
+          a snapshot and CreateBuildPage runs it through its own persist:false
+          hooks, so drafting a guide cannot alter the setup it came from. */}
+      {route === 'myBuildImport' && (
+        <CreateBuildPage
+          copyFrom={buildMyBuildSeed({
+            regions: selected,
+            leagueRelics: selectedLeagueRelics,
+            archRelics: selectedRelics,
+            blessings: selectedBlessings,
+            extras: selectedExtras,
+            equippedNamesByStyle: gear.equippedNamesByStyle,
+            eofWeaponNamesByStyle: gear.eofWeaponNamesByStyle,
+          })}
+          fromMyBuild
           onSubmitted={() => {
             window.location.hash = '#user-builds';
           }}
@@ -534,6 +593,9 @@ function App() {
           {`· v${versionInfo.version}`}
           {formatUpdatedAt(versionInfo.updatedAt) && ` · Updated ${formatUpdatedAt(versionInfo.updatedAt)}`}
         </span>
+        <a href="#assumptions" className="site-footer-link">
+          Assumptions
+        </a>
         <ThemeToggle theme={theme} onToggle={toggleTheme} />
         <ReportIssueButton open={reportIssueOpen} onToggle={() => setReportIssueOpen((prev) => !prev)} />
       </footer>
