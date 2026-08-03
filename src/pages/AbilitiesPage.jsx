@@ -39,9 +39,8 @@ export default function AbilitiesPage({ isUnlocked }) {
       <header>
         <h1>Abilities</h1>
         <p>
-          Abilities that are locked behind a codex, quest, drop, or shop purchase - greyed out
-          until you've picked the region(s) that provide them. Abilities that simply unlock at a
-          skill level aren't shown here.
+          Abilities that are locked behind a codex, quest, drop, or purchase - greyed out
+          until you've picked the region(s) that provide them. 
         </p>
       </header>
 

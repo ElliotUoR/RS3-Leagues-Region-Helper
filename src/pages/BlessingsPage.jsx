@@ -104,10 +104,10 @@ export default function BlessingsPage({
           </div>
         </div>
         <p>
-          Pick one blessing from each of the three tiers. Every tier offers the same three colours,
-          and the colours of your picks decide which God Tier One power you are given - a colour
-          with two or more picks wins, and one of each falls to green. Blessings are resettable
-          mid-league, so these are not permanent decisions.
+          Pick one blessing from each of the three tiers. Every tier offers a choice from one of the gods,
+          and decide which god power you are given - a god
+          with two or more picks wins, and one of each falls to guthix. Blessings are resettable
+          up to three times.
         </p>
       </header>
 

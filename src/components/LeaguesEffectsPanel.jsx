@@ -166,7 +166,7 @@ function achtoCard(achto) {
       ? [
           strong(`+${round(achto.bonus)} equipment damage bonus`),
           muted(
-            `${achto.pieces * 5}% of a tier ${ACHTO_TIER} main-hand's damage, ${achto.pieces} piece${achto.pieces === 1 ? '' : 's'} at 5% each - paid because the off-hand is a ${achto.shieldClass}.`,
+            `${achto.pieces * 5}% of a tier ${ACHTO_TIER} main-hand's damage, ${achto.pieces} piece${achto.pieces === 1 ? '' : 's'} at 5% each - requires off-hand to be a ${achto.shieldClass}.`,
           ),
         ]
       : [

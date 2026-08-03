@@ -48,10 +48,7 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
       <header>
         <h1>Arch Relics</h1>
         <p>
-          Archaeology relic powers, greyed out until you've picked the region(s) they need - a dig
-          site's artefacts, a quest, or a hand-in to someone who isn't a collector. Handing in the
-          collections themselves never needs a region: the delivery box at the Archaeology Campus
-          reaches every collector. Pick up to {MAX_SELECTED} to plan your final loadout - click a
+          The archaeology relics you can access with your limited regions. Collectors are accessable in misthalin, and artefacts can be obtained outside of the required region, but some relics still maintain regional restrictions. Pick up to {MAX_SELECTED} to plan your loadout - click a
           picked relic again to free up its slot.
         </p>
       </header>

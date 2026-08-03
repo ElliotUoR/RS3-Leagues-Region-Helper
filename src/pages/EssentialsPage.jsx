@@ -19,9 +19,7 @@ export default function EssentialsPage({ isUnlocked, selectedLeagueRelics = [] }
       <header>
         <h1>Essentials</h1>
         <p>
-          The account-wide unlocks that set your combat ceiling but are not gear, abilities or
-          prayers - potions, augmentation, familiars, prayer restore. Each one lights up once your
-          regions and league relics actually support it.
+          The other unlockables that don't quite fit elsewhere; potions, augmentations, familiars, passive stat restores and more.
         </p>
       </header>
 
