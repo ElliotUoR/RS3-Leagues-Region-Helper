@@ -35,13 +35,29 @@ export const ESSENTIALS = [
     why:
       'Upgrade to an overload: +25 Defence is about +849 armour. On a Teragard\'s Aegis build that is worth roughly +692 ability damage on its own.',
     source: {
+      // TWO groups, not one - an array is an AND (see gearAvailability.js's
+      // isGearItemAvailable, which `.every()`s them), and elder overloads
+      // genuinely need both halves. A single "Crystal flask" tag satisfied by
+      // Divine Druid said the opposite of what is true: that relic unlocks the
+      // recipes and no flask at all.
+      //
+      // The flask is not consumed by the elder step itself - the wiki is
+      // explicit that "a crystal flask is not required" there. It is needed one
+      // rung down: elder consumes a SIX-DOSE supreme overload, six-dose is the
+      // crystal-flask form, and supreme overload lists a crystal flask among its
+      // ingredients. Same reasoning as getElderOverloadSources in
+      // utils/gearStats.js, which has to agree with this.
+      //
       // `label` is required for the relic alternative to show: a group with a
       // leagueRelic but no label falls through to plain region pills, which
       // ignore relics, so the tag would sit dark while the row was unlocked
       // (see RegionTags' RegionGroupPill).
-      region: { anyOf: ['tirannwn'], label: 'Crystal flask', leagueRelic: 'Divine Druid' },
+      region: [
+        { anyOf: ['tirannwn'], label: 'Meilyr recipes', leagueRelic: 'Divine Druid' },
+        { anyOf: ['tirannwn'], label: 'Crystal flask', leagueRelic: ['Superheated', 'Voidwalker'] },
+      ],
       detail:
-        'Needs a crystal flask (Tirannwn) - or Divine Druid, which grants a flask and unlocks the Meilyr potion recipes outright.',
+        'Requires Meilyr potion recipes (Tirannwn/Divine Druid) and access to crystal flasks (Tirannwn/Superheated/Voidwalker).',
     },
   },
   {
@@ -58,12 +74,26 @@ export const ESSENTIALS = [
     summary: 'The strongest familiars in the game, via binding contracts.',
     why:
       'Ripper demons, Kalgerion demon, Nightmare muspah, blood reavers. Gargoyle and divine druid combo to provide a +36 mining boost.',
-    // Voidwalker is a confirmed alternative: its Void Shard table includes
-    // every ancient Summoning pouch (see that relic's dropTable), so the
-    // familiars are reachable without Kandarin.
+    // Two genuinely separate ROUTES, not one AND'd requirement - a flat
+    // `source.region` can only express AND-of-OR, and this needs OR-of-AND
+    // (Voidwalker alone vs. a composite needing Asgarnia AND (Kandarin OR
+    // Animal Wrangler)), hence `source.paths` (see gearAvailability.js /
+    // RegionTags.jsx). Each path renders as its own single named pill:
+    // "Ancient pouches" - Voidwalker's Void Shard table includes every
+    // ancient Summoning pouch (see that relic's dropTable), no region needed
+    // at all. `anyOf: []` is deliberate: it's what keeps `leagueRelic` alive
+    // with no real region alternative, same idea as a pure `region: 'relic'`
+    // group elsewhere, just without that reserved keyword.
+    // "Contract claws" - the normal unlock, Asgarnia plus either Kandarin or
+    // the Animal Wrangler relic (its Farm Animals table supplies the cows
+    // Kandarin otherwise provides).
     source: {
-      region: { anyOf: ['kandarin'], label: 'Ancient pouches', leagueRelic: 'Voidwalker' },
-      detail: 'Unlocked in Kandarin - or Voidwalker, whose Void Shards drop ancient Summoning pouches.',
+      paths: [
+        { label: 'Ancient pouches', groups: [{ anyOf: [], leagueRelic: 'Voidwalker' }] },
+        { label: 'Contract claws', groups: ['asgarnia', { anyOf: ['kandarin'], leagueRelic: 'Animal Wrangler' }] },
+      ],
+      detail:
+        'Ancient pouches straight from Voidwalker - or Contract claws: Asgarnia plus either Kandarin or the Animal Wrangler relic (for its cows).',
     },
   },
   {

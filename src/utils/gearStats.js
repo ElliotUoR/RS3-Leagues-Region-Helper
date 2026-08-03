@@ -158,14 +158,48 @@ export function getIcyeneBonusPercent(equipped) {
 // the Divine Druid league relic, which unlocks every Meilyr recipe. Derived
 // from a build's own picks rather than stored, so it stays correct when those
 // picks change.
-export const ELDER_OVERLOAD_RELIC = 'Divine Druid';
+// Elder overloads need TWO things, and a build has to have both.
+//
+//   1. The Meilyr recipes. Elder overload (Herblore 106) and the supreme
+//      overload it is brewed from (98) are both bought from the Meilyr recipe
+//      shop in Prifddinas.
+//   2. Crystal flasks. The elder step does not take one - "a crystal flask is
+//      not required" - but it consumes a SIX-DOSE supreme overload, and six-dose
+//      is the crystal-flask form: supreme overload lists a crystal flask among
+//      its ingredients. So the flask is a hard requirement one step up the
+//      chain, which is exactly the kind of gate that is easy to miss.
+//
+// This used to treat Divine Druid as sufficient on its own. It is not: the relic
+// unlocks the recipes and nothing else, so a build holding it without a flask
+// source was being shown elder armour, Aegis and ability damage figures it could
+// never actually reach.
 export const ELDER_OVERLOAD_REGION = 'tirannwn';
+export const ELDER_RECIPE_RELIC = 'Divine Druid';
+// Superheated's Blessed Fire Spirits table drops "Crystal & Potion Flasks";
+// Voidwalker's own table grants access to that same fire spirit table, so it
+// reaches them second-hand. Tirannwn covers both gates by itself - Prifddinas
+// has the shop, and crystal flasks are crafted there.
+export const ELDER_FLASK_RELICS = ['Superheated', 'Voidwalker'];
 
+function elderRecipeSource(leagueRelics, regions) {
+  if (regions.includes(ELDER_OVERLOAD_REGION)) return 'Tirannwn';
+  return leagueRelics.includes(ELDER_RECIPE_RELIC) ? ELDER_RECIPE_RELIC : null;
+}
+
+function elderFlaskSource(leagueRelics, regions) {
+  if (regions.includes(ELDER_OVERLOAD_REGION)) return 'Tirannwn';
+  return ELDER_FLASK_RELICS.find((relic) => leagueRelics.includes(relic)) ?? null;
+}
+
+// The sources actually being relied on, or [] when either gate is unmet - which
+// is what every caller reads as "no elder overload for this build". Tirannwn
+// collapses to one entry because naming it twice would imply two requirements
+// where one pick satisfies both.
 export function getElderOverloadSources({ leagueRelics = [], regions = [] } = {}) {
-  return [
-    leagueRelics.includes(ELDER_OVERLOAD_RELIC) && ELDER_OVERLOAD_RELIC,
-    regions.includes(ELDER_OVERLOAD_REGION) && 'Tirannwn',
-  ].filter(Boolean);
+  const recipes = elderRecipeSource(leagueRelics, regions);
+  const flasks = elderFlaskSource(leagueRelics, regions);
+  if (!recipes || !flasks) return [];
+  return recipes === flasks ? [recipes] : [recipes, flasks];
 }
 
 // Defence levels each potion state puts you at, relative to 99. Elder overload

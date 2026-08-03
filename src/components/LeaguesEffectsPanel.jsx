@@ -595,7 +595,7 @@ export default function LeaguesEffectsPanel({
                     </button>
                   );
                 })}
-                {canElder && <span className="leagues-effects-elder-note">via {elderSources.join(' or ')}</span>}
+                {canElder && <span className="leagues-effects-elder-note">via {elderSources.join(' + ')}</span>}
               </div>
             )}
 

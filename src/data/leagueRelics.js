@@ -554,7 +554,7 @@ export const LEAGUE_RELICS = [
       'Memory strands are gained at x10 rate.',
       'Chronicle fragments give 2x XP (before Leagues multipliers).',
       'Crafting items from divine energies only requires half as many energies, rounded down.',
-      'Provides a flask and unlocks all Meilyr potion recipes.',
+      'Unlocks all Meilyr potion recipes.',
     ],
     icon: FP('Divine_Druid.png'),
   },

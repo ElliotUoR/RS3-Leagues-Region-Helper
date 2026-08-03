@@ -111,7 +111,7 @@ export default function LoadoutStatNote({
                 {' '}({aegis.multiplier}x - {aegis.source})
                 {' · '}+{aegis.overloaded.toLocaleString()} overloaded
                 {aegis.elder != null && (
-                  <> {'· '}+{aegis.elder.toLocaleString()} elder overloaded - via {elderSources.join(' or ')}</>
+                  <> {'· '}+{aegis.elder.toLocaleString()} elder overloaded - via {elderSources.join(' + ')}</>
                 )}
               </span>
             </span>

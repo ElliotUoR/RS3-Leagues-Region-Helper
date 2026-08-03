@@ -56,22 +56,26 @@ const ALWAYS_UNLOCKED = new Set(['global', 'relic', 'tier6']);
 //       (asgarnia AND (wilderness OR kandarin))
 //   - a bare `{ anyOf: [...], label?, component?, artefact?, note?, leagueRelic? }` (no
 //       surrounding array) -> [{ regions: [...anyOf], label, component, artefact, note }]
+// Normalizes one `source.region`-array entry (a plain region id, or an
+// `{ anyOf, label?, component?, artefact?, note?, leagueRelic? }` object)
+// into a `{ regions, label?, component?, artefact?, note?, leagueRelic? }`
+// group. Factored out of normalizeRegionGroups so `source.paths` (see
+// isGearItemAvailable) can build its own groups the same way, from the same
+// author-facing shape, instead of a second hand-rolled mapping.
+export function normalizeGroupEntry(entry) {
+  if (typeof entry === 'string') return { regions: [entry] };
+  if (Array.isArray(entry?.anyOf)) {
+    return { regions: entry.anyOf, label: entry.label, component: entry.component, artefact: entry.artefact, note: entry.note, leagueRelic: entry.leagueRelic };
+  }
+  return { regions: [] };
+}
+
 export function normalizeRegionGroups(item) {
   const region = item.source?.region;
   if (!region || region === 'global') return [{ regions: ['global'] }];
   if (region === 'relic') return [{ regions: ['relic'], leagueRelic: item.source?.leagueRelic }];
-  if (Array.isArray(region)) {
-    return region.map((entry) => {
-      if (typeof entry === 'string') return { regions: [entry] };
-      if (Array.isArray(entry?.anyOf)) {
-        return { regions: entry.anyOf, label: entry.label, component: entry.component, artefact: entry.artefact, note: entry.note, leagueRelic: entry.leagueRelic };
-      }
-      return { regions: [] };
-    });
-  }
-  if (typeof region === 'object' && Array.isArray(region.anyOf)) {
-    return [{ regions: region.anyOf, label: region.label, component: region.component, artefact: region.artefact, note: region.note, leagueRelic: region.leagueRelic }];
-  }
+  if (Array.isArray(region)) return region.map(normalizeGroupEntry);
+  if (typeof region === 'object' && Array.isArray(region.anyOf)) return [normalizeGroupEntry(region)];
   return [{ regions: [region] }];
 }
 
@@ -147,18 +151,37 @@ export function normalizeLeagueRelicList(leagueRelic) {
 // ore"/"Light animica ore" labelled groups - see normalizeLeagueRelicList
 // above) - there, the relic(s) are an *additional* alternative on top of the
 // normal region check, not a replacement for it.
-export function isGearItemAvailable(item, isUnlocked, options = {}) {
+function isGroupSatisfied(group, isUnlocked, options) {
   const { ignoreComponents = false, ignoreArtefactRegions = false, selectedLeagueRelics = [] } = options;
+  const relicOptions = normalizeLeagueRelicList(group.leagueRelic);
+  if (relicOptions.some((relic) => selectedLeagueRelics.includes(relic))) return true;
+  // A pure relic-gated group (no real region alternative) stops here -
+  // falling through to the region check below would trivially pass
+  // regardless of the relic pick, since 'relic' is itself in ALWAYS_UNLOCKED.
+  if (relicOptions.length > 0 && group.regions.length === 1 && group.regions[0] === 'relic') return false;
+  if (ignoreComponents && group.component) return true;
+  if (ignoreArtefactRegions && group.artefact) return true;
+  return group.regions.some((r) => ALWAYS_UNLOCKED.has(r) || isUnlocked(r));
+}
+
+export function isGearItemAvailable(item, isUnlocked, options = {}) {
   if (isGearItemImpossible(item) || isGearItemDisabled(item)) return false;
-  return normalizeRegionGroups(item).every((group) => {
-    const relicOptions = normalizeLeagueRelicList(group.leagueRelic);
-    if (relicOptions.some((relic) => selectedLeagueRelics.includes(relic))) return true;
-    // A pure relic-gated group (no real region alternative) stops here -
-    // falling through to the region check below would trivially pass
-    // regardless of the relic pick, since 'relic' is itself in ALWAYS_UNLOCKED.
-    if (relicOptions.length > 0 && group.regions.length === 1 && group.regions[0] === 'relic') return false;
-    if (ignoreComponents && group.component) return true;
-    if (ignoreArtefactRegions && group.artefact) return true;
-    return group.regions.some((r) => ALWAYS_UNLOCKED.has(r) || isUnlocked(r));
-  });
+  // `source.paths` is for a requirement a flat AND-of-OR `source.region` can't
+  // express: several alternative ROUTES to the same item, satisfied if ANY
+  // ONE route is fully met, where a route can itself need more than one thing
+  // AND'd together (e.g. Ancient summoning - Voidwalker alone, or Asgarnia
+  // AND (Kandarin OR the Animal Wrangler relic)). Each path is
+  // `{ label, groups: [...] }`, `groups` in the exact same shape
+  // normalizeRegionGroups produces from `source.region` - reused rather than
+  // duplicated, so a path's own AND-logic runs through the same
+  // isGroupSatisfied check every other item uses. See RegionTags.jsx for how
+  // paths render (one pill per path, "/" between them, unlike the "+" between
+  // `source.region`'s AND-groups). Deliberately rare - only reach for this
+  // when a plain `source.region` genuinely cannot express the requirement.
+  if (item.source?.paths) {
+    return item.source.paths.some((path) =>
+      path.groups.map(normalizeGroupEntry).every((group) => isGroupSatisfied(group, isUnlocked, options)),
+    );
+  }
+  return normalizeRegionGroups(item).every((group) => isGroupSatisfied(group, isUnlocked, options));
 }

@@ -141,11 +141,13 @@ export const BLESSING_BUILDS_EXAMPLES = [
     styles: ['melee', 'magic'],
     blessings: ["Teragard's Aegis", 'Striking Light', 'Steadfast Will'],
     godTier: 'Sacred Fervor',
-    relics: ['Golden Touch', 'Transmutation', 'Divine Druid'],
+    relics: ['Golden Touch', 'Transmutation', 'Divine Druid', 'Voidwalker'],
     relicReasons: {
       'Golden Touch': 'Tier-1. Guaranteed pickpockets with tripled loot: grimy herbs from Guam to Fellstalk plus tier 1-2 secondaries, which is the whole overload supply chain, and the Teci that buys the Primeval robes or Teralith armour outright.',
       Transmutation: 'Divine Divergence steps ore up a tier, handing you the full Primal set and Primal kiteshield for the mid-late melee slot without the Wilderness.',
       'Divine Druid': 'Unlocks every Meilyr recipe, so the herbs Golden Touch supplies become elder overloads: +25 Defence instead of +17, worth ~+849 armour and about +692 ability damage through Aegis and the strength/magic boost.',
+      Voidwalker:
+        "Tier 3, and the reason this build can brew elder overloads at all. Divine Druid unlocks the Meilyr recipes but not crystal flasks - and a supreme overload, which the elder recipe consumes six doses of, needs one. Voidwalker's table reaches Superheated's fire spirits, which drop them.",
     },
     regions: ['kharidianDesert', 'morytania', 'anachronia'],
     regionReasons: {
@@ -160,7 +162,7 @@ export const BLESSING_BUILDS_EXAMPLES = [
           { region: "asgarnia", note: "The upgraded Nex prayers (Ruination, Desolation, Malevolence, Affliction) and Torva. A reasonable swap for Morytania if you would rather have the prayers than the augmentable kiteshields - but then Aegis has a much worse shield to triple off." },
         ],
     whyItsGood:
-      'Teragard\'s Aegis adds 75% of your total armour to your base ability damage while you hold a shield. At 3,605 total armour that is +2,704 ability damage - roughly double what the weapon itself provides - and because it increases the base ability stat, every percentage-based ability, ultimate multiplier and crit scales off it.\n\nElder overloads and overloads give this build a massive boost . Armour is also granted from your Defence level, so the +25 boost from an Elder overload is worth about +849 armour on its own - taking this loadout from 3,605 to 4,454. Aegis triples off that too, so the bonus climbs from +2,704 to +3,341. The same +25 boost affects your Strength, adding another +55 through the level term of the damage formula. A potion is worth roughly +692 ability damage here, which is more than an abyssal whip. \n\nThe Divine Druid is in the relic list to make getting elder overloads possible (crystal flask and recipe) alongside secondary saving and golden touch, elder overloads should be incredibly sustainable. Every armour-scaling blessing in the build gets the same treatment: Bash climbs past 17,000 and Light of Saradomin past 13,500.\n\nAchto armour then double-dips on the same shield: its set bonus adds 5% per piece (25% at five) of a tier-equivalent main-hand\'s damage to your Strength Bonus, but only while the off-hand acts as a shield. Aegis wants a shield and Achto wants a shield, so they compound for more damage.\n\nMelee has the best basic attack in the game - 110-130% where every other style gets 90-110% - so Striking Light\'s +40% is worth proportionally more here than anywhere else. A single melee basic attack lands for about 8,270 once elder-overloaded, at no adrenaline and no cooldown. Simply auto-attacking, with Light of Saradomin firing every 9s on its own, is roughly a total of 55,000 damage per 9-second window; the magic side of the same build gets about 48,000 from the identical rotation. Most builds ask you to earn your damage through skill; you could beat that with an empty revo bar.\n\nCombo a fully stacked Revenge with Berserk and your 9 seconds of auto attacks deals 192k damage - don\'t forget Bash for an extra ~55K damage. ',
+      'Teragard\'s Aegis adds 75% of your total armour to your base ability damage while you hold a shield. At 3,605 total armour that is +2,704 ability damage - roughly double what the weapon itself provides - and because it increases the base ability stat, every percentage-based ability, ultimate multiplier and crit scales off it.\n\nElder overloads and overloads give this build a massive boost . Armour is also granted from your Defence level, so the +25 boost from an Elder overload is worth about +849 armour on its own - taking this loadout from 3,605 to 4,454. Aegis triples off that too, so the bonus climbs from +2,704 to +3,341. The same +25 boost affects your Strength, adding another +55 through the level term of the damage formula. A potion is worth roughly +692 ability damage here, which is more than an abyssal whip. \n\nDivine Druid and Voidwalker are both in the relic list to make elder overloads possible, and it takes both: Divine Druid unlocks the Meilyr recipes, but the elder recipe consumes a six-dose supreme overload, and a supreme overload needs a crystal flask. Voidwalker reaches the Superheated fire spirit table, which drops them. With secondary saving and Golden Touch on top, elder overloads should be incredibly sustainable. Every armour-scaling blessing in the build gets the same treatment: Bash climbs past 17,000 and Light of Saradomin past 13,500.\n\nAchto armour then double-dips on the same shield: its set bonus adds 5% per piece (25% at five) of a tier-equivalent main-hand\'s damage to your Strength Bonus, but only while the off-hand acts as a shield. Aegis wants a shield and Achto wants a shield, so they compound for more damage.\n\nMelee has the best basic attack in the game - 110-130% where every other style gets 90-110% - so Striking Light\'s +40% is worth proportionally more here than anywhere else. A single melee basic attack lands for about 8,270 once elder-overloaded, at no adrenaline and no cooldown. Simply auto-attacking, with Light of Saradomin firing every 9s on its own, is roughly a total of 55,000 damage per 9-second window; the magic side of the same build gets about 48,000 from the identical rotation. Most builds ask you to earn your damage through skill; you could beat that with an empty revo bar.\n\nCombo a fully stacked Revenge with Berserk and your 9 seconds of auto attacks deals 192k damage - don\'t forget Bash for an extra ~55K damage. ',
     howToPlay:
       'Hold a shield at all times.  Open with Revenge, and deliberately let the boss hit you: each incoming attack is +5% damage and Steadfast Will raises the cap to 20 stacks, so a full stack is +100%. Sacred Fervor cuts Revenge\'s cooldown to 63s while Preparation strips 12s off every cooldown per cast, collapsing the effective cooldown to roughly 34s - under Revenge\'s 39.6s duration, so held correctly it never drops. Weave Bash on cooldown (10 sec cd for an extra 350-450% of your armour value, around +14,000) and let basic attacks and striking light fill the gaps. You could even use some real abilities too.',
     tradeoffs: [
@@ -358,11 +360,13 @@ export const BLESSING_BUILDS_EXAMPLES = [
     styles: ['melee', 'magic'],
     blessings: ['Adrenaline Junkie', 'Abyssal Cinders', 'Avernic Rampage'],
     godTier: "Demon's Mark",
-    relics: ['Golden Touch', 'Crystal Grace', 'Divine Druid'],
+    relics: ['Golden Touch', 'Crystal Grace', 'Divine Druid', 'Voidwalker'],
     relicReasons: {
       'Golden Touch': "Tier-1. Guaranteed pickpockets are the fastest route to the Asuran Arsenal, and Varanus's Mercy is a premier spec-spam main-hand. Also the herb/secondary supply for overloads.",
       'Crystal Grace': 'Unlocks every Magic spell across all spellbooks and triples rune output - this build takes neither the Desert nor Fremennik, so it is the only way to Ancient Magicks.',
       'Divine Druid': 'Potion savings and Meilyr recipes. This build has no armour scaling at all, so overload uptime carries more weight here than anywhere else.',
+      Voidwalker:
+        "Tier 3, and the reason this build can brew elder overloads at all. Divine Druid unlocks the Meilyr recipes but not crystal flasks - and a supreme overload, which the elder recipe consumes six doses of, needs one. Voidwalker's table reaches Superheated's fire spirits, which drop them.",
     },
     regions: ['wilderness', 'asgarnia', 'anachronia'],
     regionReasons: {
@@ -479,11 +483,13 @@ export const BLESSING_BUILDS_EXAMPLES = [
     styles: ['melee', 'ranged'],
     blessings: ['Big Boned', 'Barkscales', 'Avernic Rampage'],
     godTier: 'Splash Zone',
-    relics: ['Survivalist', 'Transmutation', 'Divine Druid'],
+    relics: ['Survivalist', 'Transmutation', 'Divine Druid', 'Voidwalker'],
     relicReasons: {
       Survivalist: 'Tier-1. Doubled gathering and best-in-slot tools - the fastest route to the raw materials this build needs.',
       Transmutation: 'Primal arrows for the ammo slot and the Primal chain as a fallback set.',
       'Divine Druid': 'Potion savings and Meilyr recipes; overloads matter more here because there is no ability-damage scaling in the build.',
+      Voidwalker:
+        "Tier 3, and the reason this build can brew elder overloads at all. Divine Druid unlocks the Meilyr recipes but not crystal flasks - and a supreme overload, which the elder recipe consumes six doses of, needs one. Voidwalker's table reaches Superheated's fire spirits, which drop them.",
     },
     regions: ['kharidianDesert', 'anachronia', 'morytania'],
     regionReasons: {
@@ -693,11 +699,13 @@ export const BLESSING_BUILDS_EXAMPLES = [
     styles: ['magic'],
     blessings: ['Big Boned', 'Barkscales', 'Eternal Sustenance'],
     godTier: 'Splash Zone',
-    relics: ['Survivalist', 'Crystal Grace', 'Divine Druid'],
+    relics: ['Survivalist', 'Crystal Grace', 'Divine Druid', 'Voidwalker'],
     relicReasons: {
       Survivalist: 'Tier-1. Doubled gathering and best-in-slot tools to assemble the set quickly.',
       'Crystal Grace': "Load-bearing. It unlocks every Magic spell across all spellbooks - which is how you guarantee Animate Dead - and triples rune output, which pays the spell's heavy upkeep. Animate Dead is the whole engine here.",
       'Divine Druid': '75% ingredient savings and all Meilyr recipes, so overload and prayer-renewal uptime is permanent rather than rationed.',
+      Voidwalker:
+        "Tier 3, and the reason this build can brew elder overloads at all. Divine Druid unlocks the Meilyr recipes but not crystal flasks - and a supreme overload, which the elder recipe consumes six doses of, needs one. Voidwalker's table reaches Superheated's fire spirits, which drop them.",
     },
     regions: ['kharidianDesert', 'anachronia', 'morytania'],
     regionReasons: {
@@ -786,11 +794,13 @@ export const BLESSING_BUILDS_EXAMPLES = [
     styles: ['ranged'],
     blessings: ["Teragard's Aegis", 'Striking Light', 'Steadfast Will'],
     godTier: 'Sacred Fervor',
-    relics: ['Golden Touch', 'Transmutation', 'Divine Druid'],
+    relics: ['Golden Touch', 'Transmutation', 'Divine Druid', 'Voidwalker'],
     relicReasons: {
       'Golden Touch': 'Tier-1. Herbs and secondaries for permanent overloads, and the Teci for the mid-late Tempest set.',
       Transmutation: 'Primal arrows and the Primal chain as a fallback while the Mazcab drops are slow.',
-      'Divine Druid': 'Unlocks every Meilyr recipe, which means ELDER overloads: +25 Defence instead of +17, worth ~+849 armour and about +692 ability damage through Aegis and the level term. This is the only Elder route here, so it is not optional.',
+      'Divine Druid': 'Unlocks every Meilyr recipe, which is half of what ELDER overloads need - Voidwalker supplies the other half. Together they are worth +25 Defence instead of +17: ~+849 armour and about +692 ability damage through Aegis and the level term. Not optional.',
+      Voidwalker:
+        "Tier 3, and the reason this build can brew elder overloads at all. Divine Druid unlocks the Meilyr recipes but not crystal flasks - and a supreme overload, which the elder recipe consumes six doses of, needs one. Voidwalker's table reaches Superheated's fire spirits, which drop them.",
     },
     regions: ['wilderness', 'kharidianDesert', 'anachronia'],
     regionReasons: {
@@ -804,7 +814,7 @@ export const BLESSING_BUILDS_EXAMPLES = [
           { region: "kandarin", note: "Ancient Invention for rank-4 perks, plus Ascendri bolts you cannot use on a bow." },
         ],
     whyItsGood:
-      'The Strykebow is a shieldbow: "despite being two-handed, it counts as also wielding a shield, giving armour and a life point bonus like an off-hand piece." So it satisfies Teragard’s Aegis’ shield clause AND Achto’s off-hand clause while still occupying both hands. On raw ability damage it lands at 5,451 against The Ironclad’s 5,572 - 2.2% behind - because the lower weapon tier is almost entirely offset by the bow’s own 435.6 armour feeding Aegis.\n\nWhat you get for that 2.2% is a far shorter runway: tier 85 off a single region, against a Mazcab raid drop plus a Rise of the Six kiteshield. It also brings +560 life points and 8.5% PvM damage reduction that the damage figure does not count at all, and being a bow rather than a crossbow it takes god arrows.\n\nLike every Aegis build, it lives on Elder overloads. The +25 Defence they grant is worth about +849 armour through D^3/1250 + 4D + 40, taking this loadout from 3,566 to 4,415 - and because Aegis converts 75% of armour into ability damage, that alone is +636 on top of the +55 the same boost adds through your Ranged level. Divine Druid is in the relic list to guarantee the recipe, and it is the only Elder route this build has, since it skips Tirannwn.\n\nDo NOT take it for the Dark Burn passive. The numbers look enormous - a store of up to 80,000, releasing 10% as a free hit, with Deep Burn adding 62.5% of the store across five hits - but that ceiling needs 160,000 damage taken to reach, and this build is built to avoid damage. At a realistic store of a few hundred, the passive release is worth about 50 damage and Deep Burn’s store component about 300, roughly 2.5% of the special. Deep Burn is still a fine 25%-adrenaline button, but for its 180-210% ability damage and its 3-second stun and bind - not for the store.',
+      'The Strykebow is a shieldbow: "despite being two-handed, it counts as also wielding a shield, giving armour and a life point bonus like an off-hand piece." So it satisfies Teragard’s Aegis’ shield clause AND Achto’s off-hand clause while still occupying both hands. On raw ability damage it lands at 5,451 against The Ironclad’s 5,572 - 2.2% behind - because the lower weapon tier is almost entirely offset by the bow’s own 435.6 armour feeding Aegis.\n\nWhat you get for that 2.2% is a far shorter runway: tier 85 off a single region, against a Mazcab raid drop plus a Rise of the Six kiteshield. It also brings +560 life points and 8.5% PvM damage reduction that the damage figure does not count at all, and being a bow rather than a crossbow it takes god arrows.\n\nLike every Aegis build, it lives on Elder overloads. The +25 Defence they grant is worth about +849 armour through D^3/1250 + 4D + 40, taking this loadout from 3,566 to 4,415 - and because Aegis converts 75% of armour into ability damage, that alone is +636 on top of the +55 the same boost adds through your Ranged level. Divine Druid guarantees the Meilyr recipes and Voidwalker guarantees the crystal flasks a supreme overload needs, which between them are the only Elder route this build has, since it skips Tirannwn.\n\nDo NOT take it for the Dark Burn passive. The numbers look enormous - a store of up to 80,000, releasing 10% as a free hit, with Deep Burn adding 62.5% of the store across five hits - but that ceiling needs 160,000 damage taken to reach, and this build is built to avoid damage. At a realistic store of a few hundred, the passive release is worth about 50 damage and Deep Burn’s store component about 300, roughly 2.5% of the special. Deep Burn is still a fine 25%-adrenaline button, but for its 180-210% ability damage and its 3-second stun and bind - not for the store.',
     howToPlay:
       'Play it as the shield build it is: Preparation and Revenge on cooldown, Bash woven in, and deliberately take hits to stack Revenge. Lean on basic attacks - Striking Light adds 40% to them and Light of Saradomin fires off them every 9 seconds, which is the real engine here.\n\nUse Deep Burn on cooldown rather than saving it. Waiting for the Dark Burn store to build is not worth it: the store only grows as you take damage, which this build is actively preventing, so the special is worth about the same whenever you press it. Its 3-second stun and bind is often the more useful half.',
     tradeoffs: [

@@ -1,4 +1,10 @@
-import { isGearItemDisabled, isGearItemImpossible, normalizeLeagueRelicList, normalizeRegionGroups } from '../data/gearAvailability';
+import {
+  isGearItemDisabled,
+  isGearItemImpossible,
+  normalizeGroupEntry,
+  normalizeLeagueRelicList,
+  normalizeRegionGroups,
+} from '../data/gearAvailability';
 import { REGION_COLORS, REGION_SHORT_LABELS, RESOURCE_TAG_COLORS } from '../data/regionColors';
 import TagTooltip from './TagTooltip';
 
@@ -118,6 +124,39 @@ function RegionGroupPill({ group, isUnlocked, selectedLeagueRelics }) {
   ));
 }
 
+function isGroupLit(group, isUnlocked, selectedLeagueRelics) {
+  const relicOptions = normalizeLeagueRelicList(group.leagueRelic);
+  if (relicOptions.some((relic) => selectedLeagueRelics.includes(relic))) return true;
+  if (relicOptions.length > 0 && group.regions.length === 1 && group.regions[0] === 'relic') return false;
+  return group.regions.some((r) => isRegionUnlocked(r, isUnlocked));
+}
+
+// One alternative ROUTE from `source.paths` (see gearAvailability.js),
+// rendered as a single named pill rather than exploded into its own AND'd
+// sub-pills - "Contract claws" should read as one thing to chase, not
+// "Asgarnia + Kandarin/Animal Wrangler". Lit only once every one of the
+// path's own groups is satisfied; the tooltip spells out the full
+// requirement for whoever wants the breakdown.
+function PathPill({ path, isUnlocked, selectedLeagueRelics }) {
+  const groups = path.groups.map(normalizeGroupEntry);
+  const unlocked = groups.every((group) => isGroupLit(group, isUnlocked, selectedLeagueRelics));
+  const tooltip = `Requires: ${groups
+    .map((group) => {
+      const regionNames = group.regions.map((r) => REGION_SHORT_LABELS[r] ?? r);
+      const relicNames = normalizeLeagueRelicList(group.leagueRelic).map((relic) => `the "${relic}" relic`);
+      return [...regionNames, ...relicNames].join(' or ');
+    })
+    .join(' and ')}`;
+  return (
+    <TagTooltip
+      className={`region-tag region-tag-resource${unlocked ? ' region-tag-resource-unlocked' : ''}`}
+      tooltip={tooltip}
+    >
+      {path.label}
+    </TagTooltip>
+  );
+}
+
 export default function RegionTags({ item, isUnlocked, selectedLeagueRelics = [] }) {
   if (isGearItemDisabled(item)) {
     return (
@@ -141,6 +180,19 @@ export default function RegionTags({ item, isUnlocked, selectedLeagueRelics = []
         >
           Not obtainable
         </TagTooltip>
+      </span>
+    );
+  }
+
+  if (item.source?.paths) {
+    return (
+      <span className="region-tags">
+        {item.source.paths.map((path, pathIndex) => (
+          <span className="region-tag-or-item" key={path.label}>
+            {pathIndex > 0 && <span className="region-tag-or">/</span>}
+            <PathPill path={path} isUnlocked={isUnlocked} selectedLeagueRelics={selectedLeagueRelics} />
+          </span>
+        ))}
       </span>
     );
   }
