@@ -867,10 +867,12 @@ export const LEAGUE_RELICS = [
           detail: 'Quantities not revealed yet.',
         },
         {
+          // No longer `hidden` (which renders the "Unrevealed" redacted tag -
+          // see RelicDropTablePanel's void facets): Antiquarian's own reveal
+          // states what a geode holds, and that answers it for every source.
           name: 'Divine geodes',
           icon: 'icons/Voidwalker.webp',
-          detail: 'Contents not revealed yet. 1-5 dropped.',
-          hidden: true,
+          detail: 'Contains archaeology materials. 1-5 dropped.',
         },
       ],
     },
