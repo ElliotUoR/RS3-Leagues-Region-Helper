@@ -3,7 +3,7 @@ import BuildGuideCard from '../components/BuildGuideCard';
 import UserBuildListItem from '../components/UserBuildListItem';
 import ReportBuildModal from '../components/ReportBuildModal';
 import UseBuildModal from '../components/UseBuildModal';
-import { importableFromCuratedBuild } from '../utils/importableBuild';
+import { importableFromCuratedBuild, importableFromUserBuild } from '../utils/importableBuild';
 import { applyBuildToSelections } from '../utils/loadBuildIntoMine';
 import TierList from '../components/TierList';
 import {
@@ -16,7 +16,13 @@ import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { isBuildVisible, isSourceEditable } from '../utils/buildTextEdit';
 import { buildGuideUrl, buildIdFromLocation } from '../utils/buildGuideRoute';
-import { fetchBuildVotes, getUserBuildBySlug, listFeaturedUserBuilds, trackUsage } from '../utils/api';
+import {
+  fetchBuildVotes,
+  getUserBuild,
+  getUserBuildBySlug,
+  listFeaturedUserBuilds,
+  trackUsage,
+} from '../utils/api';
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
 import { IS_PAGES_BUILD } from '../utils/deployTarget';
 
@@ -154,9 +160,50 @@ function useVotesWhenNeeded(needed) {
 export default function BuildGuidesPage({ setters }) {
   const [editing, setEditing] = useState(false);
   const [reporting, setReporting] = useState(null);
-  // Curated guides are already in memory, so unlike the user-build listing this
-  // needs no fetch - the modal opens fully populated.
+  // Two kinds of build reach the same modal from this page, and they are not
+  // interchangeable:
+  //
+  //   { kind: 'curated', build }                       - already in memory
+  //   { kind: 'user', summary, importable, loading, error } - needs a fetch
+  //
+  // Tagged rather than sniffed, because the difference decides whether the
+  // modal offers "Copy into new build" at all (see the comment on the modal
+  // below) and a missing tag would silently pick the wrong branch.
   const [using, setUsing] = useState(null);
+
+  // Mirrors UserBuildsPage's handleUse - the featured strip and the shared
+  // build here are the same UserBuildListItem, and its "Use this build" button
+  // calls `onUse?.()`. Without this handler that optional call was a no-op:
+  // the button rendered, clicked, and did nothing at all.
+  async function handleUseUserBuild(summary, alreadyLoaded) {
+    if (alreadyLoaded) {
+      setUsing({
+        kind: 'user',
+        summary,
+        importable: importableFromUserBuild(alreadyLoaded),
+        loading: false,
+        error: false,
+      });
+      return;
+    }
+    // Opened straight away with a loading state rather than after the fetch -
+    // a button that does nothing for half a second reads as broken.
+    setUsing({ kind: 'user', summary, importable: null, loading: true, error: false });
+    try {
+      const row = await getUserBuild(summary.id);
+      const sanitized = sanitizeUserBuildPayload(row.payload);
+      if (!sanitized) throw new Error('malformed build');
+      setUsing({
+        kind: 'user',
+        summary,
+        importable: importableFromUserBuild(sanitized),
+        loading: false,
+        error: false,
+      });
+    } catch {
+      setUsing((prev) => (prev ? { ...prev, loading: false, error: true } : prev));
+    }
+  }
   const featured = useFeaturedBuilds();
   const shared = useSharedUserBuild();
   const [votes, setVotes] = useVotesWhenNeeded(featured.length > 0 || Boolean(shared));
@@ -274,6 +321,7 @@ export default function BuildGuidesPage({ setters }) {
                 vote={votes[shared.summary.id]}
                 onVoted={(id, next) => setVotes((prev) => ({ ...prev, [id]: next }))}
                 onReport={setReporting}
+                onUse={handleUseUserBuild}
               />
             </div>
           </section>
@@ -287,7 +335,7 @@ export default function BuildGuidesPage({ setters }) {
               expanded={expanded.has(build.id)}
               onToggle={() => toggle(build.id)}
               editing={editing}
-              onUse={setUsing}
+              onUse={(build) => setUsing({ kind: 'curated', build })}
             />
           ))}
         </section>
@@ -316,6 +364,7 @@ export default function BuildGuidesPage({ setters }) {
                   vote={votes[summary.id]}
                   onVoted={(id, next) => setVotes((prev) => ({ ...prev, [id]: next }))}
                   onReport={setReporting}
+                  onUse={handleUseUserBuild}
                 />
               ))}
             </div>
@@ -363,19 +412,31 @@ export default function BuildGuidesPage({ setters }) {
       {reporting && <ReportBuildModal build={reporting} onClose={() => setReporting(null)} />}
       {using && (
         <UseBuildModal
-          buildName={using.name}
-          importable={importableFromCuratedBuild(using)}
-          // No copy option here. Curated guides are site data, not rows in
-          // user_builds, so there is no id for #create-build-from/<id> to
-          // fetch - and seeding Create a Build by writing the guide into the
-          // visitor's own selections first would make "copy" destructive,
-          // which is the one thing that option promises it is not.
-          //
-          // The route to publishing a variant already exists and is honest
-          // about what it does: load it here, tweak it, then use My Build's own
-          // "Import into Build Guide".
+          buildName={using.kind === 'curated' ? using.build.name : using.summary.name}
+          importable={
+            using.kind === 'curated' ? importableFromCuratedBuild(using.build) : using.importable
+          }
+          loading={using.loading}
+          error={using.error}
+          // Copy is offered for USER builds only. A curated guide is site data,
+          // not a row in user_builds, so there is no id for
+          // #create-build-from/<id> to fetch - and seeding Create a Build by
+          // writing the guide into the visitor's own selections first would
+          // make "copy" destructive, which is the one thing that option
+          // promises it is not. For those the honest route already exists:
+          // load it here, tweak it, then use My Build's "Import into Build
+          // Guide".
+          onCopy={
+            using.kind === 'user'
+              ? () => {
+                  window.location.hash = `#create-build-from/${using.summary.id}`;
+                }
+              : undefined
+          }
           onLoad={(choices) => {
-            applyBuildToSelections(importableFromCuratedBuild(using), choices, setters);
+            const importable =
+              using.kind === 'curated' ? importableFromCuratedBuild(using.build) : using.importable;
+            applyBuildToSelections(importable, choices, setters);
             setUsing(null);
             window.location.hash = '#my-build';
           }}
