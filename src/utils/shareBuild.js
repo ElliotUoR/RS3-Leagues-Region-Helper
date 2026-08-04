@@ -7,8 +7,8 @@ import { sanitizeEofWeaponNames, sanitizeEquippedNames, sanitizeStyle } from '..
 
 // Bumped from 7 to 8 to add blessing picks (see hooks/useBlessingSelection.js)
 // and the landing hash - v2-v7 links still decode fine, missing blessings
-// simply sanitizes to "none picked" and a missing hash falls back to #gear,
-// which is where every pre-v8 link was always meant to land.
+// simply sanitizes to "none picked" and a missing hash falls back to the
+// default below.
 const SHARE_VERSION = 8;
 const SHARE_PARAM = 'share';
 
@@ -16,11 +16,24 @@ const SHARE_PARAM = 'share';
 // string: the value ends up in history.replaceState (see App.jsx's short-link
 // resolution), so a crafted payload must not be able to steer that anywhere
 // this app didn't choose.
-const LANDING_HASHES = new Set(['#gear', '#blessings', '#league-relics', '#home', '#character']);
-const DEFAULT_LANDING_HASH = '#gear';
+const LANDING_HASHES = new Set(['#my-build', '#blessings', '#league-relics', '#home', '#character']);
+const DEFAULT_LANDING_HASH = '#my-build';
+export { DEFAULT_LANDING_HASH as DEFAULT_SHARE_LANDING_HASH };
+
+// Shared builds used to land on the Gear Planner, which shows one of the six
+// things a share link actually carries - the recipient saw a loadout and no
+// sign of the regions, relics, blessings or extras that justify it. My Build
+// shows all of them AND embeds the same gear planner, so it is a superset of
+// where these links used to go; App.jsx scrolls it to the loadout on arrival
+// so nothing is further away than it was.
+//
+// Applied at SANITIZE time, so it retroactively redirects every link already
+// in the wild - the payloads are immutable and most of them predate this.
+const LANDING_HASH_ALIASES = { '#gear': '#my-build' };
 
 function sanitizeLandingHash(raw) {
-  return LANDING_HASHES.has(raw) ? raw : DEFAULT_LANDING_HASH;
+  const aliased = LANDING_HASH_ALIASES[raw] ?? raw;
+  return LANDING_HASHES.has(aliased) ? aliased : DEFAULT_LANDING_HASH;
 }
 
 // Encodes the current build (all 4 styles' loadouts + EOF weapon picks +

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import RegionMap from '../components/RegionMap';
 import LeagueRelicRow from '../components/LeagueRelicRow';
 import RelicRow from '../components/RelicRow';
@@ -98,9 +98,9 @@ function groupRelicsByTier() {
 // page and most visits change one thing. The summary line in the header is what
 // makes a collapsed section still worth having - it answers "what have I got"
 // without opening anything.
-function BuildSection({ id, title, summary, count, open, onToggle, action = null, children }) {
+function BuildSection({ id, title, summary, count, open, onToggle, action = null, sectionRef = null, children }) {
   return (
-    <section className={`my-build-section${open ? ' open' : ''}`}>
+    <section className={`my-build-section${open ? ' open' : ''}`} ref={sectionRef}>
       {/* `action` sits BESIDE the head button, never inside it - a nested
           button is invalid HTML and browsers silently break click handling on
           it (same reason RelicDropTablePanel's toggle is a sibling of its row
@@ -146,6 +146,9 @@ export default function MyBuildPage({
   toggleExtra,
   clearExtras,
   clearAllLoadouts,
+  // Set when this is somebody else's shared build (see App.jsx). The loadout
+  // is what the link was sent to show, so it opens and the page scrolls to it.
+  focusLoadout = false,
   ...gear
 }) {
   const [openSection, setOpenSection] = useState(null);
@@ -154,12 +157,30 @@ export default function MyBuildPage({
   const [archRelicTab, setArchRelicTab] = useState('all');
   const [archRelicHideLocked, setArchRelicHideLocked] = useState(true);
   const [archRelicIgnoreArtefactRegions, setArchRelicIgnoreArtefactRegions] = useState(false);
-  const [loadoutOpen, setLoadoutOpen] = useState(loadoutOpenByDefault);
+  // A shared build overrides the mobile default: arriving collapsed, at a
+  // section the visitor never chose to close, reads as the link not having
+  // worked.
+  const [loadoutOpen, setLoadoutOpen] = useState(() => focusLoadout || loadoutOpenByDefault());
   // Bumped by "See blessing effects" - the panel watches it and opens.
   const [effectsOpenSignal, setEffectsOpenSignal] = useState(0);
   const effectsRef = useRef(null);
+  const loadoutRef = useRef(null);
 
   const toggleSection = (id) => setOpenSection((prev) => (prev === id ? null : id));
+
+  // Two frames, for the same reason showBlessingEffects below needs them: the
+  // section above it renders its own content on this pass, so a scroll started
+  // before React commits measures the old layout and lands short. Mount only -
+  // this is where the link put you, not a place to be returned to afterwards.
+  useEffect(() => {
+    if (!focusLoadout) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() =>
+        loadoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      );
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const share = useBuildShare({
     payload: {
@@ -514,6 +535,7 @@ export default function MyBuildPage({
             blessings, which mutual exclusion would prevent. */}
         <BuildSection
           id="loadout"
+          sectionRef={loadoutRef}
           title="Gear loadout"
           count={styleWithGear.length || null}
           // No style list here - the count says how many have gear, and the

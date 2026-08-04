@@ -39,7 +39,12 @@ import { useIsAdmin } from './hooks/useIsAdmin';
 import { useTheme } from './hooks/useTheme';
 import { useHeartbeat } from './hooks/useHeartbeat';
 import { useLiveSiteUrl } from './hooks/useLiveSiteUrl';
-import { decodeShareBuild, parseShareParam, stripShareParam } from './utils/shareBuild';
+import {
+  DEFAULT_SHARE_LANDING_HASH,
+  decodeShareBuild,
+  parseShareParam,
+  stripShareParam,
+} from './utils/shareBuild';
 import { parseImportRelicsParam, stripImportRelicsParam } from './utils/importRelics';
 import { fetchIsAdmin, resolveShortCode, trackPageview, trackUsage } from './utils/api';
 import { IS_PAGES_BUILD, PAGES_MIGRATION_DISMISSED_KEY } from './utils/deployTarget';
@@ -364,6 +369,10 @@ function AppContent({ route, sharedBuild, importedLeagueRelics, onExitShared, on
           selectedExtras={selectedExtras}
           toggleExtra={toggleExtra}
           clearExtras={clearExtras}
+          // A shared build opens at the gear loadout: it is the part of a build
+          // people share links to look at, and on My Build it sits below five
+          // other sections.
+          focusLoadout={Boolean(sharedBuild)}
           {...gear}
         />
       )}
@@ -519,6 +528,23 @@ function App() {
     };
   }, []);
 
+  // A long-form `?share=` link carries its landing hash in the URL itself, so
+  // the browser has already routed by the time decodeShareBuild's alias
+  // (#gear -> #my-build) could apply. Short links go through the effect below
+  // instead, where the hash comes out of the payload and the alias does the
+  // work. This covers the other half: any shared build that landed on the Gear
+  // Planner is moved to My Build, which shows everything the link carries.
+  //
+  // Runs once, on mount only. A later hashchange is the visitor navigating,
+  // and they are allowed to visit the Gear Planner while in shared view.
+  useEffect(() => {
+    if (!sharedBuild) return;
+    if (window.location.hash !== '#gear') return;
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#my-build`);
+    setRoute('myBuild');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fires on every route change (including the initial mount) - a no-op
   // wherever the backend isn't deployed yet (e.g. GitHub Pages), see
   // utils/api.js.
@@ -551,9 +577,10 @@ function App() {
       // A short link has no hash of its own to read the landing tab from (that
       // is the point of it being short), so the tab is carried inside the
       // payload instead - see shareBuild.js's landingHash, which allow-lists
-      // the value before it ever reaches replaceState. Pre-v8 payloads have no
-      // hash and sanitize to #gear, which is where they always used to land.
-      const landingHash = decoded.landingHash ?? '#gear';
+      // the value before it ever reaches replaceState and aliases the old
+      // #gear landing onto #my-build. Pre-v8 payloads have no hash at all and
+      // sanitize to the same default.
+      const landingHash = decoded.landingHash ?? DEFAULT_SHARE_LANDING_HASH;
       // history.replaceState never fires 'hashchange' (unlike a real
       // navigation or a direct `location.hash =` assignment), so `route`
       // has to be updated explicitly here too - otherwise the visible tab
