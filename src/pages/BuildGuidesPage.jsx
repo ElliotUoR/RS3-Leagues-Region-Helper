@@ -20,6 +20,15 @@ import { fetchBuildVotes, getUserBuildBySlug, listFeaturedUserBuilds, trackUsage
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
 import { IS_PAGES_BUILD } from '../utils/deployTarget';
 
+// Hides this site's OWN two ranked lists at the foot of the page. The
+// "Make your own tier list" call to action above them stays either way -
+// the maker is a separate feature and is unaffected.
+//
+// A flag rather than a deletion: the lists are still authored data
+// (blessingBuilds.js), the admin editing path that writes them still works,
+// and turning them back on is one word. Flip to true to restore.
+const SHOW_SITE_TIER_LISTS = false;
+
 const BLESSING_ICONS = new Map([...BLESSINGS, ...GOD_TIER_BLESSINGS].map((b) => [b.name, b.icon]));
 const LEAGUE_RELIC_ICONS = new Map(LEAGUE_RELICS.map((r) => [r.name, r.icon]));
 
@@ -313,37 +322,42 @@ export default function BuildGuidesPage({ setters }) {
           </section>
         )}
 
-        {/* The way into the maker, now that it has no nav tab of its own - put
-            directly above this site's own rankings, which is exactly where
-            someone thinking "I'd rank these differently" is looking. */}
+        {/* The way into the maker, now that it has no nav tab of its own. It
+            used to sit directly above this site's own rankings; with those
+            hidden (SHOW_SITE_TIER_LISTS) it is the only tier-list surface on
+            the page, so it stands alone. */}
         <div className="tier-maker-cta">
           <a href="#tier-list-maker" className="build-create-button">
             + Make your own tier list
           </a>
           <span className="tier-maker-cta-hint">
-            Rank the blessings or league relics yourself, then share it or export it as an image.
+            Rank the blessings or league relics, then share it or export it as an image.
           </span>
         </div>
 
-        <TierList
-          title="Blessing tier list"
-          standfirst="Each blessing and god power graded on its own isolated power, deliberately ignoring the combos above."
-          grades={BLESSING_TIER_LIST.grades}
-          entries={blessingTierEntries}
-          renderBadges={BlessingBadges}
-          footnote="* Demon's Mark is graded on the weaker reading of its effect - tap it for detail."
-          listId="blessings"
-        />
+        {SHOW_SITE_TIER_LISTS && (
+          <>
+            <TierList
+              title="Blessing tier list"
+              standfirst="Each blessing and god power graded on its own isolated power, deliberately ignoring the combos above."
+              grades={BLESSING_TIER_LIST.grades}
+              entries={blessingTierEntries}
+              renderBadges={BlessingBadges}
+              footnote="* Demon's Mark is graded on the weaker reading of its effect - tap it for detail."
+              listId="blessings"
+            />
 
-        <TierList
-          title="League relic tier list"
-          standfirst={LEAGUE_RELIC_TIER_LIST.scopeNote}
-          grades={LEAGUE_RELIC_TIER_LIST.grades}
-          entries={relicTierEntries}
-          renderBadges={RelicBadges}
-          gradeLabels={{ unranked: 'Unranked' }}
-          listId="relics"
-        />
+            <TierList
+              title="League relic tier list"
+              standfirst={LEAGUE_RELIC_TIER_LIST.scopeNote}
+              grades={LEAGUE_RELIC_TIER_LIST.grades}
+              entries={relicTierEntries}
+              renderBadges={RelicBadges}
+              gradeLabels={{ unranked: 'Unranked' }}
+              listId="relics"
+            />
+          </>
+        )}
       </main>
 
       {reporting && <ReportBuildModal build={reporting} onClose={() => setReporting(null)} />}
