@@ -1,5 +1,6 @@
 import RegionTags from './RegionTags';
 import RetryImage from './RetryImage';
+import TagTooltip from './TagTooltip';
 import { wikiContextMenuHandler } from '../utils/wiki';
 
 // Row for a relic power: power name (primary) + relic/artefact name
@@ -7,7 +8,15 @@ import { wikiContextMenuHandler } from '../utils/wiki';
 // AbilityRow this one IS clickable - selecting/deselecting one of the
 // player's 3 chosen relics - but right-click still opens the underlying
 // relic's wiki page, same as everywhere else.
-export default function RelicRow({ relic, available, isUnlocked, selected, selectable, onToggleSelect }) {
+//
+// `hasAntiquarian` is a second, region-independent unlock path (same
+// pattern as UnlockCard's `hasCrystalGrace`): the Antiquarian league
+// relic's own effect text is "All Archaeology relics are available to use
+// after completing the Archaeology tutorial", so any non-global arch relic
+// gets an extra tag alongside its region tags - unlit until the relic is
+// actually picked, at which point `available` (computed by the caller)
+// also bypasses the region gate entirely.
+export default function RelicRow({ relic, available, isUnlocked, selected, selectable, onToggleSelect, hasAntiquarian }) {
   const classes = [
     'gear-item-row',
     'ability-row',
@@ -41,7 +50,17 @@ export default function RelicRow({ relic, available, isUnlocked, selected, selec
             </span>
             <span className="relic-subname">{relic.relicName}</span>
           </span>
-          <RegionTags item={relic} isUnlocked={isUnlocked} />
+          <span className="unlock-card-tags">
+            <RegionTags item={relic} isUnlocked={isUnlocked} />
+            {hasAntiquarian !== undefined && relic.source?.region !== 'global' && (
+              <TagTooltip
+                className={`region-tag region-tag-antiquarian${hasAntiquarian ? ' region-tag-antiquarian-unlocked' : ''}`}
+                tooltip="Antiquarian unlocks are arch relics"
+              >
+                Antiquarian
+              </TagTooltip>
+            )}
+          </span>
         </div>
         <div className="gear-item-bottom">
           <RetryImage src={relic.icon} alt="" loading="eager" />

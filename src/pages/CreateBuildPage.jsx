@@ -606,10 +606,17 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom, fromMy
     [blessingSelection.selected],
   );
 
+  // Antiquarian's own effect text is "All Archaeology relics are available
+  // to use after completing the Archaeology tutorial" - a second,
+  // region-independent unlock path (same pattern as RelicsPage/MyBuildPage).
+  const hasAntiquarian = relicSelection.selected.includes('Antiquarian');
+
   function isArchRelicAvailable(relic) {
-    return isGearItemAvailable(relic, regionSelection.isUnlocked, {
-      ignoreArtefactRegions: archRelicIgnoreArtefactRegions,
-    });
+    return (
+      isGearItemAvailable(relic, regionSelection.isUnlocked, {
+        ignoreArtefactRegions: archRelicIgnoreArtefactRegions,
+      }) || hasAntiquarian
+    );
   }
   // Picked relics stay pinned to the top (same convention as RelicsPage) and
   // are never hidden by the locked filter - unpicking your own already-taken
@@ -633,6 +640,7 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom, fromMy
     archRelicIgnoreArtefactRegions,
     archRelicSelection.selected,
     regionSelection.isUnlocked,
+    hasAntiquarian,
   ]);
 
   function toggleActiveStyle(styleId) {
@@ -1074,6 +1082,7 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom, fromMy
                 selected={archRelicSelection.selected.includes(relic.name)}
                 selectable={archRelicSelection.selected.length < MAX_RELICS}
                 onToggleSelect={archRelicSelection.toggleRelic}
+                hasAntiquarian={hasAntiquarian}
               />
             ))}
           </div>

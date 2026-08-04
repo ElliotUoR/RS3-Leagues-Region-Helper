@@ -9,7 +9,9 @@ import {
   BIG_BONED_LIFE_MULTIPLIER,
   equippedItemsFor,
   getBigBonedBonusDamage,
+  getAegisAbilityDamage,
   getIcyeneBonusPercent,
+  getTotalArmour,
   getTotalLifePoints,
   getTotalPrayerBonus,
   ICYENIC_FAITH_RELIC,
@@ -25,6 +27,8 @@ import {
   SPLASH_ZONE_AOE_BONUS,
   WEAPON_MODE_LABELS,
   FURY_OF_THE_SMALL_RELIC,
+  BASE_COMBAT_LEVEL,
+  SLIVER_COMBAT_LEVEL,
   combatLevelFor,
   getAdrenaline,
   getBaseAbilityDamage,
@@ -62,10 +66,27 @@ import {
 // One potion boosts Defence AND the style's offensive stat by the same amount,
 // so this single toggle moves the armour figures and - through the level term
 // in the ability damage formula - the damage ones too. See utils/abilityDamage.js.
+//
+// The Sliver of Edicts is the odd one out and is labelled to say so: it SETS
+// every stat to 255 rather than adding, it is not a potion, and it lasts 16.8
+// seconds on a 90-second cooldown. So its numbers are a burst ceiling, not
+// something a build sustains - hence "255" flat where the potions show "+17".
+//
+// Each carries a `short` label as well as its full one. Three chips sitting at
+// full length is a row of prose the eye has to read before it can find the one
+// that is on; abbreviated, the selected chip is the only long one and reads as
+// the answer. The swap is animated rather than instantaneous so the row is
+// visibly the same three controls rearranging, not three that were replaced.
 const STATES = [
-  { id: 'overload', label: 'Overload', bonus: '+17' },
-  { id: 'elder', label: 'Elder overload', bonus: '+25' },
+  { id: 'overload', short: 'Ovl', label: 'Overload', bonus: '+17' },
+  { id: 'elder', short: 'Eld Ovl', label: 'Elder overload', bonus: '+25' },
+  { id: 'sliver', short: 'Sliver', label: 'Sliver of Edicts', bonus: '255' },
 ];
+
+// Granted by the Naragi Edict relic. Gated on the RELIC rather than on the
+// Sliver being worn, because it activates from the inventory - a build that
+// takes the relic can use it whether or not the pocket slot holds it.
+export const SLIVER_RELIC = 'Naragi Edict';
 
 const STYLE_STAT = { melee: 'Strength', ranged: 'Ranged', magic: 'Magic', necromancy: 'Necromancy' };
 
@@ -105,6 +126,10 @@ function godTierFor(godTier, blessings) {
 
 const strong = (text) => ({ text, tone: 'strong' });
 const muted = (text) => ({ text, tone: 'muted' });
+// A figure the app is showing but does not stand behind. Red rather than the
+// card's own accent on purpose - a caveat tinted to match the number it is
+// warning about reads as part of the same claim.
+const warn = (text) => ({ text, tone: 'warn' });
 
 // Sacred Fervor states the same 30% four times, once per style. Repeating all
 // four at a melee build would be three lines of noise; the other two god powers
@@ -281,8 +306,43 @@ function strikingLightCard({ style, payoutAD, armourNow }) {
 
 // The whole card list for a build, in reading order: what your abilities hit
 // for, then what each pick adds on top, then the god power.
+// The Sliver of Edicts' activated effect. Deliberately all prose: three of the
+// four lines are rules with no figure to compute against a build, and the one
+// number that exists (40,000 healing) is already stated.
+//
+// The exception is armour. "Boosts combat stats to 255" reads like an
+// offensive line, and the single biggest thing it does to a build is defensive
+// and entirely implicit: Defence 255 runs through the same D^3/1250 baseline
+// every armour figure here uses, so the total goes up roughly tenfold. That is what
+// Teragard's Aegis, Barkscales and Steadfast Will are all scaling off while
+// the Sliver is up, and it is worth stating in the same place as the effect
+// that causes it rather than leaving it to be inferred from the toggle.
+//
+// Costed only when there is gear to cost it against - `armourAt` is null on an
+// empty loadout, and the card falls back to the plain effect line.
+function sliverCard({ armourAt, sliverArmour }) {
+  const gain = armourAt != null && sliverArmour != null ? sliverArmour - armourAt : null;
+  return {
+    key: 'sliver-of-edicts',
+    name: 'Sliver of Edicts',
+    colour: 'extra',
+    icon: 'icons/Sliver_of_Edicts.png',
+    lines: [
+      muted('On activate:'),
+      strong('Revives you if you die'),
+      strong('Boosts combat stats to 255'),
+      gain != null && strong(`+${round(gain)} total armour while active`),
+      gain != null &&
+        muted(`${round(armourAt)} -> ${round(sliverArmour)}, from the Defence part of that boost.`),
+      gain != null && warn('Armour interaction is not confirmed!'),
+      strong('Heals you for 10k 4 times'),
+      muted('90 second CD.'),
+    ].filter(Boolean),
+  };
+}
+
 function buildCards(context) {
-  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash } =
+  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour } =
     context;
   const cards = [];
   const picked = (name) => blessings.includes(name);
@@ -305,6 +365,8 @@ function buildCards(context) {
   }
 
   cards.push(...extraCards(extras, picked('Big Boned')));
+
+  if (hasSliver) cards.push(sliverCard({ armourAt: baseArmour, sliverArmour }));
 
   if (aegisNow != null) {
     cards.push({
@@ -448,10 +510,45 @@ export default function LeaguesEffectsPanel({
   // switch to. A build with no armour-scaling blessing passes no armour but can
   // still brew the potion, and it still moves that build's ability damage.
   const canElder = elderSources.length > 0 && (!armour || armour.elder != null);
-  const state = potion === 'elder' && !canElder ? 'none' : potion;
-  const armourNow = armour?.[state] ?? armour?.none ?? null;
-  const aegisNow = aegis ? aegis[state] ?? aegis.none : null;
+  const hasSliver = leagueRelics.includes(SLIVER_RELIC);
+  const state = (potion === 'elder' && !canElder) || (potion === 'sliver' && !hasSliver) ? 'none' : potion;
   const hasGear = Object.keys(equipped).length > 0;
+
+  // The Sliver's armour and Aegis figures are DERIVED here rather than passed
+  // in, unlike the three potion states. Two of this component's four callers
+  // hand over armour precomputed in blessingBuilds.js, so a fourth state would
+  // otherwise mean hand-authoring another total for every curated loadout. The
+  // inputs are already on hand - `equipped` and `style` - so the same
+  // gearStats helpers that produced the other three produce this one.
+  //
+  // Derived whenever the relic is held, NOT only when `armour` was passed: the
+  // Sliver's card states its armour gain for every build that can press it,
+  // including one whose blessings never read an armour total otherwise.
+  // `armourNow` below stays gated on `armour` so that unchanged behaviour -
+  // no armour-scaling blessing, no "Total armour" figure - is preserved.
+  const sliverArmour = useMemo(
+    () => (hasSliver && hasGear ? getTotalArmour(equipped, style, SLIVER_COMBAT_LEVEL) : null),
+    [hasSliver, hasGear, equipped, style],
+  );
+  // The unboosted total the gain is measured from. Curated builds precompute
+  // theirs, so prefer that over re-deriving and quoting a figure a point off
+  // the one their own loadout line shows.
+  const baseArmour = useMemo(
+    () => armour?.none ?? (hasSliver && hasGear ? getTotalArmour(equipped, style, BASE_COMBAT_LEVEL) : null),
+    [armour, hasSliver, hasGear, equipped, style],
+  );
+  const armourNow = !armour
+    ? null
+    : state === 'sliver'
+      ? sliverArmour ?? armour.none
+      : armour[state] ?? armour.none;
+  const aegisNow = !aegis
+    ? null
+    : state === 'sliver'
+      ? sliverArmour == null
+        ? aegis.none
+        : getAegisAbilityDamage(sliverArmour, aegis.multiplier)
+      : aegis[state] ?? aegis.none;
 
   // Base ability damage moves with the potion state because the formula's level
   // term reads the boosted combat stat - see utils/abilityDamage.js.
@@ -526,6 +623,9 @@ export default function LeaguesEffectsPanel({
     extras,
     resolvedGodTier,
     chinSplash,
+    hasSliver,
+    baseArmour,
+    sliverArmour,
   });
 
   // No gear, no panel. Every figure here is framed as "what this loadout is
@@ -581,6 +681,7 @@ export default function LeaguesEffectsPanel({
               <div className="leagues-effects-potions">
                 {STATES.map((entry) => {
                   if (entry.id === 'elder' && !canElder) return null;
+                  if (entry.id === 'sliver' && !hasSliver) return null;
                   const active = state === entry.id;
                   return (
                     <button
@@ -590,12 +691,51 @@ export default function LeaguesEffectsPanel({
                       aria-pressed={active}
                       onClick={() => setPotion(active ? 'none' : entry.id)}
                     >
-                      {entry.label}
+                      {/* Both labels are always in the DOM, one of them
+                          collapsed to zero width. Swapping the text outright
+                          cannot be transitioned - there is no "from" width to
+                          animate out of - so each sits in its own 0fr/1fr grid
+                          column and the column is what moves. See
+                          .leagues-effects-potion-word. */}
+                      {/* aria-hidden on whichever is collapsed: zero width and
+                          overflow:hidden do not take an element out of the
+                          accessibility tree, so without this the chip announces
+                          itself as "Ovl Overload +17". */}
+                      <span
+                        className={`leagues-effects-potion-word${active ? '' : ' shown'}`}
+                        aria-hidden={active}
+                      >
+                        <span>{entry.short}</span>
+                      </span>
+                      <span
+                        className={`leagues-effects-potion-word${active ? ' shown' : ''}`}
+                        aria-hidden={!active}
+                      >
+                        <span>{entry.label}</span>
+                      </span>
                       <span className="leagues-effects-potion-defence">{entry.bonus}</span>
                     </button>
                   );
                 })}
-                {canElder && <span className="leagues-effects-elder-note">via {elderSources.join(' + ')}</span>}
+                {/* Only while elder is the ACTIVE state. It answers "can this
+                    build even brew one", which is a question about the chip
+                    that was just pressed - parked beside an unpressed chip it
+                    was a permanent caption on a row that is meant to read as
+                    three short options. */}
+                {state === 'elder' && (
+                  <span className="leagues-effects-elder-note">via {elderSources.join(' + ')}</span>
+                )}
+                {/* The Sliver's numbers need their frame stated: they last 16.8
+                    seconds, and the armour ones extrapolate the Defence-to-armour
+                    formula far past the level it was verified at (see
+                    gearStats.js's getSkillArmour). Quoting 15,000 armour with no
+                    caveat would read as a sustained figure someone can plan gear
+                    around. */}
+                {state === 'sliver' && (
+                  <span className="leagues-effects-elder-note">
+                    16.8s burst - armour extrapolated past 99 Defence
+                  </span>
+                )}
               </div>
             )}
 

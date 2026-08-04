@@ -182,8 +182,14 @@ export default function MyBuildPage({
     [selectedBlessings],
   );
 
+  // Antiquarian's own effect text is "All Archaeology relics are available
+  // to use after completing the Archaeology tutorial" - a second,
+  // region-independent unlock path (same pattern as RelicsPage/CreateBuildPage).
+  const hasAntiquarian = selectedLeagueRelics.includes('Antiquarian');
+
   const isArchRelicAvailable = (relic) =>
-    isGearItemAvailable(relic, isUnlocked, { ignoreArtefactRegions: archRelicIgnoreArtefactRegions });
+    isGearItemAvailable(relic, isUnlocked, { ignoreArtefactRegions: archRelicIgnoreArtefactRegions }) ||
+    hasAntiquarian;
 
   // Picked relics pin to the top and are never hidden by the locked filter -
   // unpicking your own already-taken relic has to stay possible even if a
@@ -203,7 +209,15 @@ export default function MyBuildPage({
     const locked = archRelicHideLocked ? [] : rest.filter((r) => !isArchRelicAvailable(r));
     return [...picked, ...available, ...locked];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [archRelicTab, archRelicSearch, archRelicHideLocked, archRelicIgnoreArtefactRegions, selectedRelics, isUnlocked]);
+  }, [
+    archRelicTab,
+    archRelicSearch,
+    archRelicHideLocked,
+    archRelicIgnoreArtefactRegions,
+    selectedRelics,
+    isUnlocked,
+    hasAntiquarian,
+  ]);
 
   const styleWithGear = Object.entries(gear.equippedNamesByStyle ?? {})
     .filter(([, slots]) => Object.keys(slots ?? {}).length > 0)
@@ -489,6 +503,7 @@ export default function MyBuildPage({
                 selected={selectedRelics.includes(relic.name)}
                 selectable={selectedRelics.length < MAX_RELICS}
                 onToggleSelect={toggleRelic}
+                hasAntiquarian={hasAntiquarian}
               />
             ))}
           </div>

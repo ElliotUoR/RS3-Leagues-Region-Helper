@@ -46,7 +46,19 @@ export function levelBonus(level) {
 export const BASE_COMBAT_LEVEL = 99;
 export const OVERLOAD_COMBAT_BONUS = { none: 0, overload: 17, elder: 25 };
 
+// The Sliver of Edicts (Naragi Edict relic) is not a potion and does not stack
+// with one: it SETS every combat stat to 255 rather than adding to 99, so it is
+// an absolute level and not another entry in the bonus table above. At 255 the
+// formula's level term is worth roughly twice what it is at 99, which is why it
+// gets a state of its own instead of being waved at in prose.
+//
+// It is a 16.8-second window on a 90-second cooldown, so this state answers
+// "what does my burst look like", not "what do I sustain". The panel labels it
+// as such - see components/LeaguesEffectsPanel.jsx.
+export const SLIVER_COMBAT_LEVEL = 255;
+
 export function combatLevelFor(potionState) {
+  if (potionState === 'sliver') return SLIVER_COMBAT_LEVEL;
   return BASE_COMBAT_LEVEL + (OVERLOAD_COMBAT_BONUS[potionState] ?? 0);
 }
 

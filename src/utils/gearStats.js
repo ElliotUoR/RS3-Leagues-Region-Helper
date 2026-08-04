@@ -36,6 +36,14 @@ export function getArmourRating(item, style) {
 // shown ceiled to a whole number in-game (verified against a level-99
 // Defence, no-armour-equipped screenshot: formula gives 1212.24, in-game
 // shows 1213).
+//
+// That verification is at 99, and the overload states (116/124) sit close
+// enough to it to trust. The Sliver of Edicts does NOT: it sets Defence to 255,
+// where the cubic term alone contributes ~13,265 and the baseline reaches
+// ~14,325 - an order of magnitude above worn gear, extrapolated well past the
+// only point the formula was checked at. The figures the panel shows for that
+// state are what this formula says, not something confirmed in game; treat them
+// as an upper bound on a 16.8-second window rather than as a measured number.
 export function getSkillArmour(defenceLevel) {
   const d = defenceLevel;
   return (d ** 3) / 1250 + 4 * d + 40;

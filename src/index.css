@@ -3585,6 +3585,26 @@ main.abilities-page .gear-item-rows {
   border: 1px dashed color-mix(in srgb, var(--crystal-grace-color) 55%, transparent);
 }
 
+/* Antiquarian tag (Arch Relics tab only - see RelicRow.jsx) - same
+   region-independent-unlock pattern as Crystal Grace above, styled with its
+   own colour (amber, an archaeology/artefact association) rather than
+   reusing Crystal Grace's teal so the two stay visually distinct. */
+.region-tag-antiquarian {
+  background: var(--bg);
+  color: var(--text);
+  opacity: 0.5;
+  border: 1px dashed var(--border);
+  cursor: help;
+}
+
+.region-tag-antiquarian-unlocked {
+  --antiquarian-color: #d4a24c;
+  opacity: 1;
+  background: color-mix(in srgb, var(--antiquarian-color) 18%, transparent);
+  color: var(--antiquarian-color);
+  border: 1px dashed color-mix(in srgb, var(--antiquarian-color) 55%, transparent);
+}
+
 .region-tag-impossible {
   font-size: 10px;
   font-weight: 600;
@@ -8629,14 +8649,78 @@ main.abilities-page .gear-item-rows {
   color: var(--text-h);
 }
 
+/* The chip's label, abbreviated until its state is selected. Both labels are
+   rendered; the inactive one is collapsed to nothing.
+
+   `grid-template-columns: 0fr -> 1fr` rather than max-width, because the two
+   labels are different lengths per chip ("Ovl"/"Overload" vs "Sliver"/"Sliver
+   of Edicts") and a single max-width would have to be big enough for the
+   longest - leaving the shorter ones easing over dead space and arriving late.
+   A grid column measures its own content, so every chip takes the same time to
+   travel its own distance. */
+.leagues-effects-potion-word {
+  display: grid;
+  grid-template-columns: 0fr;
+  overflow: hidden;
+  transition: grid-template-columns 200ms ease;
+}
+
+.leagues-effects-potion-word.shown {
+  grid-template-columns: 1fr;
+}
+
+/* min-width overrides a grid item's auto minimum, which would otherwise refuse
+   to shrink below the text's own width and defeat the whole thing. */
+.leagues-effects-potion-word > span {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* The button's flex gap applies to the collapsed label too, so a chip would
+   carry 6px of padding for a word that isn't there. Owning the spacing on the
+   visible label instead keeps both states tight. */
+.leagues-effects-potion {
+  gap: 0;
+}
+
+.leagues-effects-potion-word.shown > span {
+  padding-right: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leagues-effects-potion-word {
+    transition: none;
+  }
+}
+
 .leagues-effects-potion-defence {
   font-size: 0.7rem;
   opacity: 0.7;
 }
 
+/* Fades in with the elder chip rather than appearing instantly, so the row
+   settles as one movement alongside the chip's own expansion. */
 .leagues-effects-elder-note {
   font-size: 0.72rem;
   opacity: 0.65;
+  animation: leagues-effects-note-in 200ms ease both;
+}
+
+@keyframes leagues-effects-note-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 0.65;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leagues-effects-elder-note {
+    animation: none;
+  }
 }
 
 /* ==========================================================================
@@ -9540,6 +9624,19 @@ main.abilities-page .gear-item-rows {
   color: color-mix(in srgb, var(--card-accent, var(--accent)) 40%, var(--text-h));
   font-weight: 650;
   font-variant-numeric: tabular-nums;
+}
+
+/* A number the app derives but cannot vouch for. The Sliver's armour is the
+   case this exists for: it runs the Defence-to-armour formula out to 255, far
+   past the level that formula was ever checked at. Red, at the same weight as
+   a payout line, because it has to survive being skimmed.
+
+   `--danger` rather than a literal red: it already resolves per theme
+   (#ff6b6b dark, #c81e3a light), and a hardcoded dark-mode red would sit at
+   about 3:1 on the light theme's white cards. */
+.leagues-effects-card li.warn {
+  color: var(--danger);
+  font-weight: 650;
 }
 
 /* The working, the caveats and the wiki wording behind each figure - present

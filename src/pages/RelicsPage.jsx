@@ -13,13 +13,19 @@ const CATEGORY_LABELS = {
 const TABS = [...RELIC_CATEGORIES, 'all'];
 const MAX_SELECTED = MAX_RELICS;
 
-export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
+export default function RelicsPage({ isUnlocked, selected, toggleRelic, selectedLeagueRelics }) {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
   const [ignoreArtefactRegions, setIgnoreArtefactRegions] = useState(false);
 
+  // Antiquarian's own effect text is "All Archaeology relics are available
+  // to use after completing the Archaeology tutorial" - a second,
+  // region-independent unlock path alongside the usual region gate (same
+  // pattern as Crystal Grace on the Spellbooks tab - see UnlockCard.jsx).
+  const hasAntiquarian = Boolean(selectedLeagueRelics?.includes('Antiquarian'));
+
   function isRelicAvailable(relic) {
-    return isGearItemAvailable(relic, isUnlocked, { ignoreArtefactRegions });
+    return isGearItemAvailable(relic, isUnlocked, { ignoreArtefactRegions }) || hasAntiquarian;
   }
 
   const displayRelics = useMemo(() => {
@@ -39,7 +45,7 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
     const locked = rest.filter((r) => !isRelicAvailable(r));
     return [...picked, ...available, ...locked];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, search, selected, isUnlocked, ignoreArtefactRegions]);
+  }, [tab, search, selected, isUnlocked, ignoreArtefactRegions, hasAntiquarian]);
 
   const tabLabel = tab === 'all' ? 'relics' : `${CATEGORY_LABELS[tab].toLowerCase()} relics`;
 
@@ -108,6 +114,7 @@ export default function RelicsPage({ isUnlocked, selected, toggleRelic }) {
                 selected={selected.includes(relic.name)}
                 selectable={selected.length < MAX_SELECTED}
                 onToggleSelect={toggleRelic}
+                hasAntiquarian={hasAntiquarian}
               />
             ))}
           </div>

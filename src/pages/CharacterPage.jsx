@@ -92,7 +92,12 @@ export default function CharacterPage({
       </nav>
       {subTab === 'abilities' && <AbilitiesPage isUnlocked={isUnlocked} />}
       {subTab === 'relics' && (
-        <RelicsPage isUnlocked={isUnlocked} selected={selectedRelics} toggleRelic={toggleRelic} />
+        <RelicsPage
+          isUnlocked={isUnlocked}
+          selected={selectedRelics}
+          toggleRelic={toggleRelic}
+          selectedLeagueRelics={selectedLeagueRelics}
+        />
       )}
       {subTab === 'spellbooks' && <SpellbooksPage isUnlocked={isUnlocked} hasCrystalGrace={hasCrystalGrace} />}
       {subTab === 'essentials' && (
