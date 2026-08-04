@@ -67,22 +67,46 @@ export function combatLevelFor(potionState) {
 // is 1368 = 14.4*95. So `w` above is read straight off the item and never
 // recomputed from its tier.
 //
-// Which coefficient a weapon was stored with is therefore the only thing that
-// decides whether the 1.25*f term and the 1.5b multiplier apply - and it is
-// read back from the data rather than taken from the `twoHanded` flag, because
-// the two disagree. The Strykebow is `twoHanded: true` yet carries 816 = 9.6*85,
-// the ONE-handed coefficient, consistent with the rest of the app treating a
-// shieldbow as a main-hand-plus-shield (see data/aegisMultiplier.js). Trusting
-// the flag there would pay it a two-handed level bonus on top of one-handed
-// weapon damage, which is a figure the game never produces.
+// Which coefficient a weapon was stored with is what decides whether the
+// 1.25*f term and the 1.5b multiplier apply, and for weapons flagged
+// `twoHanded: true` that is checked against the data rather than trusted. The
+// Strykebow is `twoHanded: true` yet carries 816 = 9.6*85, the ONE-handed
+// coefficient, consistent with the rest of the app treating a shieldbow as a
+// main-hand-plus-shield (see data/aegisMultiplier.js). Trusting the flag there
+// would pay it a two-handed level bonus on top of one-handed weapon damage,
+// which is a figure the game never produces.
+//
+// The check is ONE-DIRECTIONAL: it can demote a weapon the flag calls
+// two-handed, never promote one the flag calls one-handed. Symmetric
+// "whichever coefficient is nearer" was wrong, because plenty of genuine
+// one-handers sit above the 9.6*tier line and it read that as evidence of a
+// second hand:
+//
+//   - Both chinchompas. Thrown AoE weapons are off-curve by design - the wiki
+//     says outright that a black chinchompa (tier 65, 869.8) "has damage
+//     approximately equal to a tier 71 weapon". Nearest-coefficient made them
+//     two-handed, which paid them a level bonus and a 1.5x armour multiplier
+//     the game does not, and told getWeaponMode to ignore their off-hand -
+//     they are main-hand weapons and can hold a shield.
+//   - Death guard (tier 10), where `level.level` is the Necromancy
+//     REQUIREMENT (1), not the tier (10). 96 = 9.6*10 is exactly the
+//     one-handed coefficient; measured against tier 1 it looked enormous.
+//     Necromancy main-hands pair with a conduit lantern, so promoting it also
+//     silently dropped the off-hand half of that style's damage.
+//
+// That last case is the general hazard: `level.level` is a wield requirement
+// and only usually equals the tier. Demotion survives it because a weapon
+// carrying LESS than 9.6*requirement cannot be a two-hander whatever its real
+// tier is; promotion does not.
 const MAIN_HAND_COEFFICIENT = 9.6;
 const TWO_HANDED_COEFFICIENT = 14.4;
 
 export function usesTwoHandedScale(weapon) {
   if (!weapon) return false;
+  if (!weapon.twoHanded) return false;
   const tier = weapon.level?.level;
   const damage = weapon.stats?.damage;
-  if (!tier || !damage) return Boolean(weapon.twoHanded);
+  if (!tier || !damage) return true;
   return (
     Math.abs(damage - TWO_HANDED_COEFFICIENT * tier) <= Math.abs(damage - MAIN_HAND_COEFFICIENT * tier)
   );

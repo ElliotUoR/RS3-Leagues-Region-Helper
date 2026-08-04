@@ -2393,11 +2393,22 @@ export const GEAR = {
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1694 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 1080, accuracy: 1694, lifeBonus: 0, prayerBonus: 0, setEffect: 'Special attack "Aimed Shot" (35% adrenaline): 300-360% ability damage, +75% hit chance, 3s channel.' },
         specialAttack: 'Aimed Shot (35% adrenaline): 300-360% ability damage over a 3s channel, +75% hit chance.',
         icon: 'icons/Hand_cannon.png', source: { type: 'boss', boss: 'Chaos dwarf hand cannoneer', region: 'fremennikProvince', note: 'Rare drop (1/132) in the Chaos Dwarf Battlefield; Forgiveness of a Chaos Dwarf must be completed to wield it.' } },
+      // ABILITY damage, not tooltip damage. The wiki's offensive-attributes box
+      // has two Damage columns and these two weapons are the only ones in this
+      // file where they differ - a thrown weapon's tooltip figure is scaled for
+      // its attack speed, so the chinchompas read 943.3/869.8 there while
+      // abilities actually use 739.2/681.6. Every formula in this app is an
+      // ability-damage formula (see utils/abilityDamage.js), so the Ability
+      // column is the one to copy. Both check out: 739.2 = 9.6*77 and the
+      // item's damage stat is 77; 681.6 = 9.6*71 and the wiki says in prose
+      // that a black chinchompa "has damage approximately equal to a tier 71
+      // weapon". Every other weapon here divides cleanly by 9.6 or 14.4 into a
+      // whole tier, which is what makes these two stand out.
       { name: 'Mechanised chinchompa', slot: 'weapon', twoHanded: false, level: { skill: 'Ranged', level: 75, note: 'also 50 Invention to craft' },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1694 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 943.3, accuracy: 1694, lifeBonus: 0, prayerBonus: 0, setEffect: 'Thrown AoE: deals damage to up to 9 targets in a 3x3 area around the primary target.' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1694 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 739.2, accuracy: 1694, lifeBonus: 0, prayerBonus: 0, setEffect: 'Thrown AoE: deals damage to up to 9 targets in a 3x3 area around the primary target.' },
         icon: 'icons/Mechanised_chinchompa.png', source: { type: 'shop', shop: "Grand Exchange, or crafted via Invention (50 Invention, Inventor's workbench, cave goblin technology tree) from 50 Red chinchompas + 65 Plated parts + 65 Connector parts + 5 Living components per batch of 50", region: 'global' } },
       { name: 'Black chinchompa', slot: 'weapon', twoHanded: false, level: { skill: 'Ranged', level: 65 },
-        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1299 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 869.8, accuracy: 1299, lifeBonus: 0, prayerBonus: 0, setEffect: 'Thrown AoE: deals 90-110% of initial ability damage to up to 9 enemies within one tile of the target.' },
+        stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1299 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 681.6, accuracy: 1299, lifeBonus: 0, prayerBonus: 0, setEffect: 'Thrown AoE: deals 90-110% of initial ability damage to up to 9 enemies within one tile of the target.' },
         icon: 'icons/Black_chinchompa.png', source: { type: 'skilling', detail: 'Hunter or Player-Owned Farm', region: 'global' } },
       { name: 'Sunspear (ranged)', slot: 'weapon', twoHanded: true, level: { skill: 'Ranged', level: 78 },
         stats: { attack: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 1829 }, defence: { stab: 0, slash: 0, crush: 0, magic: 0, ranged: 0 }, damage: 1123.2, accuracy: 1829, lifeBonus: 0, prayerBonus: 0, setEffect: 'Also functions as a Sunspear vs. vampyres and Wolfbane vs. werewolves. Cremates vyre corpses for Prayer/Firemaking XP; every 50 cremations grants +10 damage (caps at +100).' },
