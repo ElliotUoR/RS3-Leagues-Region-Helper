@@ -12,15 +12,31 @@ import { LEAGUE_RELICS } from './leagueRelics.js';
 //
 // Rejuvenated: "Choose another relic from a previous tier." Taking it buys ONE
 // extra pick, so exactly one tier may hold two relics while the rest stay at
-// one. Its own wording says "previous", which cannot be enforced here: it has
-// no confirmed tier (see leagueRelics.js), so there is no "previous" to measure
-// against and the bonus is spendable on any tier. If a tier is ever confirmed
-// for it, this file is the only place that needs the extra condition.
+// one.
+//
+// The "previous" in that wording is enforced at exactly one point: the TOP
+// tier. Nothing is previous to the highest tier there is, so the bonus can
+// never be spent doubling it up - Naragi Edict and Icyenic Faith (both Tier 7)
+// stay a genuine either/or no matter what else is picked. Below the top it is
+// unenforceable and deliberately unenforced: Rejuvenated has no confirmed tier
+// of its own (see leagueRelics.js), so there is no anchor to measure "previous
+// to what" against, and guessing one would block legal sets. If its tier is
+// ever confirmed, BONUS_ELIGIBLE_TIER is the only thing that needs tightening.
 export const REJUVENATED_RELIC = 'Rejuvenated';
 
 const BY_NAME = new Map(LEAGUE_RELICS.map((relic) => [relic.name, relic]));
 
 export const tierOf = (name) => BY_NAME.get(name)?.tier ?? null;
+
+// Derived from the catalogue rather than hardcoded to 7, so revealing a Tier 8
+// relic moves the ceiling on its own. `tier: null` relics are excluded - an
+// unknown tier is not evidence of a higher one.
+export const MAX_RELIC_TIER = Math.max(
+  ...LEAGUE_RELICS.map((relic) => relic.tier).filter((tier) => tier != null),
+);
+
+// Whether Rejuvenated's extra pick may be spent on this tier at all.
+export const BONUS_ELIGIBLE_TIER = (tier) => tier != null && tier < MAX_RELIC_TIER;
 
 function countsPerTier(names) {
   const perTier = new Map();
@@ -54,6 +70,7 @@ export function bonusPicksRemaining(names) {
 // already picked. 1 normally; 2 for whichever tier the bonus is spent on.
 export function capForTier(names, tier) {
   if (tier == null) return Infinity;
+  if (!BONUS_ELIGIBLE_TIER(tier)) return 1;
   const others = names.filter((name) => tierOf(name) !== tier);
   return 1 + bonusPicksRemaining(others);
 }
@@ -82,7 +99,9 @@ export function sanitizeRelicPicks(raw) {
     if (count >= 1) {
       // Over the base rule - allowed only while the bonus lasts, and spent in
       // arrival order so a hand-crafted payload cannot smuggle in more than one.
-      if (budget <= 0) continue;
+      // The top tier is never eligible, so a payload naming both Tier 7 relics
+      // loses the later one whether or not Rejuvenated is in the list.
+      if (!BONUS_ELIGIBLE_TIER(tier) || budget <= 0) continue;
       budget -= 1;
     }
     perTier.set(tier, count + 1);

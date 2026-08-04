@@ -451,8 +451,21 @@ const UNIVERSAL_ACCESSORIES = [
   // always-unlocked (see gearAvailability.js's ALWAYS_UNLOCKED), with
   // `source.leagueRelic` naming which relic actually grants it so the UI's
   // relic-requirement note is accurate rather than just "no region needed".
-  // No icon yet - Icyenic Faith has no wiki page or item art as of writing,
-  // only the relic's own reveal-image icon (see leagueRelics.js).
+  // Neither has wiki item art as of writing, only the granting relic's own
+  // reveal-image icon (see leagueRelics.js) - which is what both point at.
+  //
+  // Sliver of Edicts carries only its WORN stats. The reveal's activated
+  // effect (every combat stat to 255 for 16.8s, 40,000 healing, a revive, on a
+  // 1.5 minute cooldown) is a burst, and every figure this app quotes is
+  // sustained - at 99, or at an overload's 99+17/+25. Folding a burst into
+  // those totals would misreport the number people actually plan around, so it
+  // lives in `setEffect` as prose instead. Its flat +300 armour goes on all
+  // five defence keys because armour is per-style here (see gearStats.js's
+  // getArmourRating / DEFENCE_KEY_BY_STYLE).
+  { name: 'Sliver of Edicts', slot: 'pocket', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
+    stats: { defence: { stab: 300, slash: 300, crush: 300, magic: 300, ranged: 300 }, damage: 14, accuracy: 0, lifeBonus: 1500, prayerBonus: 15, setEffect: 'Activate from the inventory for 16.8s: heals 10,000 life points four times, boosts every combat stat to 255, and revives you if you die. 1.5 minute cooldown.' },
+    icon: 'icons/Naragi_Edict.png',
+    source: { type: 'shop', shop: 'Obtained from picking the Naragi Edict relic', region: 'relic', leagueRelic: 'Naragi Edict' } },
   { name: 'Tome of the Icyene', slot: 'pocket', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
     stats: { damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 50, setEffect: 'When worn, gain 0.2% critical strike chance and 0.2% base ability damage per 1 Prayer bonus you have.' },
     icon: 'icons/Tome_of_the_Icyene.png',

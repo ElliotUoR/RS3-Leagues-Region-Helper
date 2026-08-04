@@ -36,8 +36,9 @@
 //
 // The reveal-only relics have no wiki icon at all (see above) - Crystal Grace,
 // Superheated, Divine Druid, Transmutation, Animal Wrangler, Icyenic Faith,
-// Devout, Perkfection and Rejuvenated. Their art is cropped from Jagex's reveal
-// images, kept in `image/league relics/` and copied into public/icons/ under
+// Devout, Perkfection, Rejuvenated, Naragi Edict, Antiquarian and Production
+// Master. Their art is cropped from Jagex's reveal images, kept in
+// `image/league relics/` and copied into public/icons/ under
 // the Title_Case_Underscored names used below. Unlike every other FP()
 // reference here there is no runescape.wiki file behind them, so
 // scripts/download-icons.mjs must never be pointed at these - it would find
@@ -704,9 +705,42 @@ export const LEAGUE_RELICS = [
     },
   },
   {
+    // TIER 7 IS AN ASSUMPTION, not a Jagex statement. The reveal image states
+    // no tier for this relic; it is placed at 7 alongside Icyenic Faith so the
+    // two behave as the either/or they are expected to be. Revisit when Jagex
+    // confirm a tier - this is the only line that decides it.
+    //
+    // Unlike Antiquarian and Production Master below, this relic has real
+    // combat stats, and they are large. The Sliver is a POCKET item, so it
+    // competes with the Tome of the Icyene and Book of Death and is carried in
+    // gear.js as a real equippable (see the `region: 'relic'` block there).
+    // Its worn stats feed Teragard's Aegis (+300 armour), Big Boned (+1500 LP)
+    // and Icyenic Faith (+15 prayer) directly, which is why it has to exist as
+    // gear rather than as prose here.
+    //
+    // The activated effect is deliberately NOT modelled anywhere: a 16.8s
+    // window that caps every combat stat at 255 is a burst, and every damage
+    // figure this app quotes is a sustained one at 99 (or at an overload's
+    // 99+17/+25). Folding a 1.5-minute-cooldown burst into those totals would
+    // misreport the number people actually plan around.
+    name: 'Naragi Edict',
+    tier: 7,
+    summary:
+      'Grants the Sliver of Edicts: a pocket item worth +300 armour, +14 damage and +1500 life points, which also activates for 16.8s to cap your combat stats at 255, heal 40,000 and revive you.',
+    effects: [
+      'Grants you the Sliver of Edicts.',
+      'The Sliver can be activated from the inventory for 16.8 seconds.',
+      'When activated it heals 10,000 lifepoints 4 times, once per 4.2 seconds.',
+      'When activated it boosts your combat stats to 255.',
+      'When activated it revives you if you die.',
+      'The Sliver has a cooldown of 1.5 minutes before it can be activated again.',
+      'Additionally the Sliver can be placed in your pocket slot and offers +300 armour, +14 melee/ranged/magic/necromancy damage bonus, +1500 life points bonus and +15 prayer bonus.',
+    ],
+    icon: FP('Naragi_Edict.png'),
+  },
+  {
     // Transcribed from the reveal image directly (not the wiki - not
-    // published there yet), same "Unknown Tier" treatment as Animal Wrangler
-    // above. Tier is unconfirmed as of writing - update once Jagex states it.
+    // published there yet), same as Animal Wrangler above.
     //
     // The reveal image groups three "When worn" bonuses under one shared
     // header rather than repeating the phrase three times as three visually
@@ -718,11 +752,11 @@ export const LEAGUE_RELICS = [
     // Icon is a manually-cropped reveal-image icon, same situation as
     // Animal Wrangler above.
     //
-    // TIER 7, and currently the only relic at it - so it is the only thing you
-    // can activate in that tier, but nothing forces the pick. Both fall out of
-    // the existing one-per-tier rule (see hooks/useLeagueRelicSelection.js):
-    // a tier with a single member has exactly one option, and a relic is only
-    // ever selected by clicking it.
+    // TIER 7, shared with Naragi Edict above - so the top tier is a genuine
+    // choice between the two rather than a free pick. Rejuvenated cannot buy
+    // its way out of that one: its own wording is "a relic from a PREVIOUS
+    // tier", and nothing is previous to the top (see leagueRelicPicks.js's
+    // MAX_RELIC_TIER).
     name: 'Icyenic Faith',
     tier: 7,
     summary:
@@ -877,8 +911,9 @@ export const LEAGUE_RELICS = [
 
   // --------------------------------------------------- TIER NOT YET REVEALED
   // Transcribed verbatim from Jagex's "Relic Reveal" images for Devout,
-  // Perkfection and Rejuvenated. Those images name the relic and list its
-  // effects but state no tier, so all three take `tier: null` and sit in the
+  // Perkfection, Rejuvenated, Antiquarian and Production Master. Those images
+  // name the relic and list its effects but state no tier, so each takes
+  // `tier: null` and sits in the
   // "Unknown tier - pick any number" group until one is confirmed - the same
   // treatment Crystal Grace and Superheated had before the wiki caught up.
   //
@@ -934,6 +969,57 @@ export const LEAGUE_RELICS = [
     summary: 'Choose another relic from a previous tier.',
     effects: ['Choose another relic from a previous tier.'],
     icon: FP('Rejuvenated.png'),
+  },
+  {
+    name: 'Antiquarian',
+    tier: null,
+    summary:
+      'Every Archaeology relic unlocked after the tutorial, half-price restoration, 10x chronotes and materials sent straight to storage.',
+    effects: [
+      'All Archaeology relics are available to use after completing the Archaeology tutorial.',
+      "Archaeology materials are automatically sent to the material storage, or to the bank if it's full.",
+      'The Monolith provides 1,000 Monolith energy.',
+      'The Archaeology journal acts as a free soil screener.',
+      'Fixate is available straight away, and no longer has a cap to casting.',
+      'Archaeology lore pages are 20% more common. This is in addition to the passive effect.',
+      'Receive 10x as many chronotes from handing in collections. (This overwrites the passive 5x multiplier)',
+      'Restoring an artefact costs half as many materials.',
+      'Ancient caskets are received when completing an Archaeology collection.',
+      'Immediately reach 100% focus when you receive an artefact or lore page.',
+      'Divine geodes can be found while excavating and contain Archaeology materials.',
+    ],
+    // No `regionTagNote` - that field is a {prefix, tags, suffix} object for
+    // naming RESOURCES a relic substitutes for (see LeagueRelicRow's
+    // RegionTagNote), and this relic unlocks powers rather than materials.
+    //
+    // Worth knowing anyway, because the first bullet is the combat-relevant
+    // one and it is easy to lose among ten skilling lines: the Arch relic
+    // powers modelled in relics.js (Persistent Rage, Font of Life and the
+    // rest) each normally need their own artefact restored in their own
+    // region. This hands you all of them for a tutorial.
+    icon: FP('Antiquarian.png'),
+  },
+  {
+    name: 'Production Master',
+    tier: null,
+    summary:
+      'Grants the Brooch of the Spirits: portable-station benefits everywhere, infinite exquisite urns, one-action masterwork and +6 to six production skills.',
+    effects: [
+      'Grants the Brooch of the Spirits.',
+      'Various production activities have their items processed at once.',
+      'You never burn food accidentally.',
+      'When wearing your brooch, you can spawn Seren spirits, divine blessings, catalysts of alteration and manifested knowledge.',
+      'The Brooch of Spirits supplies infinite exquisite urns.',
+      'While wearing your brooch, you will gain portable skilling station benefits, even when not using one.',
+      'Where applicable, masterwork items now take 1 action to complete.',
+      '+6 boost to Construction, Cooking, Crafting, Herblore, Fletching and Smithing.',
+    ],
+    // The brooch is a worn item but not a combat one - the reveal lists no
+    // armour, damage, life or prayer stats for it, so unlike the Sliver of
+    // Edicts above it gets no gear.js entry. Its combat relevance is indirect:
+    // one-action masterwork is the melee tank chain (Masterwork/Trimmed
+    // masterwork) built in an evening rather than a week.
+    icon: FP('Production_Master.png'),
   },
 ];
 

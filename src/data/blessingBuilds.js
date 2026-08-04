@@ -109,6 +109,9 @@ export const RELIC_COLOURS = {
   Devout: { hue: 75, label: 'olive' },
   Perkfection: { hue: 200, label: 'steel' },
   Rejuvenated: { hue: 320, label: 'rose' },
+  'Naragi Edict': { hue: 45, label: 'amber' },
+  Antiquarian: { hue: 25, label: 'clay' },
+  'Production Master': { hue: 140, label: 'fern' },
 };
 
 // Shown under the Arch relics column. Some relics list a second region that is
@@ -963,6 +966,18 @@ export const LEAGUE_RELIC_TIER_LIST = {
     {
       name: 'Rejuvenated', relicTier: null, grade: 'unranked', unlocksGear: 0,
       note: 'Just revealed, and ungradeable on its own terms: it grants a second relic from an earlier tier, so it is worth exactly whatever the best relic you are missing is worth. Its grade would have to be read off the rest of this list rather than assigned.',
+    },
+    {
+      name: 'Naragi Edict', relicTier: 7, grade: 'unranked', unlocksGear: 1,
+      note: 'Just revealed - not yet assessed. The only one of the newest batch with real combat stats: the Sliver of Edicts is a pocket item at +300 armour, +14 damage, +1500 life points and +15 prayer, which is a straight upgrade over anything else in that slot and feeds Aegis, Big Boned and Icyenic Faith at once. The 16.8s stat-cap-and-revive burst is on top of that and needs its own assessment.',
+    },
+    {
+      name: 'Antiquarian', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      note: 'Just revealed - not yet assessed for combat viability. Reads as an Archaeology relic, but the first line hands you every Archaeology relic power after the tutorial, which is the Arch relics tab with its regions and artefact restorations removed. Needs grading against what those powers are actually worth.',
+    },
+    {
+      name: 'Production Master', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      note: 'Just revealed - not yet assessed for combat viability. A production relic on its face; the combat angle is indirect, one-action masterwork turning the melee tank chain from a week into an evening.',
     },
   ],
 };
