@@ -864,7 +864,7 @@ export const LEAGUE_RELICS = [
         {
           name: 'Invention components',
           icon: 'icons/voidshard/Precious_components.webp',
-          detail: 'Quantities not revealed yet.',
+          detail: 'Scavanger droptable',
         },
         {
           // No longer `hidden` (which renders the "Unrevealed" redacted tag -
