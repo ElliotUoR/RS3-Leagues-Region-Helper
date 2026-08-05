@@ -65,7 +65,7 @@ import {
   getBlessingModifiers,
 } from '../utils/blessingModifiers';
 import { getCritBreakdown, UNHOLY_CRITUAL } from '../utils/critChance';
-import { CHAOTIC_INSIGHT, CHAOTIC_INSIGHT_EXTRA_PIECES } from '../data/critSetBonus';
+import { CHAOTIC_INSIGHT, CHAOTIC_INSIGHT_EXTRA_PIECES, getWornSetEffects } from '../data/critSetBonus';
 
 // Everything a build's blessings, relics and gear actually DO for it, behind
 // one button under the loadout.
@@ -601,38 +601,36 @@ function envenomedCard({ grasp }) {
 // of my gear actually a set? Sets are listed from data/critSetBonus.js, which
 // covers what this planner carries gear for; naming armour the planner cannot
 // equip would promise something it cannot deliver.
-function chaoticInsightCard({ crit, baseAD }) {
-  const sets = crit?.critSets;
-  const best = sets?.best;
+function chaoticInsightCard({ crit, baseAD, equipped }) {
+  const critSets = crit?.critSets;
+  const best = critSets?.best;
   const achto = baseAD?.achto;
-  const lines = [];
+  // Every set-bonus set worn, whether or not this app models what it does -
+  // the grant is real either way, and a card that only listed the two crit
+  // sets would look like the effect ignores the rest of the loadout.
+  const worn = getWornSetEffects(equipped);
 
-  // One entry per set actually WORN. The headline for each is the thing this
-  // power does - grant pieces - and the line under it is what those pieces
-  // bought, because "+4 pieces" on its own does not say whether that crossed a
-  // threshold or did nothing.
-  for (const entry of sets?.sets ?? []) {
-    lines.push(strong(`+${entry.worn * CHAOTIC_INSIGHT_EXTRA_PIECES} pieces to ${entry.set}`));
-    if (entry === best) {
+  const lines = [];
+  for (const entry of worn) {
+    lines.push(strong(`+${entry.granted} pieces to ${entry.set}`));
+
+    // The resulting effect, but ONLY where it is actually costed. Everything
+    // else gets the grant and nothing more - inventing an effect line for a set
+    // this app has never modelled would be worse than saying nothing.
+    const crits = (critSets?.sets ?? []).find((c) => c.set === entry.set);
+    if (crits && crits === best) {
+      lines.push(muted(`${entry.worn} worn counting as ${crits.counted} - +${crits.chance}% critical strike chance from ${crits.effect}.`));
+    } else if (crits) {
       lines.push(
-        muted(`${entry.worn} worn counting as ${entry.counted} - +${entry.chance}% critical strike chance from ${entry.effect}.`),
+        warn(`${entry.worn} worn counting as ${crits.counted}, but paying nothing - it shares one bonus with ${best?.set ?? 'the other set'} and they do not stack.`),
       );
-    } else {
-      // Worn, boosted, and still paying nothing - the two crit sets share one
-      // bonus, so the extra pieces cannot rescue the losing side.
+    } else if (achto && achto.set === entry.set) {
       lines.push(
-        warn(`${entry.worn} worn counting as ${entry.counted}, but paying nothing - it shares one bonus with ${best?.set ?? 'the other set'} and they do not stack.`),
+        muted(
+          `${entry.worn} worn counting as ${achto.counted}${achto.capped ? ` (capped at ${ACHTO_MAX_PIECES})` : ''} - +${round(achto.bonus)} equipment damage bonus${achto.active ? '' : ', once an off-hand shield is equipped'}.`,
+        ),
       );
     }
-  }
-
-  if (achto) {
-    lines.push(strong(`+${achto.worn * CHAOTIC_INSIGHT_EXTRA_PIECES} pieces to ${achto.set}`));
-    lines.push(
-      muted(
-        `${achto.worn} worn counting as ${achto.counted}${achto.capped ? ` (capped at ${ACHTO_MAX_PIECES})` : ''} - +${round(achto.bonus)} equipment damage bonus${achto.active ? '' : ', once an off-hand shield is equipped'}.`,
-      ),
-    );
   }
 
   return {
@@ -724,7 +722,7 @@ function temperedHeartCard() {
 }
 
 function buildCards(context) {
-  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp, inferno } =
+  const { blessings, style, equipped, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp, inferno } =
     context;
   const cards = [];
   const picked = (name) => blessings.includes(name);
@@ -1189,6 +1187,7 @@ export default function LeaguesEffectsPanel({
   const cards = buildCards({
     blessings,
     style,
+    equipped,
     baseAD,
     damage,
     payoutAD,

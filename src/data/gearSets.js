@@ -136,6 +136,16 @@ export const GEAR_SET_GROUPS = {
   'Refined anima core body of Sliske': 'Refined anima core armour of Sliske',
   'Refined anima core legs of Sliske': 'Refined anima core armour of Sliske',
 
+  // Hybrid, so it appears under all four style tabs - the grouping is what
+  // keeps it from listing six times each. Its set effect is modelled in
+  // data/critSetBonus.js.
+  'Warpriest of Tuska helm': 'Warpriest of Tuska',
+  'Warpriest of Tuska cuirass': 'Warpriest of Tuska',
+  'Warpriest of Tuska robe legs': 'Warpriest of Tuska',
+  'Warpriest of Tuska gauntlets': 'Warpriest of Tuska',
+  'Warpriest of Tuska boots': 'Warpriest of Tuska',
+  'Warpriest of Tuska cape': 'Warpriest of Tuska',
+
   'Masterwork helm': 'Masterwork armour',
   'Masterwork platebody': 'Masterwork armour',
   'Masterwork platelegs': 'Masterwork armour',

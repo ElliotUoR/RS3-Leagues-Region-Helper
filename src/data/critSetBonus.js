@@ -1,3 +1,4 @@
+import { GEAR_SET_GROUPS } from './gearSets.js';
 // The armour set effects that grant base critical strike chance, and the rules
 // governing how they combine.
 //
@@ -60,6 +61,60 @@ export const CRIT_SETS = [
 // single Sliske core worth the full 6%.
 export const CHAOTIC_INSIGHT = 'Chaotic Insight';
 export const CHAOTIC_INSIGHT_EXTRA_PIECES = 2;
+
+// Every armour set in this planner that carries a real SET BONUS, by the
+// display name gearSets.js groups its pieces under.
+//
+// Curated rather than derived from `stats.setEffect`, because that field is
+// also used for plain item notes - "Doesn't degrade", "Magic-only Lunar cape",
+// "Base form of Khopesh of Tumeken". Filtering on its presence would list a
+// dozen sets that have no bonus for Chaotic Insight to boost.
+//
+// The list names sets, never pieces: membership stays in GEAR_SET_GROUPS so
+// there is one place to add armour. Nothing here needs a modelled effect - the
+// point is to say "+N pieces to this set", which is true whether or not this
+// app knows what the set does. Only the three in CRIT_SETS and Achto have their
+// resulting effect costed out; see the Chaotic Insight card.
+export const SET_EFFECT_GROUPS = new Set([
+  'Achto Primeval armour',
+  'Achto Tempest armour',
+  'Achto Teralith armour',
+  'Anima core armour of Sliske',
+  'Refined anima core armour of Sliske',
+  'Cryptbloom armour',
+  'Deathdealer armour (tier 70)',
+  'Deathdealer armour (tier 80)',
+  'Deathdealer armour (tier 90)',
+  'Deathwarden armour (tier 70)',
+  'Deathwarden armour (tier 80)',
+  'Deathwarden armour (tier 90)',
+  'Dino boots',
+  'Enhanced Dino boots',
+  'Elite Tectonic armour',
+  'Tectonic armour',
+  "First Necromancer's gear",
+  'Primeval armour',
+  'Tempest armour',
+  "Tumeken's resplendence",
+  'Vestments of havoc',
+  'Warpriest of Tuska',
+]);
+
+// Every set-bonus armour set worn, and how many pieces of each - the input to
+// Chaotic Insight's "+2 additional pieces per item".
+//
+// Sorted by piece count so the set the player has committed to leads.
+export function getWornSetEffects(equipped = {}) {
+  const counts = new Map();
+  for (const item of Object.values(equipped)) {
+    const set = GEAR_SET_GROUPS[item?.name];
+    if (!set || !SET_EFFECT_GROUPS.has(set)) continue;
+    counts.set(set, (counts.get(set) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([set, worn]) => ({ set, worn, granted: worn * CHAOTIC_INSIGHT_EXTRA_PIECES }))
+    .sort((a, b) => b.worn - a.worn);
+}
 
 // How many pieces of a set are worn, and what that is worth.
 //
