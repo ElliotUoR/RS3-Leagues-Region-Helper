@@ -471,6 +471,40 @@ const UNIVERSAL_ACCESSORIES = [
     icon: 'icons/Tome_of_the_Icyene.png',
     source: { type: 'shop', shop: 'Obtained from picking Icyenic Faith relic - When worn, gain 0.2% critical strike and 0.2% base ability damage per 1 Prayer bonus you have', region: 'relic', leagueRelic: 'Icyenic Faith' } },
 
+  // Warpriest of Tuska - HYBRID, so one entry serves all four styles and the
+  // armour rating is the same on every defence key (unlike, say, a melee
+  // kiteshield, whose magic rating is deeply negative).
+  //
+  // Worn for the SET EFFECT rather than the armour: tier 75 ratings are modest
+  // next to the tier 90 sets around them, but Tuska's Might is base critical
+  // strike chance, which nothing else in this file grants. See
+  // data/critSetBonus.js, which owns the piece counting and the fact that this
+  // set and Sliske's anima cores pay into the same bonus without stacking.
+  { name: 'Warpriest of Tuska helm', slot: 'head', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: { skill: 'Defence', level: 75 },
+    stats: { defence: { stab: 226.4, slash: 226.4, crush: 226.4, magic: 226.4, ranged: 226.4 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: "Tuska's Might: +1% base critical strike chance per piece worn, from 3 pieces (3%) up to 6 (6%). Shared with Sliske's Parody - the two do not stack." },
+    icon: 'icons/Warpriest_of_Tuska_helm.png',
+    source: { type: 'shop', shop: 'Raid Rewards shop at Mazcab (2,000 Teci)', region: 'kharidianDesert', note: 'Also drops from Airuts and Beastmaster hounds. Same region as the Achto sets - the Liberation of Mazcab raid.' } },
+  { name: 'Warpriest of Tuska cuirass', slot: 'torso', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: { skill: 'Defence', level: 75 },
+    stats: { defence: { stab: 260.3, slash: 260.3, crush: 260.3, magic: 260.3, ranged: 260.3 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: "Tuska's Might: +1% base critical strike chance per piece worn, from 3 pieces (3%) up to 6 (6%). Shared with Sliske's Parody - the two do not stack." },
+    icon: 'icons/Warpriest_of_Tuska_cuirass.png',
+    source: { type: 'shop', shop: 'Raid Rewards shop at Mazcab (2,000 Teci)', region: 'kharidianDesert', note: 'Also drops from Airuts and Beastmaster hounds. Same region as the Achto sets - the Liberation of Mazcab raid.' } },
+  { name: 'Warpriest of Tuska robe legs', slot: 'legs', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: { skill: 'Defence', level: 75 },
+    stats: { defence: { stab: 249, slash: 249, crush: 249, magic: 249, ranged: 249 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: "Tuska's Might: +1% base critical strike chance per piece worn, from 3 pieces (3%) up to 6 (6%). Shared with Sliske's Parody - the two do not stack." },
+    icon: 'icons/Warpriest_of_Tuska_robe_legs.png',
+    source: { type: 'shop', shop: 'Raid Rewards shop at Mazcab (2,000 Teci)', region: 'kharidianDesert', note: 'Also drops from Airuts and Beastmaster hounds. Same region as the Achto sets - the Liberation of Mazcab raid.' } },
+  { name: 'Warpriest of Tuska gauntlets', slot: 'hands', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: { skill: 'Defence', level: 75 },
+    stats: { defence: { stab: 56.6, slash: 56.6, crush: 56.6, magic: 56.6, ranged: 56.6 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: "Tuska's Might: +1% base critical strike chance per piece worn, from 3 pieces (3%) up to 6 (6%). Shared with Sliske's Parody - the two do not stack." },
+    icon: 'icons/Warpriest_of_Tuska_gauntlets.png',
+    source: { type: 'shop', shop: 'Raid Rewards shop at Mazcab (2,000 Teci)', region: 'kharidianDesert', note: 'Also drops from Airuts and Beastmaster hounds. Same region as the Achto sets - the Liberation of Mazcab raid.' } },
+  { name: 'Warpriest of Tuska boots', slot: 'feet', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: { skill: 'Defence', level: 75 },
+    stats: { defence: { stab: 56.6, slash: 56.6, crush: 56.6, magic: 56.6, ranged: 56.6 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: "Tuska's Might: +1% base critical strike chance per piece worn, from 3 pieces (3%) up to 6 (6%). Shared with Sliske's Parody - the two do not stack." },
+    icon: 'icons/Warpriest_of_Tuska_boots.png',
+    source: { type: 'shop', shop: 'Raid Rewards shop at Mazcab (2,000 Teci)', region: 'kharidianDesert', note: 'Also drops from Airuts and Beastmaster hounds. Same region as the Achto sets - the Liberation of Mazcab raid.' } },
+  { name: 'Warpriest of Tuska cape', slot: 'back', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: { skill: 'Defence', level: 75 },
+    stats: { defence: { stab: 33.9, slash: 33.9, crush: 33.9, magic: 33.9, ranged: 33.9 }, damage: 0, accuracy: 0, lifeBonus: 0, prayerBonus: 0, setEffect: "Tuska's Might: +1% base critical strike chance per piece worn, from 3 pieces (3%) up to 6 (6%). Shared with Sliske's Parody - the two do not stack." },
+    icon: 'icons/Warpriest_of_Tuska_cape.png',
+    source: { type: 'shop', shop: 'Raid Rewards shop at Mazcab (2,000 Teci)', region: 'kharidianDesert', note: 'Also drops from Airuts and Beastmaster hounds. Same region as the Achto sets - the Liberation of Mazcab raid.' } },
+
   // BACK
   { name: 'Igneous Kal-Zuk', slot: 'back', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
     stats: { defence: { stab: 57.7, slash: 57.7, crush: 57.7, magic: 57.7, ranged: 57.7 }, damage: 37.1, accuracy: 0, lifeBonus: 0, prayerBonus: 2, setEffect: null },

@@ -186,10 +186,18 @@ export function ammoTierCap(weapon, ammo) {
 // the two conditions are deliberately not the same test.
 export const ACHTO_TIER = 90;
 export const ACHTO_SHARE_PER_PIECE = 0.05;
+// "25% at five" - so five pieces is the ceiling, not just the slot count. It
+// only starts to matter under Chaotic Insight, which can push the COUNTED
+// pieces well past the five a player can physically wear.
+export const ACHTO_MAX_PIECES = 5;
 const ACHTO_SET_PREFIX = 'Achto ';
 const ACHTO_SHIELD_CLASSES = new Set(['shield', 'shieldbow']);
 
-export function getAchtoBonus(equipped = {}) {
+// `chaoticInsight` makes each worn piece count as three (see
+// data/critSetBonus.js). Achto is a set effect like any other, so it qualifies -
+// which means one Achto piece plus a shield is worth 15%, and two is already at
+// the 25% ceiling.
+export function getAchtoBonus(equipped = {}, { chaoticInsight = false } = {}) {
   // Counted per SET, not by name prefix, so three Teralith pieces plus two
   // Tempest ones is two incomplete sets rather than one full one.
   const pieces = new Map();
@@ -200,17 +208,24 @@ export function getAchtoBonus(equipped = {}) {
   }
   if (pieces.size === 0) return null;
 
-  const [set, count] = [...pieces.entries()].sort((a, b) => b[1] - a[1])[0];
+  const [set, worn] = [...pieces.entries()].sort((a, b) => b[1] - a[1])[0];
+  const counted = Math.min(chaoticInsight ? worn * 3 : worn, ACHTO_MAX_PIECES);
   const shieldClass = getAegisClass({ weaponName: equipped.weapon?.name, offhandName: equipped.offhand?.name });
   const active = ACHTO_SHIELD_CLASSES.has(shieldClass);
   return {
     set,
-    pieces: count,
+    worn,
+    // What the set effect actually reads, capped. `pieces` keeps its old name
+    // and meaning for existing callers - it is the number the bonus came from.
+    pieces: counted,
+    counted,
+    capped: counted === ACHTO_MAX_PIECES && (chaoticInsight ? worn * 3 : worn) > ACHTO_MAX_PIECES,
+    chaoticInsight,
     shieldClass,
     active,
     // Reported even when inactive, so the panel can say what a shield WOULD be
     // worth to a build already wearing the armour for it.
-    bonus: count * ACHTO_SHARE_PER_PIECE * MAIN_HAND_COEFFICIENT * ACHTO_TIER,
+    bonus: counted * ACHTO_SHARE_PER_PIECE * MAIN_HAND_COEFFICIENT * ACHTO_TIER,
   };
 }
 
@@ -288,7 +303,7 @@ export function getBaseAbilityDamage(
   // Achto lands in the equipment damage bonus (b), which is what "adds to your
   // Strength Bonus" means, so it flows through the formula exactly as worn
   // armour damage does rather than being bolted onto the total afterwards.
-  const achto = getAchtoBonus(equipped);
+  const achto = getAchtoBonus(equipped, { chaoticInsight: blessings.includes(CHAOTIC_INSIGHT_NAME) });
   const achtoBonus = achto?.active ? achto.bonus : 0;
   const armour = gearArmour + achtoBonus;
 
@@ -314,20 +329,12 @@ export function getBaseAbilityDamage(
       });
     }
 
-    // Higher Power is a percentage OF base ability damage, so it multiplies
-    // everything above including the flat. Recorded as the difference it made
-    // rather than as a percentage, so the parts still sum exactly to the total
-    // - which is the contract the panel's working line depends on.
-    const total = Math.floor(withFlat * mods.abilityDamageMultiplier);
-    if (total !== withFlat) {
-      parts.push({
-        key: 'higher-power',
-        label: `${HIGHER_POWER} (+${Math.round((mods.abilityDamageMultiplier - 1) * 100)}%)`,
-        value: total - withFlat,
-      });
-    }
-
-    return { mode, combatLevel, total, parts, achto, ammoCap, mods };
+    // Higher Power is NOT applied here - see getTotalAbilityDamage. It is a
+    // percentage of "base ability damage", and Teragard's Aegis GRANTS base
+    // ability damage, so the multiplier has to land after the Aegis bonus has
+    // been added or it silently excludes the largest source of the thing it
+    // multiplies.
+    return { mode, combatLevel, total: withFlat, parts, achto, ammoCap, mods };
   };
 
   if (mode === 'twoHanded') {
@@ -357,17 +364,43 @@ export function getBaseAbilityDamage(
 // large enough to matter (at +2,700 Aegis and +16% tome it is ~430 damage), so
 // both readings are returned and the panel labels them rather than picking one
 // and being quietly wrong.
-export function getTotalAbilityDamage({ base, aegisBonus = 0, icyenePercent = 0 }) {
+// `abilityDamageMultiplier` is Higher Power's +30%, and where it applies is a
+// judgement call rather than a stated rule.
+//
+// It says "your BASE ability damage is increased by 30%". Teragard's Aegis says
+// it grants base ability damage - the panel prints "+1,197 base ability damage"
+// on its own card - so the two are talking about the same quantity, and the
+// multiplier is applied to the sum. On a shield build that is the difference
+// between +30% of ~1,200 and +30% of ~2,400.
+//
+// The alternative reading is that "base" means the weapon-and-level figure
+// before any bonus, which would exclude Aegis. Nothing in either card text
+// settles it. This is the same class of ambiguity as the Icyenic tome's
+// percentage below, which the app answers by showing BOTH readings - the
+// difference here is that Higher Power's is a single number either way, so it
+// picks the literal reading rather than doubling the row.
+export function getTotalAbilityDamage({
+  base,
+  aegisBonus = 0,
+  icyenePercent = 0,
+  abilityDamageMultiplier = 1,
+}) {
   const withAegis = base + (aegisBonus || 0);
+  const boosted = withAegis * abilityDamageMultiplier;
   const share = (icyenePercent || 0) / 100;
   return {
     base,
     aegisBonus: aegisBonus || 0,
     withAegis,
+    boosted,
+    // What Higher Power actually added, for the card that has to state it.
+    multiplierBonus: boosted - withAegis,
+    abilityDamageMultiplier,
     // Icyenic reads the raised figure - the optimistic reading.
-    compounding: Math.round(withAegis * (1 + share)),
-    // Icyenic reads the untouched base - the conservative reading.
-    additive: Math.round(withAegis + base * share),
+    compounding: Math.round(boosted * (1 + share)),
+    // Icyenic reads the untouched base - the conservative reading. The base it
+    // reads carries Higher Power, since that is a change to base itself.
+    additive: Math.round(boosted + base * abilityDamageMultiplier * share),
     // No tome means the two readings are the same number; the panel uses this
     // to show one row instead of two.
     split: share > 0 && (aegisBonus || 0) > 0,
@@ -427,6 +460,40 @@ export function getAdrenaline({ blessings = [], archRelics = [] } = {}) {
 // average - stated as "~" everywhere it is shown, since no single hit is 150%.
 export const ABYSSAL_CINDERS_ON_HIT_SHARE = 0.15;
 export const INFERNO_OF_ZAMORAK_AVERAGE_SHARE = 1.5;
+// Abyssal Cinders' own wording: "5% chance on hit".
+export const INFERNO_OF_ZAMORAK_BASE_CHANCE = 5;
+
+// Perfidious (Tier 6, red) does nothing on its own - it only empowers the three
+// named procs, so what it is worth depends entirely on which of them the build
+// already carries. Each of the three lines below has a different shape, which
+// is why they are three constants rather than one multiplier:
+//
+//   Inferno of Zamorak - activation CHANCE x5
+//   Grasp of Guthix    - activation REQUIREMENT down to 2 hits (from 5)
+//   Light of Saradomin - COOLDOWN down to 4.8s (from 9, or 14.4 under Lord of Light)
+// Tempered Heart (Tier 6, blue): "Generate 6% adrenaline every 1.2s."
+export const TEMPERED_HEART = 'Tempered Heart';
+export const TEMPERED_HEART_ADRENALINE = 6;
+export const TEMPERED_HEART_INTERVAL_SECONDS = 1.2;
+
+// Named here rather than imported, to avoid a cycle: data/critSetBonus.js
+// already reaches into this module's world through utils/critChance.js.
+const CHAOTIC_INSIGHT_NAME = 'Chaotic Insight';
+
+export const PERFIDIOUS = 'Perfidious';
+export const PERFIDIOUS_INFERNO_MULTIPLIER = 5;
+export const PERFIDIOUS_GRASP_TRIGGER_HITS = 2;
+export const PERFIDIOUS_LIGHT_COOLDOWN_SECONDS = 4.8;
+
+export function getInfernoOfZamorak({ payoutAD = 0, perfidious = false } = {}) {
+  const chance = INFERNO_OF_ZAMORAK_BASE_CHANCE * (perfidious ? PERFIDIOUS_INFERNO_MULTIPLIER : 1);
+  return {
+    chance,
+    baseChance: INFERNO_OF_ZAMORAK_BASE_CHANCE,
+    damage: payoutAD * INFERNO_OF_ZAMORAK_AVERAGE_SHARE,
+    perfidious,
+  };
+}
 
 // Barkscales. The reduction reads TOTAL armour (the same figure the panel shows,
 // Defence baseline included), so it moves with the potion toggle. Grasp of
@@ -494,7 +561,8 @@ export function getGraspOfGuthix({
     herbloreLevel,
     // Barkscales triggers on every 5th damage reduction; Tearing Thorns on
     // every 5th damage-over-time hit. Perfidious takes either to 2.
-    triggerHits: perfidious ? 2 : TEARING_THORNS_TRIGGER_HITS,
+    triggerHits: perfidious ? PERFIDIOUS_GRASP_TRIGGER_HITS : TEARING_THORNS_TRIGGER_HITS,
+    perfidious,
   };
 }
 
@@ -542,6 +610,7 @@ export function getLightOfSaradomin({
   armour = 0,
   prayerBonus = 0,
   lordOfLight = false,
+  perfidious = false,
 } = {}) {
   const base = payoutAD * LIGHT_OF_SARADOMIN_AVERAGE_AD_SHARE + armour * LIGHT_OF_SARADOMIN_ARMOUR_SHARE;
   const prayerMultiplier = lordOfLight ? 1 + prayerBonus * LORD_OF_LIGHT_PRAYER_SHARE : 1;
@@ -557,8 +626,18 @@ export function getLightOfSaradomin({
     prayerBonus,
     // 5% of damage DEALT, so it follows the whole trigger rather than one proc.
     heal: lordOfLight ? total * LORD_OF_LIGHT_HEAL_SHARE : null,
-    cooldown: lordOfLight ? LORD_OF_LIGHT_COOLDOWN_SECONDS : STRIKING_LIGHT_COOLDOWN_SECONDS,
+    // Perfidious overrides both, rather than scaling either - its wording is a
+    // flat "reduced to 4.8s", so it is the same number whichever blessing is
+    // carrying the proc. On a Lord of Light build that is 14.4s -> 4.8s, a
+    // third of the cooldown for five procs a trigger.
+    cooldown: perfidious
+      ? PERFIDIOUS_LIGHT_COOLDOWN_SECONDS
+      : lordOfLight
+        ? LORD_OF_LIGHT_COOLDOWN_SECONDS
+        : STRIKING_LIGHT_COOLDOWN_SECONDS,
+    baseCooldown: lordOfLight ? LORD_OF_LIGHT_COOLDOWN_SECONDS : STRIKING_LIGHT_COOLDOWN_SECONDS,
     lordOfLight,
+    perfidious,
   };
 }
 

@@ -26,12 +26,20 @@ import {
   LIGHT_OF_SARADOMIN_TARGETS,
   LORD_OF_LIGHT,
   TEARING_THORNS,
+  TEARING_THORNS_TRIGGER_HITS,
   ENVENOMED,
+  PERFIDIOUS,
+  PERFIDIOUS_INFERNO_MULTIPLIER,
+  TEMPERED_HEART,
+  TEMPERED_HEART_ADRENALINE,
+  TEMPERED_HEART_INTERVAL_SECONDS,
+  getInfernoOfZamorak,
   HERBLORE_LEVELS,
   getGraspOfGuthix,
   getLightOfSaradomin,
   getPoisonMultiplier,
   ACHTO_TIER,
+  ACHTO_MAX_PIECES,
   SPLASH_ZONE_AOE_BONUS,
   WEAPON_MODE_LABELS,
   FURY_OF_THE_SMALL_RELIC,
@@ -56,7 +64,8 @@ import {
   TRUE_EQUILIBRIUM_PER_ALIGNMENT,
   getBlessingModifiers,
 } from '../utils/blessingModifiers';
-import { getCritBreakdown } from '../utils/critChance';
+import { getCritBreakdown, UNHOLY_CRITUAL } from '../utils/critChance';
+import { CHAOTIC_INSIGHT, CHAOTIC_INSIGHT_EXTRA_PIECES } from '../data/critSetBonus';
 
 // Everything a build's blessings, relics and gear actually DO for it, behind
 // one button under the loadout.
@@ -180,6 +189,11 @@ function abilityDamageCard({ baseAD, damage, aegis, aegisNow, icyeneBonus, style
     lines: [
       muted(`${working} = ${round(baseAD.total)} base`),
       aegisNow != null && strong(`+${round(aegisNow)} Teragard's Aegis (${aegis.multiplier}x, ${aegis.source})`),
+      // After Aegis, deliberately - see getTotalAbilityDamage.
+      damage.multiplierBonus > 0 &&
+        strong(
+          `+${round(damage.multiplierBonus)} ${HIGHER_POWER} (+${Math.round((damage.abilityDamageMultiplier - 1) * 100)}% of the ${round(damage.withAegis)} above)`,
+        ),
       icyeneBonus != null && strong(`+${icyeneBonus.toFixed(1)}% Tome of the Icyene`),
       // Both readings, labelled - which figure the tome's percentage applies to
       // is not established, and at these numbers the gap is hundreds of damage.
@@ -217,19 +231,31 @@ function achtoCard(achto) {
     key: 'achto',
     name: achto.set,
     colour: 'relic',
-    lines: achto.active
+    lines: (achto.active
       ? [
           strong(`+${round(achto.bonus)} equipment damage bonus`),
           muted(
             `${achto.pieces * 5}% of a tier ${ACHTO_TIER} main-hand's damage, ${achto.pieces} piece${achto.pieces === 1 ? '' : 's'} at 5% each - requires off-hand to be a ${achto.shieldClass}.`,
           ),
+          // Without this the count reads as pieces WORN, and a one-piece build
+          // showing "3 pieces at 5% each" looks like a bug rather than a god
+          // power doing its job.
+          achto.chaoticInsight &&
+            achto.counted > achto.worn &&
+            muted(
+              `${achto.worn} actually worn - ${CHAOTIC_INSIGHT} counts each as ${1 + CHAOTIC_INSIGHT_EXTRA_PIECES}${achto.capped ? `, capped at ${ACHTO_MAX_PIECES}` : ''}.`,
+            ),
         ]
       : [
           strong(`+${round(achto.bonus)} available, but not being paid`),
           muted(
-            `${achto.pieces} piece${achto.pieces === 1 ? '' : 's'} worn, but the set only pays with a shield in the off-hand - a ${achto.shieldClass} does not qualify.`,
+            // `worn`, not `pieces` - `pieces` is the COUNTED figure, which
+            // Chaotic Insight inflates, and "5 pieces worn" off two is a lie
+            // about the loadout rather than a statement about the effect.
+            `${achto.worn} piece${achto.worn === 1 ? '' : 's'} worn, but the set only pays with a shield in the off-hand - a ${achto.shieldClass} does not qualify.`,
           ),
-        ],
+        ]
+    ).filter(Boolean),
   };
 }
 
@@ -325,12 +351,16 @@ function strikingLightCard({ style, payoutAD, armourNow, light }) {
       muted(
         `${band.boosted[0]}-${band.boosted[1]}% of ability damage - ${band.base[0]}-${band.base[1]}% for ${style}, +40 from the blessing.`,
       ),
-      // Deferred to the Lord of Light card when that is also held, rather than
-      // stating the same proc twice with different numbers - Lord of Light
-      // upgrades this one rather than adding a second.
-      !light.lordOfLight && strong(`Light of Saradomin ~${round(light.each)} damage`),
-      !light.lordOfLight && muted('40-60% of ability damage plus 250% of armour, 9s cooldown.'),
-      light.lordOfLight && muted('Light of Saradomin is upgraded by Lord of Light - see its card.'),
+      // Both blessings state the proc, and both state the SAME figure - they
+      // read one shared calculation (getLightOfSaradomin), so there is no risk
+      // of two different numbers for one effect. Showing it on both is what
+      // someone comparing the two cards expects.
+      strong(`Light of Saradomin ~${round(light.each)} damage`),
+      muted(
+        light.lordOfLight
+          ? `40-60% of ability damage plus 250% of armour, boosted by Lord of Light. ${light.procs}x per trigger, ${light.cooldown}s cooldown.`
+          : '40-60% of ability damage plus 250% of armour, 9s cooldown.',
+      ),
     ].filter(Boolean),
   };
 }
@@ -449,17 +479,20 @@ function trueEquilibriumCard(mods) {
   };
 }
 
-function higherPowerCard(baseAD) {
-  const part = baseAD?.parts?.find((p) => p.key === 'higher-power');
+function higherPowerCard({ damage }) {
   return {
     key: 'higher-power',
     name: HIGHER_POWER,
     icon: iconFor(HIGHER_POWER),
     lines: [
-      part
-        ? strong(`+${round(part.value)} base ability damage`)
+      damage?.multiplierBonus
+        ? strong(`+${round(damage.multiplierBonus)} base ability damage`)
         : strong(`+${Math.round(HIGHER_POWER_ABILITY_DAMAGE * 100)}% base ability damage`),
-      muted(`${Math.round(HIGHER_POWER_ABILITY_DAMAGE * 100)}% of base ability damage, already inside the total above.`),
+      damage?.multiplierBonus
+        ? muted(
+            `${Math.round(HIGHER_POWER_ABILITY_DAMAGE * 100)}% of ${round(damage.withAegis)} - the weapon-and-level figure PLUS Teragard's Aegis, since Aegis grants base ability damage too.`,
+          )
+        : muted(`${Math.round(HIGHER_POWER_ABILITY_DAMAGE * 100)}% of base ability damage, already inside the total above.`),
       // The lockout has no number, and it is the whole cost of the blessing -
       // stated in full rather than summarised so nobody takes this by accident.
       { text: "You lose Berserk, Death's Swiftness, Living Death and Sunshine." },
@@ -560,16 +593,154 @@ function envenomedCard({ grasp }) {
   };
 }
 
+// Chaotic Insight: "Each combat equipment item counts as 2 additional pieces
+// towards its set effect."
+//
+// Names the sets it is working on rather than stating the rule and stopping,
+// because the rule alone does not answer the only question a build has - is any
+// of my gear actually a set? Sets are listed from data/critSetBonus.js, which
+// covers what this planner carries gear for; naming armour the planner cannot
+// equip would promise something it cannot deliver.
+function chaoticInsightCard({ crit, baseAD }) {
+  const sets = crit?.critSets;
+  const best = sets?.best;
+  const achto = baseAD?.achto;
+  const lines = [];
+
+  // One entry per set actually WORN. The headline for each is the thing this
+  // power does - grant pieces - and the line under it is what those pieces
+  // bought, because "+4 pieces" on its own does not say whether that crossed a
+  // threshold or did nothing.
+  for (const entry of sets?.sets ?? []) {
+    lines.push(strong(`+${entry.worn * CHAOTIC_INSIGHT_EXTRA_PIECES} pieces to ${entry.set}`));
+    if (entry === best) {
+      lines.push(
+        muted(`${entry.worn} worn counting as ${entry.counted} - +${entry.chance}% critical strike chance from ${entry.effect}.`),
+      );
+    } else {
+      // Worn, boosted, and still paying nothing - the two crit sets share one
+      // bonus, so the extra pieces cannot rescue the losing side.
+      lines.push(
+        warn(`${entry.worn} worn counting as ${entry.counted}, but paying nothing - it shares one bonus with ${best?.set ?? 'the other set'} and they do not stack.`),
+      );
+    }
+  }
+
+  if (achto) {
+    lines.push(strong(`+${achto.worn * CHAOTIC_INSIGHT_EXTRA_PIECES} pieces to ${achto.set}`));
+    lines.push(
+      muted(
+        `${achto.worn} worn counting as ${achto.counted}${achto.capped ? ` (capped at ${ACHTO_MAX_PIECES})` : ''} - +${round(achto.bonus)} equipment damage bonus${achto.active ? '' : ', once an off-hand shield is equipped'}.`,
+      ),
+    );
+  }
+
+  return {
+    key: 'chaotic-insight',
+    name: CHAOTIC_INSIGHT,
+    icon: iconFor(CHAOTIC_INSIGHT),
+    isGod: true,
+    lines:
+      lines.length > 0
+        ? [muted('Boosting, on this build:'), ...lines]
+        : [
+            // Nothing worn means nothing to list. Says that rather than naming
+            // every set it could have helped with - the same rule
+            // perfidiousCard follows.
+            { text: 'Each combat equipment item counts as 2 additional pieces towards its set effect.' },
+            muted('No set effect on this loadout for it to count towards.'),
+          ],
+  };
+}
+
+// Perfidious pays out ONLY through the three named procs, so its card lists
+// what it has actually changed on this build rather than what it could change
+// on some other one. A build carrying none of them gets the honest version:
+// nothing, and which blessings would fix that.
+//
+// Each line names the source blessing, because "Light of Saradomin" on its own
+// does not tell you which pick brought it.
+function perfidiousCard({ blessings, grasp, light, inferno }) {
+  const has = (name) => blessings.includes(name);
+  const affected = [];
+
+  if (inferno && (has('Abyssal Cinders') || has(UNHOLY_CRITUAL))) {
+    affected.push({
+      line: strong(`Inferno of Zamorak ${inferno.baseChance}% -> ${inferno.chance}% chance on hit`),
+      note: muted(`x${PERFIDIOUS_INFERNO_MULTIPLIER} activation chance, via ${has('Abyssal Cinders') ? 'Abyssal Cinders' : UNHOLY_CRITUAL}.`),
+    });
+  }
+
+  if (grasp && (has('Barkscales') || has(TEARING_THORNS))) {
+    affected.push({
+      line: strong(`Grasp of Guthix every ${TEARING_THORNS_TRIGGER_HITS} -> every ${grasp.triggerHits} hits`),
+      note: muted(`Activation requirement reduced, via ${has(TEARING_THORNS) ? TEARING_THORNS : 'Barkscales'}.`),
+    });
+  }
+
+  if (light && (has('Striking Light') || has(LORD_OF_LIGHT))) {
+    affected.push({
+      line: strong(`Light of Saradomin ${light.baseCooldown}s -> ${light.cooldown}s cooldown`),
+      note: muted(`Via ${has(LORD_OF_LIGHT) ? LORD_OF_LIGHT : 'Striking Light'}.`),
+    });
+  }
+
+  return {
+    key: 'perfidious',
+    name: PERFIDIOUS,
+    icon: iconFor(PERFIDIOUS),
+    lines:
+      affected.length > 0
+        ? [muted('Empowering, on this build:'), ...affected.flatMap((a) => [a.line, a.note])]
+        : [
+            warn('Nothing on this build - Perfidious is paying nothing.'),
+            muted(
+              'It only empowers Inferno of Zamorak, Grasp of Guthix and Light of Saradomin. Take Abyssal Cinders or Unholy Critual, Barkscales or Tearing Thorns, or Striking Light or Lord of Light.',
+            ),
+          ],
+  };
+}
+
+// Tempered Heart: "Generate 6% adrenaline every 1.2s."
+//
+// The only adrenaline source in the tree that does not depend on attacking, so
+// its figures are stated as rates rather than as shares of a rotation - 6% per
+// 1.2s is 5% a second, which is a full bar every 20 seconds from standing
+// still.
+function temperedHeartCard() {
+  const perSecond = TEMPERED_HEART_ADRENALINE / TEMPERED_HEART_INTERVAL_SECONDS;
+  return {
+    key: 'tempered-heart',
+    name: TEMPERED_HEART,
+    icon: iconFor(TEMPERED_HEART),
+    lines: [
+      strong(`+${TEMPERED_HEART_ADRENALINE}% adrenaline every ${TEMPERED_HEART_INTERVAL_SECONDS}s`),
+      strong(`${Math.round(perSecond * 60)}% adrenaline per minute`),
+      muted(`${perSecond}% a second, off your rotation entirely - it ticks whether or not you are attacking.`),
+      strong(`100% adrenaline in ${Math.round(100 / perSecond)}s from empty`),
+      muted('Which removes the build-up phase rather than speeding it up.'),
+    ],
+  };
+}
+
 function buildCards(context) {
-  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp } =
+  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp, inferno } =
     context;
   const cards = [];
   const picked = (name) => blessings.includes(name);
+  // A god power, so it is in resolvedGodTier2 rather than in the picks.
+  const hasChaoticInsight = resolvedGodTier2 === CHAOTIC_INSIGHT;
 
   if (damage) cards.push(abilityDamageCard(context));
   if (crit) cards.push(critCard(crit));
   if (baseAD?.achto) cards.push(achtoCard(baseAD.achto));
   if (adrenaline) cards.push(adrenalineCard(adrenaline, blessings));
+  // Pushed straight after the adrenaline card so it lands immediately to the
+  // right of Adrenaline Junkie whenever that one is present - the two are the
+  // same subject, and reading them apart means holding one rate in your head
+  // while you look for the other. Order is the only lever here: the cards flow
+  // in a grid, so "next in the list" is "to the right of" until the row wraps.
+  if (picked(TEMPERED_HEART)) cards.push(temperedHeartCard());
 
   if (lifeTotal != null && picked('Big Boned')) {
     cards.push({
@@ -590,9 +761,10 @@ function buildCards(context) {
   // what set them - reading Havoc Born's -25% armour after Barkscales' share of
   // that armour is reading the answer before the question.
   if (mods.equilibrium) cards.push(trueEquilibriumCard(mods));
-  if (mods.higher) cards.push(higherPowerCard(baseAD));
+  if (mods.higher) cards.push(higherPowerCard(context));
   if (mods.havoc) cards.push(havocBornCard({ armourNow, lifeTotal, totalAD, effectiveAD }));
   if (mods.genesis) cards.push(genesisEssenceCard(baseAD));
+  if (hasChaoticInsight) cards.push(chaoticInsightCard(context));
 
   if (hasSliver) cards.push(sliverCard({ armourAt: baseArmour, sliverArmour }));
 
@@ -616,8 +788,11 @@ function buildCards(context) {
       lines: [
         strong(`+${round(payoutAD * ABYSSAL_CINDERS_ON_HIT_SHARE)} bonus damage on hit`),
         muted('15% of total ability damage.'),
-        strong(`Inferno of Zamorak ~${round(payoutAD * INFERNO_OF_ZAMORAK_AVERAGE_SHARE)} damage`),
-        muted('5% chance on hit; rolls 100-200% of ability damage, single target.'),
+        strong(`Inferno of Zamorak ~${round(inferno.damage)} damage`),
+        muted(
+          `${inferno.chance}% chance on hit; rolls 100-200% of ability damage, single target.` +
+            (inferno.perfidious ? ` ${inferno.baseChance}% before Perfidious.` : ''),
+        ),
       ],
     });
   }
@@ -631,7 +806,9 @@ function buildCards(context) {
         strong(`-${round(armourNow * BARKSCALES_REDUCTION_SHARE)} incoming damage per hit`),
         muted('10% of total armour, flat - on top of any percentage reduction.'),
         strong(`Grasp of Guthix ~${round(grasp?.total ?? payoutAD * GRASP_OF_GUTHIX_AVERAGE_SHARE)} damage`),
-        muted('Every 5th reduction; rolls 80-120% of ability damage as poison in a 3x3.'),
+        muted(
+          `Every ${grasp?.triggerHits ?? 5}${grasp?.perfidious ? '' : 'th'} reduction; rolls 80-120% of ability damage as poison in a 3x3.`,
+        ),
         // Named here rather than left to the Tearing Thorns / Envenomed cards,
         // because this is the line whose number those two changed.
         grasp?.tearingThorns &&
@@ -640,6 +817,7 @@ function buildCards(context) {
     });
   }
 
+  if (picked(PERFIDIOUS)) cards.push(perfidiousCard(context));
   if (grasp && picked(TEARING_THORNS)) cards.push(tearingThornsCard(context));
   if (grasp && picked(ENVENOMED)) cards.push(envenomedCard(context));
 
@@ -688,9 +866,10 @@ function buildCards(context) {
   for (const name of [resolvedGodTier, resolvedGodTier2]) {
     const godPower = name ? BLESSING_BY_NAME.get(name) : null;
     if (!godPower) continue;
-    // Genesis Essence has its own costed card above - this loop would otherwise
-    // add a second one repeating the effect text.
+    // These two have their own costed cards - this loop would otherwise add a
+    // second one repeating the effect text.
     if (godPower.name === GENESIS_ESSENCE) continue;
+    if (godPower.name === CHAOTIC_INSIGHT) continue;
     cards.push({
       key: `god-power-${godPower.godTier ?? 1}`,
       name: godPower.name,
@@ -868,6 +1047,8 @@ export default function LeaguesEffectsPanel({
   // True Equilibrium's prayer bonus is real prayer bonus, so Icyenic Faith
   // reads it like any other - see getTotalPrayerBonus.
   const hasLordOfLight = blessings.includes(LORD_OF_LIGHT);
+  const hasEnvenomed = blessings.includes(ENVENOMED);
+  const hasPerfidious = blessings.includes(PERFIDIOUS);
   const prayerTotal = hasGear && (hasIcyenic || hasLordOfLight) ? prayerBonusTotal : null;
   const icyeneBonus =
     hasIcyenic && prayerTotal != null && isIcyeneTomeWorn(equipped)
@@ -890,7 +1071,12 @@ export default function LeaguesEffectsPanel({
       : null;
 
   const damage = baseAD
-    ? getTotalAbilityDamage({ base: baseAD.total, aegisBonus: aegisNow ?? 0, icyenePercent: icyeneBonus ?? 0 })
+    ? getTotalAbilityDamage({
+        base: baseAD.total,
+        aegisBonus: aegisNow ?? 0,
+        icyenePercent: icyeneBonus ?? 0,
+        abilityDamageMultiplier: mods.abilityDamageMultiplier,
+      })
     : null;
   // Everything downstream - Abyssal Cinders, Barkscales' Grasp, Light of
   // Saradomin - is a share of the FINISHED ability damage, not of the base.
@@ -931,12 +1117,12 @@ export default function LeaguesEffectsPanel({
           armour: armourNow,
           prayerBonus: prayerBonusTotal,
           lordOfLight: hasLordOfLight,
+          perfidious: hasPerfidious,
         })
       : null;
 
   // One Grasp of Guthix for whichever blessings carry it. Envenomed multiplies
   // it because Grasp deals poison damage - see getGraspOfGuthix.
-  const hasEnvenomed = blessings.includes(ENVENOMED);
   const grasp =
     payoutAD != null
       ? getGraspOfGuthix({
@@ -945,8 +1131,11 @@ export default function LeaguesEffectsPanel({
           tearingThorns: blessings.includes(TEARING_THORNS),
           envenomed: hasEnvenomed,
           herbloreLevel,
+          perfidious: hasPerfidious,
         })
       : null;
+
+  const inferno = payoutAD != null ? getInfernoOfZamorak({ payoutAD, perfidious: hasPerfidious }) : null;
 
   const adrenaline = getAdrenaline({ blessings, archRelics });
 
@@ -1021,6 +1210,7 @@ export default function LeaguesEffectsPanel({
     crit,
     light,
     grasp,
+    inferno,
     baseArmour,
     sliverArmour,
   });

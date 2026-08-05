@@ -1,5 +1,6 @@
 import { getTotalPrayerBonus, ICYENE_PERCENT_PER_PRAYER, isIcyeneTomeWorn } from './gearStats.js';
 import { getBlessingModifiers, TRUE_EQUILIBRIUM_PER_ALIGNMENT } from './blessingModifiers.js';
+import { CHAOTIC_INSIGHT, getCritSetBonus } from '../data/critSetBonus.js';
 
 // Critical strike chance and damage, assembled from everything in this app that
 // moves either.
@@ -76,6 +77,10 @@ export const UNHOLY_CRITUAL_CAP = 50;
 // honest answer, since nothing else in the data says what happens past 50%.
 export function getCritBreakdown({ equipped = {}, blessings = [], leagueRelics = [] } = {}) {
   const mods = getBlessingModifiers(blessings);
+  // Chaotic Insight is a god power, so it arrives in `blessings` alongside the
+  // picks (the panel passes both - see modBlessings).
+  const chaoticInsight = blessings.includes(CHAOTIC_INSIGHT);
+  const critSets = getCritSetBonus(equipped, { chaoticInsight });
   const weaponName = equipped.weapon?.name;
   const chanceParts = [{ key: 'base', label: 'base', value: BASE_CRIT_CHANCE }];
   const damageParts = [{ key: 'base', label: 'base', value: BASE_CRIT_DAMAGE }];
@@ -92,6 +97,19 @@ export function getCritBreakdown({ equipped = {}, blessings = [], leagueRelics =
       value: applies ? item.chance : 0,
       note: applies ? item.note : 'needs a bow equipped',
       inactive: !applies,
+    });
+  }
+
+  // Armour set effects - Tuska's Might and Sliske's Parody, which share one
+  // bonus rather than stacking. See data/critSetBonus.js.
+  if (critSets.best) {
+    chanceParts.push({
+      key: 'crit-set',
+      label: critSets.best.effect,
+      value: critSets.chance,
+      note: chaoticInsight
+        ? `${critSets.best.worn} ${critSets.best.set} pieces counting as ${critSets.best.counted} via ${CHAOTIC_INSIGHT}`
+        : `${critSets.best.worn} ${critSets.best.set} pieces`,
     });
   }
 
@@ -154,6 +172,7 @@ export function getCritBreakdown({ equipped = {}, blessings = [], leagueRelics =
     damage: round1(damageParts.reduce((sum, part) => sum + part.value, 0)),
     chanceParts,
     damageParts,
+    critSets,
   };
 }
 
