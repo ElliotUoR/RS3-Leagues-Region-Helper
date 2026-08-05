@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import UserBuildCard from './UserBuildCard';
-import BuildCardMeta from './BuildCardMeta';
+import BuildCardMeta, { BuildByline, BuildDifficultyTag } from './BuildCardMeta';
 import BuildVoteBar from './BuildVoteBar';
 import ShareBuildButton from './ShareBuildButton';
 import { getUserBuild, trackUsage } from '../utils/api';
@@ -237,11 +237,14 @@ export default function UserBuildListItem({
         <div className="build-card-headline">
           <h3 className="build-card-name">{summary.name}</h3>
           <p className="build-card-tagline">{summary.tagline}</p>
-          {summary.author_name && <p className="user-build-author">by {summary.author_name}</p>}
+          <BuildByline
+            author={summary.author_name}
+            difficulty={
+              <BuildDifficultyTag label={summary.difficultyLabel} note={summary.difficultyNote} />
+            }
+          />
         </div>
         <BuildCardMeta
-          difficultyLabel={summary.difficultyLabel}
-          difficultyNote={summary.difficultyNote}
           blessings={meta.blessings}
           godTier={meta.godTier}
           godTier2={meta.godTier2}

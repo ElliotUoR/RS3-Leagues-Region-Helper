@@ -7,6 +7,7 @@ import EditableText from './EditableText';
 import BuildProse from './BuildProse';
 import PicksHeading from './PicksHeading';
 import RejuvenatedNote from './RejuvenatedNote';
+import { BuildByline, BuildDifficultyTag } from './BuildCardMeta';
 import { BLESSINGS, GOD_TIER_BLESSINGS, GOD_TIER_SOURCE_TIERS } from '../data/blessings';
 import {
   ARTEFACT_BYPASS_NOTE,
@@ -332,12 +333,20 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
             {hidden && <span className="build-hidden-badge">hidden</span>}
           </h3>
           <p className="build-card-tagline">{build.tagline}</p>
+          {/* No author on a curated guide, so the byline is the difficulty
+              alone - which puts it bottom-left of the headline. */}
+          <BuildByline
+            difficulty={
+              <BuildDifficultyTag
+                label={difficulty?.label}
+                note={difficulty?.note}
+                level={build.difficulty}
+              />
+            }
+          />
         </div>
 
         <div className="build-card-meta">
-          <TagTooltip className={`build-difficulty build-difficulty-${build.difficulty}`} tooltip={difficulty?.note}>
-            {difficulty?.label}
-          </TagTooltip>
           {/* One row per half of the blessing tree, each in TIER order and
               ending in the god power that half awards. The stored array is in
               whatever order the build was authored in, which is not tier order

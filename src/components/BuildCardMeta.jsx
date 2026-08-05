@@ -2,6 +2,7 @@ import RetryImage from './RetryImage';
 import TagTooltip from './TagTooltip';
 import { RELIC_COLOURS } from '../data/blessingBuilds';
 import { BLESSING_BY_NAME, LEAGUE_RELIC_BY_NAME } from '../data/buildLookups';
+import { difficultyLevelFor, difficultyNoteFor } from '../utils/difficultyTag';
 
 // The right-hand summary of a build card's header - difficulty, blessing
 // chain, league relic chips, combat styles. Shared because the "User made
@@ -49,12 +50,46 @@ export function LeagueRelicChip({ name }) {
   );
 }
 
+// The difficulty pill, shared by curated guides and user builds so the two look
+// identical. It lives in the card's BYLINE rather than in the meta block - see
+// the callers - because it belongs with who made the build, not with what the
+// build contains.
+//
+// `level` is the numeric execution difficulty a curated guide carries. A user
+// build has only free text, so it is matched against the keyword rules in
+// utils/difficultyTag.js; an unmatched label still renders, just without a
+// colour, since a wrong difficulty is worse than an uncoloured one.
+//
 // TagTooltip renders a <span role="button">, not a real <button> - deliberate,
-// since this whole block sits inside the card's header <button> and a nested
-// button is invalid HTML that browsers quietly break click handling on.
+// since this sits inside the card's header <button> and a nested button is
+// invalid HTML that browsers quietly break click handling on.
+export function BuildDifficultyTag({ label, note, level }) {
+  if (!label) return null;
+  const resolved = level ?? difficultyLevelFor(label);
+  const classes = ['build-difficulty', resolved ? `build-difficulty-${resolved}` : '']
+    .filter(Boolean)
+    .join(' ');
+  return (
+    <TagTooltip className={classes} tooltip={note ?? difficultyNoteFor(resolved)}>
+      {label}
+    </TagTooltip>
+  );
+}
+
+// The byline row: who made it, and how hard it is to play. One row so the
+// difficulty sits to the RIGHT of the author - and, on a curated guide with no
+// author, alone at the bottom-left of the headline.
+export function BuildByline({ author, difficulty }) {
+  if (!author && !difficulty) return null;
+  return (
+    <div className="build-card-byline">
+      {author && <span className="user-build-author">by {author}</span>}
+      {difficulty}
+    </div>
+  );
+}
+
 export default function BuildCardMeta({
-  difficultyLabel,
-  difficultyNote,
   blessings = [],
   godTier,
   relics = [],
@@ -62,11 +97,6 @@ export default function BuildCardMeta({
 }) {
   return (
     <div className="build-card-meta">
-      {difficultyLabel && (
-        <TagTooltip className="build-difficulty" tooltip={difficultyNote}>
-          {difficultyLabel}
-        </TagTooltip>
-      )}
       {blessings.length > 0 && (
         <div className="build-card-pills">
           {blessings.map((name) => (

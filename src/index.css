@@ -4412,6 +4412,20 @@ main.abilities-page .gear-item-rows {
 /* Difficulty: green (very easy) through amber (demanding). A build you can
    play badly and still perform with is a genuine selection axis, so this
    gets real visual weight rather than being buried in the body. */
+/* Who made the build, and how hard it is to play - on one row, so the
+   difficulty sits to the RIGHT of the author. On a curated guide there is no
+   author, so the row holds the tag alone and it lands bottom-left under the
+   tagline. `margin-top: auto` pins it to the bottom of the headline column
+   however tall the tagline runs. */
+.build-card-byline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
 .build-difficulty {
   padding: 3px 9px;
   border-radius: 999px;
@@ -6782,8 +6796,10 @@ main.abilities-page .gear-item-rows {
 
 /* ── User made builds page ─────────────────────────────────────────── */
 
+/* Now a <span> inside .build-card-byline rather than a block <p> of its own,
+   so the margin that used to space it goes to the row instead. */
 .user-build-author {
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 12px;
   color: var(--text);
   opacity: 0.7;

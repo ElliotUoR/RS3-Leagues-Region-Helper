@@ -3,7 +3,7 @@ import RetryImage from './RetryImage';
 import ReadOnlyLoadout from './ReadOnlyLoadout';
 import LeaguesEffectsPanel from './LeaguesEffectsPanel';
 import BuildProse from './BuildProse';
-import BuildCardMeta from './BuildCardMeta';
+import BuildCardMeta, { BuildByline, BuildDifficultyTag } from './BuildCardMeta';
 import PicksHeading from './PicksHeading';
 import RejuvenatedNote from './RejuvenatedNote';
 import { ARCH_RELIC_BY_NAME, LEAGUE_RELIC_BY_NAME } from '../data/buildLookups';
@@ -143,12 +143,15 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
         <div className="build-card-headline">
           <h3 className="build-card-name">{build.name}</h3>
           <p className="build-card-tagline">{build.tagline}</p>
-          {build.authorName && <p className="user-build-author">by {build.authorName}</p>}
+          <BuildByline
+            author={build.authorName}
+            difficulty={
+              <BuildDifficultyTag label={build.difficultyLabel} note={build.difficultyNote} />
+            }
+          />
         </div>
 
         <BuildCardMeta
-          difficultyLabel={build.difficultyLabel}
-          difficultyNote={build.difficultyNote}
           blessings={build.blessings}
           godTier={build.godTier}
           godTier2={build.godTier2}
