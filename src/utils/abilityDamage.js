@@ -29,6 +29,11 @@
 //     stubbornly still.
 import { DEFENDER_OFFHANDS, SHIELD_OFFHANDS, getAegisClass } from '../data/aegisMultiplier.js';
 import { GEAR_SET_GROUPS } from '../data/gearSets.js';
+import {
+  HIGHER_POWER,
+  TRUE_EQUILIBRIUM,
+  getBlessingModifiers,
+} from './blessingModifiers.js';
 
 // The slots whose `damage` is a WEAPON rating (w) rather than an equipment
 // damage bonus (b). Same split GearStatsSummary makes, for the same reason -
@@ -210,7 +215,22 @@ export function getAchtoBonus(equipped = {}) {
 }
 
 // Everything the formula needs from a loadout, in one pass.
-function damageRatings(equipped) {
+// Genesis Essence (God Tier Two, blue) sets every equipped weapon to tier 120.
+// The stored damage is the coefficient times the weapon's real tier, so the
+// override is that same coefficient at 120 - read back off the item rather than
+// hardcoded, for the reason ammoTierCap gives: a handful of weapons sit off the
+// 9.6/14.4 curve and assuming a coefficient would misprice them.
+//
+// Returns null for anything with no tier to override, which leaves the stored
+// damage alone.
+function retierWeaponDamage(item, tier) {
+  const realTier = item?.level?.level;
+  const damage = item?.stats?.damage;
+  if (!tier || !realTier || !damage) return null;
+  return (damage / realTier) * tier;
+}
+
+function damageRatings(equipped, weaponTier = null) {
   let armour = 0;
   for (const [slot, item] of Object.entries(equipped)) {
     if (WEAPON_DAMAGE_SLOTS.has(slot)) continue;
@@ -223,10 +243,19 @@ function damageRatings(equipped) {
   const ammoItem = equipped.ammo;
   if (ammoItem && ammoItem.level?.level == null) armour += ammoItem.stats?.damage || 0;
 
-  // The tier cap applies per hand, against that hand's own tier.
-  const mainCap = ammoTierCap(equipped.weapon, ammoItem);
-  const offCap = ammoTierCap(equipped.offhand, ammoItem);
-  const rate = (item, cap) => (item?.stats?.damage || 0) * (cap ? cap.scale : 1);
+  // The tier cap applies per hand, against that hand's own tier. With Genesis
+  // Essence that tier is 120, so ammunition caps HARDER than it otherwise
+  // would - which is the formula being consistent, not a bug: min(t, a) with
+  // t = 120 and t95 arrows still fires at 95, and the weapon is now being held
+  // back by a much wider margin. The panel names the culprit either way.
+  const capAgainst = (item) =>
+    weaponTier && item?.level?.level ? { ...item, level: { ...item.level, level: weaponTier } } : item;
+  const mainCap = ammoTierCap(capAgainst(equipped.weapon), ammoItem);
+  const offCap = ammoTierCap(capAgainst(equipped.offhand), ammoItem);
+  const rate = (item, cap) => {
+    const base = retierWeaponDamage(item, weaponTier) ?? item?.stats?.damage ?? 0;
+    return base * (cap ? cap.scale : 1);
+  };
 
   return {
     armour,
@@ -246,10 +275,14 @@ function damageRatings(equipped) {
 // without anyone having to ask. The parts are built to SUM EXACTLY to the
 // total - the last one absorbs whatever the formula's floors took off, so the
 // arithmetic on screen is never a rounding-error apart from the headline.
-export function getBaseAbilityDamage(equipped = {}, { combatLevel = BASE_COMBAT_LEVEL } = {}) {
+export function getBaseAbilityDamage(
+  equipped = {},
+  { combatLevel = BASE_COMBAT_LEVEL, blessings = [] } = {},
+) {
+  const mods = getBlessingModifiers(blessings);
   const f = levelBonus(combatLevel);
   const mode = getWeaponMode(equipped);
-  const { armour: gearArmour, mainHand, offHand, ammoCap } = damageRatings(equipped);
+  const { armour: gearArmour, mainHand, offHand, ammoCap } = damageRatings(equipped, mods.weaponTier);
   const levelTerm = Math.floor(2.5 * f);
 
   // Achto lands in the equipment damage bonus (b), which is what "adds to your
@@ -259,16 +292,42 @@ export function getBaseAbilityDamage(equipped = {}, { combatLevel = BASE_COMBAT_
   const achtoBonus = achto?.active ? achto.bonus : 0;
   const armour = gearArmour + achtoBonus;
 
-  const finish = (total, level, weapon) => {
+  const finish = (formulaTotal, level, weapon) => {
     const parts = [
       { key: 'level', label: 'level', value: level },
       { key: 'weapon', label: 'weapon', value: weapon },
       // The armour part absorbs whatever the formula's floors took off, so the
       // working on screen always sums to the headline.
-      { key: 'armour', label: 'armour', value: total - level - weapon - achtoBonus },
+      { key: 'armour', label: 'armour', value: formulaTotal - level - weapon - achtoBonus },
     ];
     if (achtoBonus) parts.push({ key: 'achto', label: 'Achto set', value: achtoBonus });
-    return { mode, combatLevel, total, parts, achto, ammoCap };
+
+    // True Equilibrium grants BASE ability damage, so it lands on the finished
+    // formula figure rather than inside it as an equipment bonus - the card
+    // says "gain 75 base ability damage", not "+75 Strength bonus".
+    const withFlat = formulaTotal + mods.abilityDamageFlat;
+    if (mods.abilityDamageFlat) {
+      parts.push({
+        key: 'true-equilibrium',
+        label: `${TRUE_EQUILIBRIUM} (${mods.alignments}x)`,
+        value: mods.abilityDamageFlat,
+      });
+    }
+
+    // Higher Power is a percentage OF base ability damage, so it multiplies
+    // everything above including the flat. Recorded as the difference it made
+    // rather than as a percentage, so the parts still sum exactly to the total
+    // - which is the contract the panel's working line depends on.
+    const total = Math.floor(withFlat * mods.abilityDamageMultiplier);
+    if (total !== withFlat) {
+      parts.push({
+        key: 'higher-power',
+        label: `${HIGHER_POWER} (+${Math.round((mods.abilityDamageMultiplier - 1) * 100)}%)`,
+        value: total - withFlat,
+      });
+    }
+
+    return { mode, combatLevel, total, parts, achto, ammoCap, mods };
   };
 
   if (mode === 'twoHanded') {
@@ -375,6 +434,70 @@ export const INFERNO_OF_ZAMORAK_AVERAGE_SHARE = 1.5;
 export const BARKSCALES_REDUCTION_SHARE = 0.1;
 export const GRASP_OF_GUTHIX_AVERAGE_SHARE = 1.0;
 
+// Grasp of Guthix is carried by Barkscales (Tier 2) and rebuilt by Tearing
+// Thorns (Tier 5), which adds a share of MAX LIFE POINTS on top of its ability
+// damage - 20-30%, so 25% is the average.
+export const TEARING_THORNS = 'Tearing Thorns';
+export const TEARING_THORNS_LIFE_SHARE = 0.25;
+// "Every 5th hit of a damage over time ability triggers a Grasp of Guthix" -
+// and Perfidious (Tier 6) reduces that requirement to 2.
+export const TEARING_THORNS_TRIGGER_HITS = 5;
+
+// Envenomed (Tier 6): "Poison damage is increased by 50% + an additional 2% per
+// Herblore level."
+//
+// This applies to Grasp of Guthix because Grasp deals POISON damage - its own
+// wording is "deals poison damage equal to 80-120% of your ability damage in a
+// 3x3". That is the whole reason Envenomed is a combat pick rather than a
+// Herblore one, and it is the single largest multiplier on the green proc.
+//
+// ASSUMPTION: Tearing Thorns' life-points term is treated as part of the same
+// poison hit and scales with it. The card calls it "additional damage" to a
+// poison ability rather than a separate instance, so multiplying the whole
+// thing is the straightforward reading - but it is a reading, and it is where
+// this figure would be wrong if Jagex meant otherwise.
+export const ENVENOMED = 'Envenomed';
+export const ENVENOMED_BASE_BONUS = 0.5;
+export const ENVENOMED_PER_HERBLORE_LEVEL = 0.02;
+// 99 is the default; 120 is the elite-skill cap, and the difference is large
+// enough (+248% vs +290%) to be worth a toggle rather than an assumption.
+export const HERBLORE_LEVELS = [99, 120];
+
+export function getPoisonMultiplier({ envenomed = false, herbloreLevel = 99 } = {}) {
+  if (!envenomed) return 1;
+  return 1 + ENVENOMED_BASE_BONUS + ENVENOMED_PER_HERBLORE_LEVEL * herbloreLevel;
+}
+
+// One Grasp of Guthix, assembled from whichever of the three blessings are held.
+// Shared so Barkscales and Tearing Thorns can never quote different numbers for
+// the same proc - the same reason getLightOfSaradomin exists.
+export function getGraspOfGuthix({
+  payoutAD = 0,
+  lifeTotal = 0,
+  tearingThorns = false,
+  envenomed = false,
+  herbloreLevel = 99,
+  perfidious = false,
+} = {}) {
+  const fromDamage = payoutAD * GRASP_OF_GUTHIX_AVERAGE_SHARE;
+  const fromLife = tearingThorns ? lifeTotal * TEARING_THORNS_LIFE_SHARE : 0;
+  const base = fromDamage + fromLife;
+  const poisonMultiplier = getPoisonMultiplier({ envenomed, herbloreLevel });
+  return {
+    fromDamage,
+    fromLife,
+    base,
+    poisonMultiplier,
+    total: base * poisonMultiplier,
+    tearingThorns,
+    envenomed,
+    herbloreLevel,
+    // Barkscales triggers on every 5th damage reduction; Tearing Thorns on
+    // every 5th damage-over-time hit. Perfidious takes either to 2.
+    triggerHits: perfidious ? 2 : TEARING_THORNS_TRIGGER_HITS,
+  };
+}
+
 // Striking Light. "Basic attack" is the auto-triggered 1.8s basic ability, and
 // its damage band differs by style - melee hits harder because it has no range.
 // The blessing adds 40 PERCENTAGE POINTS to the band, not a 1.4x multiplier.
@@ -389,6 +512,55 @@ export const STRIKING_LIGHT_BASIC_BONUS = 40;
 // 50% is the average of that band.
 export const LIGHT_OF_SARADOMIN_AVERAGE_AD_SHARE = 0.5;
 export const LIGHT_OF_SARADOMIN_ARMOUR_SHARE = 2.5;
+
+// Lord of Light (Tier 5, blue) is the same Light of Saradomin, upgraded on four
+// axes at once: five of them per trigger instead of one, on a longer cooldown,
+// each scaling with prayer bonus and each healing you.
+//
+// Striking Light (Tier 2, blue) is where this proc first appears, so the two
+// blessings share one calculation - see getLightOfSaradomin. Without that they
+// would drift, and a build holding both would show two different numbers for
+// the same effect.
+export const LORD_OF_LIGHT = 'Lord of Light';
+export const LORD_OF_LIGHT_PROCS = 5;
+export const LORD_OF_LIGHT_COOLDOWN_SECONDS = 14.4;
+export const STRIKING_LIGHT_COOLDOWN_SECONDS = 9;
+// "Light of Saradomin deal 2% increased damage for each point of prayer bonus
+// you have." A multiplier on the proc, not on ability damage - and the only
+// thing in the app that makes prayer bonus an offensive stat outside Icyenic
+// Faith, which is why a build can want both.
+export const LORD_OF_LIGHT_PRAYER_SHARE = 0.02;
+export const LORD_OF_LIGHT_HEAL_SHARE = 0.05;
+export const LIGHT_OF_SARADOMIN_TARGETS = 8;
+
+// One Light of Saradomin, and what a trigger is worth in total.
+//
+// `prayerBonus` is only read when Lord of Light is held - Striking Light's own
+// version has no prayer term, so passing one would silently inflate it.
+export function getLightOfSaradomin({
+  payoutAD = 0,
+  armour = 0,
+  prayerBonus = 0,
+  lordOfLight = false,
+} = {}) {
+  const base = payoutAD * LIGHT_OF_SARADOMIN_AVERAGE_AD_SHARE + armour * LIGHT_OF_SARADOMIN_ARMOUR_SHARE;
+  const prayerMultiplier = lordOfLight ? 1 + prayerBonus * LORD_OF_LIGHT_PRAYER_SHARE : 1;
+  const each = base * prayerMultiplier;
+  const procs = lordOfLight ? LORD_OF_LIGHT_PROCS : 1;
+  const total = each * procs;
+  return {
+    base,
+    each,
+    procs,
+    total,
+    prayerMultiplier,
+    prayerBonus,
+    // 5% of damage DEALT, so it follows the whole trigger rather than one proc.
+    heal: lordOfLight ? total * LORD_OF_LIGHT_HEAL_SHARE : null,
+    cooldown: lordOfLight ? LORD_OF_LIGHT_COOLDOWN_SECONDS : STRIKING_LIGHT_COOLDOWN_SECONDS,
+    lordOfLight,
+  };
+}
 
 // Splash Zone: "Area-of-effect and multi-target attacks deal 30% more damage."
 //

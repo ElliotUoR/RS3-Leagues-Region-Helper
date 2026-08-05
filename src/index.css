@@ -3363,6 +3363,18 @@ main.abilities-page .gear-item-rows {
   color: var(--stat-prayer-color, #f2f2f7);
 }
 
+/* Critical strike, chance and damage both. Amber rather than any of the
+   blessing colours: crit is assembled from gear, blessings AND relics at once
+   (see utils/critChance.js), so borrowing one system's colour would imply it
+   belongs to that system. */
+.gear-stat-crit {
+  color: var(--stat-crit-color, #f0b429);
+}
+
+:root[data-theme='light'] .gear-stat-crit {
+  color: var(--stat-crit-color, #a16207);
+}
+
 .gear-stat-acc {
   color: var(--stat-acc-color, #6fd39a);
 }
@@ -8619,12 +8631,28 @@ main.abilities-page .gear-item-rows {
   height: 3px;
 }
 
+/* Two stacked rows of buff chips: the potion/Sliver state on top, then the
+   Herblore level when Envenomed makes it matter. Stacked rather than one long
+   wrapping row so the second row's chips are visibly a separate choice - they
+   are, the top row is exclusive-or-nothing and the bottom row is exactly-one. */
+.leagues-effects-buffs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 12px;
+}
+
 .leagues-effects-potions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 6px 0 12px;
+}
+
+/* The buffs wrapper owns the outer spacing now that there can be two rows. */
+.leagues-effects-buffs .leagues-effects-potions {
+  margin: 0;
 }
 
 .leagues-effects-potion {
@@ -9456,11 +9484,70 @@ main.abilities-page .gear-item-rows {
   margin: 0;
 }
 
+/* Two stacked rows of figures: the flat totals, then critical strike. Stacking
+   is deliberate rather than letting one row wrap - crit chance and crit damage
+   are a pair and need to stay together, and a wrapping single row breaks them
+   apart at unpredictable widths. */
+.leagues-effects-figure-rows {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
 .leagues-effects-figures {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 22px;
   margin: 0;
+}
+
+/* The second row sits quieter than the first - these are percentages that
+   modify the totals above rather than totals in their own right. */
+.leagues-effects-figures-crit .leagues-effects-figure strong {
+  font-size: 0.95em;
+}
+
+/* The "this total is incomplete" marker beside a figure's label. Orange rather
+   than the --danger red used for wrong numbers: nothing here is wrong, it is
+   just not the whole picture, and reusing the error colour would overstate it.
+   Sized off the label it follows so it stays proportional at any zoom. */
+.leagues-effects-warn-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+  margin-left: 5px;
+  border: 1px solid var(--warning);
+  border-radius: 50%;
+  color: var(--warning);
+  font-size: 0.85em;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+  vertical-align: middle;
+  /* The label above it is uppercased and letter-spaced; neither should apply
+     to a single glyph in a circle. */
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.leagues-effects-warn-marker:hover,
+.leagues-effects-warn-marker:focus-visible {
+  background: color-mix(in srgb, var(--warning) 18%, transparent);
+}
+
+.leagues-effects-figure-suffix {
+  font-size: 0.7rem;
+  opacity: 0.65;
+  font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  .leagues-effects-figure-rows {
+    align-items: flex-start;
+  }
 }
 
 .leagues-effects-figure {
@@ -9511,6 +9598,7 @@ main.abilities-page .gear-item-rows {
 .leagues-effects-card[data-colour='icyenic'] { --card-accent: #6fd3f7; }
 .leagues-effects-card[data-colour='extra'] { --card-accent: #c9a23e; }
 .leagues-effects-card[data-colour='relic'] { --card-accent: var(--accent); }
+.leagues-effects-card[data-colour='crit'] { --card-accent: #f0b429; }
 
 .leagues-effects-card {
   position: relative;

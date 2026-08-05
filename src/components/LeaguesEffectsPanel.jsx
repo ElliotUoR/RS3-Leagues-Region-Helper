@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import RetryImage from './RetryImage';
+import TagTooltip from './TagTooltip';
 import { ARCH_RELIC_BY_NAME, BLESSING_BY_NAME } from '../data/buildLookups';
 import { isGodTierSettled, resolveGodTierFor } from '../data/blessings';
 import { blessingColourTally, blessingGradient, dominantBlessingColour } from '../utils/blessingTheme';
@@ -10,7 +11,8 @@ import {
   equippedItemsFor,
   getBigBonedBonusDamage,
   getAegisAbilityDamage,
-  getIcyeneBonusPercent,
+  ICYENE_PERCENT_PER_PRAYER,
+  isIcyeneTomeWorn,
   getTotalArmour,
   getTotalLifePoints,
   getTotalPrayerBonus,
@@ -21,8 +23,14 @@ import {
   BARKSCALES_REDUCTION_SHARE,
   GRASP_OF_GUTHIX_AVERAGE_SHARE,
   INFERNO_OF_ZAMORAK_AVERAGE_SHARE,
-  LIGHT_OF_SARADOMIN_ARMOUR_SHARE,
-  LIGHT_OF_SARADOMIN_AVERAGE_AD_SHARE,
+  LIGHT_OF_SARADOMIN_TARGETS,
+  LORD_OF_LIGHT,
+  TEARING_THORNS,
+  ENVENOMED,
+  HERBLORE_LEVELS,
+  getGraspOfGuthix,
+  getLightOfSaradomin,
+  getPoisonMultiplier,
   ACHTO_TIER,
   SPLASH_ZONE_AOE_BONUS,
   WEAPON_MODE_LABELS,
@@ -36,6 +44,19 @@ import {
   getTotalAbilityDamage,
   hasChinchompaSplashZone,
 } from '../utils/abilityDamage';
+import {
+  GENESIS_ESSENCE,
+  GENESIS_ESSENCE_TIER,
+  HAVOC_BORN,
+  HAVOC_BORN_DAMAGE_BONUS,
+  HAVOC_BORN_PENALTY,
+  HIGHER_POWER,
+  HIGHER_POWER_ABILITY_DAMAGE,
+  TRUE_EQUILIBRIUM,
+  TRUE_EQUILIBRIUM_PER_ALIGNMENT,
+  getBlessingModifiers,
+} from '../utils/blessingModifiers';
+import { getCritBreakdown } from '../utils/critChance';
 
 // Everything a build's blessings, relics and gear actually DO for it, behind
 // one button under the loadout.
@@ -87,6 +108,13 @@ const STATES = [
 // Sliver being worn, because it activates from the inventory - a build that
 // takes the relic can use it whether or not the pocket slot holds it.
 export const SLIVER_RELIC = 'Naragi Edict';
+
+// What the crit total leaves out. Worth a marker rather than a card line: the
+// figure sits in the headline row where it reads as authoritative, and the
+// sources it misses are ones a player plausibly has - Biting is one of the most
+// common weapon perks in the game.
+const CRIT_INCOMPLETE_HINT =
+  "Does not consider all crit sources - e.g. Biting, abilities, conditionals e.g. Channeller's ring.";
 
 const STYLE_STAT = { melee: 'Strength', ranged: 'Ranged', magic: 'Magic', necromancy: 'Necromancy' };
 
@@ -286,7 +314,7 @@ function steadfastWillCard(armourNow) {
   };
 }
 
-function strikingLightCard({ style, payoutAD, armourNow }) {
+function strikingLightCard({ style, payoutAD, armourNow, light }) {
   const band = getBasicAttackBand(style);
   return {
     key: 'striking-light',
@@ -297,11 +325,43 @@ function strikingLightCard({ style, payoutAD, armourNow }) {
       muted(
         `${band.boosted[0]}-${band.boosted[1]}% of ability damage - ${band.base[0]}-${band.base[1]}% for ${style}, +40 from the blessing.`,
       ),
-      strong(
-        `Light of Saradomin ~${round(payoutAD * LIGHT_OF_SARADOMIN_AVERAGE_AD_SHARE + armourNow * LIGHT_OF_SARADOMIN_ARMOUR_SHARE)} damage`,
+      // Deferred to the Lord of Light card when that is also held, rather than
+      // stating the same proc twice with different numbers - Lord of Light
+      // upgrades this one rather than adding a second.
+      !light.lordOfLight && strong(`Light of Saradomin ~${round(light.each)} damage`),
+      !light.lordOfLight && muted('40-60% of ability damage plus 250% of armour, 9s cooldown.'),
+      light.lordOfLight && muted('Light of Saradomin is upgraded by Lord of Light - see its card.'),
+    ].filter(Boolean),
+  };
+}
+
+// Lord of Light rebuilds the same proc: five per trigger, each scaled by prayer
+// bonus, each healing. The card leads with the whole trigger because that is
+// what a basic attack actually produces - one proc's figure understates it
+// fivefold.
+function lordOfLightCard({ light, armourNow, payoutAD }) {
+  const prayerPercent = Math.round((light.prayerMultiplier - 1) * 100);
+  return {
+    key: 'lord-of-light',
+    name: LORD_OF_LIGHT,
+    icon: iconFor(LORD_OF_LIGHT),
+    lines: [
+      strong(`~${round(light.total)} damage per trigger`),
+      muted(
+        `${light.procs}x Light of Saradomin at ~${round(light.each)} each, from a basic attack. ${light.cooldown}s cooldown.`,
       ),
-      muted('40-60% of ability damage plus 250% of armour, 9s cooldown.'),
-    ],
+      strong(`~${round(light.base)} per proc before prayer`),
+      muted(
+        `40-60% of ${round(payoutAD)} ability damage plus 250% of ${round(armourNow)} armour.`,
+      ),
+      light.prayerBonus > 0
+        ? strong(`+${prayerPercent}% from ${round(light.prayerBonus)} prayer bonus`)
+        : warn('No prayer bonus - the 2%-per-point multiplier is paying nothing.'),
+      light.prayerBonus > 0 && muted('2% more Light of Saradomin damage per point of prayer bonus.'),
+      strong(`~${round(light.heal)} healing per trigger`),
+      muted('5% of the damage dealt, healed back to you.'),
+      muted(`Each proc hits up to ${LIGHT_OF_SARADOMIN_TARGETS} targets within 1 tile.`),
+    ].filter(Boolean),
   };
 }
 
@@ -342,13 +402,172 @@ function sliverCard({ armourAt, sliverArmour }) {
   };
 }
 
+// The four blessings that move a stat rather than paying out a share of one
+// (see utils/blessingModifiers.js). Their cards state what they DID to the
+// figures above, not what their reveal card says - the effect text is already
+// on the Blessings page, and a build wants the consequence.
+//
+// Each is costed against the totals as they now stand, so the arithmetic on the
+// card reconciles with the headline rather than being a second opinion on it.
+function havocBornCard({ armourNow, lifeTotal, totalAD, effectiveAD }) {
+  return {
+    key: 'havoc-born',
+    name: HAVOC_BORN,
+    icon: iconFor(HAVOC_BORN),
+    lines: [
+      effectiveAD != null && totalAD != null
+        ? strong(`+${round(effectiveAD - totalAD)} damage per hit`)
+        : strong(`+${Math.round(HAVOC_BORN_DAMAGE_BONUS * 100)}% damage`),
+      muted(`${Math.round(HAVOC_BORN_DAMAGE_BONUS * 100)}% more damage dealt - a multiplier on the hit, not on the ability damage stat.`),
+      armourNow != null && strong(`${round(armourNow / (1 - HAVOC_BORN_PENALTY) - armourNow)} armour lost`),
+      lifeTotal != null && strong(`${round(lifeTotal / (1 - HAVOC_BORN_PENALTY) - lifeTotal)} life points lost`),
+      // Named because the armour half is the expensive one on this league's
+      // builds and it is easy to read -25% as a survivability cost alone.
+      armourNow != null &&
+        muted('Both are -25%. Armour also feeds Teragard\'s Aegis, Barkscales, Steadfast Will and Striking Light, so they all pay it too.'),
+    ].filter(Boolean),
+  };
+}
+
+function trueEquilibriumCard(mods) {
+  const per = TRUE_EQUILIBRIUM_PER_ALIGNMENT;
+  const x = mods.alignments;
+  return {
+    key: 'true-equilibrium',
+    name: TRUE_EQUILIBRIUM,
+    icon: iconFor(TRUE_EQUILIBRIUM),
+    lines: [
+      strong(`${x} alignment${x === 1 ? '' : 's'} - everything below is ${x}x`),
+      muted('One per distinct blessing colour held. God powers are awarded rather than chosen, so they do not count.'),
+      strong(`+${round(per.abilityDamage * x)} base ability damage`),
+      strong(`+${round(per.armour * x)} armour  +${round(per.lifePoints * x)} life points  +${round(per.prayerBonus * x)} prayer bonus`),
+      strong(`+${(per.critChance * x).toFixed(1)}% critical strike chance  +${(per.critDamage * x).toFixed(1)}% critical strike damage`),
+      // Crit is the one pair with nowhere to land: nothing else on this panel
+      // reads it, so it is stated rather than folded into a total.
+      muted('The armour, life points and prayer bonus are already inside the figures above. Critical strike is not modelled anywhere else, so it is quoted as granted.'),
+    ],
+  };
+}
+
+function higherPowerCard(baseAD) {
+  const part = baseAD?.parts?.find((p) => p.key === 'higher-power');
+  return {
+    key: 'higher-power',
+    name: HIGHER_POWER,
+    icon: iconFor(HIGHER_POWER),
+    lines: [
+      part
+        ? strong(`+${round(part.value)} base ability damage`)
+        : strong(`+${Math.round(HIGHER_POWER_ABILITY_DAMAGE * 100)}% base ability damage`),
+      muted(`${Math.round(HIGHER_POWER_ABILITY_DAMAGE * 100)}% of base ability damage, already inside the total above.`),
+      // The lockout has no number, and it is the whole cost of the blessing -
+      // stated in full rather than summarised so nobody takes this by accident.
+      { text: "You lose Berserk, Death's Swiftness, Living Death and Sunshine." },
+      muted('That trade is not modelled - every figure on this panel is a sustained one, and an ultimate is a window.'),
+    ],
+  };
+}
+
+function genesisEssenceCard(baseAD) {
+  const weaponPart = baseAD?.parts?.find((p) => p.key === 'weapon');
+  return {
+    key: 'genesis-essence',
+    name: GENESIS_ESSENCE,
+    icon: iconFor(GENESIS_ESSENCE),
+    isGod: true,
+    lines: [
+      weaponPart ? strong(`${round(weaponPart.value)} weapon damage at tier ${GENESIS_ESSENCE_TIER}`) : null,
+      muted(`Every equipped weapon is treated as tier ${GENESIS_ESSENCE_TIER}, whatever it actually is.`),
+      // Worth saying out loud: at t120 the gap to t95 ammunition is far wider
+      // than it was, so a bow that was fine before can now be badly held back.
+      baseAD?.ammoCap &&
+        strong(`Held back to tier ${baseAD.ammoCap.ammoTier} by ${baseAD.ammoCap.name}`),
+      baseAD?.ammoCap &&
+        muted('Ammunition caps the weapon\'s tier, and tier 120 makes that cap cost far more than it used to.'),
+    ].filter(Boolean),
+  };
+}
+
+// The working behind the two crit figures. Worth a card of its own because the
+// sources are scattered across gear, blessings and relics, and because a worn
+// item can be paying nothing (the Stalker's ring without a bow) in a way no
+// other stat on this panel manages.
+function critCard(crit) {
+  const part = (p) => `${p.value > 0 ? '+' : ''}${p.value} ${p.label}`;
+  const lines = [
+    strong(`${crit.chance}% critical strike chance`),
+    muted(crit.chanceParts.map(part).join('   ')),
+  ];
+
+  if (crit.overflow > 0) {
+    lines.push(
+      strong(`Capped at ${crit.cap}% - ${crit.overflow}% converted to critical strike damage`),
+      muted(`${crit.rawChance}% before the cap. Unholy Critual converts the excess 1:1, so crit chance from anywhere keeps paying past saturation.`),
+    );
+  }
+
+  lines.push(strong(`+${crit.damage}% critical strike damage`));
+  lines.push(muted(crit.damageParts.map(part).join('   ')));
+
+  // The one worn item that can be dead weight. Said plainly rather than left
+  // for the reader to notice a zero in the working above.
+  const idle = crit.chanceParts.filter((p) => p.inactive);
+  for (const p of idle) lines.push(warn(`${p.label} is paying nothing - ${p.note}.`));
+
+  return { key: 'crit', name: 'Critical strike', colour: 'crit', lines };
+}
+
+// Tearing Thorns and Envenomed both rebuild Grasp of Guthix rather than adding
+// a payout of their own, so both cards cost out the SAME proc from
+// getGraspOfGuthix - Barkscales' card shows the finished figure too, and all
+// three agree by construction.
+function tearingThornsCard({ grasp }) {
+  return {
+    key: 'tearing-thorns',
+    name: TEARING_THORNS,
+    icon: iconFor(TEARING_THORNS),
+    lines: [
+      strong(`Grasp of Guthix ~${round(grasp.total)} damage`),
+      muted(
+        `${round(grasp.fromDamage)} from ability damage + ${round(grasp.fromLife)} from life points` +
+          (grasp.poisonMultiplier > 1 ? `, then x${grasp.poisonMultiplier.toFixed(2)} poison` : ''),
+      ),
+      strong(`+${round(grasp.fromLife)} from 20-30% of maximum life points`),
+      muted('25% is the average of that band.'),
+      strong(`Triggers every ${grasp.triggerHits} hits of a damage over time ability`),
+      { text: 'Damage over time abilities last 100% longer.' },
+      muted('Double duration is double the hits feeding that trigger.'),
+    ],
+  };
+}
+
+function envenomedCard({ grasp }) {
+  const percent = Math.round((grasp.poisonMultiplier - 1) * 100);
+  return {
+    key: 'envenomed',
+    name: ENVENOMED,
+    icon: iconFor(ENVENOMED),
+    lines: [
+      strong(`+${percent}% poison damage at ${grasp.herbloreLevel} Herblore`),
+      muted(`50% flat, plus 2% per Herblore level.`),
+      strong(`Grasp of Guthix ~${round(grasp.total)} damage`),
+      muted(
+        `${round(grasp.base)} before poison scaling. Grasp deals POISON damage, so this multiplies all of it.`,
+      ),
+      { text: 'Damaging an enemy disables their poison immunity for 30s.' },
+      muted('Which is what makes poison worth scaling at all in endgame PvM.'),
+    ],
+  };
+}
+
 function buildCards(context) {
-  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour, resolvedGodTier2 } =
+  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp } =
     context;
   const cards = [];
   const picked = (name) => blessings.includes(name);
 
   if (damage) cards.push(abilityDamageCard(context));
+  if (crit) cards.push(critCard(crit));
   if (baseAD?.achto) cards.push(achtoCard(baseAD.achto));
   if (adrenaline) cards.push(adrenalineCard(adrenaline, blessings));
 
@@ -366,6 +585,14 @@ function buildCards(context) {
   }
 
   cards.push(...extraCards(extras, picked('Big Boned')));
+
+  // Before the blessings that take a share of these figures, because these are
+  // what set them - reading Havoc Born's -25% armour after Barkscales' share of
+  // that armour is reading the answer before the question.
+  if (mods.equilibrium) cards.push(trueEquilibriumCard(mods));
+  if (mods.higher) cards.push(higherPowerCard(baseAD));
+  if (mods.havoc) cards.push(havocBornCard({ armourNow, lifeTotal, totalAD, effectiveAD }));
+  if (mods.genesis) cards.push(genesisEssenceCard(baseAD));
 
   if (hasSliver) cards.push(sliverCard({ armourAt: baseArmour, sliverArmour }));
 
@@ -403,14 +630,25 @@ function buildCards(context) {
       lines: [
         strong(`-${round(armourNow * BARKSCALES_REDUCTION_SHARE)} incoming damage per hit`),
         muted('10% of total armour, flat - on top of any percentage reduction.'),
-        strong(`Grasp of Guthix ~${round(payoutAD * GRASP_OF_GUTHIX_AVERAGE_SHARE)} damage`),
+        strong(`Grasp of Guthix ~${round(grasp?.total ?? payoutAD * GRASP_OF_GUTHIX_AVERAGE_SHARE)} damage`),
         muted('Every 5th reduction; rolls 80-120% of ability damage as poison in a 3x3.'),
+        // Named here rather than left to the Tearing Thorns / Envenomed cards,
+        // because this is the line whose number those two changed.
+        grasp?.tearingThorns &&
+          muted(`Includes Tearing Thorns' life points and Envenomed's poison bonus where taken - see their cards.`),
       ],
     });
   }
 
+  if (grasp && picked(TEARING_THORNS)) cards.push(tearingThornsCard(context));
+  if (grasp && picked(ENVENOMED)) cards.push(envenomedCard(context));
+
   if (payoutAD != null && armourNow != null && picked('Striking Light')) {
     cards.push(strikingLightCard(context));
+  }
+
+  if (light?.lordOfLight && payoutAD != null && armourNow != null) {
+    cards.push(lordOfLightCard(context));
   }
 
   // Falls through to the plain wording if there is no armour figure to cost it
@@ -450,6 +688,9 @@ function buildCards(context) {
   for (const name of [resolvedGodTier, resolvedGodTier2]) {
     const godPower = name ? BLESSING_BY_NAME.get(name) : null;
     if (!godPower) continue;
+    // Genesis Essence has its own costed card above - this loop would otherwise
+    // add a second one repeating the effect text.
+    if (godPower.name === GENESIS_ESSENCE) continue;
     cards.push({
       key: `god-power-${godPower.godTier ?? 1}`,
       name: godPower.name,
@@ -507,6 +748,12 @@ export default function LeaguesEffectsPanel({
   // 'none' | 'overload' | 'elder'. Clicking the active one turns it off, same
   // convention GearStatsSummary's own overload toggle uses.
   const [potion, setPotion] = useState('none');
+  // Herblore level, for Envenomed's "+2% poison damage per Herblore level".
+  // Unlike the potion row this is NOT a toggle-off - one of the two always
+  // applies, because you always have a Herblore level. 99 is the default; 120
+  // is the elite cap, and the gap between them (+248% vs +290% poison) is large
+  // enough that assuming one would misreport the other by a wide margin.
+  const [herbloreLevel, setHerbloreLevel] = useState(HERBLORE_LEVELS[0]);
 
   const theme = useMemo(() => {
     const tally = blessingColourTally(blessings);
@@ -535,49 +782,111 @@ export default function LeaguesEffectsPanel({
   // including one whose blessings never read an armour total otherwise.
   // `armourNow` below stays gated on `armour` so that unchanged behaviour -
   // no armour-scaling blessing, no "Total armour" figure - is preserved.
+  // Resolved BEFORE the stat totals, because Genesis Essence is a god power and
+  // it changes weapon tier - so the modifiers below cannot be worked out until
+  // it is known whether it was awarded.
+  const resolvedGodTier = godTierFor(1, godTier, blessings);
+  const resolvedGodTier2 = godTierFor(2, godTier2, blessings);
+
+  // Picks plus awarded god powers. getBlessingModifiers reads Havoc Born, True
+  // Equilibrium and Higher Power off the picks and Genesis Essence off the
+  // gods, and alignmentCount ignores the gods by construction.
+  const modBlessings = useMemo(
+    () => [...blessings, resolvedGodTier, resolvedGodTier2].filter(Boolean),
+    [blessings, resolvedGodTier, resolvedGodTier2],
+  );
+  const mods = useMemo(() => getBlessingModifiers(modBlessings), [modBlessings]);
+
+  // Defence level each state puts you at, so armour can be re-derived per state
+  // rather than read out of the `armour` prop's three precomputed figures.
+  const defenceLevelFor = (potionState) =>
+    potionState === 'sliver' ? SLIVER_COMBAT_LEVEL : combatLevelFor(potionState);
+
+  // Two of this component's four callers hand over armour precomputed in
+  // blessingBuilds.js, from a time when nothing could move it. Three things now
+  // can - the Sliver's 255 Defence, Havoc Born's -25% and True Equilibrium's
+  // flat bonus - and none of them are in those stored figures.
+  //
+  // So: derive whenever anything would change the answer, and otherwise keep
+  // using the prop. That keeps the seven curated guides showing exactly the
+  // numbers they were authored with, while a build that moves armour gets a
+  // figure that actually accounts for it.
+  const derivedArmour = mods.active || state === 'sliver';
+  const armourAt = useMemo(() => {
+    if (!hasGear) return () => null;
+    return (potionState) =>
+      getTotalArmour(equipped, style, defenceLevelFor(potionState), { blessings: modBlessings });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [equipped, hasGear, style, modBlessings]);
+
   const sliverArmour = useMemo(
-    () => (hasSliver && hasGear ? getTotalArmour(equipped, style, SLIVER_COMBAT_LEVEL) : null),
-    [hasSliver, hasGear, equipped, style],
+    () => (hasSliver && hasGear ? armourAt('sliver') : null),
+    [hasSliver, hasGear, armourAt],
   );
-  // The unboosted total the gain is measured from. Curated builds precompute
-  // theirs, so prefer that over re-deriving and quoting a figure a point off
-  // the one their own loadout line shows.
-  const baseArmour = useMemo(
-    () => armour?.none ?? (hasSliver && hasGear ? getTotalArmour(equipped, style, BASE_COMBAT_LEVEL) : null),
-    [armour, hasSliver, hasGear, equipped, style],
-  );
-  const armourNow = !armour
-    ? null
-    : state === 'sliver'
-      ? sliverArmour ?? armour.none
-      : armour[state] ?? armour.none;
+  // The unboosted total the Sliver's gain is measured from. Prefers the
+  // caller's own figure when nothing would have changed it, so a curated guide
+  // quotes the same number its loadout line shows.
+  const baseArmour = useMemo(() => {
+    if (mods.active && hasGear) return armourAt('none');
+    return armour?.none ?? (hasSliver && hasGear ? armourAt('none') : null);
+  }, [mods.active, armour, hasSliver, hasGear, armourAt]);
+
+  const armourNow = (() => {
+    if (derivedArmour && hasGear) return armourAt(state);
+    if (!armour) return null;
+    return armour[state] ?? armour.none;
+  })();
+
+  // Aegis is a quarter of whatever armour actually is, so once armour is being
+  // derived the bonus has to be too - the prop's precomputed figures were taken
+  // from the unmodified total and would understate or overstate it.
   const aegisNow = !aegis
     ? null
-    : state === 'sliver'
-      ? sliverArmour == null
-        ? aegis.none
-        : getAegisAbilityDamage(sliverArmour, aegis.multiplier)
+    : derivedArmour && armourNow != null
+      ? getAegisAbilityDamage(armourNow, aegis.multiplier)
       : aegis[state] ?? aegis.none;
 
   // Base ability damage moves with the potion state because the formula's level
-  // term reads the boosted combat stat - see utils/abilityDamage.js.
+  // term reads the boosted combat stat - see utils/abilityDamage.js. It also
+  // carries Genesis Essence's tier override, True Equilibrium's flat bonus and
+  // Higher Power's multiplier, all of which show up in `parts`.
   const baseAD = useMemo(
-    () => (hasGear ? getBaseAbilityDamage(equipped, { combatLevel: combatLevelFor(state) }) : null),
-    [equipped, hasGear, state],
+    () =>
+      hasGear
+        ? getBaseAbilityDamage(equipped, { combatLevel: combatLevelFor(state), blessings: modBlessings })
+        : null,
+    [equipped, hasGear, state, modBlessings],
   );
 
+  // Prayer bonus, computed for EVERY build rather than only Icyenic Faith ones:
+  // Lord of Light scales Light of Saradomin by 2% per point, so a build with no
+  // Icyenic Faith can still be reading this stat hard. The headline figure below
+  // stays gated on something actually consuming it.
+  const prayerBonusTotal = hasGear ? getTotalPrayerBonus(equipped, { blessings: modBlessings }) : 0;
+
   const hasIcyenic = leagueRelics.includes(ICYENIC_FAITH_RELIC);
-  const prayerTotal = hasIcyenic && hasGear ? getTotalPrayerBonus(equipped) : null;
-  const icyeneBonus = hasIcyenic ? getIcyeneBonusPercent(equipped) : null;
+  // True Equilibrium's prayer bonus is real prayer bonus, so Icyenic Faith
+  // reads it like any other - see getTotalPrayerBonus.
+  const hasLordOfLight = blessings.includes(LORD_OF_LIGHT);
+  const prayerTotal = hasGear && (hasIcyenic || hasLordOfLight) ? prayerBonusTotal : null;
+  const icyeneBonus =
+    hasIcyenic && prayerTotal != null && isIcyeneTomeWorn(equipped)
+      ? Number((prayerTotal * ICYENE_PERCENT_PER_PRAYER).toFixed(1))
+      : null;
   // Total health is worth stating whenever something has actually moved it -
-  // Big Boned, or an Extra that grants max LP. A build with the Totem but no
-  // Big Boned still has 1,500 more health than the loadout alone implies, and
-  // it would be the one figure on this panel nothing accounted for.
+  // Big Boned, an Extra that grants max LP, or now a blessing. A build with the
+  // Totem but no Big Boned still has 1,500 more health than the loadout alone
+  // implies, and it would be the one figure on this panel nothing accounted for.
   const bonusLife = extraLifePoints(extras);
   const hasBigBoned = blessings.includes('Big Boned');
   const lifeTotal =
-    hasGear && (hasBigBoned || bonusLife > 0)
-      ? getTotalLifePoints(equipped, { bigBoned: hasBigBoned, archRelics, extraLifePoints: bonusLife })
+    hasGear && (hasBigBoned || bonusLife > 0 || mods.lifeFlat > 0 || mods.havoc)
+      ? getTotalLifePoints(equipped, {
+          bigBoned: hasBigBoned,
+          archRelics,
+          extraLifePoints: bonusLife,
+          blessings: modBlessings,
+        })
       : null;
 
   const damage = baseAD
@@ -587,9 +896,15 @@ export default function LeaguesEffectsPanel({
   // Saradomin - is a share of the FINISHED ability damage, not of the base.
   const totalAD = damage?.compounding ?? null;
 
-  const resolvedGodTier = godTierFor(1, godTier, blessings);
-  const resolvedGodTier2 = godTierFor(2, godTier2, blessings);
   const chinSplash = hasChinchompaSplashZone(resolvedGodTier, equipped);
+
+
+  // Critical strike is the one stat that reads gear, blessings and relics at
+  // once - see utils/critChance.js, which also owns Unholy Critual's cap.
+  const crit = useMemo(
+    () => (hasGear ? getCritBreakdown({ equipped, blessings: modBlessings, leagueRelics }) : null),
+    [hasGear, equipped, modBlessings, leagueRelics],
+  );
 
   // Splash Zone is a multiplier on damage dealt rather than on the ability
   // damage STAT, so it sits outside the total above. With chinchompas it
@@ -597,9 +912,41 @@ export default function LeaguesEffectsPanel({
   // practice from a bigger stat - so it gets its own headline, and everything
   // that takes a share of ability damage takes it of THIS figure. Grasp of
   // Guthix off a chin build really does hit 30% harder.
+  //
+  // Havoc Born's +20% is the same kind of thing - "your damage is increased",
+  // not "your ability damage stat is increased" - so it multiplies here beside
+  // Splash Zone rather than inside the total.
+  const dealtMultiplier =
+    (chinSplash ? 1 + SPLASH_ZONE_AOE_BONUS / 100 : 1) * mods.damageMultiplier;
   const effectiveAD =
-    chinSplash && totalAD != null ? Math.round(totalAD * (1 + SPLASH_ZONE_AOE_BONUS / 100)) : null;
+    dealtMultiplier !== 1 && totalAD != null ? Math.round(totalAD * dealtMultiplier) : null;
   const payoutAD = effectiveAD ?? totalAD;
+
+  // Both blessings that carry Light of Saradomin read this one figure, so they
+  // can never disagree about what the proc is worth.
+  const light =
+    payoutAD != null && armourNow != null
+      ? getLightOfSaradomin({
+          payoutAD,
+          armour: armourNow,
+          prayerBonus: prayerBonusTotal,
+          lordOfLight: hasLordOfLight,
+        })
+      : null;
+
+  // One Grasp of Guthix for whichever blessings carry it. Envenomed multiplies
+  // it because Grasp deals poison damage - see getGraspOfGuthix.
+  const hasEnvenomed = blessings.includes(ENVENOMED);
+  const grasp =
+    payoutAD != null
+      ? getGraspOfGuthix({
+          payoutAD,
+          lifeTotal: lifeTotal ?? 0,
+          tearingThorns: blessings.includes(TEARING_THORNS),
+          envenomed: hasEnvenomed,
+          herbloreLevel,
+        })
+      : null;
 
   const adrenaline = getAdrenaline({ blessings, archRelics });
 
@@ -616,6 +963,39 @@ export default function LeaguesEffectsPanel({
     lifeTotal != null && { key: 'life', label: 'Total health', value: round(lifeTotal), className: 'gear-stat-lp' },
     prayerTotal != null && { key: 'prayer', label: 'Prayer bonus', value: round(prayerTotal), className: 'gear-stat-prayer' },
   ].filter(Boolean);
+
+  // A SECOND row rather than two more entries in the first. Critical strike is
+  // a pair of percentages among a row of flat totals, and the two read as one
+  // stat - putting them on their own line keeps that pairing visible and stops
+  // the headline row wrapping unpredictably as the build fills out.
+  //
+  // Always shown once there is gear: unlike armour or prayer bonus, everyone
+  // has a crit chance, so an absent figure would read as "none" rather than
+  // "nothing has moved it".
+  const critFigures = crit
+    ? [
+        {
+          key: 'crit-chance',
+          label: 'Critical strike chance',
+          value: `${crit.chance}%`,
+          className: 'gear-stat-crit',
+          // This total is honest about what it counts and silent about what it
+          // does not, which on its own reads as a complete figure. The marker
+          // says otherwise - see CRIT_INCOMPLETE_HINT.
+          hint: CRIT_INCOMPLETE_HINT,
+          // Named on the figure itself, because a capped number that silently
+          // stops rising as you add crit gear is the most confusing thing this
+          // panel could show without explanation.
+          suffix: crit.overflow > 0 ? `capped, ${crit.overflow}% to damage` : null,
+        },
+        {
+          key: 'crit-damage',
+          label: 'Critical strike damage',
+          value: `+${crit.damage}%`,
+          className: 'gear-stat-crit',
+        },
+      ]
+    : [];
 
   const cards = buildCards({
     blessings,
@@ -635,6 +1015,12 @@ export default function LeaguesEffectsPanel({
     resolvedGodTier2,
     chinSplash,
     hasSliver,
+    mods,
+    totalAD,
+    effectiveAD,
+    crit,
+    light,
+    grasp,
     baseArmour,
     sliverArmour,
   });
@@ -689,6 +1075,7 @@ export default function LeaguesEffectsPanel({
                 potion moves ability damage through the formula's level term
                 even for a build that never reads its armour value. */}
             {hasGear && (
+              <div className="leagues-effects-buffs">
               <div className="leagues-effects-potions">
                 {STATES.map((entry) => {
                   if (entry.id === 'elder' && !canElder) return null;
@@ -748,18 +1135,83 @@ export default function LeaguesEffectsPanel({
                   </span>
                 )}
               </div>
+
+              {/* Second row, and only for Envenomed - it is the one blessing
+                  whose payout depends on a skill level rather than on gear or
+                  picks, so there is nothing to choose until it is taken.
+                  Unlike the potion row above, one of these is ALWAYS on:
+                  clicking the active chip does not turn it off, because you
+                  cannot have no Herblore level. */}
+              {hasEnvenomed && (
+                <div className="leagues-effects-potions leagues-effects-herblore">
+                  {HERBLORE_LEVELS.map((level) => {
+                    const active = herbloreLevel === level;
+                    return (
+                      <button
+                        key={level}
+                        type="button"
+                        className={`leagues-effects-potion${active ? ' active' : ''}`}
+                        aria-pressed={active}
+                        onClick={() => setHerbloreLevel(level)}
+                      >
+                        <span
+                          className={`leagues-effects-potion-word${active ? '' : ' shown'}`}
+                          aria-hidden={active}
+                        >
+                          <span>{level}</span>
+                        </span>
+                        <span
+                          className={`leagues-effects-potion-word${active ? ' shown' : ''}`}
+                          aria-hidden={!active}
+                        >
+                          <span>{level} Herblore</span>
+                        </span>
+                        <span className="leagues-effects-potion-defence">
+                          +{Math.round((getPoisonMultiplier({ envenomed: true, herbloreLevel: level }) - 1) * 100)}%
+                        </span>
+                      </button>
+                    );
+                  })}
+                  <span className="leagues-effects-elder-note">poison damage, via Envenomed</span>
+                </div>
+              )}
+              </div>
             )}
 
-            <dl className="leagues-effects-figures">
-              {figures.map((figure) => (
-                <div key={figure.key} className="leagues-effects-figure">
-                  <dt>{figure.label}</dt>
-                  <dd>
-                    <strong className={figure.className}>{figure.value}</strong>
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <div className="leagues-effects-figure-rows">
+              <dl className="leagues-effects-figures">
+                {figures.map((figure) => (
+                  <div key={figure.key} className="leagues-effects-figure">
+                    <dt>{figure.label}</dt>
+                    <dd>
+                      <strong className={figure.className}>{figure.value}</strong>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              {critFigures.length > 0 && (
+                <dl className="leagues-effects-figures leagues-effects-figures-crit">
+                  {critFigures.map((figure) => (
+                    <div key={figure.key} className="leagues-effects-figure">
+                      <dt>
+                        {figure.label}
+                        {figure.hint && (
+                          <TagTooltip className="leagues-effects-warn-marker" tooltip={figure.hint}>
+                            !
+                          </TagTooltip>
+                        )}
+                      </dt>
+                      <dd>
+                        <strong className={figure.className}>{figure.value}</strong>
+                        {figure.suffix && (
+                          <span className="leagues-effects-figure-suffix"> {figure.suffix}</span>
+                        )}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </div>
           </div>
 
           <div className="leagues-effects-cards">

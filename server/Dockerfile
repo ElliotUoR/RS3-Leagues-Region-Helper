@@ -47,6 +47,7 @@ COPY src/data/leagueRelics.js ./src/data/leagueRelics.js
 COPY src/data/blessingBuilds.js ./src/data/blessingBuilds.js
 COPY src/data/aegisMultiplier.js ./src/data/aegisMultiplier.js
 COPY src/data/tierListItems.js ./src/data/tierListItems.js
+COPY src/utils/blessingModifiers.js ./src/utils/blessingModifiers.js
 COPY src/utils/gearStats.js ./src/utils/gearStats.js
 COPY src/utils/usageKeys.js ./src/utils/usageKeys.js
 COPY public/icons ./public/icons

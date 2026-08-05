@@ -9,6 +9,7 @@
 // server/Dockerfile) and Node's ESM resolver, unlike Vite's, will not guess them.
 import { getAegisClass, getAegisMultiplier } from '../data/aegisMultiplier.js';
 import { GEAR } from '../data/gear.js';
+import { applyFlatThenMultiplier, getBlessingModifiers } from './blessingModifiers.js';
 
 // A slot -> item-name map (what both kinds of build store) resolved to the
 // actual gear entries the stat helpers below need. Unknown names are dropped
@@ -49,12 +50,17 @@ export function getSkillArmour(defenceLevel) {
   return (d ** 3) / 1250 + 4 * d + 40;
 }
 
-export function getTotalArmour(equipped, style, defenceLevel) {
+// `blessings` may include awarded god powers as well as picks - see
+// utils/blessingModifiers.js, which also owns the flat-then-multiplier order
+// True Equilibrium's +50 and Havoc Born's -25% compose in.
+export function getTotalArmour(equipped, style, defenceLevel, { blessings = [] } = {}) {
   let gearArmour = 0;
   for (const item of Object.values(equipped)) {
     gearArmour += getArmourRating(item, style);
   }
-  return Math.ceil(getSkillArmour(defenceLevel) + gearArmour);
+  const mods = getBlessingModifiers(blessings);
+  const base = getSkillArmour(defenceLevel) + gearArmour;
+  return Math.ceil(applyFlatThenMultiplier(base, mods.armourFlat, mods.armourMultiplier));
 }
 
 // Max life points at level 99 Hitpoints with no gear worn at all - RS3's own
@@ -93,14 +99,23 @@ export const FONT_OF_LIFE_LIFE_POINTS = 500;
 // because this module is COPY'd into the server image by name (see
 // server/Dockerfile) and importing the catalogue here would drag another file
 // into that list.
-export function getTotalLifePoints(equipped, { bigBoned = false, archRelics = [], extraLifePoints = 0 } = {}) {
-  let bonus = extraLifePoints;
+export function getTotalLifePoints(
+  equipped,
+  { bigBoned = false, archRelics = [], extraLifePoints = 0, blessings = [] } = {},
+) {
+  const mods = getBlessingModifiers(blessings);
+  // True Equilibrium's life points join the pre-multiplier sum, same as the
+  // Totem of Vitality's - which is what lets Big Boned's x1.5 carry them.
+  let bonus = extraLifePoints + mods.lifeFlat;
   for (const item of Object.values(equipped)) {
     bonus += item.stats?.lifeBonus || 0;
   }
   if (archRelics.includes(FONT_OF_LIFE_RELIC)) bonus += FONT_OF_LIFE_LIFE_POINTS;
   const total = BASE_LIFE_POINTS_99_HP + bonus;
-  return bigBoned ? Math.round(total * BIG_BONED_LIFE_MULTIPLIER) : total;
+  const multiplied = bigBoned ? total * BIG_BONED_LIFE_MULTIPLIER : total;
+  // Havoc Born and Big Boned are both multipliers, so their order does not
+  // matter - see the note in blessingModifiers.js.
+  return Math.round(multiplied * mods.lifeMultiplier);
 }
 
 // Big Boned's second effect: "All damage you deal gains 5% of your maximum life
@@ -141,8 +156,12 @@ export const ICYENIC_FAITH_RELIC = 'Icyenic Faith';
 export const TOME_OF_THE_ICYENE = 'Tome of the Icyene';
 export const ICYENE_PERCENT_PER_PRAYER = 0.2;
 
-export function getTotalPrayerBonus(equipped) {
-  let total = 0;
+// True Equilibrium's prayer bonus lands here rather than being shown on its own
+// card, because prayer bonus is an INPUT: Icyenic Faith turns it into critical
+// strike chance and base ability damage at 0.2% each, so an alignment's +5 is
+// worth +1% of both. Folding it in is what makes that show up.
+export function getTotalPrayerBonus(equipped, { blessings = [] } = {}) {
+  let total = getBlessingModifiers(blessings).prayerFlat;
   for (const item of Object.values(equipped)) total += item.stats?.prayerBonus || 0;
   return total;
 }
@@ -239,8 +258,8 @@ export function getAegisFromArmour({ weaponName, offhandName, base, overloaded =
 
 // The same, derived from the worn gear rather than from precomputed totals -
 // what a user-submitted build needs, since nobody hand-supplies its armour.
-export function getAegisBreakdown({ equipped, style, weaponName, offhandName, hasElder }) {
-  const armourAt = (defenceLevel) => getTotalArmour(equipped, style, defenceLevel);
+export function getAegisBreakdown({ equipped, style, weaponName, offhandName, hasElder, blessings = [] }) {
+  const armourAt = (defenceLevel) => getTotalArmour(equipped, style, defenceLevel, { blessings });
   return getAegisFromArmour({
     weaponName,
     offhandName,
