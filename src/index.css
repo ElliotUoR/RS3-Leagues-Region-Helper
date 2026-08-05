@@ -4652,6 +4652,7 @@ main.abilities-page .gear-item-rows {
 
 .build-stage-tab {
   flex: 1;
+  min-width: 0;
   padding: 7px 12px;
   border: 0;
   background: var(--panel-bg);
@@ -4660,6 +4661,8 @@ main.abilities-page .gear-item-rows {
   font-size: 0.8rem;
   cursor: pointer;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .build-stage-tab.active {

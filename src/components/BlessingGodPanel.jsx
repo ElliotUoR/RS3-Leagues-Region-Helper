@@ -3,50 +3,64 @@ import {
   BLESSING_COLOURS,
   BLESSING_COLOUR_META,
   GOD_TIER_BLESSINGS,
-  resolveGodTier,
+  GOD_TIER_SOURCE_TIERS,
+  resolveGodTierFor,
 } from '../data/blessings';
 
-// The God Tier One power is derived, never picked - it falls out of the colours
-// of the three tier picks (2+ of a colour wins; 1-of-each falls back to green).
-// This panel exists to make that rule legible rather than magical: it shows the
-// running colour tally, names the rule that fired, and marks which of the three
-// powers you are currently on track for.
+const GOD_TIER_TITLES = { 1: 'God Tier One', 2: 'God Tier Two' };
+
+// A god power is derived, never picked - it falls out of the colours of one
+// HALF of the tree (2+ of a colour wins; 1-of-each falls back to green). Tiers
+// 1-3 award God Tier One, tiers 4-6 award God Tier Two, and the two resolve
+// independently. This panel exists to make that rule legible rather than
+// magical: it shows the running colour tally for its own half, names the rule
+// that fired, and marks which of the three powers you are on track for.
 //
 // It stays visible with an incomplete selection on purpose. Watching the
 // awarded power change as the second pick lands is the clearest way to explain
 // the mechanic, so a partial tally is shown as provisional rather than hidden.
-export default function BlessingGodPanel({ selectedBlessings }) {
-  const picked = selectedBlessings.length;
+//
+// `selectedBlessings` may be the WHOLE six-pick selection - the panel filters
+// down to its own half, so both instances take the same prop.
+export default function BlessingGodPanel({ selectedBlessings, godTier = 1 }) {
+  const fromTiers = GOD_TIER_SOURCE_TIERS[godTier] ?? [];
+  const mine = selectedBlessings.filter((b) => fromTiers.includes(b.tier));
+  const picked = mine.length;
+  const total = fromTiers.length;
   const counts = Object.fromEntries(
-    BLESSING_COLOURS.map((colour) => [colour, selectedBlessings.filter((b) => b.colour === colour).length]),
+    BLESSING_COLOURS.map((colour) => [colour, mine.filter((b) => b.colour === colour).length]),
   );
   const majorityColour = BLESSING_COLOURS.find((colour) => counts[colour] >= 2);
 
-  // resolveGodTier answers "what would these picks award" and falls back to
-  // green whenever no colour has two - correct for a finished set of three, but
-  // it would show green as "on track" off a single red pick. So the outcome is
+  // resolveGodTierFor answers "what would these picks award" and falls back to
+  // green whenever no colour has two - correct for a finished half, but it
+  // would show green as "on track" off a single red pick. So the outcome is
   // only surfaced once it is actually settled: either a colour has reached two
-  // (which no third pick can overturn) or all three picks are in.
-  const settled = Boolean(majorityColour) || picked === 3;
-  const awarded = settled ? resolveGodTier(selectedBlessings.map((b) => b.colour)) : null;
+  // (which no later pick can overturn) or every pick in this half is in.
+  const settled = Boolean(majorityColour) || picked === total;
+  const awarded = settled ? resolveGodTierFor(godTier, mine) : null;
+
+  const tierRange = `${fromTiers[0]}-${fromTiers[fromTiers.length - 1]}`;
 
   let ruleText;
   if (picked === 0) {
-    ruleText = 'Pick a blessing from each tier and the god power resolves from their colours.';
+    ruleText = `Pick a blessing from tiers ${tierRange} and this god power resolves from their colours.`;
   } else if (majorityColour) {
     const meta = BLESSING_COLOUR_META[majorityColour];
     ruleText = `${counts[majorityColour]} ${majorityColour} of ${picked} - a colour with two or more picks wins, so ${meta.god} takes it.`;
-  } else if (picked === 3) {
+  } else if (picked === total) {
     ruleText = 'One of each colour - no majority, so the tie falls to green (Guthix, balance).';
   } else {
-    ruleText = `${picked} of 3 picked - no colour has two yet, so this is still provisional.`;
+    ruleText = `${picked} of ${total} picked - no colour has two yet, so this is still provisional.`;
   }
+
+  const powers = GOD_TIER_BLESSINGS.filter((power) => power.godTier === godTier);
 
   return (
     <section className={`god-panel${awarded ? ` god-panel-${awarded.colour}` : ''}`}>
       <div className="god-panel-head">
-        <h2 className="god-panel-title">God Tier One</h2>
-        <span className="god-panel-derived">Awarded, not picked</span>
+        <h2 className="god-panel-title">{GOD_TIER_TITLES[godTier]}</h2>
+        <span className="god-panel-derived">From tiers {tierRange} - awarded, not picked</span>
       </div>
 
       <div className="god-panel-tally" aria-label="Colour tally">
@@ -68,7 +82,7 @@ export default function BlessingGodPanel({ selectedBlessings }) {
       <p className="god-panel-rule">{ruleText}</p>
 
       <div className="god-panel-powers">
-        {GOD_TIER_BLESSINGS.map((power) => {
+        {powers.map((power) => {
           const isAwarded = awarded?.name === power.name;
           return (
             <article
@@ -80,7 +94,7 @@ export default function BlessingGodPanel({ selectedBlessings }) {
                 {power.icon && <RetryImage src={power.icon} alt="" loading="eager" className="god-power-icon" />}
                 <span className="god-power-name">{power.name}</span>
                 {isAwarded && (
-                  <span className="god-power-badge">{picked === 3 ? 'Awarded' : 'Locked in'}</span>
+                  <span className="god-power-badge">{picked === total ? 'Awarded' : 'Locked in'}</span>
                 )}
               </header>
               <ul className="god-power-effects">

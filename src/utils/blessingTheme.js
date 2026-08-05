@@ -1,4 +1,4 @@
-import { BLESSINGS, resolveGodTier } from '../data/blessings';
+import { BLESSINGS, isGodTierSettled, resolveGodTierFor } from '../data/blessings';
 
 // Turns a build's blessing picks into a colour theme.
 //
@@ -11,17 +11,21 @@ import { BLESSINGS, resolveGodTier } from '../data/blessings';
 const COLOUR_HEX = { red: '#ef5350', green: '#3fbf6f', blue: '#4a90e2' };
 const COLOUR_ORDER = ['red', 'green', 'blue'];
 
-// resolveGodTier falls back to green whenever no colour has two picks, so
-// asking it before a build has actually settled would invent a green vote for
-// what is really an undecided build. Same "settled or nothing" rule the share
-// image renderer uses (see server/src/lib/buildGuideShare.js).
-function godColourFor(colours) {
-  const majority = COLOUR_ORDER.find((colour) => colours.filter((c) => c === colour).length >= 2);
-  const settled = Boolean(majority) || colours.length === 3;
-  return settled ? resolveGodTier(colours)?.colour ?? null : null;
+// resolveGodTierFor falls back to green whenever no colour in that half has two
+// picks, so asking before a half has actually settled would invent a green vote
+// for what is really an undecided build. Same "settled or nothing" rule the
+// share image renderer uses (see server/src/lib/buildGuideShare.js).
+//
+// Takes NAMES, not colours: each god power reads only its own half of the tree,
+// and a bare colour carries no tier to tell the halves apart.
+function godColoursFor(blessingNames) {
+  return [1, 2]
+    .filter((godTier) => isGodTierSettled(godTier, blessingNames))
+    .map((godTier) => resolveGodTierFor(godTier, blessingNames)?.colour ?? null)
+    .filter(Boolean);
 }
 
-// { red, green, blue } counts including the god power's vote.
+// { red, green, blue } counts including each settled god power's vote.
 export function blessingColourTally(blessingNames = []) {
   const colours = blessingNames
     .map((name) => BLESSINGS.find((blessing) => blessing.name === name)?.colour)
@@ -30,8 +34,10 @@ export function blessingColourTally(blessingNames = []) {
   const tally = { red: 0, green: 0, blue: 0 };
   for (const colour of colours) tally[colour] += 1;
 
-  const god = godColourFor(colours);
-  if (god) tally[god] += 1;
+  // Both god powers vote, for the same reason the first one always has: a
+  // six-pick build leaning blue in both halves is really eight blue votes, and
+  // the theme should read that way.
+  for (const god of godColoursFor(blessingNames)) tally[god] += 1;
   return tally;
 }
 

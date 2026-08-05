@@ -7,7 +7,12 @@
 // possible for a plain shareable URL - see routes/buildGuidePage.js for why the
 // hash form (#build-guides/<id>) cannot work.
 import { BLESSING_BUILDS_EXAMPLES } from '../../../src/data/blessingBuilds.js';
-import { BLESSINGS, GOD_TIER_BLESSINGS, resolveGodTier } from '../../../src/data/blessings.js';
+import {
+  BLESSINGS,
+  GOD_TIER_BLESSINGS,
+  isGodTierSettled,
+  resolveGodTierFor,
+} from '../../../src/data/blessings.js';
 import { LEAGUE_RELICS } from '../../../src/data/leagueRelics.js';
 import { GATEWAY_REGIONS, OPTIONAL_REGIONS, REGIONS } from '../../../src/data/regions.js';
 import { COMBAT_STYLES, ESSENCE_OF_FINALITY_NAMES } from '../../../src/data/gear.js';
@@ -27,20 +32,23 @@ export function findBuildGuide(id) {
   return BUILD_BY_ID.get(id) ?? null;
 }
 
-// Same "settled or nothing" rule the Blessings page uses: the God Tier One
-// power only joins the icons once a colour has two picks or all three tiers are
-// in, because resolveGodTier falls back to green whenever no colour has two.
+// Same "settled or nothing" rule the Blessings page uses - see
+// isGodTierSettled in src/data/blessings.js.
 function blessingIconsFor(blessingNames) {
   const picks = (blessingNames ?? [])
     .map((name) => BLESSINGS.find((b) => b.name === name))
     .filter(Boolean);
-  const colours = picks.map((b) => b.colour);
-  const majority = ['red', 'green', 'blue'].find(
-    (colour) => colours.filter((c) => c === colour).length >= 2,
-  );
-  const settled = Boolean(majority) || picks.length === 3;
-  const god = settled ? resolveGodTier(colours) : null;
-  const all = god ? [...picks, GOD_TIER_BLESSINGS.find((p) => p.name === god.name)] : picks;
+  // One god power per HALF of the tree - tiers 1-3 award God Tier One, tiers
+  // 4-6 award God Tier Two - and each is only drawn once its own half has
+  // settled, since resolveGodTierFor falls back to green whenever no colour in
+  // that half has two picks. A three-pick build (every curated guide, and most
+  // submissions) simply produces no second power, exactly as before.
+  const gods = [1, 2]
+    .filter((godTier) => isGodTierSettled(godTier, picks))
+    .map((godTier) => resolveGodTierFor(godTier, picks))
+    .filter(Boolean)
+    .map((god) => GOD_TIER_BLESSINGS.find((p) => p.name === god.name));
+  const all = [...picks, ...gods];
   return all.filter(Boolean).map((b) => ({ icon: b.icon, colour: b.colour, name: b.name }));
 }
 

@@ -503,6 +503,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                       role="tab"
                       aria-selected={stage === entry.id}
                       className={`build-stage-tab${stage === entry.id ? ' active' : ''}`}
+                      title={entry.label}
                       onClick={() => setStage(entry.id)}
                     >
                       {entry.label}
@@ -560,6 +561,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
               slots={loadout.slots}
               blessings={build.blessings}
               godTier={build.godTier}
+              godTier2={build.godTier2}
               leagueRelics={build.relics}
               archRelics={archRelicNames}
               armour={{

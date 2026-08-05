@@ -151,6 +151,7 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
           difficultyNote={build.difficultyNote}
           blessings={build.blessings}
           godTier={build.godTier}
+          godTier2={build.godTier2}
           relics={build.relics}
           styles={build.styles}
         />
@@ -259,6 +260,7 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
                         role="tab"
                         aria-selected={stageIndex === index}
                         className={`build-stage-tab${stageIndex === index ? ' active' : ''}`}
+                        title={s.label}
                         onClick={() => setStageIndex(index)}
                       >
                         {s.label}

@@ -16,7 +16,7 @@ import { sanitizeRegionSelection } from '../hooks/useRegionSelection';
 import { sanitizeLeagueRelicSelection } from '../hooks/useLeagueRelicSelection';
 import { sanitizeRelicSelection } from '../hooks/useRelicSelection';
 import { sanitizeBlessingSelection } from '../hooks/useBlessingSelection';
-import { resolveGodTier } from '../data/blessings';
+import { isGodTierSettled, resolveGodTierFor } from '../data/blessings';
 import { sanitizeBuildExtras } from '../data/buildExtras';
 
 export const MAX_LENGTHS = {
@@ -133,11 +133,17 @@ export function sanitizeUserBuildPayload(raw) {
   const regions = sanitizeRegionSelection(raw.regions);
   const relics = sanitizeLeagueRelicSelection(raw.relics);
   const archRelics = sanitizeRelicSelection(raw.archRelics);
-  // Blessings are optional for a user build (unlike curated guides, not
-  // every submission is a min-maxed endgame loadout) - only resolves a god
-  // tier once all three tiers are actually picked.
+  // Blessings are optional for a user build (unlike curated guides, not every
+  // submission is a min-maxed endgame loadout), so each god power only resolves
+  // once its own half of the tree has settled - see isGodTierSettled.
+  //
+  // `godTier` keeps its original meaning (God Tier One, from tiers 1-3) rather
+  // than becoming a list: it is a stored payload field, and every build written
+  // before tiers 4-6 existed has one. `godTier2` is new and simply absent from
+  // those, which reads correctly as "no second god power".
   const blessings = sanitizeBlessingSelection(raw.blessings);
-  const godTier = blessings.length === 3 ? resolveGodTier(blessings)?.name ?? null : null;
+  const godTier = isGodTierSettled(1, blessings) ? resolveGodTierFor(1, blessings)?.name ?? null : null;
+  const godTier2 = isGodTierSettled(2, blessings) ? resolveGodTierFor(2, blessings)?.name ?? null : null;
 
   const tradeoffs = Array.isArray(raw.tradeoffs)
     ? raw.tradeoffs
@@ -155,6 +161,7 @@ export function sanitizeUserBuildPayload(raw) {
     styles,
     blessings,
     godTier,
+    godTier2,
     relics,
     relicReasons: sanitizeReasons(raw.relicReasons, relics),
     archRelics,

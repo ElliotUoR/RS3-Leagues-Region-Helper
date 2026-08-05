@@ -9,7 +9,7 @@ import { hasEditAccess } from '../utils/myBuilds';
 import { userBuildCounterKey } from '../utils/usageKeys';
 import { sanitizeBlessingSelection } from '../hooks/useBlessingSelection';
 import { sanitizeLeagueRelicSelection } from '../hooks/useLeagueRelicSelection';
-import { resolveGodTier } from '../data/blessings';
+import { isGodTierSettled, resolveGodTierFor } from '../data/blessings';
 
 // The listing hands over the blessing/relic names straight out of the stored
 // payload, which is opaque JSON server-side - so they go through the same
@@ -18,14 +18,16 @@ import { resolveGodTier } from '../data/blessings';
 // than merely similar: same names, same order, same two-picks-in-one-tier
 // resolution.
 //
-// The god power is not stored at all - only the three tier picks are, and it
-// is derived from them on read - so it is derived here too.
+// The god powers are not stored at all - only the tier picks are, and they are
+// derived from them on read - so they are derived here too. One per half of the
+// tree, each only once that half has settled (see isGodTierSettled).
 function summaryMeta(summary) {
   const blessings = sanitizeBlessingSelection(summary.blessings);
   return {
     blessings,
     relics: sanitizeLeagueRelicSelection(summary.relics),
-    godTier: blessings.length === 3 ? resolveGodTier(blessings)?.name ?? null : null,
+    godTier: isGodTierSettled(1, blessings) ? resolveGodTierFor(1, blessings)?.name ?? null : null,
+    godTier2: isGodTierSettled(2, blessings) ? resolveGodTierFor(2, blessings)?.name ?? null : null,
   };
 }
 
@@ -242,6 +244,7 @@ export default function UserBuildListItem({
           difficultyNote={summary.difficultyNote}
           blessings={meta.blessings}
           godTier={meta.godTier}
+          godTier2={meta.godTier2}
           relics={meta.relics}
           styles={summary.styles}
         />

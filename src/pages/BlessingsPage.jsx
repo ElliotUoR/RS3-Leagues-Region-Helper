@@ -161,7 +161,8 @@ export default function BlessingsPage({
           );
         })}
 
-        <BlessingGodPanel selectedBlessings={selectedBlessings} />
+        <BlessingGodPanel selectedBlessings={selectedBlessings} godTier={1} />
+        <BlessingGodPanel selectedBlessings={selectedBlessings} godTier={2} />
 
         <section className="dev-note">
           <p>

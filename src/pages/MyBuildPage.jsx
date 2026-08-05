@@ -456,7 +456,12 @@ export default function MyBuildPage({
               </div>
             </div>
           ))}
-          {selectedBlessingObjects.length > 0 && <BlessingGodPanel selectedBlessings={selectedBlessingObjects} />}
+          {selectedBlessingObjects.length > 0 && (
+            <>
+              <BlessingGodPanel selectedBlessings={selectedBlessingObjects} godTier={1} />
+              <BlessingGodPanel selectedBlessings={selectedBlessingObjects} godTier={2} />
+            </>
+          )}
         </BuildSection>
 
         <BuildSection

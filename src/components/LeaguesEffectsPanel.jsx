@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import RetryImage from './RetryImage';
 import { ARCH_RELIC_BY_NAME, BLESSING_BY_NAME } from '../data/buildLookups';
-import { BLESSING_COLOURS, resolveGodTier } from '../data/blessings';
+import { isGodTierSettled, resolveGodTierFor } from '../data/blessings';
 import { blessingColourTally, blessingGradient, dominantBlessingColour } from '../utils/blessingTheme';
 import { BUILD_EXTRA_BY_NAME, extraLifePoints } from '../data/buildExtras';
 import {
@@ -110,18 +110,20 @@ const REFLECT_ARMOUR_SHARE = [0.1, 0.15];
 const round = (n) => (Math.round(n) + 0).toLocaleString();
 const iconFor = (name) => BLESSING_BY_NAME.get(name)?.icon;
 
-// Saved builds store their god power; the build editor has not settled on one
-// yet, so it is derived from the picks instead.
+// Saved builds store their god powers; the build editor has not settled on them
+// yet, so they are derived from the picks instead. Two of them now - tiers 1-3
+// award God Tier One, tiers 4-6 award God Tier Two - and each is only named
+// once its own half has settled, because resolveGodTierFor falls back to green
+// whenever no colour in that half has two picks and would otherwise name a
+// power the build has not earned.
 //
-// "Settled" is the same rule blessingTheme.js applies, and for the same reason:
-// resolveGodTier falls back to green whenever no colour has two picks, so
-// asking it about a half-finished set would name a god power the build has not
-// actually earned.
-function godTierFor(godTier, blessings) {
-  if (godTier) return godTier;
-  const colours = blessings.map((name) => BLESSING_BY_NAME.get(name)?.colour).filter(Boolean);
-  const settled = colours.length === 3 || BLESSING_COLOURS.some((c) => colours.filter((x) => x === c).length >= 2);
-  return settled ? resolveGodTier(colours)?.name ?? null : null;
+// `stored` is the payload's own value for that tier when there is one (curated
+// guides and saved user builds carry it), and wins over derivation.
+function godTierFor(godTier, stored, blessings) {
+  if (stored) return stored;
+  return isGodTierSettled(godTier, blessings)
+    ? resolveGodTierFor(godTier, blessings)?.name ?? null
+    : null;
 }
 
 const strong = (text) => ({ text, tone: 'strong' });
@@ -231,7 +233,6 @@ function adrenalineCard(adrenaline, blessings) {
       // is not one of them - typesetting it the same way overstates it.
       adrenaline.fury && { text: 'Basic abilities generate 1% more adrenaline' },
       adrenaline.fury && muted(`${FURY_OF_THE_SMALL_RELIC} - Arch relic.`),
-      adrenaline.generation,
     ].filter(Boolean),
   };
 }
@@ -342,7 +343,7 @@ function sliverCard({ armourAt, sliverArmour }) {
 }
 
 function buildCards(context) {
-  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour } =
+  const { blessings, style, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour, resolvedGodTier2 } =
     context;
   const cards = [];
   const picked = (name) => blessings.includes(name);
@@ -442,10 +443,15 @@ function buildCards(context) {
     });
   }
 
-  const godPower = resolvedGodTier ? BLESSING_BY_NAME.get(resolvedGodTier) : null;
-  if (godPower) {
+  // One card per awarded god power. Both are pushed in tier order, so a build
+  // that has settled only its first half still shows that one rather than
+  // nothing - the same "show it as soon as it is real" rule the rest of this
+  // panel follows.
+  for (const name of [resolvedGodTier, resolvedGodTier2]) {
+    const godPower = name ? BLESSING_BY_NAME.get(name) : null;
+    if (!godPower) continue;
     cards.push({
-      key: 'god-power',
+      key: `god-power-${godPower.godTier ?? 1}`,
       name: godPower.name,
       icon: godPower.icon,
       isGod: true,
@@ -455,7 +461,9 @@ function buildCards(context) {
         // multi-target attacks", "per tile the target occupies". Chinchompas
         // satisfy the first one on every hit, so for this loadout the whole
         // card collapses to one unconditional sentence.
-        chinSplash && strong(`With chins you always deal ${SPLASH_ZONE_AOE_BONUS}% more damage`),
+        chinSplash &&
+          godPower.name === 'Splash Zone' &&
+          strong(`With chins you always deal ${SPLASH_ZONE_AOE_BONUS}% more damage`),
       ].filter(Boolean),
     });
   }
@@ -468,6 +476,7 @@ export default function LeaguesEffectsPanel({
   slots,
   blessings = [],
   godTier,
+  godTier2,
   leagueRelics = [],
   archRelics = [],
   extras = [],
@@ -578,7 +587,8 @@ export default function LeaguesEffectsPanel({
   // Saradomin - is a share of the FINISHED ability damage, not of the base.
   const totalAD = damage?.compounding ?? null;
 
-  const resolvedGodTier = godTierFor(godTier, blessings);
+  const resolvedGodTier = godTierFor(1, godTier, blessings);
+  const resolvedGodTier2 = godTierFor(2, godTier2, blessings);
   const chinSplash = hasChinchompaSplashZone(resolvedGodTier, equipped);
 
   // Splash Zone is a multiplier on damage dealt rather than on the ability
@@ -622,6 +632,7 @@ export default function LeaguesEffectsPanel({
     adrenaline,
     extras,
     resolvedGodTier,
+    resolvedGodTier2,
     chinSplash,
     hasSliver,
     baseArmour,

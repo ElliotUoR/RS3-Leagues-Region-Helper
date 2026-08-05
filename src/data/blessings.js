@@ -5,14 +5,21 @@
 // writing, same situation leagueRelics.js's Divine Druid/Transmutation entries
 // were in before the wiki caught up.
 //
-// STRUCTURE. A run picks exactly one blessing from each of the three tiers.
-// Every tier offers the same three colours - red, green, blue - and the colours
-// of your three picks determine which God Tier One power you receive:
+// STRUCTURE. A run picks exactly one blessing from each of the six tiers.
+// Every tier offers the same three colours - red, green, blue - and each HALF
+// of the tree awards its own god power from the colours of that half's picks:
+//
+//   tiers 1-3 -> God Tier One   (Demon's Mark / Splash Zone / Sacred Fervor)
+//   tiers 4-6 -> God Tier Two   (Chaotic Insight / Power Archive / Genesis Essence)
+//
+// Within a half the rule is unchanged:
 //
 //   2 or 3 of a colour  -> that colour's god power
-//   1 of each           -> green (Splash Zone)
+//   1 of each           -> green
 //
-// See `resolveGodTier()` at the bottom, which implements exactly that rule.
+// So the two god powers are independent - a red-leaning first half and a
+// green-leaning second half award Demon's Mark AND Power Archive. See
+// `resolveGodTierFor()` at the bottom, which implements exactly that.
 //
 // Blessings are RESETTABLE mid-league, which is why `analysis.stageRank` grades
 // each one separately for early/mid/late game rather than giving a single
@@ -51,12 +58,19 @@ export const BLESSING_COLOURS = ['red', 'green', 'blue'];
 // page leans on it so the three columns are identifiable at a glance without
 // relying on colour alone.
 export const BLESSING_COLOUR_META = {
-  red: { god: 'Zamorak', theme: 'Chaos', godPower: "Demon's Mark" },
-  green: { god: 'Guthix', theme: 'Balance', godPower: 'Splash Zone' },
-  blue: { god: 'Saradomin', theme: 'Order & Wisdom', godPower: 'Sacred Fervor' },
+  red: { god: 'Zamorak', theme: 'Chaos', godPower: "Demon's Mark", godPower2: 'Chaotic Insight' },
+  green: { god: 'Guthix', theme: 'Balance', godPower: 'Splash Zone', godPower2: 'Power Archive' },
+  blue: {
+    god: 'Saradomin',
+    theme: 'Order & Wisdom',
+    godPower: 'Sacred Fervor',
+    godPower2: 'Genesis Essence',
+  },
 };
 
-export const BLESSING_TIERS = [1, 2, 3];
+// Six tiers now, and they split cleanly in half: tiers 1-3 award God Tier One,
+// tiers 4-6 award God Tier Two. See GOD_TIER_SOURCE_TIERS below.
+export const BLESSING_TIERS = [1, 2, 3, 4, 5, 6];
 
 // Transcribed verbatim from Jagex's "Blessing Passives Revealed" promo image -
 // a SEPARATE progression track from BLESSING_TIERS above. BLESSING_TIERS is
@@ -506,15 +520,301 @@ export const BLESSINGS = [
       ],
     },
   },
+
+  // --------------------------------------------------------------- TIER FOUR
+  // Tiers 4-6 and God Tier Two transcribed from Jagex's later "Blessing Reveal"
+  // images. Icons are crops from those reveals, kept in `image/Blessing icon/`
+  // and copied into public/icons/blessings/ under the same
+  // Title_Case_Underscored names the original twelve use. They are .png rather
+  // than the earlier set's .webp - both decode in @napi-rs/canvas, which is the
+  // constraint that matters (see the icon note at the top of this file).
+  //
+  // `analysis` on these is deliberately thinner than on tiers 1-3. Those were
+  // costed against the derivations in `opus combat notes/`; these are new, and
+  // several of them (Higher Power's ultimate lockout, True Equilibrium's
+  // per-alignment scaling) change the shape of a rotation rather than adding a
+  // number to it, so a precise DPM figure here would be invented rather than
+  // derived. The summaries state what is actually known.
+  {
+    name: 'Havoc Born',
+    tier: 4,
+    colour: 'red',
+    icon: 'icons/blessings/Havoc_Born.png',
+    effects: [
+      'Your damage is increased by 20%.',
+      'Your maximum life points are reduced by 25%.',
+      'Your armour value is reduced by 25%.',
+    ],
+    compactPoints: [
+      '+20% damage',
+      '-25% maximum life points',
+      '-25% armour value',
+    ],
+    analysis: {
+      summary:
+        "A flat +20% damage bought with a quarter of your health and a quarter of your armour. The armour half is the expensive one on this league's builds: armour is the input to Teragard's Aegis, Barkscales and Steadfast Will, so -25% armour is also -25% of whatever those pay out.",
+      stageRank: { early: 3, mid: 3, late: 3 },
+      scalesWithSkill: true,
+      requiresShield: false,
+      synergies: [],
+      // Anything reading max LP or armour pays for this twice - it loses the
+      // stat AND the blessing that scales off it.
+      antiSynergies: ["Teragard's Aegis", 'Big Boned', 'Barkscales', 'Steadfast Will'],
+      styleNotes: {},
+    },
+  },
+  {
+    name: 'True Equilibrium',
+    tier: 4,
+    colour: 'green',
+    icon: 'icons/blessings/True_Equilibrium.png',
+    effects: [
+      'Gain 75 base ability damage, 50 armour, 500 life points, 5% critical strike chance, 7.5% critical strike damage and 5 prayer bonus for each relic alignment you have chosen.',
+    ],
+    compactPoints: [
+      'Per relic alignment: +75 ability damage, +50 armour, +500 LP',
+      'Per relic alignment: +5% crit chance, +7.5% crit damage, +5 prayer bonus',
+    ],
+    analysis: {
+      summary:
+        'The only blessing whose payout is set by something outside the blessing screen - it multiplies up with each relic alignment chosen. Every stat it grants is one some other pick already scales off: the prayer bonus feeds Icyenic Faith, the life points feed Big Boned, the armour feeds Aegis.',
+      // Deliberately no estimatedGain. "Relic alignment" is not a quantity this
+      // app models, and the payout is that count times six separate stats, so a
+      // single figure would mean guessing the count.
+      stageRank: { early: 2, mid: 2, late: 2 },
+      scalesWithSkill: false,
+      requiresShield: false,
+      synergies: ["Teragard's Aegis", 'Big Boned', 'Icyenic Faith'],
+      styleNotes: {},
+    },
+  },
+  {
+    name: 'Higher Power',
+    tier: 4,
+    colour: 'blue',
+    icon: 'icons/blessings/Higher_Power.png',
+    effects: [
+      'Your base ability damage is increased by 30%.',
+      "You lose access to the Berserk, Death's Swiftness, Living Death, and Sunshine abilities.",
+    ],
+    compactPoints: [
+      '+30% base ability damage',
+      "No Berserk, Death's Swiftness, Living Death or Sunshine",
+    ],
+    analysis: {
+      summary:
+        "+30% base ability damage, paid for with your style's damage ultimate. It trades a large multiplier you choose the timing of for a smaller one that is always on - an upgrade for anyone not getting full value out of ultimate windows, a downgrade for anyone who was.",
+      stageRank: { early: 1, mid: 2, late: 3 },
+      // The one blessing whose value goes DOWN as execution improves: the
+      // better your ultimate uptime, the more the lockout costs.
+      scalesWithSkill: false,
+      requiresShield: false,
+      synergies: [],
+      // Adrenaline Junkie's whole case is ultimate quality and frequency.
+      // Removing the ultimate removes the case.
+      antiSynergies: ['Adrenaline Junkie'],
+      styleNotes: {},
+    },
+  },
+
+  // --------------------------------------------------------------- TIER FIVE
+  // Tier 5 introduces the three named procs that tier 6's Perfidious then
+  // empowers - Inferno of Zamorak, Grasp of Guthix and Light of Saradomin. Two
+  // of those names already appear on tier 2/3 blessings (Abyssal Cinders
+  // carries Inferno of Zamorak, Barkscales carries Grasp of Guthix), which is
+  // the clearest signal in this data that the two halves of the tree are meant
+  // to be built together.
+  {
+    // "Critual" is Jagex's own spelling on the reveal image, not a
+    // transcription slip. Left as-is because this string is the key every other
+    // file matches on; correcting it here would orphan any build storing it.
+    name: 'Unholy Critual',
+    tier: 5,
+    colour: 'red',
+    icon: 'icons/blessings/Unholy_Critual.png',
+    effects: [
+      'Gain +15% critical strike chance.',
+      'Your critical strike chance is capped at 50%.',
+      'All excess critical strike chance is converted into critical strike damage at a 1:1 ratio.',
+      'Inferno of Zamorak gains +50% critical strike damage.',
+      'On critical strike: unleash an Inferno of Zamorak.',
+      'Inferno of Zamorak: deals 100-200% ability damage to a single target.',
+    ],
+    compactPoints: [
+      '+15% critical strike chance, capped at 50%',
+      'Excess crit chance becomes crit damage 1:1',
+      'Critical strikes unleash an Inferno of Zamorak',
+    ],
+    analysis: {
+      summary:
+        'Turns critical strike chance into a resource that never wastes: past the 50% cap every further point becomes critical strike damage instead. The cap is the point - it keeps crit chance from every other source paying after saturation.',
+      stageRank: { early: 3, mid: 2, late: 1 },
+      scalesWithSkill: false,
+      requiresShield: false,
+      // Icyenic Faith converts prayer bonus into crit chance, which this then
+      // converts into crit damage past 50%. True Equilibrium grants both crit
+      // stats directly, per alignment.
+      synergies: ['Icyenic Faith', 'True Equilibrium', 'Abyssal Cinders', 'Perfidious'],
+      styleNotes: {},
+    },
+  },
+  {
+    name: 'Tearing Thorns',
+    tier: 5,
+    colour: 'green',
+    icon: 'icons/blessings/Tearing_Thorns.png',
+    effects: [
+      'Damage over time abilities last 100% longer.',
+      'Every 5th hit of a damage over time ability triggers a Grasp of Guthix.',
+      'Grasp of Guthix deals additional damage equal to 20-30% of your maximum life points.',
+      'Grasp of Guthix: deals poison damage equal to 80-120% of your ability damage in a 3x3.',
+    ],
+    compactPoints: [
+      'Damage over time abilities last 100% longer',
+      'Every 5th DoT hit triggers a Grasp of Guthix',
+      'Grasp of Guthix adds 20-30% of maximum life points',
+    ],
+    analysis: {
+      summary:
+        'Doubles DoT duration, which doubles the hit count feeding the every-5th-hit trigger, then pays each Grasp a share of max life points on top of its ability damage. That life points term is what makes this scale with Big Boned rather than with gear.',
+      stageRank: { early: 3, mid: 2, late: 2 },
+      scalesWithSkill: false,
+      requiresShield: false,
+      synergies: ['Big Boned', 'Barkscales', 'Envenomed', 'Perfidious'],
+      styleNotes: {
+        necromancy:
+          'Necromancy runs the most damage-over-time in the game, so it reaches the every-5th-hit trigger fastest.',
+      },
+    },
+  },
+  {
+    name: 'Lord of Light',
+    tier: 5,
+    colour: 'blue',
+    icon: 'icons/blessings/Lord_of_Light.png',
+    effects: [
+      'Your basic attacks trigger 5x Light of Saradomin at random tiles near your target, each damaging up to 8 targets within 1 tile. 14.4s CD',
+      'Light of Saradomin deal 2% increased damage for each point of prayer bonus you have.',
+      'Light of Saradomin now heals you for 5% of damage dealt.',
+      'Light of Saradomin: deals damage equal to 40-60% of your ability damage, plus 250% of your armour value.',
+    ],
+    compactPoints: [
+      'Basic attacks trigger 5x Light of Saradomin (14.4s CD)',
+      '+2% Light of Saradomin damage per point of prayer bonus',
+      'Light of Saradomin heals for 5% of damage dealt',
+    ],
+    analysis: {
+      summary:
+        'The heaviest armour-scaling line in the tree: each Light of Saradomin carries 250% of your armour value, and it fires five at a time. The prayer-bonus term stacks a second multiplier on top of that, off a stat nothing else in the tree spends.',
+      stageRank: { early: 3, mid: 1, late: 1 },
+      scalesWithSkill: false,
+      // Not a hard requirement, but 250% of armour per proc x5 is exactly what
+      // the shield builds already exist to maximise.
+      requiresShield: false,
+      synergies: ["Teragard's Aegis", 'Icyenic Faith', 'Striking Light', 'Perfidious'],
+      styleNotes: {},
+    },
+  },
+
+  // ---------------------------------------------------------------- TIER SIX
+  {
+    // "Empower's" is Jagex's spelling on the reveal image - kept verbatim in
+    // `effects` for the same reason as Unholy Critual above.
+    name: 'Perfidious',
+    tier: 6,
+    colour: 'red',
+    icon: 'icons/blessings/Perfidious.png',
+    effects: [
+      "Empower's Inferno of Zamorak, Grasp of Guthix, Light of Saradomin.",
+      'Inferno of Zamorak activation chance is increased by 5x.',
+      'Grasp of Guthix activation requirement is reduced to 2.',
+      "Light of Saradomin's cooldown is reduced to 4.8s.",
+    ],
+    compactPoints: [
+      'Inferno of Zamorak activation chance x5',
+      'Grasp of Guthix triggers every 2nd hit instead of 5th',
+      "Light of Saradomin's cooldown 14.4s -> 4.8s",
+    ],
+    analysis: {
+      summary:
+        'Pays out only through the three named procs, and pays enormously: 5x the Inferno rate, Grasp on every 2nd hit instead of every 5th, and Light of Saradomin at a third of its cooldown. Worth close to nothing on a build carrying none of them.',
+      stageRank: { early: 3, mid: 2, late: 1 },
+      scalesWithSkill: false,
+      requiresShield: false,
+      // The procs come from tier 2/3 (Abyssal Cinders, Barkscales) and tier 5
+      // (all three). This is the multiplier those exist to feed.
+      synergies: ['Abyssal Cinders', 'Barkscales', 'Unholy Critual', 'Tearing Thorns', 'Lord of Light'],
+      styleNotes: {},
+    },
+  },
+  {
+    name: 'Envenomed',
+    tier: 6,
+    colour: 'green',
+    icon: 'icons/blessings/Envenomed.png',
+    effects: [
+      'Poison damage is increased by 50% + an additional 2% per Herblore level.',
+      'Damaging an enemy disables their poison immunity for 30s.',
+    ],
+    compactPoints: [
+      '+50% poison damage, +2% more per Herblore level',
+      'Damaging an enemy strips poison immunity for 30s',
+    ],
+    analysis: {
+      summary:
+        'At 99 Herblore the first line is +248% poison damage. The second is what decides whether that matters: poison immunity is what normally rules poison out of endgame PvM, and this removes it on anything you have hit.',
+      // Grasp of Guthix deals POISON damage (see Barkscales and Tearing
+      // Thorns), so this multiplies the green proc rather than only weapon
+      // poison - which is what makes it a combat pick rather than a Herblore one.
+      estimatedGain: '+248% poison damage at 99 Herblore',
+      stageRank: { early: 3, mid: 2, late: 2 },
+      scalesWithSkill: false,
+      requiresShield: false,
+      synergies: ['Barkscales', 'Tearing Thorns', 'Perfidious'],
+      styleNotes: {},
+    },
+  },
+  {
+    name: 'Tempered Heart',
+    tier: 6,
+    colour: 'blue',
+    icon: 'icons/blessings/Tempered_Heart.png',
+    effects: ['Generate 6% adrenaline every 1.2s.'],
+    compactPoints: ['+6% adrenaline every 1.2s'],
+    analysis: {
+      summary:
+        'Five percent a second, unconditionally and without spending an action - 100% adrenaline every 20 seconds without attacking anything. It removes the build-up phase from a rotation rather than speeding it up.',
+      estimatedGain: '+300% adrenaline per minute, independent of your rotation',
+      stageRank: { early: 1, mid: 1, late: 1 },
+      scalesWithSkill: true,
+      requiresShield: false,
+      // Adrenaline Junkie raises the ceiling this fills toward. Avernic Rampage
+      // makes adrenaline free inside its window, so the two overlap there for
+      // the same reason Adrenaline Junkie does.
+      synergies: ['Adrenaline Junkie'],
+      antiSynergies: ['Avernic Rampage'],
+      styleNotes: {},
+    },
+  },
 ];
 
-// God Tier One powers, awarded automatically from the colours of your three
-// blessing picks rather than chosen directly. Card text is verbatim; `analysis`
-// is app-added.
+// Which blessing tiers each god tier reads its colours from. God Tier One was
+// always the first three; God Tier Two is the direct generalisation onto the
+// second three, so each half of the tree awards its own power independently.
+export const GOD_TIER_SOURCE_TIERS = { 1: [1, 2, 3], 2: [4, 5, 6] };
+
+// God powers, awarded automatically from the colours of your picks rather than
+// chosen directly. Card text is verbatim; `analysis` is app-added.
+//
+// `godTier` (1 or 2) says which half awards it. It is a separate field from
+// `tier`, which stays the literal string 'god' on every entry here - that value
+// is what distinguishes a god power from a numbered blessing throughout the app
+// (see data/tierListItems.js), and repurposing it would have broken that.
 export const GOD_TIER_BLESSINGS = [
   {
     name: "Demon's Mark",
     tier: 'god',
+    godTier: 1,
     colour: 'red',
     icon: 'icons/blessings/Demons_Mark.webp',
     effects: ["Your accuracy is always calculated using your target's weakness."],
@@ -532,6 +832,7 @@ export const GOD_TIER_BLESSINGS = [
   {
     name: 'Splash Zone',
     tier: 'god',
+    godTier: 1,
     colour: 'green',
     icon: 'icons/blessings/Splash_Zone.webp',
     effects: [
@@ -568,6 +869,7 @@ export const GOD_TIER_BLESSINGS = [
   {
     name: 'Sacred Fervor',
     tier: 'god',
+    godTier: 1,
     colour: 'blue',
     icon: 'icons/blessings/Sacred_Fervor.webp',
     effects: [
@@ -583,20 +885,105 @@ export const GOD_TIER_BLESSINGS = [
       estimatedGain: '+15-25% DPM standalone; enables the Revenge engine with Steadfast Will',
     },
   },
+  {
+    name: 'Chaotic Insight',
+    tier: 'god',
+    godTier: 2,
+    colour: 'red',
+    icon: 'icons/blessings/Chaotic_Insight.png',
+    effects: ['Each combat equipment item counts as 2 additional pieces towards its set effect.'],
+    analysis: {
+      summary:
+        'Every worn piece counts triple toward its set effect, so a two-piece wear gets you a five-piece bonus. Under region locking that is the point: it turns the partial sets a limited region pool actually lets you assemble into complete ones.',
+      // Directly relevant to this app's Achto handling - the set effect is
+      // 5% of a t90 main-hand PER PIECE (see utils/abilityDamage.js's
+      // getAchtoBonus), so tripling the count triples that bonus up to the cap.
+      rank: 2,
+      estimatedGain: 'Set effects at full strength from a third of the pieces',
+    },
+  },
+  {
+    name: 'Power Archive',
+    tier: 'god',
+    godTier: 2,
+    colour: 'green',
+    icon: 'icons/blessings/Power_Archive.png',
+    effects: [
+      'Grants the Automaton Control Bot.',
+      'Stores up to 20 weapon or armour gizmos, granting their effects while wearing augmented equipment.',
+      'Combat perks in stored gizmos have their rank doubled, excluding perks that do not benefit from additional ranks.',
+    ],
+    analysis: {
+      summary:
+        'Twenty gizmos active at once with their combat perk ranks doubled, on top of whatever is already on your gear. Perk ranks are normally the hardest-capped damage source in RS3 - this removes both the slot limit and the rank ceiling in one pick.',
+      rank: 1,
+      estimatedGain: 'Every combat perk you can make, at double rank, all at once',
+      caveats: [
+        'Needs augmented equipment worn for the stored gizmos to do anything.',
+        'Gated behind actually having the gizmos - Invention supply is a region and relic question (see Perkfection).',
+      ],
+    },
+  },
+  {
+    name: 'Genesis Essence',
+    tier: 'god',
+    godTier: 2,
+    colour: 'blue',
+    icon: 'icons/blessings/Genesis_Essence.png',
+    effects: ['Your equipped weapons are treated as tier 120.'],
+    analysis: {
+      summary:
+        'Sets every equipped weapon to tier 120 - above anything in the game, and above the tier 95 this app treats as the ceiling. It makes weapon choice a question of special attacks and effects rather than of tier.',
+      // The single largest ability-damage effect in the tree, and the most
+      // mechanical: weapon damage in the formula is the coefficient times the
+      // tier (9.6*t one-handed, 14.4*t two-handed - see utils/abilityDamage.js),
+      // so t120 one-handed is 1,152 and two-handed 1,728. NOT modelled by the
+      // damage panel yet; the numbers there read the weapon's own stored damage.
+      rank: 1,
+      estimatedGain: 'Weapon damage 1,152 (one-handed) / 1,728 (two-handed) regardless of what you wield',
+      caveats: [
+        'Not yet reflected in this app’s ability damage figures - those read each weapon’s stored damage, which is its real tier.',
+      ],
+    },
+  },
 ];
 
-// Resolve which God Tier One power a set of picks awards.
-// Rule: a colour with 2+ picks wins; 1-of-each falls back to green.
-// `picks` is an array of blessing names, colours, or blessing objects.
-export function resolveGodTier(picks) {
+function pickColour(pick) {
+  if (!pick) return null;
+  if (typeof pick === 'object') return pick.colour ?? null;
+  if (BLESSING_COLOURS.includes(pick)) return pick;
+  return BLESSINGS.find((blessing) => blessing.name === pick)?.colour ?? null;
+}
+
+// null for a BARE COLOUR STRING, which carries no tier of its own. That case is
+// load-bearing rather than an oversight: several callers hand over colours they
+// have already narrowed to the half they are asking about, and those must not
+// be filtered out. See the `tier == null` line in resolveGodTierFor.
+function pickTier(pick) {
+  if (!pick) return null;
+  if (typeof pick === 'object') return pick.tier ?? null;
+  if (BLESSING_COLOURS.includes(pick)) return null;
+  return BLESSINGS.find((blessing) => blessing.name === pick)?.tier ?? null;
+}
+
+// Resolve which god power of a given tier (1 or 2) a set of picks awards.
+// Rule, applied within that half of the tree: a colour with 2+ picks wins;
+// 1-of-each falls back to green.
+//
+// `picks` is an array of blessing names, colours, or blessing objects, and may
+// contain picks from BOTH halves - anything belonging to the other half is
+// ignored, so a caller can pass a whole six-pick build to either tier.
+export function resolveGodTierFor(godTier, picks) {
+  const fromTiers = GOD_TIER_SOURCE_TIERS[godTier];
+  if (!fromTiers) return null;
+
   const colours = (picks || [])
-    .map((pick) => {
-      if (!pick) return null;
-      if (typeof pick === 'object') return pick.colour ?? null;
-      if (BLESSING_COLOURS.includes(pick)) return pick;
-      return BLESSINGS.find((blessing) => blessing.name === pick)?.colour ?? null;
-    })
-    .filter(Boolean);
+    .map((pick) => ({ colour: pickColour(pick), tier: pickTier(pick) }))
+    // A pick with no knowable tier is a bare colour the caller already scoped -
+    // taken at face value rather than discarded, which is what keeps the old
+    // colours-only callers behaving exactly as they did.
+    .filter((entry) => entry.colour && (entry.tier == null || fromTiers.includes(entry.tier)))
+    .map((entry) => entry.colour);
 
   if (colours.length === 0) return null;
 
@@ -608,7 +995,43 @@ export function resolveGodTier(picks) {
   const majority = BLESSING_COLOURS.find((colour) => (counts[colour] || 0) >= 2);
   const winner = majority ?? 'green';
 
-  return GOD_TIER_BLESSINGS.find((blessing) => blessing.colour === winner) ?? null;
+  return (
+    GOD_TIER_BLESSINGS.find(
+      (blessing) => blessing.colour === winner && blessing.godTier === godTier,
+    ) ?? null
+  );
+}
+
+// God Tier One, from tiers 1-3. Kept as its own export with its original name
+// and behaviour because stored build payloads, the share-image renderers on the
+// server and every existing caller are built around it.
+export function resolveGodTier(picks) {
+  return resolveGodTierFor(1, picks);
+}
+
+// God Tier Two, from tiers 4-6.
+export function resolveGodTierTwo(picks) {
+  return resolveGodTierFor(2, picks);
+}
+
+// Whether a half's picks have settled far enough to name a winner. A colour
+// reaching two can no longer be overturned, and a full three is decided by the
+// green tiebreak - anything less is provisional, and resolveGodTierFor's green
+// fallback would otherwise invent a result off a single pick.
+export function isGodTierSettled(godTier, picks) {
+  const fromTiers = GOD_TIER_SOURCE_TIERS[godTier] ?? [];
+  const colours = (picks || [])
+    .filter((pick) => {
+      const tier = pickTier(pick);
+      return tier == null || fromTiers.includes(tier);
+    })
+    .map(pickColour)
+    .filter(Boolean);
+
+  const majority = BLESSING_COLOURS.some(
+    (colour) => colours.filter((c) => c === colour).length >= 2,
+  );
+  return majority || colours.length === fromTiers.length;
 }
 
 // Curated 3-pick packages from the ranking analysis, in order. `picks` are
