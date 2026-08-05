@@ -19,7 +19,13 @@ import { useRelicSelection, MAX_RELICS } from '../hooks/useRelicSelection';
 import { useBlessingSelection } from '../hooks/useBlessingSelection';
 import { emptyEofWeaponNames, emptyEquippedNames } from '../data/gearShape';
 import { COMBAT_STYLES, GEAR } from '../data/gear';
-import { BLESSINGS, BLESSING_COLOURS, BLESSING_TIERS } from '../data/blessings';
+import {
+  BLESSINGS,
+  BLESSING_COLOURS,
+  BLESSING_TIERS,
+  isGodTierSettled,
+  resolveGodTierFor,
+} from '../data/blessings';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { RELICS, RELIC_CATEGORIES } from '../data/relics';
 import { GATEWAY_REGIONS, REGIONS } from '../data/regions';
@@ -523,6 +529,7 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom, fromMy
   const [tradeoffs, setTradeoffs] = useState(() => (build?.tradeoffs?.length ? build.tradeoffs : ['']));
   const [regionReasons, setRegionReasons] = useState(() => build?.regionReasons ?? {});
   const [relicReasons, setRelicReasons] = useState(() => build?.relicReasons ?? {});
+  const [blessingReasons, setBlessingReasons] = useState(() => build?.blessingReasons ?? {});
   const [archRelicReasons, setArchRelicReasons] = useState(() => build?.archRelicReasons ?? {});
   const [archRelicSearch, setArchRelicSearch] = useState('');
   const [archRelicTab, setArchRelicTab] = useState('all');
@@ -605,6 +612,22 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom, fromMy
     () => blessingSelection.selected.map((n) => BLESSINGS.find((b) => b.name === n)).filter(Boolean),
     [blessingSelection.selected],
   );
+
+  // Picks in tier order, then whichever god powers those picks have settled -
+  // the same order the finished card's rows read in, so the editor and the
+  // guide line up.
+  const blessingReasonKeys = useMemo(() => {
+    const picks = [...blessingSelection.selected].sort(
+      (a, b) =>
+        (BLESSINGS.find((x) => x.name === a)?.tier ?? 99) -
+        (BLESSINGS.find((x) => x.name === b)?.tier ?? 99),
+    );
+    const gods = [1, 2]
+      .filter((tier) => isGodTierSettled(tier, blessingSelection.selected))
+      .map((tier) => resolveGodTierFor(tier, blessingSelection.selected)?.name)
+      .filter(Boolean);
+    return [...picks, ...gods];
+  }, [blessingSelection.selected]);
 
   // Antiquarian's own effect text is "All Archaeology relics are available
   // to use after completing the Archaeology tutorial" - a second,
@@ -760,6 +783,7 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom, fromMy
       blessings: blessingSelection.selected,
       relics: relicSelection.selected,
       relicReasons,
+      blessingReasons,
       archRelics: archRelicSelection.selected,
       archRelicReasons,
       regions: regionSelection.selected,
@@ -1128,6 +1152,30 @@ export default function CreateBuildPage({ onSubmitted, editing, copyFrom, fromMy
               <BlessingGodPanel selectedBlessings={selectedBlessingObjects} godTier={1} />
               <BlessingGodPanel selectedBlessings={selectedBlessingObjects} godTier={2} />
             </>
+          )}
+          {/* One row per pick AND per awarded god power - the god powers are
+              derived rather than chosen, but a reader still wants to know why
+              the build wanted that colour. These fill the Blessings section on
+              the finished card (see components/BlessingGuideSection.jsx);
+              leaving one blank falls back to that blessing's general analysis
+              rather than showing an empty panel. */}
+          {blessingReasonKeys.length > 0 && (
+            <ul className="create-build-pick-reasons">
+              {blessingReasonKeys.map((name) => (
+                <li key={name} className="create-build-pick-reason">
+                  <span className="create-build-pick-reason-head">{name}</span>
+                  <input
+                    type="text"
+                    value={blessingReasons[name] ?? ''}
+                    maxLength={MAX_LENGTHS.reason}
+                    onChange={(e) =>
+                      setBlessingReasons((prev) => ({ ...prev, [name]: e.target.value }))
+                    }
+                    placeholder="Why this blessing?"
+                  />
+                </li>
+              ))}
+            </ul>
           )}
         </section>
 

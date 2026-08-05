@@ -164,6 +164,13 @@ export function sanitizeUserBuildPayload(raw) {
     godTier2,
     relics,
     relicReasons: sanitizeReasons(raw.relicReasons, relics),
+    // Keyed by blessing name AND by god power name - the god powers are derived
+    // rather than picked, but they are just as much a choice to justify, and
+    // the section renders them in the same rows.
+    blessingReasons: sanitizeReasons(
+      raw.blessingReasons,
+      [...blessings, godTier, godTier2].filter(Boolean),
+    ),
     archRelics,
     archRelicReasons: sanitizeReasons(raw.archRelicReasons, archRelics),
     regions,

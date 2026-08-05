@@ -6297,6 +6297,104 @@ main.abilities-page .gear-item-rows {
   margin: 0;
 }
 
+/* The Blessings section of a build guide - two rows of clickable picks over a
+   pinned explanation panel. See components/BlessingGuideSection.jsx for why the
+   panel does not follow the pill you clicked. */
+.blessing-guide-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.blessing-guide-arrow {
+  opacity: 0.5;
+  font-size: 0.9em;
+}
+
+/* Layout and interaction only. The COLOUR comes from the .blessing-pill-red /
+   -green / -blue classes these also carry, which set border, background and
+   text themselves - restating any of that here would win on source order and
+   flatten every pick to one colour. */
+.blessing-guide-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 120ms ease, box-shadow 120ms ease;
+}
+
+/* Which picks have a note is shown by the BORDER, and only by the border - it
+   is a hint about where to click, not a status worth shouting. The pills keep
+   the border width and colour .blessing-pill-* already gives them; a pick with
+   something to read just gets that border at full strength instead of the
+   55%-alpha default, which reads as a quiet brightening rather than a badge.
+   `currentColor` tracks red/green/blue without this rule knowing which. */
+.blessing-guide-pick {
+  border-color: currentColor;
+}
+
+.blessing-guide-pick:hover {
+  filter: brightness(1.2);
+}
+
+/* No note: the default pill, untouched. Still fully legible - the rows are
+   worth reading as a reference whether or not every pick is written up - it
+   simply is not a control. */
+.blessing-guide-pick.is-silent {
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+  cursor: default;
+}
+
+.blessing-guide-pick.is-silent:hover {
+  filter: none;
+}
+
+/* The selected pick stays obvious while you read its note - otherwise the panel
+   below is a paragraph with no visible subject. */
+.blessing-guide-pick.is-active {
+  filter: brightness(1.3);
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 30%, transparent);
+}
+
+/* No min-height any more: the panel only exists while a pick is open, so there
+   is no empty state to reserve space for. */
+.blessing-guide-note {
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+
+.blessing-guide-note-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-weight: 650;
+  color: var(--text-h);
+}
+
+.blessing-guide-note-tag {
+  font-size: 0.68rem;
+  font-weight: 500;
+  opacity: 0.6;
+}
+
+.blessing-guide-note p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .create-build-pick-reasons {
   list-style: none;
   margin: 4px 0 0;

@@ -4,6 +4,7 @@ import ReadOnlyLoadout from './ReadOnlyLoadout';
 import LeaguesEffectsPanel from './LeaguesEffectsPanel';
 import BuildProse from './BuildProse';
 import BuildCardMeta, { BuildByline, BuildDifficultyTag } from './BuildCardMeta';
+import BlessingGuideSection from './BlessingGuideSection';
 import PicksHeading from './PicksHeading';
 import RejuvenatedNote from './RejuvenatedNote';
 import { ARCH_RELIC_BY_NAME, LEAGUE_RELIC_BY_NAME } from '../data/buildLookups';
@@ -193,6 +194,19 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
               <BuildProse text={build.howToPlay} />
             </Collapsible>
           )}
+
+          {/* Same placement as the curated guides - see BuildGuideCard. */}
+          {/* Always shown, notes or not - the two rows are worth having as a
+              reference on their own, and the border only tells you which of
+              them have something more to read. */}
+          <Collapsible title="Blessings">
+            <BlessingGuideSection
+              blessings={build.blessings}
+              godTier={build.godTier}
+              godTier2={build.godTier2}
+              reasons={build.blessingReasons}
+            />
+          </Collapsible>
 
           <div className="build-main-split">
             <div className="build-picks">

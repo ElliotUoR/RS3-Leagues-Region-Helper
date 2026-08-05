@@ -2,6 +2,7 @@ import RetryImage from './RetryImage';
 import TagTooltip from './TagTooltip';
 import { RELIC_COLOURS } from '../data/blessingBuilds';
 import { BLESSING_BY_NAME, LEAGUE_RELIC_BY_NAME } from '../data/buildLookups';
+import { GOD_TIER_SOURCE_TIERS } from '../data/blessings';
 import { difficultyLevelFor, difficultyNoteFor } from '../utils/difficultyTag';
 
 // The right-hand summary of a build card's header - difficulty, blessing
@@ -89,28 +90,63 @@ export function BuildByline({ author, difficulty }) {
   );
 }
 
+// Splits a build's picks into one row per half of the blessing tree: tiers 1-3
+// then tiers 4-6, each sorted by tier and tailed by the god power that half
+// awards.
+//
+// Exported because BOTH card families need it and a second copy drifts. Curated
+// guides render through BuildGuideCard, user builds through this file, and the
+// two have to agree - a build that reads "Aegis, Barkscales, Rampage,
+// Envenomed, True Equilibrium / Unholy Critual -> Splash Zone" in one place and
+// correctly in the other is worse than either.
+//
+// SORTED, not trusted: a curated guide's array is hand-authored and a user
+// build's is in click order, so neither arrives in tier order. Unknown names
+// sort last rather than throwing.
+export function blessingRows({ blessings, godTier, godTier2 }) {
+  const tierOf = (name) => BLESSING_BY_NAME.get(name)?.tier ?? Number.MAX_SAFE_INTEGER;
+  const picks = [...(blessings ?? [])].sort((a, b) => tierOf(a) - tierOf(b));
+
+  return [1, 2]
+    .map((tier) => ({
+      key: `god-${tier}`,
+      blessings: picks.filter((name) => (GOD_TIER_SOURCE_TIERS[tier] ?? []).includes(tierOf(name))),
+      godTier: tier === 1 ? godTier : godTier2,
+    }))
+    .filter((row) => row.blessings.length > 0 || row.godTier);
+}
+
+// The pill rows themselves, so the two card families render them identically
+// and not just group them identically.
+export function BlessingRows({ blessings, godTier, godTier2 }) {
+  return blessingRows({ blessings, godTier, godTier2 }).map((row) => (
+    <div key={row.key} className="build-card-pills">
+      {row.blessings.map((name) => (
+        <BlessingPill key={name} name={name} />
+      ))}
+      {row.godTier && (
+        <>
+          <span className="build-card-arrow" aria-hidden="true">
+            →
+          </span>
+          <BlessingPill name={row.godTier} isGodTier />
+        </>
+      )}
+    </div>
+  ));
+}
+
 export default function BuildCardMeta({
   blessings = [],
   godTier,
+  godTier2,
   relics = [],
   styles = [],
 }) {
   return (
     <div className="build-card-meta">
       {blessings.length > 0 && (
-        <div className="build-card-pills">
-          {blessings.map((name) => (
-            <BlessingPill key={name} name={name} />
-          ))}
-          {godTier && (
-            <>
-              <span className="build-card-arrow" aria-hidden="true">
-                →
-              </span>
-              <BlessingPill name={godTier} isGodTier />
-            </>
-          )}
-        </div>
+        <BlessingRows blessings={blessings} godTier={godTier} godTier2={godTier2} />
       )}
       {relics.length > 0 && (
         <div className="build-card-chips">

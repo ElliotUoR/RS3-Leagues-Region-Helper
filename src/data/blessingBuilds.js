@@ -166,6 +166,27 @@ export const BLESSING_BUILDS_EXAMPLES = [
       Perkfection:
         'Means only need one hilt drop from araxxi to make biting 3.',
     },
+    // Keyed by blessing name and by god power name. Read by the card's
+    // Blessings section (components/BlessingGuideSection.jsx); anything left
+    // out falls back to that blessing's own analysis in data/blessings.js.
+    blessingReasons: {
+      "Teragard's Aegis":
+        'The whole build. It adds 25% of total armour to base ability damage, tripled while you hold a shield - +2,704 at this loadout, roughly double what the weapon contributes, and it raises the BASE stat so every percentage, ultimate multiplier and crit scales off it.',
+      'Striking Light':
+        "Melee has the best basic attack in the game at 110-130%, so the blessing's +40 is worth proportionally more here than in any other style. It also brings Light of Saradomin, which Lord of Light later rebuilds into the build's biggest single number.",
+      'Steadfast Will':
+        'Turns defensive abilities into the rotation. Bash pays 350-450% of armour - the stat this build maximises - and Revenge caps at 20 stacks for +100% damage, which Sacred Fervor then keeps permanently up.',
+      'Higher Power':
+        '+30% base ability damage, applied after Aegis has already roughly doubled that figure, so it is +876 rather than +353. It costs the damage ultimates - acceptable on a build designed to win on auto-attacks and defensives rather than on burst windows.',
+      'Lord of Light':
+        'Five Light of Saradomin procs per trigger, each carrying 250% of armour. Armour is the one stat this build is built to maximise, so this is where it converts: roughly 140,000 damage per trigger with the tome equipped.',
+      Perfidious:
+        "Empowers what the build already has rather than adding anything: Light of Saradomin's cooldown drops from 14.4s to 4.8s, tripling the rate of the biggest number on the card.",
+      'Sacred Fervor':
+        'Awarded by the three blue picks. Cuts every cooldown by 30%, which is what collapses Revenge to under its own duration and keeps Bash and Preparation flowing - the multiplier that makes the rotation loop at all.',
+      'Genesis Essence':
+        'Awarded by the two blue picks in tiers 4-6. Treats every equipped weapon as tier 120, taking the Abyssal Scourge from 883 to 1,152 weapon damage without changing a single slot.',
+    },
     regions: ['kharidianDesert', 'morytania', 'anachronia'],
     regionReasons: {
       kharidianDesert: 'Achto Teralith - the augmentable tank set. Base Teralith and Primal are not augmentable, so they forfeit every Invention perk; only the Achto variant belongs in a late-game slot. Also buys the mid-late Primeval robes with Teci.',

@@ -7,6 +7,8 @@ import { fileIssue } from '../lib/github.js';
 import { sessionIdFor } from '../lib/session.js';
 import { isReservedSlug, slugCandidate, slugify } from '../lib/userBuildSlug.js';
 import { isAdminSession, ADMIN_COOKIE_NAME } from '../lib/adminAuth.js';
+import { BLESSING_TIERS } from '../../../src/data/blessings.js';
+import { LEAGUE_RELICS } from '../../../src/data/leagueRelics.js';
 
 export const userBuildsRouter = Router();
 
@@ -68,11 +70,24 @@ function nameArray(value, max) {
   return value.filter((v) => typeof v === 'string').slice(0, max).map((v) => v.slice(0, 60));
 }
 
+// Derived, not hardcoded. These caps were 4 and 8, written when a run picked
+// three blessings and a handful of relics. Tiers 4-6 took blessings to six, and
+// the listing quietly truncated every build to its first four - so a collapsed
+// card showed a one-pill second row and no God Tier Two, while the same build
+// opened showed all six. The card was fine; the data reaching it was not.
+//
+// Reading the real counts means the next tier that gets revealed cannot
+// reintroduce this. `+ 2` on relics covers Rejuvenated's bonus pick and leaves
+// room for the unknown-tier relics, which carry no one-per-tier constraint at
+// all (see data/leagueRelicPicks.js).
+const MAX_LISTED_BLESSINGS = BLESSING_TIERS.length;
+const MAX_LISTED_RELICS = LEAGUE_RELICS.length + 2;
+
 function shapeListRow(row) {
   return {
     ...row,
-    blessings: nameArray(row.blessings, 4),
-    relics: nameArray(row.relics, 8),
+    blessings: nameArray(row.blessings, MAX_LISTED_BLESSINGS),
+    relics: nameArray(row.relics, MAX_LISTED_RELICS),
     difficultyLabel: shortText(row.difficultyLabel, 40),
     difficultyNote: shortText(row.difficultyNote, 300),
   };

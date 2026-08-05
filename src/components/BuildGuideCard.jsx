@@ -7,8 +7,9 @@ import EditableText from './EditableText';
 import BuildProse from './BuildProse';
 import PicksHeading from './PicksHeading';
 import RejuvenatedNote from './RejuvenatedNote';
-import { BuildByline, BuildDifficultyTag } from './BuildCardMeta';
-import { BLESSINGS, GOD_TIER_BLESSINGS, GOD_TIER_SOURCE_TIERS } from '../data/blessings';
+import BlessingGuideSection from './BlessingGuideSection';
+import { BuildByline, BuildDifficultyTag, blessingRows } from './BuildCardMeta';
+import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import {
   ARTEFACT_BYPASS_NOTE,
   BLESSING_BUILD_STAGES,
@@ -49,30 +50,6 @@ const regionIcon = (id) => `icons/regions/${id}.png`;
 // Misthalin/Havenhythe are FIXED_REGIONS and Karamja is a GATEWAY_REGIONS
 // entry; all three are free, so a build's `regions` lists only optional picks.
 const FIXED_REGION_IDS = [...FIXED_REGIONS, ...GATEWAY_REGIONS];
-
-// Tiers 1-3 then tiers 4-6, each sorted by tier and tailed by its own god
-// power. A row is skipped entirely when the build has no picks in that half -
-// the older three-blessing guides then render exactly as they always did.
-//
-// Sorted rather than trusted: `build.blessings` is authored by hand and a
-// user-submitted build's array is in click order, so neither is reliably by
-// tier. Unknown names sort last rather than throwing.
-function blessingRows(build) {
-  const tierOf = (name) => BLESSING_BY_NAME.get(name)?.tier ?? Number.MAX_SAFE_INTEGER;
-  const picks = [...(build.blessings ?? [])].sort((a, b) => tierOf(a) - tierOf(b));
-
-  return [1, 2]
-    .map((godTier) => {
-      const tiers = GOD_TIER_SOURCE_TIERS[godTier] ?? [];
-      const blessings = picks.filter((name) => tiers.includes(tierOf(name)));
-      return {
-        key: `god-${godTier}`,
-        blessings,
-        godTier: godTier === 1 ? build.godTier : build.godTier2,
-      };
-    })
-    .filter((row) => row.blessings.length > 0 || row.godTier);
-}
 
 function BlessingPill({ name, isGodTier }) {
   const blessing = BLESSING_BY_NAME.get(name);
@@ -425,6 +402,23 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
             ) : (
               <BuildProse text={build.howToPlay} />
             )}
+          </Collapsible>
+
+          {/* Between "How to play it" and the League relics list, per the
+              section order the guides read in: what it does, how to play it,
+              why these blessings, then the rest of the setup. Collapsed by
+              default - the same two rows are already in the card header, so
+              this is the follow-up question, not the headline. */}
+          {/* Always shown, notes or not - the two rows are worth having as a
+              reference on their own, and the border only tells you which of
+              them have something more to read. */}
+          <Collapsible title="Blessings">
+            <BlessingGuideSection
+              blessings={build.blessings}
+              godTier={build.godTier}
+              godTier2={build.godTier2}
+              reasons={build.blessingReasons}
+            />
           </Collapsible>
 
           <dl className="build-key-numbers">

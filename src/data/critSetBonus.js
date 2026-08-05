@@ -75,6 +75,19 @@ export const CHAOTIC_INSIGHT_EXTRA_PIECES = 2;
 // point is to say "+N pieces to this set", which is true whether or not this
 // app knows what the set does. Only the three in CRIT_SETS and Achto have their
 // resulting effect costed out; see the Chaotic Insight card.
+// Reconciled against runescape.wiki/w/Set_bonus, which lists the sets that
+// have one. Names here are gearSets.js GROUP names, which do not always match
+// the wiki's wording ("Superior tetsu armour" is 'Superior tetsu gear' here,
+// the six Barrows sets are one 'Barrows Items' group).
+//
+// Two deliberate departures from that page:
+//   - 'Masterwork ranged armour' is included even though the page's Ranged
+//     column omits it, because the item pages themselves describe the effect
+//     (Masterwork ranged body: "per piece worn, 10% of the incoming damage is
+//     delayed"). A per-item page beats a summary table.
+//   - 'Masterwork armour' - the plain MELEE set - is excluded. It is absent
+//     from that page and its own article describes no set effect; the
+//     masterwork melee benefit is Masterworked Mending on the weapons.
 export const SET_EFFECT_GROUPS = new Set([
   'Achto Primeval armour',
   'Achto Tempest armour',
@@ -90,6 +103,12 @@ export const SET_EFFECT_GROUPS = new Set([
   'Deathwarden armour (tier 90)',
   'Dino boots',
   'Enhanced Dino boots',
+  // Ranged and magic only. The MELEE Masterwork set has no set effect - its
+  // wiki page describes none, and the masterwork weapons carry Masterworked
+  // Mending instead - so 'Masterwork armour' and 'Trimmed masterwork armour'
+  // are deliberately absent.
+  'Masterwork ranged armour',
+  'Masterwork mage armour',
   'Elite Tectonic armour',
   'Tectonic armour',
   "First Necromancer's gear",
@@ -98,6 +117,22 @@ export const SET_EFFECT_GROUPS = new Set([
   "Tumeken's resplendence",
   'Vestments of havoc',
   'Warpriest of Tuska',
+  // All six Barrows brothers are one group here, and every one of them has a
+  // set effect.
+  'Barrows Items',
+  'Teralith armour',
+  'Trimmed masterwork armour',
+  'Dracolich armour',
+  'Elite dracolich armour',
+  'Sirenic armour',
+  'Elite sirenic armour',
+  'Superior Death Lotus armour',
+  "Superior seasinger's gear",
+  'Superior tetsu gear',
+  // The lower Deathwarden tiers carry the same per-piece dodge effect as the
+  // three already listed above, just at a smaller percentage.
+  'Deathwarden armour (tier 50)',
+  'Deathwarden armour (tier 60)',
 ]);
 
 // Every set-bonus armour set worn, and how many pieces of each - the input to
