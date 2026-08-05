@@ -7,7 +7,7 @@ import EditableText from './EditableText';
 import BuildProse from './BuildProse';
 import PicksHeading from './PicksHeading';
 import RejuvenatedNote from './RejuvenatedNote';
-import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
+import { BLESSINGS, GOD_TIER_BLESSINGS, GOD_TIER_SOURCE_TIERS } from '../data/blessings';
 import {
   ARTEFACT_BYPASS_NOTE,
   BLESSING_BUILD_STAGES,
@@ -48,6 +48,30 @@ const regionIcon = (id) => `icons/regions/${id}.png`;
 // Misthalin/Havenhythe are FIXED_REGIONS and Karamja is a GATEWAY_REGIONS
 // entry; all three are free, so a build's `regions` lists only optional picks.
 const FIXED_REGION_IDS = [...FIXED_REGIONS, ...GATEWAY_REGIONS];
+
+// Tiers 1-3 then tiers 4-6, each sorted by tier and tailed by its own god
+// power. A row is skipped entirely when the build has no picks in that half -
+// the older three-blessing guides then render exactly as they always did.
+//
+// Sorted rather than trusted: `build.blessings` is authored by hand and a
+// user-submitted build's array is in click order, so neither is reliably by
+// tier. Unknown names sort last rather than throwing.
+function blessingRows(build) {
+  const tierOf = (name) => BLESSING_BY_NAME.get(name)?.tier ?? Number.MAX_SAFE_INTEGER;
+  const picks = [...(build.blessings ?? [])].sort((a, b) => tierOf(a) - tierOf(b));
+
+  return [1, 2]
+    .map((godTier) => {
+      const tiers = GOD_TIER_SOURCE_TIERS[godTier] ?? [];
+      const blessings = picks.filter((name) => tiers.includes(tierOf(name)));
+      return {
+        key: `god-${godTier}`,
+        blessings,
+        godTier: godTier === 1 ? build.godTier : build.godTier2,
+      };
+    })
+    .filter((row) => row.blessings.length > 0 || row.godTier);
+}
 
 function BlessingPill({ name, isGodTier }) {
   const blessing = BLESSING_BY_NAME.get(name);
@@ -314,15 +338,26 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
           <TagTooltip className={`build-difficulty build-difficulty-${build.difficulty}`} tooltip={difficulty?.note}>
             {difficulty?.label}
           </TagTooltip>
-          <div className="build-card-pills">
-            {build.blessings.map((name) => (
-              <BlessingPill key={name} name={name} />
-            ))}
-            <span className="build-card-arrow" aria-hidden="true">
-              →
-            </span>
-            <BlessingPill name={build.godTier} isGodTier />
-          </div>
+          {/* One row per half of the blessing tree, each in TIER order and
+              ending in the god power that half awards. The stored array is in
+              whatever order the build was authored in, which is not tier order
+              and read as random once six picks and two god powers had to share
+              a single wrapping row. See blessingRows. */}
+          {blessingRows(build).map((row) => (
+            <div key={row.key} className="build-card-pills">
+              {row.blessings.map((name) => (
+                <BlessingPill key={name} name={name} />
+              ))}
+              {row.godTier && (
+                <>
+                  <span className="build-card-arrow" aria-hidden="true">
+                    →
+                  </span>
+                  <BlessingPill name={row.godTier} isGodTier />
+                </>
+              )}
+            </div>
+          ))}
           <div className="build-card-chips">
             {build.relics.map((name) => (
               <LeagueRelicChip key={name} name={name} />

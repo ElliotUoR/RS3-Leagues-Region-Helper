@@ -1,6 +1,10 @@
 import { getTotalPrayerBonus, ICYENE_PERCENT_PER_PRAYER, isIcyeneTomeWorn } from './gearStats.js';
 import { getBlessingModifiers, TRUE_EQUILIBRIUM_PER_ALIGNMENT } from './blessingModifiers.js';
 import { CHAOTIC_INSIGHT, getCritSetBonus } from '../data/critSetBonus.js';
+// Bow membership moved to a leaf module so abilityDamage.js can share it - see
+// data/rangedWeapons.js.
+import { isBow } from '../data/rangedWeapons.js';
+export { BOW_WEAPONS, isBow } from '../data/rangedWeapons.js';
 
 // Critical strike chance and damage, assembled from everything in this app that
 // moves either.
@@ -31,39 +35,6 @@ export const ITEM_CRIT_CHANCE = [
   { name: "Reaver's ring", chance: 5, note: 'Reckless Assault, -5% accuracy' },
   { name: "Stalker's ring", chance: 3, note: "Shadow's Mercy, bows only", requiresBow: true },
 ];
-
-// Bows, as runescape.wiki/w/Category:Bows classifies them - which explicitly
-// EXCLUDES crossbows ("all bows are two-handed weapons, but not all crossbows
-// are"), thrown weapons and blowpipes. Listed by name rather than matched on
-// "bow" in the string, because that pattern catches every crossbow and misses
-// Seercull and Decimation, both of which are in the category.
-//
-// Vanquish (ranged) and Sunspear (ranged) are NOT in it and are deliberately
-// absent here despite being two-handed ranged weapons.
-export const BOW_WEAPONS = new Set([
-  'Bow of the Last Guardian',
-  'Seren godbow',
-  'Noxious longbow',
-  'Zaryte bow',
-  'Seercull',
-  'Gloomfire Bow',
-  'Masterwork bow',
-  'Decimation',
-  'Dark Bow',
-  'Strykebow',
-  'Zamorak Bow',
-  'Eternal magic shortbow Mk. 5',
-  'Eternal Magic longbow',
-  'Elder shortbow',
-  'Elder longbow',
-  'Crystal bow',
-  'Attuned crystal bow',
-  'Hexhunter bow',
-]);
-
-export function isBow(weaponName) {
-  return typeof weaponName === 'string' && BOW_WEAPONS.has(weaponName);
-}
 
 // "Gain +15% critical strike chance. Your critical strike chance is capped at
 // 50%. All excess critical strike chance is converted into critical strike

@@ -142,15 +142,29 @@ export const BLESSING_BUILDS_EXAMPLES = [
     tagline: 'Turn your armour into ability damage - and defensive abilties into your core rotation.',
     difficulty: 1,
     styles: ['melee', 'magic'],
-    blessings: ["Teragard's Aegis", 'Striking Light', 'Steadfast Will'],
+    // Tiers 1-3 are all blue, so God Tier One is Sacred Fervor. Tiers 4-6 are
+    // blue, blue, red - two blue wins, so God Tier Two is Genesis Essence.
+    blessings: [
+      "Teragard's Aegis",
+      'Striking Light',
+      'Steadfast Will',
+      'Higher Power',
+      'Lord of Light',
+      'Perfidious',
+    ],
     godTier: 'Sacred Fervor',
-    relics: ['Golden Touch', 'Transmutation', 'Divine Druid', 'Voidwalker'],
+    godTier2: 'Genesis Essence',
+    relics: ['Golden Touch', 'Transmutation', 'Divine Druid', 'Voidwalker', 'Icyenic Faith', 'Perkfection'],
     relicReasons: {
       'Golden Touch': 'Tier-1. Guaranteed pickpockets with tripled loot: grimy herbs from Guam to Fellstalk plus tier 1-2 secondaries, which is the whole overload supply chain, and the Teci that buys the Primeval robes or Teralith armour outright.',
       Transmutation: 'Divine Divergence steps ore up a tier, handing you the full Primal set and Primal kiteshield for the mid-late melee slot without the Wilderness.',
       'Divine Druid': 'Unlocks every Meilyr recipe, so the herbs Golden Touch supplies become elder overloads: +25 Defence instead of +17, worth ~+849 armour and about +692 ability damage through Aegis and the strength/magic boost.',
       Voidwalker:
         "Tier 3, and the reason this build can brew elder overloads at all. Divine Druid unlocks the Meilyr recipes but not crystal flasks - and a supreme overload, which the elder recipe consumes six doses of, needs one. Voidwalker's table reaches Superheated's fire spirits, which drop them.",
+      'Icyenic Faith':
+        'Full 100% prayers plus lord of light healing should make it very tricky to die. The damage boost is nice too.',
+      Perkfection:
+        'Means only need one hilt drop from araxxi to make biting 3.',
     },
     regions: ['kharidianDesert', 'morytania', 'anachronia'],
     regionReasons: {
@@ -165,10 +179,12 @@ export const BLESSING_BUILDS_EXAMPLES = [
           { region: "asgarnia", note: "The upgraded Nex prayers (Ruination, Desolation, Malevolence, Affliction) and Torva. A reasonable swap for Morytania if you would rather have the prayers than the augmentable kiteshields - but then Aegis has a much worse shield to triple off." },
         ],
     whyItsGood:
-      'Teragard\'s Aegis adds 75% of your total armour to your base ability damage while you hold a shield. At 3,605 total armour that is +2,704 ability damage - roughly double what the weapon itself provides - and because it increases the base ability stat, every percentage-based ability, ultimate multiplier and crit scales off it.\n\nElder overloads and overloads give this build a massive boost . Armour is also granted from your Defence level, so the +25 boost from an Elder overload is worth about +849 armour on its own - taking this loadout from 3,605 to 4,454. Aegis triples off that too, so the bonus climbs from +2,704 to +3,341. The same +25 boost affects your Strength, adding another +55 through the level term of the damage formula. A potion is worth roughly +692 ability damage here, which is more than an abyssal whip. \n\nDivine Druid and Voidwalker are both in the relic list to make elder overloads possible, and it takes both: Divine Druid unlocks the Meilyr recipes, but the elder recipe consumes a six-dose supreme overload, and a supreme overload needs a crystal flask. Voidwalker reaches the Superheated fire spirit table, which drops them. With secondary saving and Golden Touch on top, elder overloads should be incredibly sustainable. Every armour-scaling blessing in the build gets the same treatment: Bash climbs past 17,000 and Light of Saradomin past 13,500.\n\nAchto armour then double-dips on the same shield: its set bonus adds 5% per piece (25% at five) of a tier-equivalent main-hand\'s damage to your Strength Bonus, but only while the off-hand acts as a shield. Aegis wants a shield and Achto wants a shield, so they compound for more damage.\n\nMelee has the best basic attack in the game - 110-130% where every other style gets 90-110% - so Striking Light\'s +40% is worth proportionally more here than anywhere else. A single melee basic attack lands for about 8,270 once elder-overloaded, at no adrenaline and no cooldown. Simply auto-attacking, with Light of Saradomin firing every 9s on its own, is roughly a total of 55,000 damage per 9-second window; the magic side of the same build gets about 48,000 from the identical rotation. Most builds ask you to earn your damage through skill; you could beat that with an empty revo bar.\n\nCombo a fully stacked Revenge with Berserk and your 9 seconds of auto attacks deals 192k damage - don\'t forget Bash for an extra ~55K damage. ',
+      'Teragard\'s Aegis adds 75% of your total armour to your base ability damage while you hold a shield. At 3,605 total armour that is +2,704 ability damage - roughly double what the weapon itself provides - and because it increases the base ability stat, every percentage-based ability, ultimate multiplier and crit scales off it.\n\nElder overloads and overloads give this build a massive boost . Armour is also granted from your Defence level, so the +25 boost from an Elder overload is worth about +849 armour on its own - taking this loadout from 3,605 to 4,454. Aegis triples off that too, so the bonus climbs from +2,704 to +3,341. The same +25 boost affects your Strength, adding another +55 through the level term of the damage formula. A potion is worth roughly +692 ability damage here, which is more than an abyssal whip. \n\nDivine Druid and Voidwalker are both in the relic list to make elder overloads possible, and it takes both: Divine Druid unlocks the Meilyr recipes, but the elder recipe consumes a six-dose supreme overload, and a supreme overload needs a crystal flask. Voidwalker reaches the Superheated fire spirit table, which drops them. With secondary saving and Golden Touch on top, elder overloads should be incredibly sustainable. Every armour-scaling blessing in the build gets the same treatment: Bash climbs past 17,000 and Light of Saradomin past 13,500.\n\nAchto armour then double-dips on the same shield: its set bonus adds 5% per piece (25% at five) of a tier-equivalent main-hand\'s damage to your Strength Bonus, but only while the off-hand acts as a shield. Aegis wants a shield and Achto wants a shield, so they compound for more damage.\n\nMelee has the best basic attack in the game - 110-130% where every other style gets 90-110% - so Striking Light\'s +40% is worth proportionally more here than anywhere else. A single melee basic attack lands for about 8,270 once elder-overloaded, at no adrenaline and no cooldown. Simply auto-attacking, with Light of Saradomin firing every 9s on its own, is roughly a total of 55,000 damage per 9-second window; the magic side of the same build gets about 48,000 from the identical rotation. Most builds ask you to earn your damage through skill; you could beat that with an empty revo bar.\n\nCombo a fully stacked Revenge with Berserk and your 9 seconds of auto attacks deals 192k damage - don\'t forget Bash for an extra ~55K damage.\n\nTiers 4-6 double down on exactly what this build already does. Lord of Light rebuilds Light of Saradomin into five procs at once, each carrying 250% of your armour - and armour is the stat this build maximises. Perfidious then cuts that proc\'s cooldown from 14.4s to 4.8s. Higher Power adds 30% to base ability damage AFTER Teragard\'s Aegis has been added to it, which on a shield build is 30% of a figure Aegis roughly doubled. Genesis Essence falls out of the two blue picks and treats the Abyssal Scourge as tier 120, taking weapon damage from 883 to 1,152.\n\nIcyenic Faith is the tier 7 pick and it compounds with all of it: the Tome of the Icyene is +50 prayer bonus, Lord of Light pays 2% more Light of Saradomin damage per point of it, and the tome separately converts prayer bonus into crit chance and base ability damage. The loadout ends at 6,584 total ability damage, 22.8% crit, and roughly 140,000 damage per Light of Saradomin trigger. ',
     howToPlay:
       'Hold a shield at all times.  Open with Revenge, and deliberately let the boss hit you: each incoming attack is +5% damage and Steadfast Will raises the cap to 20 stacks, so a full stack is +100%. Sacred Fervor cuts Revenge\'s cooldown to 63s while Preparation strips 12s off every cooldown per cast, collapsing the effective cooldown to roughly 34s - under Revenge\'s 39.6s duration, so held correctly it never drops. Weave Bash on cooldown (10 sec cd for an extra 350-450% of your armour value, around +14,000) and let basic attacks and striking light fill the gaps. You could even use some real abilities too.',
     tradeoffs: [
+      'Higher Power removes Berserk, Death\'s Swiftness, Living Death and Sunshine outright. That is the ultimate this build used to combo with a stacked Revenge - traded for +30% base ability damage that is always on, which suits a build already designed to win on autoattacks.',
+      'The pocket slot goes to the Tome of the Icyene, so you give up Scripture of Ful/Wen.',
       'Melee loses Greater Flurry, which extends Berserk from 19.8s to 35.4s - the single biggest cost of going shield.',
       'Melee also loses Hurricane, Meteor Strike and Bladed Dive; magic forfeits FSOA and its crit passive.',
       'Revenge needs you to actually be taking hits. At a boss you can fully avoid, this build loses its best multiplier.',
@@ -176,9 +192,10 @@ export const BLESSING_BUILDS_EXAMPLES = [
     ],
     keyNumbers: [
       { label: 'Total armour (late, melee)', value: '3,605 - 4,454 elder overloaded' },
-      { label: 'Bash bonus damage', value: '~+14,000 - ~+17,800 elder' },
-      { label: 'Melee basic attack', value: '~8,270 elder (110-130%, best in game)' },
-      { label: 'Light of Saradomin', value: '~11,100 - ~13,600 elder, every 9s' },
+      { label: 'Total ability damage', value: '6,584 (with Higher Power and the tome)' },
+      { label: 'Bash bonus damage', value: '~+12,600 - ~+16,200, more elder' },
+      { label: 'Light of Saradomin', value: '~28,000 x5 = ~140,000 per trigger, every 4.8s' },
+      { label: 'Critical strike chance', value: '22.8% (12.8% of it from the tome)' },
     ],
     loadouts: {
       late: {
@@ -192,7 +209,7 @@ export const BLESSING_BUILDS_EXAMPLES = [
             head: 'Achto Teralith helmet', torso: 'Achto Teralith cuirass', legs: 'Achto Teralith leggings',
             hands: 'Achto Teralith gauntlets', feet: 'Achto Teralith boots',
             back: 'Igneous Kal-Zuk', neck: 'Essence of Finality amulet (or)',
-            ring: "Champion's ring", pocket: 'Scripture of Ful', ammo: 'Nodon spike harness',
+            ring: "Champion's ring", pocket: 'Tome of the Icyene', ammo: 'Nodon spike harness',
           },
         },
         magic: {
@@ -205,7 +222,7 @@ export const BLESSING_BUILDS_EXAMPLES = [
             head: 'Cryptbloom helm', torso: 'Cryptbloom top', legs: 'Cryptbloom bottoms',
             hands: 'Cryptbloom gloves', feet: 'Cryptbloom boots',
             back: 'Igneous Kal-Zuk', neck: 'Essence of Finality amulet (or)',
-            ring: "Channeller's ring", pocket: 'Scripture of Wen', ammo: 'Grasping rune pouch',
+            ring: "Channeller's ring", pocket: 'Tome of the Icyene', ammo: 'Grasping rune pouch',
           },
         },
       },

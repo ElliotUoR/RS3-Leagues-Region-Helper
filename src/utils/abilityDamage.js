@@ -34,6 +34,7 @@ import {
   TRUE_EQUILIBRIUM,
   getBlessingModifiers,
 } from './blessingModifiers.js';
+import { usesAmmunition } from '../data/rangedWeapons.js';
 
 // The slots whose `damage` is a WEAPON rating (w) rather than an equipment
 // damage bonus (b). Same split GearStatsSummary makes, for the same reason -
@@ -159,6 +160,12 @@ export const WEAPON_MODE_LABELS = {
 // not ammunition at all (melee spike harnesses and the like) and its damage is
 // an ordinary equipment bonus - see damageRatings.
 export function ammoTierCap(weapon, ammo) {
+  // A thrown weapon is its own ammunition - a chinchompa, dart or javelin never
+  // reads the ammo slot, so nothing in it can cap them. Without this a tier-120
+  // chinchompa under Genesis Essence would be dragged down to whatever happened
+  // to be loaded, a penalty the game does not apply. See
+  // data/rangedWeapons.js.
+  if (!usesAmmunition(weapon?.name)) return null;
   const weaponTier = weapon?.level?.level;
   const ammoTier = ammo?.level?.level;
   if (!weaponTier || !ammoTier || ammoTier >= weaponTier) return null;
