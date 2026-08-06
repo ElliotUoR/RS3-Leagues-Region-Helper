@@ -123,6 +123,12 @@ const STATES = [
 // takes the relic can use it whether or not the pocket slot holds it.
 export const SLIVER_RELIC = 'Naragi Edict';
 
+// Infernal Fire's execute. Gated on the RELIC, not on the Avernic Star being
+// worn, for the same reason as the Sliver above - the relic's own wording is
+// "when in inventory OR worn in your pocket slot", so a build that takes it has
+// the effect whatever the pocket slot holds.
+export const INFERNAL_FIRE_RELIC = 'Infernal Fire';
+
 // What the crit total leaves out. Worth a marker rather than a card line: the
 // figure sits in the headline row where it reads as authoritative, and the
 // sources it misses are ones a player plausibly has - Biting is one of the most
@@ -725,8 +731,22 @@ function temperedHeartCard() {
   };
 }
 
+// Infernal Fire, stated and not costed. "Executes at 20% life points" is a
+// share of the TARGET's health, and this panel only knows about the player -
+// so there is no figure to derive, and inventing one against an assumed boss
+// health would be a number about a fight rather than about the build.
+function infernalFireCard() {
+  return {
+    key: 'infernal-fire',
+    name: INFERNAL_FIRE_RELIC,
+    colour: 'relic',
+    icon: 'icons/Infernal_Fire.png',
+    lines: [strong('Executes enemies at 20% lifepoints')],
+  };
+}
+
 function buildCards(context) {
-  const { blessings, style, equipped, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp, inferno } =
+  const { blessings, style, equipped, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, hasInfernalFire, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp, inferno } =
     context;
   const cards = [];
   const picked = (name) => blessings.includes(name);
@@ -769,6 +789,7 @@ function buildCards(context) {
   if (hasChaoticInsight) cards.push(chaoticInsightCard(context));
 
   if (hasSliver) cards.push(sliverCard({ armourAt: baseArmour, sliverArmour }));
+  if (hasInfernalFire) cards.push(infernalFireCard());
 
   if (aegisNow != null) {
     cards.push({
@@ -945,6 +966,7 @@ export default function LeaguesEffectsPanel({
   // still brew the potion, and it still moves that build's ability damage.
   const canElder = elderSources.length > 0 && (!armour || armour.elder != null);
   const hasSliver = leagueRelics.includes(SLIVER_RELIC);
+  const hasInfernalFire = leagueRelics.includes(INFERNAL_FIRE_RELIC);
   const state = (potion === 'elder' && !canElder) || (potion === 'sliver' && !hasSliver) ? 'none' : potion;
   const hasGear = Object.keys(equipped).length > 0;
 
@@ -1222,6 +1244,7 @@ export default function LeaguesEffectsPanel({
     resolvedGodTier2,
     chinSplash,
     hasSliver,
+    hasInfernalFire,
     mods,
     totalAD,
     effectiveAD,

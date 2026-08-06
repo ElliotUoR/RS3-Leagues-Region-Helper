@@ -112,6 +112,8 @@ export const RELIC_COLOURS = {
   'Naragi Edict': { hue: 45, label: 'amber' },
   Antiquarian: { hue: 25, label: 'clay' },
   'Production Master': { hue: 140, label: 'fern' },
+  'Infernal Fire': { hue: 8, label: 'infernal' },
+  'Clue Connoisseur': { hue: 55, label: 'parchment' },
 };
 
 // Shown under the Arch relics column. Some relics list a second region that is
@@ -1012,6 +1014,15 @@ export const LEAGUE_RELIC_TIER_LIST = {
     {
       name: 'Antiquarian', relicTier: null, grade: 'unranked', unlocksGear: 0,
       note: 'Just revealed - not yet assessed for combat viability. Reads as an Archaeology relic, but the first line hands you every Archaeology relic power after the tutorial, which is the Arch relics tab with its regions and artefact restorations removed. Needs grading against what those powers are actually worth.',
+    },
+    {
+      name: 'Infernal Fire', relicTier: 7, grade: 'unranked', unlocksGear: 1,
+      note:
+        "Just revealed - not yet assessed. Death Mark executing anything at 20% life points is the headline and the hardest thing here to grade: it is a share of the TARGET's health, so it is worth everything against a long boss fight and nothing against something that dies in one ability. The Avernic Star itself is a straightforward pocket item at +18.7 damage and +15 prayer bonus, competing with the Sliver of Edicts and the Tome of the Icyene for both the tier and the slot.",
+    },
+    {
+      name: 'Clue Connoisseur', relicTier: null, grade: 'unranked', unlocksGear: 0,
+      note: 'Just revealed, and a pure Treasure Trails relic - minimum-step clues, maximum casket loot, 3x points and unlimited sealed clues. No combat line at all, so it is unranked here rather than graded low.',
     },
     {
       name: 'Production Master', relicTier: null, grade: 'unranked', unlocksGear: 0,

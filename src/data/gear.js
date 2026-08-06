@@ -462,6 +462,20 @@ const UNIVERSAL_ACCESSORIES = [
   // lives in `setEffect` as prose instead. Its flat +300 armour goes on all
   // five defence keys because armour is per-style here (see gearStats.js's
   // getArmourRating / DEFENCE_KEY_BY_STYLE).
+  // Third of the tier 7 pocket items, alongside the Sliver of Edicts and the
+  // Tome of the Icyene - all three come from a tier 7 relic and all three want
+  // the same slot, so a build picks exactly one.
+  //
+  // Uses the RELIC's icon: the star has no item art of its own, and pointing at
+  // a file that does not exist would put RetryImage into its indefinite retry
+  // loop (see the note on that component).
+  //
+  // Death Mark is not modelled - see the relic entry in data/leagueRelics.js
+  // for why an execute threshold has no build-side number.
+  { name: 'Avernic Star', slot: 'pocket', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
+    stats: { damage: 18.7, accuracy: 0, lifeBonus: 0, prayerBonus: 15, setEffect: 'All combat styles trigger Death Mark 100% of the time: a marked target is instantly killed once it reaches 20% of its life points, and doing so grants 5% adrenaline. Works from the inventory too.' },
+    icon: 'icons/Infernal_Fire.png',
+    source: { type: 'shop', shop: 'Obtained from picking the Infernal Fire relic', region: 'relic', leagueRelic: 'Infernal Fire' } },
   { name: 'Sliver of Edicts', slot: 'pocket', applicableStyles: ['melee', 'ranged', 'magic', 'necromancy'], level: null,
     stats: { defence: { stab: 300, slash: 300, crush: 300, magic: 300, ranged: 300 }, damage: 14, accuracy: 0, lifeBonus: 1500, prayerBonus: 15, setEffect: 'Activate from the inventory for 16.8s: heals 10,000 life points four times, boosts every combat stat to 255, and revives you if you die. 1.5 minute cooldown.' },
     icon: 'icons/Sliver_of_Edicts.png',

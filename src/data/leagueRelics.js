@@ -36,8 +36,8 @@
 //
 // The reveal-only relics have no wiki icon at all (see above) - Crystal Grace,
 // Superheated, Divine Druid, Transmutation, Animal Wrangler, Icyenic Faith,
-// Devout, Perkfection, Rejuvenated, Naragi Edict, Antiquarian and Production
-// Master. Their art is cropped from Jagex's reveal images, kept in
+// Devout, Perkfection, Rejuvenated, Naragi Edict, Antiquarian, Production
+// Master, Infernal Fire and Clue Connoisseur. Their art is cropped from Jagex's reveal images, kept in
 // `image/league relics/` and copied into public/icons/ under
 // the Title_Case_Underscored names used below. Unlike every other FP()
 // reference here there is no runescape.wiki file behind them, so
@@ -924,6 +924,57 @@ export const LEAGUE_RELICS = [
   // the rest of this file uses - so like Crystal Grace, Superheated, Divine
   // Druid, Transmutation, Animal Wrangler and Icyenic Faith, there is no
   // runescape.wiki file behind them for scripts/download-icons.mjs to re-fetch.
+  {
+    // TIER 7, alongside Naragi Edict and Icyenic Faith - which fills that tier
+    // to three and makes it a genuine choice between the Sliver of Edicts, the
+    // Tome of the Icyene and the Avernic Star. All three grant a POCKET item,
+    // so they compete twice over: once for the relic pick and again for the
+    // slot, and no build can wear two of them.
+    //
+    // The Avernic Star is carried in gear.js as a real equippable, same as the
+    // other two - its worn stats are +18.7 damage bonus and +15 prayer bonus.
+    //
+    // Death Mark is deliberately NOT modelled anywhere. "Instantly killed once
+    // it reaches 20% of its lifepoints" is a fixed share of the target's health
+    // rather than of anything this app knows, so its worth depends entirely on
+    // what you are fighting - enormous on a high-health boss, nothing on a
+    // target that dies inside one ability. There is no build-side number to
+    // quote, so the effect text stands on its own.
+    name: 'Infernal Fire',
+    tier: 7,
+    summary:
+      'Grants the Avernic Star: every combat style applies Death Mark, instantly killing targets at 20% life points, and it wears in the pocket slot for +18.7 damage and +15 prayer bonus.',
+    effects: [
+      'Grants you an Avernic Star.',
+      'When in inventory or worn in your pocket slot, all combat styles trigger Death Mark 100% of the time.',
+      'Death Mark: once applied to a target, the target will be instantly killed once it reaches 20% of its lifepoints.',
+      'When an enemy is killed by Death Mark, you gain 5% adrenaline.',
+      'Additionally the star can be placed in your pocket slot and offers +18.7 melee/ranged/magic/necromancy damage bonus and +15 prayer bonus.',
+    ],
+    icon: FP('Infernal_Fire.png'),
+  },
+  {
+    // A skilling relic with no combat line at all, so nothing here reaches the
+    // Leagues effects panel. It is in the data because the relic picker has to
+    // show every relic to be a picker - a tier with a missing option would read
+    // as a bug - not because this app can cost it.
+    name: 'Clue Connoisseur',
+    tier: null,
+    summary:
+      "Uri's Briefcase for storing clues and teleporting to hidey-holes, plus minimum-step clues, maximum casket loot, 3x Treasure Trail points and unlimited sealed clues.",
+    effects: [
+      "Grants you Uri's Briefcase, which can store sealed clue scrolls and caskets and allows you to teleport to any hidey-holes available in your unlocked areas.",
+      "Unlock the Globetrotter's outfit.",
+      '3x Treasure Trail points from completing clues.',
+      'Receive an extra casket when completing clues.',
+      'When starting a new clue it will have the minimum number of steps to complete.',
+      'When opening treasure caskets you will receive the maximum number of loot drops.',
+      'All hidey-holes act as being full for the Globetrotter outfit effect.',
+      '2x chance of receiving a sealed clue scroll.',
+      'Can find an unlimited amount of sealed clues.',
+    ],
+    icon: FP('Clue_Connoisseur.png'),
+  },
   {
     name: 'Devout',
     tier: null,
