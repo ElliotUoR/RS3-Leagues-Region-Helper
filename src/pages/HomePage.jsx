@@ -95,7 +95,7 @@ export default function HomePage({ selected, toggleRegion, isUnlocked, overLimit
             !
           </span>
           <span>
-            New blessings added - next update for final relics will be the 8th - I am away on 6th &amp; 7th
+            All blessings and relics added - next update for final details will be the 8th - I am away on 6th &amp; 7th
           </span>
         </aside>
       </main>
