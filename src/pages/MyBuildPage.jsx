@@ -11,14 +11,25 @@ import BuildExtrasPicker from '../components/BuildExtrasPicker';
 import ConfirmModal from '../components/ConfirmModal';
 import { useBuildShare } from '../hooks/useBuildShare';
 import { MAX_RELICS } from '../hooks/useRelicSelection';
-import { BLESSINGS, BLESSING_COLOURS, BLESSING_TIERS } from '../data/blessings';
+import {
+  BLESSINGS,
+  BLESSING_COLOURS,
+  BLESSING_TIERS,
+  isGodTierSettled,
+  resolveGodTierFor,
+} from '../data/blessings';
 import { LEAGUE_RELICS } from '../data/leagueRelics';
 import { RELICS, RELIC_CATEGORIES } from '../data/relics';
 import { REGIONS } from '../data/regions';
 import { isGearItemAvailable } from '../data/gearAvailability';
 import { activeBuildExtras, availableBuildExtras } from '../data/buildExtras';
 import { capForTier } from '../data/leagueRelicPicks';
-import { blessingColourTally, blessingGradient, dominantBlessingColour } from '../utils/blessingTheme';
+import {
+  blessingColourTally,
+  blessingGradient,
+  dominantBlessingColour,
+  godPowerColours,
+} from '../utils/blessingTheme';
 import { IS_PAGES_BUILD } from '../utils/deployTarget';
 import {
   ARMOUR_SCALING_BLESSINGS,
@@ -303,11 +314,22 @@ export default function MyBuildPage({
 
   const listOr = (names, empty) => (names.length > 0 ? names.join(', ') : empty);
 
-  // Same theme the effects panel gives its own toggle - the god power counts as
-  // a fourth vote, so a two-blue-one-red build reads blue. See blessingTheme.js.
+  // Same theme the effects panel gives itself, god anchoring included - this
+  // button sits directly above that panel, so the two disagreeing about which
+  // colour belongs on which end would be visible in a single glance.
   const theme = useMemo(() => {
     const tally = blessingColourTally(selectedBlessings);
-    return { gradient: blessingGradient(tally), accent: dominantBlessingColour(tally) };
+    // Gated on settled, or resolveGodTierFor's green fallback would anchor an
+    // end to a power the build has not earned - the same rule the panel uses.
+    const settled = (tier) =>
+      isGodTierSettled(tier, selectedBlessings)
+        ? resolveGodTierFor(tier, selectedBlessings)?.name
+        : null;
+    const gods = godPowerColours({ godTier: settled(1), godTier2: settled(2) });
+    return {
+      gradient: blessingGradient(tally, { first: gods.first, second: gods.second }),
+      accent: dominantBlessingColour(tally),
+    };
   }, [selectedBlessings]);
 
   function showBlessingEffects() {

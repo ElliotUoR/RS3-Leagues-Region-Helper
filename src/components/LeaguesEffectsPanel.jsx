@@ -3,7 +3,12 @@ import RetryImage from './RetryImage';
 import TagTooltip from './TagTooltip';
 import { ARCH_RELIC_BY_NAME, BLESSING_BY_NAME } from '../data/buildLookups';
 import { isGodTierSettled, resolveGodTierFor } from '../data/blessings';
-import { blessingColourTally, blessingGradient, dominantBlessingColour } from '../utils/blessingTheme';
+import {
+  blessingColourTally,
+  blessingGradient,
+  dominantBlessingColour,
+  godPowerColours,
+} from '../utils/blessingTheme';
 import { BUILD_EXTRA_BY_NAME, extraLifePoints } from '../data/buildExtras';
 import {
   BIG_BONED_DAMAGE_SHARE,
@@ -467,14 +472,13 @@ function trueEquilibriumCard(mods) {
     name: TRUE_EQUILIBRIUM,
     icon: iconFor(TRUE_EQUILIBRIUM),
     lines: [
-      strong(`${x} alignment${x === 1 ? '' : 's'} - everything below is ${x}x`),
-      muted('One per distinct blessing colour held. God powers are awarded rather than chosen, so they do not count.'),
+      strong(`${x} alignment${x === 1 ? '' : 's'} - blessing is ${x}x`),
+      muted('One per distinct blessing colour held.'),
       strong(`+${round(per.abilityDamage * x)} base ability damage`),
       strong(`+${round(per.armour * x)} armour  +${round(per.lifePoints * x)} life points  +${round(per.prayerBonus * x)} prayer bonus`),
       strong(`+${(per.critChance * x).toFixed(1)}% critical strike chance  +${(per.critDamage * x).toFixed(1)}% critical strike damage`),
       // Crit is the one pair with nowhere to land: nothing else on this panel
       // reads it, so it is stated rather than folded into a total.
-      muted('The armour, life points and prayer bonus are already inside the figures above. Critical strike is not modelled anywhere else, so it is quoted as granted.'),
     ],
   };
 }
@@ -811,7 +815,9 @@ function buildCards(context) {
         // because this is the line whose number those two changed.
         grasp?.tearingThorns &&
           muted(`Includes Tearing Thorns' life points and Envenomed's poison bonus where taken - see their cards.`),
-      ],
+        // The conditional line above is `false` when Tearing Thorns is not
+        // taken, and a false in this array renders an empty keyless <li>.
+      ].filter(Boolean),
     });
   }
 
@@ -932,11 +938,6 @@ export default function LeaguesEffectsPanel({
   // enough that assuming one would misreport the other by a wide margin.
   const [herbloreLevel, setHerbloreLevel] = useState(HERBLORE_LEVELS[0]);
 
-  const theme = useMemo(() => {
-    const tally = blessingColourTally(blessings);
-    return { gradient: blessingGradient(tally), accent: dominantBlessingColour(tally) };
-  }, [blessings]);
-
   const equipped = useMemo(() => equippedItemsFor(style, slots), [style, slots]);
 
   // Elder needs a source AND, when armour is being shown at all, a figure to
@@ -964,6 +965,24 @@ export default function LeaguesEffectsPanel({
   // it is known whether it was awarded.
   const resolvedGodTier = godTierFor(1, godTier, blessings);
   const resolvedGodTier2 = godTierFor(2, godTier2, blessings);
+
+  // Built here rather than at the top of the component because it needs the
+  // resolved god powers: God Tier One anchors the gradient's left edge and God
+  // Tier Two its right, with the blessing tally still deciding everything
+  // between them. See utils/blessingTheme.js.
+  const theme = useMemo(() => {
+    const tally = blessingColourTally(blessings);
+    const gods = godPowerColours({ godTier: resolvedGodTier, godTier2: resolvedGodTier2 });
+    return {
+      gradient: blessingGradient(tally, { first: gods.first, second: gods.second }),
+      accent: dominantBlessingColour(tally),
+      // Exposed separately so the panel can put each power's colour on its own
+      // side as a hard edge - a gradient alone blends, and two powers that
+      // resolve to similar colours would be indistinguishable in it.
+      godFirst: gods.first,
+      godSecond: gods.second,
+    };
+  }, [blessings, resolvedGodTier, resolvedGodTier2]);
 
   // Picks plus awarded god powers. getBlessingModifiers reads Havoc Born, True
   // Equilibrium and Higher Power off the picks and Genesis Essence off the
@@ -1229,6 +1248,8 @@ export default function LeaguesEffectsPanel({
       style={{
         ...(theme.accent ? { '--effects-accent': theme.accent } : null),
         ...(theme.gradient ? { '--effects-gradient': theme.gradient } : null),
+        ...(theme.godFirst ? { '--effects-god-first': theme.godFirst } : null),
+        ...(theme.godSecond ? { '--effects-god-second': theme.godSecond } : null),
       }}
     >
       <button
@@ -1256,6 +1277,15 @@ export default function LeaguesEffectsPanel({
             aria-hidden="true"
             style={theme.gradient ? { backgroundImage: theme.gradient } : undefined}
           />
+          {/* Each god power's own colour, blocked in at its own end of the bar -
+              see .leagues-effects-god-edge for why the gradient alone is not
+              enough. */}
+          {theme.godFirst && (
+            <span className="leagues-effects-god-edge leagues-effects-god-edge-first" aria-hidden="true" />
+          )}
+          {theme.godSecond && (
+            <span className="leagues-effects-god-edge leagues-effects-god-edge-second" aria-hidden="true" />
+          )}
 
           {caption && <p className="leagues-effects-caption">{caption}</p>}
 

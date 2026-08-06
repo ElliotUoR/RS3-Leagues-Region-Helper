@@ -81,6 +81,23 @@ export default function HomePage({ selected, toggleRegion, isUnlocked, overLimit
           overLimit={overLimit}
           clearRegions={clearRegions}
         />
+
+        {/* Site status, not a feature - so it sits at the FOOT of the page,
+            below the region picker people actually came for, rather than up
+            with the "New:" banners in the header. Those link somewhere; this
+            is read once and does not.
+
+            Plain text in the component rather than a data file: it is a
+            dated note about one week, and giving it a home in `data/` would
+            invite it to be left there long after it stopped being true. */}
+        <aside className="home-notice-banner" role="status">
+          <span className="home-notice-icon" aria-hidden="true">
+            !
+          </span>
+          <span>
+            New blessings added - next update for final relics will be the 8th - I am away on 6th &amp; 7th
+          </span>
+        </aside>
       </main>
     </>
   );

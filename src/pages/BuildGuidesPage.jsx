@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import BuildGuideCard from '../components/BuildGuideCard';
 import UserBuildListItem from '../components/UserBuildListItem';
 import ReportBuildModal from '../components/ReportBuildModal';
@@ -24,6 +24,7 @@ import {
   trackUsage,
 } from '../utils/api';
 import { sanitizeUserBuildPayload } from '../utils/userBuildShape';
+import { sortUserBuilds } from '../utils/userBuildSort';
 import { IS_PAGES_BUILD } from '../utils/deployTarget';
 
 // Hides this site's OWN two ranked lists at the foot of the page. The
@@ -207,6 +208,16 @@ export default function BuildGuidesPage({ setters }) {
   const featured = useFeaturedBuilds();
   const shared = useSharedUserBuild();
   const [votes, setVotes] = useVotesWhenNeeded(featured.length > 0 || Boolean(shared));
+
+  // Highest net votes first. Reuses the 'best' mode the full listing already
+  // has (utils/userBuildSort.js) rather than sorting inline, so the strip and
+  // the "all user made builds" page agree about what "most voted" means -
+  // including the newest-first tiebreak between equal scores.
+  //
+  // Recomputed when `votes` arrives: the listing endpoint has no vote data, so
+  // the first render is unsorted by definition and this reorders once the
+  // separate votes request lands.
+  const featuredByVotes = useMemo(() => sortUserBuilds(featured, 'best', votes), [featured, votes]);
   // Multiple cards may be open at once - readers commonly want to compare two
   // builds side by side, so this is a Set rather than a single active id. Only
   // the most recently opened one is reflected in the URL.
@@ -357,7 +368,7 @@ export default function BuildGuidesPage({ setters }) {
               </p>
             </header>
             <div className="build-list">
-              {featured.map((summary) => (
+              {featuredByVotes.map((summary) => (
                 <UserBuildListItem
                   key={summary.id}
                   summary={summary}

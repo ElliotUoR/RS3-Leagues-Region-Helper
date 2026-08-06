@@ -1,4 +1,9 @@
-import { BLESSINGS, isGodTierSettled, resolveGodTierFor } from '../data/blessings';
+import {
+  BLESSINGS,
+  GOD_TIER_BLESSINGS,
+  isGodTierSettled,
+  resolveGodTierFor,
+} from '../data/blessings';
 
 // Turns a build's blessing picks into a colour theme.
 //
@@ -41,26 +46,80 @@ export function blessingColourTally(blessingNames = []) {
   return tally;
 }
 
+const GOD_COLOUR_BY_NAME = new Map(GOD_TIER_BLESSINGS.map((god) => [god.name, god.colour]));
+
+// The two god powers' colours, as hex, from their names. Names rather than
+// derivation because the caller may have a STORED godTier/godTier2 (curated
+// guides and saved user builds carry both) which has to win over anything
+// re-derived from the picks.
+export function godPowerColours({ godTier, godTier2 } = {}) {
+  const hex = (name) => COLOUR_HEX[GOD_COLOUR_BY_NAME.get(name)] ?? null;
+  return { first: hex(godTier), second: hex(godTier2) };
+}
+
 // A gradient whose bands are proportional to the tally: 3 blue to 1 red puts
 // the blue-red transition three-quarters of the way across rather than halfway.
 // Stops are placed at each band's MIDPOINT so adjacent colours blend instead of
 // meeting at a hard line, which at this size reads as a smear rather than a
 // stripe.
-export function blessingGradient(tally, angle = '120deg') {
+//
+// With two god powers the ENDS are no longer free. God Tier One anchors the
+// left and God Tier Two the right, because those are the two outcomes a reader
+// most wants to identify and the halves of the tree already read left-to-right
+// everywhere else (the card's two pill rows, the Blessings section). The tally
+// still decides everything between them, so a build's blessing mix is as
+// visible as it was - it just no longer decides which colour sits at which end.
+//
+// Ordering, not recolouring: the god colours are in the tally already (they
+// vote, see blessingColourTally), so anchoring moves an existing band to an end
+// rather than adding a stripe that nothing earned.
+export function blessingGradient(tally, { angle = '120deg', first = null, second = null } = {}) {
   const present = COLOUR_ORDER.filter((colour) => tally[colour] > 0);
   if (present.length === 0) return null;
 
-  const total = present.reduce((sum, colour) => sum + tally[colour], 0);
+  // Bands in draw order: the first god's colour, then whatever is left in the
+  // usual order, then the second god's. A colour is only moved to an end if the
+  // build actually has it.
+  const isPresent = (hex) => present.find((colour) => COLOUR_HEX[colour] === hex) ?? null;
+  const firstColour = isPresent(first);
+  const secondColour = isPresent(second);
+  // Both gods the same colour is a mono-god build, and it should read as one -
+  // that colour at BOTH ends with the off-colours between them, rather than
+  // trailing off into whatever happened to be left. The band is emitted twice
+  // and its weight split, so the total is unchanged.
+  const mirrored = Boolean(firstColour) && firstColour === secondColour;
+  const middle = present.filter((colour) => colour !== firstColour && colour !== secondColour);
+  const ordered = [
+    firstColour,
+    ...middle,
+    mirrored ? firstColour : secondColour,
+  ].filter(Boolean);
+
+  // A mirrored build with nothing in the middle is just that one colour.
+  if (mirrored && middle.length === 0) {
+    return `linear-gradient(${angle}, ${COLOUR_HEX[firstColour]}, ${COLOUR_HEX[firstColour]})`;
+  }
+
+  // Halved for a mirrored band so appearing twice does not double its weight.
+  const weight = (colour, index) =>
+    mirrored && colour === firstColour && (index === 0 || index === ordered.length - 1)
+      ? tally[colour] / 2
+      : tally[colour];
+  const total = ordered.reduce((sum, colour, index) => sum + weight(colour, index), 0);
   let travelled = 0;
-  const stops = present.map((colour) => {
-    const share = tally[colour] / total;
+  const stops = ordered.map((colour, index) => {
+    const share = weight(colour, index) / total;
     const midpoint = (travelled + share / 2) * 100;
     travelled += share;
-    return `${COLOUR_HEX[colour]} ${Math.round(midpoint)}%`;
+    // The end bands are pinned flush so the god colours actually reach the
+    // edges - at a midpoint they would stop short and the anchor would not read.
+    const atEnd = index === ordered.length - 1 && (secondColour || mirrored);
+    const at = index === 0 && firstColour ? 0 : atEnd ? 100 : midpoint;
+    return `${COLOUR_HEX[colour]} ${Math.round(at)}%`;
   });
 
   // A single colour needs two stops to be a gradient at all.
-  if (stops.length === 1) return `linear-gradient(${angle}, ${COLOUR_HEX[present[0]]}, ${COLOUR_HEX[present[0]]})`;
+  if (stops.length === 1) return `linear-gradient(${angle}, ${COLOUR_HEX[ordered[0]]}, ${COLOUR_HEX[ordered[0]]})`;
   return `linear-gradient(${angle}, ${stops.join(', ')})`;
 }
 
