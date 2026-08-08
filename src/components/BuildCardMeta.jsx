@@ -116,6 +116,20 @@ export function blessingRows({ blessings, godTier, godTier2 }) {
     .filter((row) => row.blessings.length > 0 || row.godTier);
 }
 
+// League relics in tier order, for exactly the same reason blessingRows sorts
+// blessings: a curated guide's array is hand-authored and a user build's is in
+// click order, so neither arrives sorted. Every relic's tier is confirmed now,
+// so this is a real order rather than a guess.
+//
+// Ties inside a tier keep their original order - the only way a tier holds two
+// is Rejuvenated's bonus pick, and which of the pair was chosen first is more
+// meaningful than alphabetising them. Unknown names sort last rather than
+// throwing, matching blessingRows.
+export function sortedRelics(relics) {
+  const tierOf = (name) => LEAGUE_RELIC_BY_NAME.get(name)?.tier ?? Number.MAX_SAFE_INTEGER;
+  return [...(relics ?? [])].sort((a, b) => tierOf(a) - tierOf(b));
+}
+
 // The pill rows themselves, so the two card families render them identically
 // and not just group them identically.
 export function BlessingRows({ blessings, godTier, godTier2 }) {
@@ -150,7 +164,7 @@ export default function BuildCardMeta({
       )}
       {relics.length > 0 && (
         <div className="build-card-chips">
-          {relics.map((name) => (
+          {sortedRelics(relics).map((name) => (
             <LeagueRelicChip key={name} name={name} />
           ))}
         </div>

@@ -56,6 +56,12 @@ function leagueRelicIconsFor(relicNames) {
   return (relicNames ?? [])
     .map((name) => LEAGUE_RELICS.find((r) => r.name === name))
     .filter((relic) => relic?.icon)
+    // Tier order, matching the cards this image previews (see
+    // components/BuildCardMeta.jsx's sortedRelics) and shareBuild.js's own
+    // sort. Ahead of the cap, not after it: truncating an unsorted list drops
+    // whichever relics happened to be authored last rather than the highest
+    // tiers, so two builds with the same picks could preview differently.
+    .sort((a, b) => (a.tier ?? Infinity) - (b.tier ?? Infinity))
     .slice(0, MAX_LEAGUE_RELICS)
     .map((relic) => ({ icon: relic.icon, name: relic.name }));
 }

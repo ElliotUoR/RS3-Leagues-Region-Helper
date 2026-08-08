@@ -8,7 +8,7 @@ import BuildProse from './BuildProse';
 import PicksHeading from './PicksHeading';
 import RejuvenatedNote from './RejuvenatedNote';
 import BlessingGuideSection from './BlessingGuideSection';
-import { BuildByline, BuildDifficultyTag, blessingRows } from './BuildCardMeta';
+import { BuildByline, BuildDifficultyTag, blessingRows, sortedRelics } from './BuildCardMeta';
 import { BLESSINGS, GOD_TIER_BLESSINGS } from '../data/blessings';
 import {
   ARTEFACT_BYPASS_NOTE,
@@ -345,7 +345,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
             </div>
           ))}
           <div className="build-card-chips">
-            {build.relics.map((name) => (
+            {sortedRelics(build.relics).map((name) => (
               <LeagueRelicChip key={name} name={name} />
             ))}
           </div>
@@ -442,7 +442,7 @@ export default function BuildGuideCard({ build, expanded, onToggle, editing = fa
                   onToggle={() => setExpandAll((p) => !p)}
                 />
                 <ul className="pick-list">
-                  {build.relics.map((name) => (
+                  {sortedRelics(build.relics).map((name) => (
                     <PickRow expandAll={expandAll}
                       key={name}
                       icon={LEAGUE_RELIC_BY_NAME.get(name)?.icon}

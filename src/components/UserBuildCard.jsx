@@ -3,7 +3,7 @@ import RetryImage from './RetryImage';
 import ReadOnlyLoadout from './ReadOnlyLoadout';
 import LeaguesEffectsPanel from './LeaguesEffectsPanel';
 import BuildProse from './BuildProse';
-import BuildCardMeta, { BuildByline, BuildDifficultyTag } from './BuildCardMeta';
+import BuildCardMeta, { BuildByline, BuildDifficultyTag, sortedRelics } from './BuildCardMeta';
 import BlessingGuideSection from './BlessingGuideSection';
 import PicksHeading from './PicksHeading';
 import RejuvenatedNote from './RejuvenatedNote';
@@ -214,7 +214,7 @@ export default function UserBuildCard({ build, expanded, onToggle }) {
                 <section className="build-setup-group">
                   {headingFor('relics', 'League relics')}
                   <ul className="pick-list">
-                    {build.relics.map((name) => (
+                    {sortedRelics(build.relics).map((name) => (
                       <PickRow key={name} icon={LEAGUE_RELIC_BY_NAME.get(name)?.icon} name={name} reason={build.relicReasons[name]} expandAll={expandAll} />
                     ))}
                   </ul>
