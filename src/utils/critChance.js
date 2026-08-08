@@ -71,16 +71,19 @@ export function getCritBreakdown({ equipped = {}, blessings = [], leagueRelics =
     });
   }
 
-  // Armour set effects - Tuska's Might and Sliske's Parody, which share one
-  // bonus rather than stacking. See data/critSetBonus.js.
-  if (critSets.best) {
+  // Armour set effects. ONE LINE PER GROUP, not one line total: Tuska's Might
+  // and Fracture Point are different effects and do stack, so collapsing them
+  // into a single number would hide which armour is paying for what. Within a
+  // group the sets share one bonus and only the best is listed - see
+  // data/critSetBonus.js.
+  for (const best of critSets.bests) {
     chanceParts.push({
-      key: 'crit-set',
-      label: critSets.best.effect,
-      value: critSets.chance,
+      key: `crit-set-${best.groupId}`,
+      label: best.effect,
+      value: best.chance,
       note: chaoticInsight
-        ? `${critSets.best.worn} ${critSets.best.set} pieces counting as ${critSets.best.counted} via ${CHAOTIC_INSIGHT}`
-        : `${critSets.best.worn} ${critSets.best.set} pieces`,
+        ? `${best.worn} ${best.set} piece${best.worn === 1 ? '' : 's'} counting as ${best.counted} via ${CHAOTIC_INSIGHT}`
+        : `${best.worn} ${best.set} piece${best.worn === 1 ? '' : 's'}`,
     });
   }
 

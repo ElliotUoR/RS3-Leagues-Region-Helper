@@ -737,13 +737,16 @@ export const BLESSINGS = [
     ],
     analysis: {
       summary:
-        'Pays out only through the three named procs, and pays enormously: 5x the Inferno rate, Grasp on every 2nd hit instead of every 5th, and Light of Saradomin at a third of its cooldown. Worth close to nothing on a build carrying none of them.',
+        'Pays out only through the tier 2 blessings that introduce the three named procs - Abyssal Cinders, Barkscales and Striking Light - and pays enormously there: 5x the Inferno rate, Grasp every 2nd reduction instead of every 5th, and Light of Saradomin at a third of its cooldown. It does NOT reach the tier 5 rebuilds of those procs (Tearing Thorns, Lord of Light), which carry their own triggers and cooldowns.',
       stageRank: { early: 3, mid: 2, late: 1 },
       scalesWithSkill: false,
       requiresShield: false,
       // The procs come from tier 2/3 (Abyssal Cinders, Barkscales) and tier 5
       // (all three). This is the multiplier those exist to feed.
-      synergies: ['Abyssal Cinders', 'Barkscales', 'Unholy Critual', 'Tearing Thorns', 'Lord of Light'],
+      // TIER 2 ONLY. The tier 5 blessings rebuild these same procs with their
+      // own triggers and cooldowns, and Perfidious does not reach those - so
+      // they are not synergies, they are the versions it cannot help.
+      synergies: ['Abyssal Cinders', 'Barkscales', 'Striking Light'],
       styleNotes: {},
     },
   },

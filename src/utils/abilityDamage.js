@@ -492,6 +492,10 @@ export const PERFIDIOUS_INFERNO_MULTIPLIER = 5;
 export const PERFIDIOUS_GRASP_TRIGGER_HITS = 2;
 export const PERFIDIOUS_LIGHT_COOLDOWN_SECONDS = 4.8;
 
+// `perfidious` only counts when the Inferno is Abyssal Cinders' - that 5%
+// on-hit chance is the thing Perfidious multiplies. Unholy Critual (tier 5)
+// fires an Inferno on every critical strike instead, which is not a chance
+// Perfidious has anything to scale.
 export function getInfernoOfZamorak({ payoutAD = 0, perfidious = false } = {}) {
   const chance = INFERNO_OF_ZAMORAK_BASE_CHANCE * (perfidious ? PERFIDIOUS_INFERNO_MULTIPLIER : 1);
   return {
@@ -566,9 +570,13 @@ export function getGraspOfGuthix({
     tearingThorns,
     envenomed,
     herbloreLevel,
-    // Barkscales triggers on every 5th damage reduction; Tearing Thorns on
-    // every 5th damage-over-time hit. Perfidious takes either to 2.
-    triggerHits: perfidious ? PERFIDIOUS_GRASP_TRIGGER_HITS : TEARING_THORNS_TRIGGER_HITS,
+    // TWO separate triggers, and Perfidious only reaches one of them.
+    // Barkscales (tier 2) fires Grasp every 5th damage reduction, and
+    // Perfidious takes that to 2. Tearing Thorns (tier 5) fires it every 5th
+    // damage-over-time hit, and Perfidious does not touch that - it empowers
+    // the tier 2 blessings, and Tearing Thorns is its own trigger.
+    barkscalesTrigger: perfidious ? PERFIDIOUS_GRASP_TRIGGER_HITS : TEARING_THORNS_TRIGGER_HITS,
+    tearingThornsTrigger: TEARING_THORNS_TRIGGER_HITS,
     perfidious,
   };
 }
@@ -633,18 +641,21 @@ export function getLightOfSaradomin({
     prayerBonus,
     // 5% of damage DEALT, so it follows the whole trigger rather than one proc.
     heal: lordOfLight ? total * LORD_OF_LIGHT_HEAL_SHARE : null,
-    // Perfidious overrides both, rather than scaling either - its wording is a
-    // flat "reduced to 4.8s", so it is the same number whichever blessing is
-    // carrying the proc. On a Lord of Light build that is 14.4s -> 4.8s, a
-    // third of the cooldown for five procs a trigger.
-    cooldown: perfidious
-      ? PERFIDIOUS_LIGHT_COOLDOWN_SECONDS
-      : lordOfLight
-        ? LORD_OF_LIGHT_COOLDOWN_SECONDS
-        : STRIKING_LIGHT_COOLDOWN_SECONDS,
+    // Perfidious reaches the TIER 2 version only. Striking Light's 9s becomes
+    // 4.8s; Lord of Light's 14.4s does not move, because Perfidious empowers
+    // the tier 2 blessings and Lord of Light has already replaced that proc
+    // with its own. So on a build holding both, the cooldown is Lord of
+    // Light's and Perfidious buys nothing here.
+    cooldown:
+      perfidious && !lordOfLight
+        ? PERFIDIOUS_LIGHT_COOLDOWN_SECONDS
+        : lordOfLight
+          ? LORD_OF_LIGHT_COOLDOWN_SECONDS
+          : STRIKING_LIGHT_COOLDOWN_SECONDS,
     baseCooldown: lordOfLight ? LORD_OF_LIGHT_COOLDOWN_SECONDS : STRIKING_LIGHT_COOLDOWN_SECONDS,
     lordOfLight,
-    perfidious,
+    // Whether Perfidious actually changed anything here.
+    perfidious: perfidious && !lordOfLight,
   };
 }
 

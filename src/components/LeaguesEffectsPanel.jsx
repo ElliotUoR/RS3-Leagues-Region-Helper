@@ -156,6 +156,13 @@ const REFLECT_ARMOUR_SHARE = [0.1, 0.15];
 // at about -0.3. Math.round takes that to -0, and (-0).toLocaleString() renders
 // the string "-0" - so the panel read "+ -0 armour".
 const round = (n) => (Math.round(n) + 0).toLocaleString();
+
+// "Every 2nd reduction", not "Every 2 reduction" - the trigger count moves
+// between 5 and 2 depending on Perfidious, so the suffix cannot be hardcoded.
+const ordinal = (n) => {
+  const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
+  return `${n}${suffix}`;
+};
 const iconFor = (name) => BLESSING_BY_NAME.get(name)?.icon;
 
 // Saved builds store their god powers; the build editor has not settled on them
@@ -370,8 +377,13 @@ function strikingLightCard({ style, payoutAD, armourNow, light }) {
       muted(
         light.lordOfLight
           ? `40-60% of ability damage plus 250% of armour, boosted by Lord of Light. ${light.procs}x per trigger, ${light.cooldown}s cooldown.`
-          : '40-60% of ability damage plus 250% of armour, 9s cooldown.',
+          // `light.cooldown`, not a hardcoded 9 - Perfidious takes this
+          // version to 4.8s, and the Perfidious card says so, so a fixed 9
+          // here would have the two cards contradicting each other.
+          : `40-60% of ability damage plus 250% of armour, ${light.cooldown}s cooldown.`,
       ),
+      // Named on the card whose cooldown actually moved, same as Barkscales.
+      light.perfidious && strong(`${light.baseCooldown}s -> ${light.cooldown}s cooldown, via ${PERFIDIOUS}`),
     ].filter(Boolean),
   };
 }
@@ -380,7 +392,7 @@ function strikingLightCard({ style, payoutAD, armourNow, light }) {
 // bonus, each healing. The card leads with the whole trigger because that is
 // what a basic attack actually produces - one proc's figure understates it
 // fivefold.
-function lordOfLightCard({ light, armourNow, payoutAD }) {
+function lordOfLightCard({ light, armourNow, payoutAD, hasPerfidious }) {
   const prayerPercent = Math.round((light.prayerMultiplier - 1) * 100);
   return {
     key: 'lord-of-light',
@@ -391,6 +403,11 @@ function lordOfLightCard({ light, armourNow, payoutAD }) {
       muted(
         `${light.procs}x Light of Saradomin at ~${round(light.each)} each, from a basic attack. ${light.cooldown}s cooldown.`,
       ),
+      // Same reason as the Tearing Thorns note: Perfidious drops Striking
+      // Light's version to 4.8s, so a build holding both would expect this to
+      // have moved too.
+      hasPerfidious &&
+        muted(`${PERFIDIOUS} does not change this cooldown - it empowers the tier 2 blessings.`),
       strong(`~${round(light.base)} per proc before prayer`),
       muted(
         `40-60% of ${round(payoutAD)} ability damage plus 250% of ${round(armourNow)} armour.`,
@@ -577,10 +594,14 @@ function tearingThornsCard({ grasp }) {
       ),
       strong(`+${round(grasp.fromLife)} from 20-30% of maximum life points`),
       muted('25% is the average of that band.'),
-      strong(`Triggers every ${grasp.triggerHits} hits of a damage over time ability`),
+      strong(`Triggers every ${grasp.tearingThornsTrigger} hits of a damage over time ability`),
+      // Said explicitly because Perfidious DOES cut Barkscales' trigger to 2
+      // on the same proc, and a reader holding both would otherwise expect
+      // this number to have moved with it.
+      grasp.perfidious && muted(`${PERFIDIOUS} does not change this - it empowers the tier 2 blessings.`),
       { text: 'Damage over time abilities last 100% longer.' },
       muted('Double duration is double the hits feeding that trigger.'),
-    ],
+    ].filter(Boolean),
   };
 }
 
@@ -613,7 +634,6 @@ function envenomedCard({ grasp }) {
 // equip would promise something it cannot deliver.
 function chaoticInsightCard({ crit, baseAD, equipped }) {
   const critSets = crit?.critSets;
-  const best = critSets?.best;
   const achto = baseAD?.achto;
   // Every set-bonus set worn, whether or not this app models what it does -
   // the grant is real either way, and a card that only listed the two crit
@@ -627,12 +647,33 @@ function chaoticInsightCard({ crit, baseAD, equipped }) {
     // The resulting effect, but ONLY where it is actually costed. Everything
     // else gets the grant and nothing more - inventing an effect line for a set
     // this app has never modelled would be worse than saying nothing.
-    const crits = (critSets?.sets ?? []).find((c) => c.set === entry.set);
-    if (crits && crits === best) {
-      lines.push(muted(`${entry.worn} worn counting as ${crits.counted} - +${crits.chance}% critical strike chance from ${crits.effect}.`));
-    } else if (crits) {
+    // Matched on the GEAR GROUP, not the set's display name - "Sliske's anima
+    // core" is one crit set spanning two gear groups and equal to neither
+    // string, so comparing names dropped its line from this card entirely.
+    const crits = (critSets?.sets ?? []).find((c) => c.groups?.includes(entry.set));
+    // `bests` is one winner per GROUP, so a build carrying both Tuska's Might
+    // and Fracture Point has two paying sets, not one.
+    const isPaying = (critSets?.bests ?? []).includes(crits);
+    if (crits && isPaying) {
+      // The uncapped group is the one where Chaotic Insight does something no
+      // amount of gear could: three robe slots cap Elite Tectonic at 6% on
+      // their own, and counting each piece three times takes it past that.
+      // Flagged only where the total has genuinely gone past what wearing the
+      // whole set could reach - counting 1 piece as 3 matches a full 3-piece
+      // set, it does not beat it. Kept as a clause on the payout line rather
+      // than a sentence of its own; it is a footnote, not a finding.
+      const uncapped = crits.groupId === 'fracture' && crits.counted > crits.size;
       lines.push(
-        warn(`${entry.worn} worn counting as ${crits.counted}, but paying nothing - it shares one bonus with ${best?.set ?? 'the other set'} and they do not stack.`),
+        muted(
+          `${entry.worn} worn counting as ${crits.counted} - +${crits.chance}% critical strike chance from ${crits.effect}${uncapped ? ', which has no piece cap' : ''}.`,
+        ),
+      );
+    } else if (crits) {
+      // Which set beat it, from ITS OWN group - naming the winner from the
+      // other group would be nonsense, since the two stack.
+      const rival = (critSets?.bests ?? []).find((b) => b.groupId === crits.groupId);
+      lines.push(
+        warn(`Does not stack with ${rival?.set ?? 'the other set'}`),
       );
     } else if (achto && achto.set === entry.set) {
       lines.push(
@@ -672,24 +713,30 @@ function perfidiousCard({ blessings, grasp, light, inferno }) {
   const has = (name) => blessings.includes(name);
   const affected = [];
 
-  if (inferno && (has('Abyssal Cinders') || has(UNHOLY_CRITUAL))) {
+  // TIER 2 ONLY. Perfidious empowers Abyssal Cinders, Barkscales and Striking
+  // Light - the three blessings that introduce these procs. The tier 5 pair
+  // (Tearing Thorns, Lord of Light) rebuild the same procs with their own
+  // triggers and cooldowns, and Perfidious does not reach those.
+  if (inferno && has('Abyssal Cinders')) {
     affected.push({
       line: strong(`Inferno of Zamorak ${inferno.baseChance}% -> ${inferno.chance}% chance on hit`),
-      note: muted(`x${PERFIDIOUS_INFERNO_MULTIPLIER} activation chance, via ${has('Abyssal Cinders') ? 'Abyssal Cinders' : UNHOLY_CRITUAL}.`),
+      note: muted(`x${PERFIDIOUS_INFERNO_MULTIPLIER} activation chance, via Abyssal Cinders.`),
     });
   }
 
-  if (grasp && (has('Barkscales') || has(TEARING_THORNS))) {
+  if (grasp && has('Barkscales')) {
     affected.push({
-      line: strong(`Grasp of Guthix every ${TEARING_THORNS_TRIGGER_HITS} -> every ${grasp.triggerHits} hits`),
-      note: muted(`Activation requirement reduced, via ${has(TEARING_THORNS) ? TEARING_THORNS : 'Barkscales'}.`),
+      line: strong(
+        `Grasp of Guthix every ${TEARING_THORNS_TRIGGER_HITS} -> every ${grasp.barkscalesTrigger} reductions`,
+      ),
+      note: muted('Activation requirement reduced, via Barkscales.'),
     });
   }
 
-  if (light && (has('Striking Light') || has(LORD_OF_LIGHT))) {
+  if (light && has('Striking Light') && !has(LORD_OF_LIGHT)) {
     affected.push({
       line: strong(`Light of Saradomin ${light.baseCooldown}s -> ${light.cooldown}s cooldown`),
-      note: muted(`Via ${has(LORD_OF_LIGHT) ? LORD_OF_LIGHT : 'Striking Light'}.`),
+      note: muted('Via Striking Light.'),
     });
   }
 
@@ -703,7 +750,7 @@ function perfidiousCard({ blessings, grasp, light, inferno }) {
         : [
             warn('Nothing on this build - Perfidious is paying nothing.'),
             muted(
-              'It only empowers Inferno of Zamorak, Grasp of Guthix and Light of Saradomin. Take Abyssal Cinders or Unholy Critual, Barkscales or Tearing Thorns, or Striking Light or Lord of Light.',
+              'It empowers the tier 2 blessings only - Abyssal Cinders, Barkscales and Striking Light. The tier 5 versions of those procs (Tearing Thorns, Lord of Light) carry their own triggers and cooldowns and are unaffected.',
             ),
           ],
   };
@@ -746,7 +793,7 @@ function infernalFireCard() {
 }
 
 function buildCards(context) {
-  const { blessings, style, equipped, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, hasInfernalFire, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp, inferno } =
+  const { blessings, style, equipped, baseAD, damage, payoutAD, aegis, aegisNow, armourNow, lifeTotal, prayerTotal, icyeneBonus, adrenaline, extras, resolvedGodTier, chinSplash, hasSliver, hasInfernalFire, hasPerfidious, baseArmour, sliverArmour, resolvedGodTier2, mods, totalAD, effectiveAD, crit, light, grasp, inferno } =
     context;
   const cards = [];
   const picked = (name) => blessings.includes(name);
@@ -830,8 +877,11 @@ function buildCards(context) {
         muted('10% of total armour, flat - on top of any percentage reduction.'),
         strong(`Grasp of Guthix ~${round(grasp?.total ?? payoutAD * GRASP_OF_GUTHIX_AVERAGE_SHARE)} damage`),
         muted(
-          `Every ${grasp?.triggerHits ?? 5}${grasp?.perfidious ? '' : 'th'} reduction; rolls 80-120% of ability damage as poison in a 3x3.`,
+          `Every ${ordinal(grasp?.barkscalesTrigger ?? 5)} reduction; rolls 80-120% of ability damage as poison in a 3x3.`,
         ),
+        // Named on the card whose trigger actually moved. Perfidious empowers
+        // the tier 2 blessings, and this is one of them.
+        grasp?.perfidious && strong(`Every 2nd reduction instead of every 5th, via ${PERFIDIOUS}`),
         // Named here rather than left to the Tearing Thorns / Envenomed cards,
         // because this is the line whose number those two changed.
         grasp?.tearingThorns &&
@@ -1245,6 +1295,7 @@ export default function LeaguesEffectsPanel({
     chinSplash,
     hasSliver,
     hasInfernalFire,
+    hasPerfidious,
     mods,
     totalAD,
     effectiveAD,

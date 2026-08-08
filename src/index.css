@@ -269,48 +269,6 @@ header h1 {
 
 /* The Build Guides link. Guthix green, matching the Blessings nav tab, so the
    two "new feature" surfaces read as the same family. */
-/* A dated site-status note at the foot of the regions page. Red, and NOT a
-   link - the banners in the header are all navigation, and giving this the same
-   affordance would have people clicking a sentence that goes nowhere.
-
-   `--danger` rather than a literal red so it stays legible on the light theme
-   (#ff6b6b dark, #c81e3a light). */
-.home-notice-banner {
-  /* The regions page's <main> is a three-column grid, so without this the
-     banner drops into the first column and renders about a third as wide as
-     the sentence needs. Spanning every column puts it across the foot of the
-     page, which is where a site-wide notice belongs. */
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 22px auto 4px;
-  padding: 10px 14px;
-  max-width: 900px;
-  width: 100%;
-  border: 1px solid color-mix(in srgb, var(--danger) 55%, transparent);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--danger) 12%, transparent);
-  color: var(--text-h);
-  font-size: 0.86rem;
-  line-height: 1.4;
-}
-
-.home-notice-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--danger);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.8rem;
-  line-height: 1;
-}
-
 .home-guides-banner {
   --guides-green: #3fbf6f;
   position: relative;
