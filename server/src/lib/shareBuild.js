@@ -128,10 +128,9 @@ function sanitizeLeagueRelicsForImage(raw) {
     if (picks.length === MAX_LEAGUE_RELICS) break;
   }
   // Same alphabetisation issue as sanitizeBlessingsForImage above - sort back
-  // to tier order (1, 2, 3, ...) with "Unknown Tier" relics (tier: null,
-  // e.g. Crystal Grace/Superheated/Transmutation/Divine Druid until Jagex
-  // assigns them a real tier) sorted after every numbered tier, matching the
-  // live Relics page's own tier-grouping.
+  // to tier order (1, 2, 3, ...), matching the live Relics page's own
+  // tier-grouping. Every relic now carries a real tier; the `?? Infinity`
+  // stays only so a future unplaced one sorts last instead of first.
   picks.sort((a, b) => (a.tier ?? Infinity) - (b.tier ?? Infinity));
   return picks.map((r) => ({ icon: r.icon, name: r.name }));
 }

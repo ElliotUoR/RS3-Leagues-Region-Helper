@@ -15,7 +15,7 @@ export default function RejuvenatedNote({ relics = [] }) {
         ✦
       </span>
       {tier == null
-        ? 'Rejuvenated grants an extra relic from another tier - unspent in this build.'
+        ? 'Rejuvenated grants an extra relic from a previous tier (1-5) - unspent in this build.'
         : `Rejuvenated grants the second Tier ${tier} relic.`}
     </p>
   );

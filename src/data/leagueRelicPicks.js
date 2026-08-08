@@ -7,21 +7,26 @@ import { LEAGUE_RELICS } from './leagueRelics.js';
 // on agreeing about it: the League Relics page, the build editor, My Build and
 // the build cards that visualise a finished set.
 //
-// Base rule: one relic per tier. Relics whose tier is unknown are unconstrained
-// - "pick any number" - since there is no tier to be exclusive within.
+// Base rule: one relic per tier. (Relics with no tier would be unconstrained -
+// "pick any number" - but every relic is now placed, so that path is unused.)
 //
 // Rejuvenated: "Choose another relic from a previous tier." Taking it buys ONE
 // extra pick, so exactly one tier may hold two relics while the rest stay at
 // one.
 //
-// The "previous" in that wording is enforced at exactly one point: the TOP
-// tier. Nothing is previous to the highest tier there is, so the bonus can
-// never be spent doubling it up - Naragi Edict and Icyenic Faith (both Tier 7)
-// stay a genuine either/or no matter what else is picked. Below the top it is
-// unenforceable and deliberately unenforced: Rejuvenated has no confirmed tier
-// of its own (see leagueRelics.js), so there is no anchor to measure "previous
-// to what" against, and guessing one would block legal sets. If its tier is
-// ever confirmed, BONUS_ELIGIBLE_TIER is the only thing that needs tightening.
+// "PREVIOUS" is now enforceable and enforced. Rejuvenated is confirmed Tier 6,
+// so the tiers previous to it are 1-5 and the bonus may only be spent there.
+// Two consequences worth naming:
+//
+//   - Tier 7 can never be doubled. Naragi Edict, Icyenic Faith and Infernal
+//     Fire stay a one-of-three no matter what else is picked.
+//   - Tier 6 can never be doubled either, and a tier is not previous to
+//     itself - so Rejuvenated and Perkfection are an either/or. Taking
+//     Rejuvenated spends the Tier 6 pick on Rejuvenated.
+//
+// This was deliberately unenforced while Rejuvenated's own tier was unknown -
+// there was no anchor to measure "previous to what" against. The chart supplied
+// one.
 export const REJUVENATED_RELIC = 'Rejuvenated';
 
 const BY_NAME = new Map(LEAGUE_RELICS.map((relic) => [relic.name, relic]));
@@ -35,8 +40,16 @@ export const MAX_RELIC_TIER = Math.max(
   ...LEAGUE_RELICS.map((relic) => relic.tier).filter((tier) => tier != null),
 );
 
-// Whether Rejuvenated's extra pick may be spent on this tier at all.
-export const BONUS_ELIGIBLE_TIER = (tier) => tier != null && tier < MAX_RELIC_TIER;
+// Read from the catalogue for the same reason: the rule is "previous to
+// Rejuvenated", not "previous to 6". Falls back to the ceiling if the relic
+// ever loses its tier, which restores the old top-tier-only behaviour rather
+// than throwing.
+export const REJUVENATED_TIER =
+  LEAGUE_RELICS.find((relic) => relic.name === REJUVENATED_RELIC)?.tier ?? MAX_RELIC_TIER;
+
+// Whether Rejuvenated's extra pick may be spent on this tier at all - strictly
+// below Rejuvenated's own tier, per "a relic from a previous tier".
+export const BONUS_ELIGIBLE_TIER = (tier) => tier != null && tier < REJUVENATED_TIER;
 
 function countsPerTier(names) {
   const perTier = new Map();
@@ -99,8 +112,9 @@ export function sanitizeRelicPicks(raw) {
     if (count >= 1) {
       // Over the base rule - allowed only while the bonus lasts, and spent in
       // arrival order so a hand-crafted payload cannot smuggle in more than one.
-      // The top tier is never eligible, so a payload naming both Tier 7 relics
-      // loses the later one whether or not Rejuvenated is in the list.
+      // Tiers 6 and 7 are never eligible, so a payload naming two Tier 7
+      // relics - or Rejuvenated alongside Perkfection - loses the later one
+      // whether or not Rejuvenated is in the list.
       if (!BONUS_ELIGIBLE_TIER(tier) || budget <= 0) continue;
       budget -= 1;
     }

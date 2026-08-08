@@ -16,10 +16,14 @@
 //
 // `tier` groups relics into the "only one relic can be activated per tier"
 // constraint the league itself enforces (see
-// hooks/useLeagueRelicSelection.js's toggleLeagueRelic). `tier: null` marks
-// a relic whose tier isn't known/confirmed yet - those get no pick
-// constraint at all instead of a per-tier one, per how little is actually
-// known about them.
+// hooks/useLeagueRelicSelection.js's toggleLeagueRelic). Every one of the 20
+// is now confirmed, from Jagex's "RELIC TIER REVEALED" chart - tiers 1-5 hold
+// three relics each, tier 6 holds two (Perkfection, Rejuvenated) and tier 7
+// holds three. Nothing is left unplaced.
+//
+// The code still tolerates `tier: null` (it reads as "unconstrained, pick any
+// number") because that is how every relic arrived before the chart, and a
+// future reveal would land the same way. No relic uses it today.
 //
 // `effects` is the relic's full list of effect bullets - shown as a list
 // rather than one run-on paragraph since several of these (Golden Touch,
@@ -214,7 +218,7 @@ export const LEAGUE_RELICS = [
     // relics since its resource-conversion effect touches the widest range
     // of other gear.js entries (see regionTagNote below).
     name: 'Transmutation',
-    tier: null,
+    tier: 4,
     summary: 'Transmutes resources up or down a tier via two new alchemy spells, reaching region-locked materials.',
     effects: [
       "Grants the Deities' Transmuter.",
@@ -437,7 +441,7 @@ export const LEAGUE_RELICS = [
   },
   {
     name: 'Crystal Grace',
-    tier: null,
+    tier: 4,
     summary: 'Unlocks all spellbooks and boosts Runecrafting, Necromancy rituals/glyphs, and bone-offering XP.',
     effects: [
       "Grants Seren's crystal tiara, which acts as an omni-tiara and offers unlimited teleports to all runecrafting altars in your unlocked regions.",
@@ -453,7 +457,7 @@ export const LEAGUE_RELICS = [
   },
   {
     name: 'Superheated',
-    tier: null,
+    tier: 2,
     summary: 'Auto-burns logs and cooks fish, doubles smelted bars, and speeds up Smithing with bonus XP.',
     effects: [
       'Provides a toggleable option to burn any log automatically when Woodcutting, regardless of your Firemaking level.',
@@ -537,7 +541,7 @@ export const LEAGUE_RELICS = [
     // published there yet), same "Unknown Tier" treatment as Crystal Grace/
     // Superheated above.
     name: 'Divine Druid',
-    tier: null,
+    tier: 2,
     summary: 'Auto-cleans grimy herbs into potions and boosts Summoning familiars, charms and divine energy conversions.',
     effects: [
       "Grants Thera's Summoning Pouch, a pouch that stores grimy herbs and charms, acts as infinite spirit shard and summoning pouches.",
@@ -576,7 +580,7 @@ export const LEAGUE_RELICS = [
     // Divine Druid/Transmutation above, so scripts/download-icons.mjs will
     // never re-fetch it from runescape.wiki.
     name: 'Animal Wrangler',
-    tier: null,
+    tier: 2,
     summary:
       'Automates Fishing/Hunter banking, boosts Hunter and farm animal yields and rates by up to 20x, guarantees Hunter catches, and occasionally gifts bonus farm animals or Farming materials.',
     effects: [
@@ -705,10 +709,10 @@ export const LEAGUE_RELICS = [
     },
   },
   {
-    // TIER 7 IS AN ASSUMPTION, not a Jagex statement. The reveal image states
-    // no tier for this relic; it is placed at 7 alongside Icyenic Faith so the
-    // two behave as the either/or they are expected to be. Revisit when Jagex
-    // confirm a tier - this is the only line that decides it.
+    // TIER 7, confirmed by Jagex's relic tier chart - which happens to match
+    // where this app had already guessed it. It shares the top tier with
+    // Icyenic Faith and Infernal Fire, so those three are a genuine
+    // one-of-three and no build can hold two.
     //
     // Unlike Antiquarian and Production Master below, this relic has real
     // combat stats, and they are large. The Sliver is a POCKET item, so it
@@ -752,11 +756,11 @@ export const LEAGUE_RELICS = [
     // Icon is a manually-cropped reveal-image icon, same situation as
     // Animal Wrangler above.
     //
-    // TIER 7, shared with Naragi Edict above - so the top tier is a genuine
-    // choice between the two rather than a free pick. Rejuvenated cannot buy
-    // its way out of that one: its own wording is "a relic from a PREVIOUS
-    // tier", and nothing is previous to the top (see leagueRelicPicks.js's
-    // MAX_RELIC_TIER).
+    // TIER 7, shared with Naragi Edict above and Infernal Fire below - so the
+    // top tier is a genuine one-of-three rather than a free pick. Rejuvenated
+    // cannot buy its way out of that one: its own wording is "a relic from a
+    // PREVIOUS tier", and nothing is previous to the top (see
+    // leagueRelicPicks.js's MAX_RELIC_TIER).
     name: 'Icyenic Faith',
     tier: 7,
     summary:
@@ -959,7 +963,7 @@ export const LEAGUE_RELICS = [
     // show every relic to be a picker - a tier with a missing option would read
     // as a bug - not because this app can cost it.
     name: 'Clue Connoisseur',
-    tier: null,
+    tier: 5,
     summary:
       "Uri's Briefcase for storing clues and teleporting to hidey-holes, plus minimum-step clues, maximum casket loot, 3x Treasure Trail points and unlimited sealed clues.",
     effects: [
@@ -977,7 +981,7 @@ export const LEAGUE_RELICS = [
   },
   {
     name: 'Devout',
-    tier: null,
+    tier: 5,
     summary:
       'Grants the Devout Yak, a 32-slot bank-anywhere familiar, plus free summoning scrolls, cheap familiar spells and up to +500% familiar damage.',
     effects: [
@@ -994,7 +998,7 @@ export const LEAGUE_RELICS = [
   },
   {
     name: 'Perkfection',
-    tier: null,
+    tier: 6,
     summary:
       "Grants the Inventor's Toolbox with two extra gizmo slots, removes junk and charge costs, and makes disassembly and machines ten times better.",
     effects: [
@@ -1018,14 +1022,14 @@ export const LEAGUE_RELICS = [
     // nothing else - whatever it would have unlocked has to be picked as if it
     // were free. Worth knowing before reading a build's unlocks as complete.
     name: 'Rejuvenated',
-    tier: null,
+    tier: 6,
     summary: 'Choose another relic from a previous tier.',
     effects: ['Choose another relic from a previous tier.'],
     icon: FP('Rejuvenated.png'),
   },
   {
     name: 'Antiquarian',
-    tier: null,
+    tier: 4,
     summary:
       'Every Archaeology relic unlocked after the tutorial, half-price restoration, 10x chronotes and materials sent straight to storage.',
     effects: [
@@ -1054,7 +1058,7 @@ export const LEAGUE_RELICS = [
   },
   {
     name: 'Production Master',
-    tier: null,
+    tier: 5,
     summary:
       'Grants the Brooch of the Spirits: portable-station benefits everywhere, infinite exquisite urns, one-action masterwork and +6 to six production skills.',
     effects: [

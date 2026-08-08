@@ -238,18 +238,34 @@ export function getAchtoBonus(equipped = {}, { chaoticInsight = false } = {}) {
 
 // Everything the formula needs from a loadout, in one pass.
 // Genesis Essence (God Tier Two, blue) sets every equipped weapon to tier 120.
-// The stored damage is the coefficient times the weapon's real tier, so the
-// override is that same coefficient at 120 - read back off the item rather than
-// hardcoded, for the reason ammoTierCap gives: a handful of weapons sit off the
-// 9.6/14.4 curve and assuming a coefficient would misprice them.
+// gear.js stores every weapon's damage as coefficient x its OWN tier, so
+// retiering to a fixed target is (damage/realTier)*target - and since realTier
+// is itself damage/coefficient, the damage term always cancels out. The
+// override can only ever land on one of three numbers: 1,728 two-handed,
+// 1,152 one-handed main, 576 off-hand (see damageRatings for why off-hand
+// gets doubled back up before this). Which of those three depends only on
+// which coefficient the weapon uses, never on its individual damage figure -
+// an "off-curve" weapon does not change this, because Genesis Essence is not
+// asking what THIS weapon's damage would be at tier 120, it is asking what
+// a real tier-120 weapon of its hand-type produces, full stop.
 //
-// Returns null for anything with no tier to override, which leaves the stored
-// damage alone.
-function retierWeaponDamage(item, tier) {
-  const realTier = item?.level?.level;
+// `level.level` therefore never enters the actual output - it is only a
+// validity gate (an item with no level has no tier to override). It CANNOT
+// be trusted as the tier itself: it is a wield requirement, and the two only
+// usually match. Death guard (tier 10) requires 1 Necromancy - a requirement
+// BELOW its tier. Primal 2h Sword +5 requires 99 Attack but its 1,296 damage
+// is 14.4x90, not 14.4x99 - a requirement ABOVE its tier, the mirror image.
+// Reading level.level as the tier mispriced both, in opposite directions.
+function retierWeaponDamage(item, tier, isOffhand = false) {
+  const levelRequirement = item?.level?.level;
   const damage = item?.stats?.damage;
-  if (!tier || !realTier || !damage) return null;
-  return (damage / realTier) * tier;
+  if (!tier || !levelRequirement || !damage) return null;
+  // Off-hand weapons are never two-handed - usesTwoHandedScale only applies
+  // to the main weapon slot.
+  let coefficient = MAIN_HAND_COEFFICIENT;
+  if (isOffhand) coefficient = MAIN_HAND_COEFFICIENT / 2;
+  else if (usesTwoHandedScale(item)) coefficient = TWO_HANDED_COEFFICIENT;
+  return coefficient * tier;
 }
 
 function damageRatings(equipped, weaponTier = null) {
@@ -274,8 +290,8 @@ function damageRatings(equipped, weaponTier = null) {
     weaponTier && item?.level?.level ? { ...item, level: { ...item.level, level: weaponTier } } : item;
   const mainCap = ammoTierCap(capAgainst(equipped.weapon), ammoItem);
   const offCap = ammoTierCap(capAgainst(equipped.offhand), ammoItem);
-  const rate = (item, cap) => {
-    const base = retierWeaponDamage(item, weaponTier) ?? item?.stats?.damage ?? 0;
+  const rate = (item, cap, isOffhand = false) => {
+    const base = retierWeaponDamage(item, weaponTier, isOffhand) ?? item?.stats?.damage ?? 0;
     return base * (cap ? cap.scale : 1);
   };
 
@@ -285,7 +301,20 @@ function damageRatings(equipped, weaponTier = null) {
     // back by what is loaded into it.
     ammoCap: mainCap ?? offCap,
     mainHand: rate(equipped.weapon, mainCap),
-    offHand: rate(equipped.offhand, offCap),
+    // gear.js stores an off-hand weapon's own damage at HALF the main-hand
+    // coefficient (an off-hand Drygore rapier is 432 = 4.8x90, next to the
+    // main-hand's 864 = 9.6x90 - see opus combat notes/01-combat-mechanics.md,
+    // "Off-hand: half of MH formula"). That formula means computing the
+    // off-hand as a FULL main-hand weapon of its own tier - level term,
+    // 9.6x-scale weapon term, full armour bonus - and THEN halving that whole
+    // total once, which getBaseAbilityDamage's dual-wield branch already
+    // does. Feeding the half-scale stored figure straight into that same
+    // branch halves it a second time: the reference notes' own worked
+    // example (t90 main+off, ~150 armour) computes to 639 off-hand ability
+    // damage, but doing it that way lands on 423. Doubling the rate back up
+    // here reconstructs the full-scale term the formula expects, so the
+    // halving downstream only ever happens once.
+    offHand: 2 * rate(equipped.offhand, offCap, true),
   };
 }
 

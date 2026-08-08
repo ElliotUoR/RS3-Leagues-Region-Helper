@@ -44,7 +44,8 @@ export default function LeagueRelicsPage({ selected, toggleLeagueRelic }) {
         <h1>League Relics</h1>
         <p>
           Relics chosen directly from the league's own relic tree, not tied to any region - pick one
-          per tier. Relics whose tier isn't confirmed yet are listed separately with no pick limit.
+          per tier. Every relic's tier is confirmed - Rejuvenated (Tier 6) is the only way to hold
+          two from one tier, and only from a tier below it.
         </p>
       </header>
 

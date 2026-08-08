@@ -77,9 +77,9 @@ function nameArray(value, max) {
 // opened showed all six. The card was fine; the data reaching it was not.
 //
 // Reading the real counts means the next tier that gets revealed cannot
-// reintroduce this. `+ 2` on relics covers Rejuvenated's bonus pick and leaves
-// room for the unknown-tier relics, which carry no one-per-tier constraint at
-// all (see data/leagueRelicPicks.js).
+// reintroduce this. `+ 2` on relics is headroom over the one-per-tier rule -
+// Rejuvenated's bonus pick only needs 1, and the listing should truncate a
+// malformed payload rather than a legal build (see data/leagueRelicPicks.js).
 const MAX_LISTED_BLESSINGS = BLESSING_TIERS.length;
 const MAX_LISTED_RELICS = LEAGUE_RELICS.length + 2;
 

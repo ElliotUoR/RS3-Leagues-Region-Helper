@@ -7,7 +7,8 @@
 //     resolveGodTier() actually returns for them
 //   - `regions` is exactly 3 optional picks (Misthalin/Karamja/Havenhythe are
 //     always free and are NOT listed)
-//   - `relics` is at most 1 tier-1 relic plus at most 2 unknown-tier relics
+//   - `relics` is one relic per tier, plus a second from tiers 1-5 only when
+//     Rejuvenated is among them (see data/leagueRelicPicks.js)
 //   - every item name in `loadouts` exists in gear.js AND is available under
 //     that build's regions+relics
 //   - no loadout pairs a two-handed weapon with an off-hand
@@ -646,9 +647,11 @@ export const BLESSING_BUILDS_EXAMPLES = [
     styles: ['necromancy'],
     blessings: ['Big Boned', 'Striking Light', 'Avernic Rampage'],
     godTier: 'Splash Zone',
-    relics: ['Survivalist', 'Crystal Grace', 'Transmutation'],
+    relics: ['Survivalist', 'Rejuvenated', 'Crystal Grace', 'Transmutation'],
     relicReasons: {
       Survivalist: 'Tier-1. Doubled gathering, best tools, and doubled time-sprite focus.',
+      Rejuvenated:
+        'Tier 6, and load-bearing here for one reason: Crystal Grace and Transmutation are both Tier 4, and this is the only thing that lets you hold both. Its extra pick is only valid on a previous tier, which Tier 4 is.',
       'Crystal Grace': 'Made for necromancy: every ritual behaves as if Multiply, Attraction and Protection glyphs are drawn at 200%, and Speed at its 50% cap, without the ingredients.',
       Transmutation: 'Death guard and Skull lantern tier 90 without the ore regions, covering the mid-late slot.',
     },
