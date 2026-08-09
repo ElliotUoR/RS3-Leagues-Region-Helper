@@ -233,6 +233,21 @@ export function getElderOverloadSources({ leagueRelics = [], regions = [] } = {}
 // is only reachable with a source above.
 export const OVERLOAD_DEFENCE_BONUS = { none: 0, overload: 17, elder: 25 };
 
+// The Elemental Titan's Titan's Constitution scroll: "4 + 10% Defence level",
+// which at the 99 this app assumes everywhere is 4 + 9.9 = 13 after the floor
+// RS3 applies to level boosts.
+//
+// DEFENCE ONLY. Unlike a potion this touches nothing else, so it moves armour
+// (and anything reading armour, like Teragard's Aegis) while leaving the
+// ability damage formula's level term alone.
+export const TITAN_SCROLL_BASE_DEFENCE = 13;
+
+// Divine Druid: "Summoning familiars which boost skills now boost them by 3x
+// the amount." 13 x 3 = 39, which is why the scroll is only ever offered to a
+// build holding the relic - 13 on its own is not worth a control.
+export const DIVINE_DRUID_BOOST_MULTIPLIER = 3;
+export const TITAN_SCROLL_DEFENCE = TITAN_SCROLL_BASE_DEFENCE * DIVINE_DRUID_BOOST_MULTIPLIER;
+
 // Everything a loadout needs to state its Teragard's Aegis bonus, in one shape:
 // the multiplier and what earned it, the bonus at each potion state, and the
 // armour each of those was derived FROM - the bonus is meaningless without the
@@ -275,8 +290,12 @@ export function getAegisBreakdown({ equipped, style, weaponName, offhandName, ha
 // pages/CreateBuildPage.jsx and components/UserBuildCard.jsx). Curated
 // builds in data/blessingBuilds.js always show armour regardless, since
 // their own hand-picked builds are chosen specifically to make it relevant.
+// Named separately as well as listed below, because two things gate on this
+// blessing specifically rather than on armour scaling in general.
+export const TERAGARDS_AEGIS = "Teragard's Aegis";
+
 export const ARMOUR_SCALING_BLESSINGS = new Set([
-  "Teragard's Aegis",
+  TERAGARDS_AEGIS,
   'Striking Light',
   'Steadfast Will',
   'Barkscales',

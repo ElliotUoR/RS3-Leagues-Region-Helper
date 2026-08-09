@@ -22,6 +22,8 @@ import {
   getTotalLifePoints,
   getTotalPrayerBonus,
   ICYENIC_FAITH_RELIC,
+  TERAGARDS_AEGIS,
+  TITAN_SCROLL_DEFENCE,
 } from '../utils/gearStats';
 import {
   ABYSSAL_CINDERS_ON_HIT_SHARE,
@@ -112,9 +114,16 @@ import { CHAOTIC_INSIGHT, CHAOTIC_INSIGHT_EXTRA_PIECES, getWornSetEffects } from
 // that is on; abbreviated, the selected chip is the only long one and reads as
 // the answer. The swap is animated rather than instantaneous so the row is
 // visibly the same three controls rearranging, not three that were replaced.
+//
+// The titan scroll is one of these rather than a toggle beside them because an
+// overload blocks it - the two cannot both be up, so they are alternatives.
+// It is also the only entry here that boosts ONE stat: its bonus is labelled
+// "Def" because a row of all-stat potions would otherwise imply it lifts
+// ability damage too, which it does not.
 const STATES = [
   { id: 'overload', short: 'Ovl', label: 'Overload', bonus: '+17' },
   { id: 'elder', short: 'Eld Ovl', label: 'Elder overload', bonus: '+25' },
+  { id: 'titan', short: 'Titan', label: 'Titan scroll boost', bonus: '+39 Def' },
   { id: 'sliver', short: 'Sliver', label: 'Sliver of Edicts', bonus: '255' },
 ];
 
@@ -128,6 +137,12 @@ export const SLIVER_RELIC = 'Naragi Edict';
 // "when in inventory OR worn in your pocket slot", so a build that takes it has
 // the effect whatever the pocket slot holds.
 export const INFERNAL_FIRE_RELIC = 'Infernal Fire';
+
+// Divine Druid triples any familiar's skill boost, which is the only reason
+// the Titan's Constitution scroll is worth a control here: 13 Defence becomes
+// 39. Gated on the relic, not on Summoning level - every build in this app is
+// assumed to be at 99.
+export const DIVINE_DRUID_RELIC = 'Divine Druid';
 
 // What the crit total leaves out. Worth a marker rather than a card line: the
 // figure sits in the headline row where it reads as authoritative, and the
@@ -1009,6 +1024,7 @@ export default function LeaguesEffectsPanel({
   // enough that assuming one would misreport the other by a wide margin.
   const [herbloreLevel, setHerbloreLevel] = useState(HERBLORE_LEVELS[0]);
 
+
   const equipped = useMemo(() => equippedItemsFor(style, slots), [style, slots]);
 
   // Elder needs a source AND, when armour is being shown at all, a figure to
@@ -1017,7 +1033,18 @@ export default function LeaguesEffectsPanel({
   const canElder = elderSources.length > 0 && (!armour || armour.elder != null);
   const hasSliver = leagueRelics.includes(SLIVER_RELIC);
   const hasInfernalFire = leagueRelics.includes(INFERNAL_FIRE_RELIC);
-  const state = (potion === 'elder' && !canElder) || (potion === 'sliver' && !hasSliver) ? 'none' : potion;
+  // Divine Druid is what makes the scroll worth 39, and Teragard's Aegis is
+  // what makes 39 Defence worth pressing a button for: without it the boost
+  // moves an armour figure and nothing else. Both, or the chip stays away.
+  const hasTitanScroll =
+    leagueRelics.includes(DIVINE_DRUID_RELIC) && blessings.includes(TERAGARDS_AEGIS);
+
+  const state =
+    (potion === 'elder' && !canElder) ||
+    (potion === 'sliver' && !hasSliver) ||
+    (potion === 'titan' && !hasTitanScroll)
+      ? 'none'
+      : potion;
   const hasGear = Object.keys(equipped).length > 0;
 
   // The Sliver's armour and Aegis figures are DERIVED here rather than passed
@@ -1067,8 +1094,17 @@ export default function LeaguesEffectsPanel({
 
   // Defence level each state puts you at, so armour can be re-derived per state
   // rather than read out of the `armour` prop's three precomputed figures.
-  const defenceLevelFor = (potionState) =>
-    potionState === 'sliver' ? SLIVER_COMBAT_LEVEL : combatLevelFor(potionState);
+  //
+  // The titan scroll is the one state where this and the combat level DIVERGE:
+  // it boosts Defence alone, so armour (and everything reading armour, like
+  // Teragard's Aegis) moves while the ability damage formula's level term stays
+  // at 99. combatLevelFor already returns 99 for it - there is no entry in
+  // OVERLOAD_COMBAT_BONUS - so only the Defence side needs stating here.
+  const defenceLevelFor = (potionState) => {
+    if (potionState === 'sliver') return SLIVER_COMBAT_LEVEL;
+    if (potionState === 'titan') return BASE_COMBAT_LEVEL + TITAN_SCROLL_DEFENCE;
+    return combatLevelFor(potionState);
+  };
 
   // Two of this component's four callers hand over armour precomputed in
   // blessingBuilds.js, from a time when nothing could move it. Three things now
@@ -1079,7 +1115,9 @@ export default function LeaguesEffectsPanel({
   // using the prop. That keeps the seven curated guides showing exactly the
   // numbers they were authored with, while a build that moves armour gets a
   // figure that actually accounts for it.
-  const derivedArmour = mods.active || state === 'sliver';
+  // The titan state joins these: no caller's precomputed `armour` prop has a
+  // figure for it, so it has to be derived like the Sliver's.
+  const derivedArmour = mods.active || state === 'sliver' || state === 'titan';
   const armourAt = useMemo(() => {
     if (!hasGear) return () => null;
     return (potionState) =>
@@ -1373,6 +1411,7 @@ export default function LeaguesEffectsPanel({
                 {STATES.map((entry) => {
                   if (entry.id === 'elder' && !canElder) return null;
                   if (entry.id === 'sliver' && !hasSliver) return null;
+                  if (entry.id === 'titan' && !hasTitanScroll) return null;
                   const active = state === entry.id;
                   return (
                     <button
@@ -1425,6 +1464,11 @@ export default function LeaguesEffectsPanel({
                 {state === 'sliver' && (
                   <span className="leagues-effects-elder-note">
                     16.8s burst - armour extrapolated past 99 Defence
+                  </span>
+                )}
+                {state === 'titan' && (
+                  <span className="leagues-effects-elder-note">
+                    x3 divine druid effect is not confirmed
                   </span>
                 )}
               </div>

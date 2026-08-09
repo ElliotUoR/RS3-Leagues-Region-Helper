@@ -147,6 +147,20 @@ export const ESSENTIALS = [
     source: { region: 'anachronia', detail: 'Requires Anachronia.' },
   },
   {
+    name: 'Boon of Het',
+    // No wiki icon exists for the boon itself (its sibling Boon of Apmeken has
+    // one; this does not), so the Het statue stands in - which is what you
+    // actually interact with to toggle the boon on or off. Source art is
+    // image/Other/800px-Het_statue.png; WebP rather than PNG because the
+    // statue render is photographic and costs ~780KB as a PNG against 70KB
+    // here, on a page that loads every icon in this folder at once.
+    icon: FP('Boon_of_Het.webp'),
+    summary: 'Increases maximum life points by 5% of base - +495 at 99 Constitution.',
+    why:
+      "+495 flat HP - after Big Boned's x1.5, worth +742 health and ~37 bonus damage per hit.",
+    source: { region: 'kharidianDesert', detail: 'Requires Desert, then activate it at the Het statue.' },
+  },
+  {
     name: 'Aggression potion',
     icon: FP('Aggression_potion.png'),
     summary: 'Pulls aggro nearby monsters onto you for six minutes.',

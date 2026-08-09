@@ -18,12 +18,17 @@
 import { ESSENTIALS } from './essentials.js';
 
 export const TOTEM_OF_VITALITY = 'Totem of Vitality';
+export const BOON_OF_HET = 'Boon of Het';
 
 // name -> what it requires and what it does. The display side (icon, one-line
 // summary) is NOT repeated here - it is read from the essentials entry of the
 // same name below, so the two can never disagree about what the thing is.
 const EXTRA_EFFECTS = {
   [TOTEM_OF_VITALITY]: { region: 'anachronia', lifePoints: 1500 },
+  // "5% of BASE life points", which at the 99 Constitution this app assumes
+  // everywhere is a flat 495 - not a share of the geared total, so it does not
+  // grow with life-bonus gear and can be carried as a constant like the Totem.
+  [BOON_OF_HET]: { region: 'kharidianDesert', lifePoints: 495 },
 };
 
 // A rename in essentials.js costs the icon and the summary line, not the extra
