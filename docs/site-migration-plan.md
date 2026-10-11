@@ -162,6 +162,17 @@ strips the `/Leagues` prefix before proxying, see `deploy/Caddyfile.snippet`)
 - Reconstructing a visitor's path through the site is then a `GROUP BY
   session_id ORDER BY created_at` query - no dashboard needed at first, a
   direct SQL query against Postgres is enough to start.
+- **Since built, and since extended to a second site**: events now go through
+  the Node service's `POST /api/track` (the salt has to stay server-side, see
+  `server/src/lib/session.js`), are rolled up daily into `daily_path_stats` /
+  `daily_sessions` (`server/src/lib/analyticsRollup.js`) and are read by the
+  JellyFlow admin dashboard via `/api/admin/summary`. Every analytics table
+  carries a `site` column (`'leagues'` or `'moviebattles'`, see
+  `deploy/migrations/019_analytics_site.sql` and `server/src/lib/sites.js`),
+  because Movie Battles on jellyflow.xyz reports through the same pipeline and
+  the dashboard shows each site separately. A `site` filter belongs in every
+  analytics query: session_id has no site in it, so a query grouped by session
+  alone merges one visitor's visits to both sites into a single session.
 
 ## Phase 6 — Domain and GitHub Pages
 
