@@ -5,6 +5,7 @@ import { getAnalyticsPool } from '../lib/analyticsDb.js';
 import { countActiveSessions } from '../lib/activeSessions.js';
 import { ROLLUP_LAG_DAYS } from '../lib/analyticsRollup.js';
 import { utcDateDaysAgo } from '../lib/dates.js';
+import { parseSite } from '../lib/sites.js';
 import {
   requireAdmin,
   isAdminSession,
@@ -100,6 +101,11 @@ adminRouter.get('/api/admin/whoami', (req, res) => {
   res.json({ isAdmin: isAdminSession(req.cookies?.[ADMIN_COOKIE_NAME]) });
 });
 
+// `?days=all` - the dashboard's "All time" range. Anything else goes through
+// clampDays as before.
+const ALL_TIME = 'all';
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
 function clampDays(rawValue) {
   const n = Number.parseInt(rawValue, 10);
   if (!Number.isFinite(n)) return DEFAULT_DAYS;
@@ -108,6 +114,23 @@ function clampDays(rawValue) {
 
 function maxDateStr(a, b) {
   return a > b ? a : b;
+}
+
+// Inclusive count of UTC days from `fromDay` to `toDay` (both "YYYY-MM-DD"),
+// so the same day twice is 1.
+function daysInclusive(fromDay, toDay) {
+  return Math.round((Date.parse(toDay) - Date.parse(fromDay)) / MS_PER_DAY) + 1;
+}
+
+// Every analytics query in this file is scoped to one site (see lib/sites.js):
+// the dashboard shows each jellyflow.xyz project on its own tab and nothing
+// here may ever add two sites' numbers together. A missing `site` means
+// 'leagues', which is what every caller from before sites existed wants.
+// Returns null (and has already sent the 400) for an unknown one.
+function siteFromQuery(req, res) {
+  const site = parseSite(req.query.site);
+  if (!site) res.status(400).json({ error: 'invalid site' });
+  return site;
 }
 
 // Dimensions summarized per session (one row per (day, session_id) in
@@ -122,15 +145,15 @@ const SESSION_DIMENSIONS = [
   { column: 'device_type', outputKey: 'deviceType', defaultLabel: 'Unknown' },
 ];
 
-async function queryTopSessionDimension(pool, { column, outputKey, defaultLabel }, fromInclusive, toExclusive) {
+async function queryTopSessionDimension(pool, { column, outputKey, defaultLabel }, site, fromInclusive, toExclusive) {
   const { rows } = await pool.query(
     `select coalesce(${column}, $3) as "${outputKey}", count(*)::int as count
      from public.daily_sessions
-     where day >= $1::date and day < $2::date
+     where site = $5 and day >= $1::date and day < $2::date
      group by ${column}
      order by count desc
      limit $4`,
-    [fromInclusive, toExclusive, defaultLabel, PARTIAL_TOP_N],
+    [fromInclusive, toExclusive, defaultLabel, PARTIAL_TOP_N, site],
   );
   return rows;
 }
@@ -139,38 +162,38 @@ async function queryTopSessionDimension(pool, { column, outputKey, defaultLabel 
 // daily_path_stats/daily_sessions rollup tables. More recent days aren't
 // guaranteed to have been rolled up yet, so they're queried live from raw
 // page_events instead - see lib/analyticsRollup.js for why the lag exists.
-async function queryRolledStats(pool, fromInclusive, toExclusive) {
+async function queryRolledStats(pool, site, fromInclusive, toExclusive) {
   const [dailyPageviews, dailyUnique, pathTotals, dimensionTotals, sessionTotals] = await Promise.all([
     pool.query(
       `select day::text as day, sum(pageview_count)::int as pageviews
        from public.daily_path_stats
-       where day >= $1::date and day < $2::date
+       where site = $3 and day >= $1::date and day < $2::date
        group by day`,
-      [fromInclusive, toExclusive],
+      [fromInclusive, toExclusive, site],
     ),
     pool.query(
       `select day::text as day, count(*)::int as unique_sessions
        from public.daily_sessions
-       where day >= $1::date and day < $2::date
+       where site = $3 and day >= $1::date and day < $2::date
        group by day`,
-      [fromInclusive, toExclusive],
+      [fromInclusive, toExclusive, site],
     ),
     pool.query(
       `select path, sum(pageview_count)::int as count
        from public.daily_path_stats
-       where day >= $1::date and day < $2::date
+       where site = $4 and day >= $1::date and day < $2::date
        group by path
        order by count desc
        limit $3`,
-      [fromInclusive, toExclusive, PARTIAL_TOP_N],
+      [fromInclusive, toExclusive, PARTIAL_TOP_N, site],
     ),
-    Promise.all(SESSION_DIMENSIONS.map((dim) => queryTopSessionDimension(pool, dim, fromInclusive, toExclusive))),
+    Promise.all(SESSION_DIMENSIONS.map((dim) => queryTopSessionDimension(pool, dim, site, fromInclusive, toExclusive))),
     pool.query(
       `select count(*)::int as total_sessions,
               coalesce(sum(extract(epoch from (ended_at - started_at))), 0)::float8 as total_seconds
        from public.daily_sessions
-       where day >= $1::date and day < $2::date`,
-      [fromInclusive, toExclusive],
+       where site = $3 and day >= $1::date and day < $2::date`,
+      [fromInclusive, toExclusive, site],
     ),
   ]);
 
@@ -192,25 +215,25 @@ async function queryRolledStats(pool, fromInclusive, toExclusive) {
 // fromTs/toTs are full ISO timestamps (UTC) - raw page_events has no `day`
 // column, so day boundaries are derived here explicitly at query time
 // rather than relying on Postgres's session timezone.
-async function queryRawStats(pool, fromTs, toTs) {
+async function queryRawStats(pool, site, fromTs, toTs) {
   const [daily, pathTotals, perSessionAgg] = await Promise.all([
     pool.query(
       `select (created_at at time zone 'UTC')::date::text as day,
               count(*)::int as pageviews,
               count(distinct session_id)::int as unique_sessions
        from public.page_events
-       where created_at >= $1::timestamptz and created_at < $2::timestamptz
+       where site = $3 and created_at >= $1::timestamptz and created_at < $2::timestamptz
        group by day`,
-      [fromTs, toTs],
+      [fromTs, toTs, site],
     ),
     pool.query(
       `select path, count(*)::int as count
        from public.page_events
-       where created_at >= $1::timestamptz and created_at < $2::timestamptz
+       where site = $4 and created_at >= $1::timestamptz and created_at < $2::timestamptz
        group by path
        order by count desc
        limit $3`,
-      [fromTs, toTs, PARTIAL_TOP_N],
+      [fromTs, toTs, PARTIAL_TOP_N, site],
     ),
     pool.query(
       `with per_session as (
@@ -222,7 +245,7 @@ async function queryRawStats(pool, fromTs, toTs) {
                 (array_agg(os order by created_at))[1] as os,
                 (array_agg(device_type order by created_at))[1] as device_type
          from public.page_events
-         where created_at >= $1::timestamptz and created_at < $2::timestamptz
+         where site = $4 and created_at >= $1::timestamptz and created_at < $2::timestamptz
          group by session_id
        )
        select
@@ -237,7 +260,7 @@ async function queryRawStats(pool, fromTs, toTs) {
          count(*)::int as total_sessions,
          coalesce(sum(extract(epoch from (ended_at - started_at))), 0)::float8 as total_seconds
        from per_session`,
-      [fromTs, toTs, PARTIAL_TOP_N],
+      [fromTs, toTs, PARTIAL_TOP_N, site],
     ),
   ]);
 
@@ -282,7 +305,30 @@ function mergeTotals(rolledRows, rawRows, keyField) {
     .slice(0, TOP_N);
 }
 
-// GET /api/admin/summary?days=30
+// The first UTC day `site` has any analytics for, in either the rollup tables
+// or raw page_events (a brand-new site's first two days exist only in the
+// latter - see ROLLUP_LAG_DAYS), or null if it has none at all. least()
+// ignores nulls, so a source with no rows for the site just drops out.
+async function queryEarliestDay(pool, site) {
+  const { rows } = await pool.query(
+    `select least(
+       (select min(day) from public.daily_path_stats where site = $1),
+       (select min(day) from public.daily_sessions where site = $1),
+       (select min((created_at at time zone 'UTC')::date) from public.page_events where site = $1)
+     )::text as earliest`,
+    [site],
+  );
+  return rows[0].earliest;
+}
+
+// GET /api/admin/summary?site=leagues&days=30
+// `site` picks which jellyflow.xyz project (lib/sites.js; default 'leagues',
+// unknown -> 400) and every query below is filtered to it. `days` is 1-365, or
+// `all` for "All time": the window then starts at the site's first day with
+// any data, or today if it has none yet, and `days` in the response is that
+// window's length so the dashboard can label it the same way as the others.
+// `from` is the window's first day either way.
+//
 // Unique visitors / session length are inherently daily-scoped concepts
 // here (session_id is derived from a salt that rotates every UTC day - see
 // lib/session.js), so "unique visitors" over a multi-day window is a sum
@@ -290,18 +336,33 @@ function mergeTotals(rolledRows, rawRows, keyField) {
 // matches the cookie-less-analytics tradeoff already documented in
 // docs/site-migration-plan.md Phase 5.
 adminRouter.get('/api/admin/summary', requireAdmin, async (req, res) => {
-  const days = clampDays(req.query.days);
+  const site = siteFromQuery(req, res);
+  if (!site) return;
+  const allTime = req.query.days === ALL_TIME;
   const pool = getAnalyticsPool();
 
-  const windowStart = utcDateDaysAgo(days - 1);
+  const today = utcDateDaysAgo(0);
   const rolledUpTo = utcDateDaysAgo(ROLLUP_LAG_DAYS);
-  const rawFrom = maxDateStr(windowStart, rolledUpTo);
   const rawToExclusive = utcDateDaysAgo(-1); // tomorrow
 
   try {
+    let windowStart;
+    let days;
+    if (allTime) {
+      const earliest = await queryEarliestDay(pool, site);
+      // A row stamped after today can only come from clock skew; never let it
+      // produce a window that starts in the future.
+      windowStart = earliest && earliest < today ? earliest : today;
+      days = daysInclusive(windowStart, today);
+    } else {
+      days = clampDays(req.query.days);
+      windowStart = utcDateDaysAgo(days - 1);
+    }
+    const rawFrom = maxDateStr(windowStart, rolledUpTo);
+
     const [rolled, raw] = await Promise.all([
-      queryRolledStats(pool, windowStart, rolledUpTo),
-      queryRawStats(pool, `${rawFrom}T00:00:00Z`, `${rawToExclusive}T00:00:00Z`),
+      queryRolledStats(pool, site, windowStart, rolledUpTo),
+      queryRawStats(pool, site, `${rawFrom}T00:00:00Z`, `${rawToExclusive}T00:00:00Z`),
     ]);
 
     const dailySeries = mergeDailySeries(rolled, raw);
@@ -315,11 +376,15 @@ adminRouter.get('/api/admin/summary', requireAdmin, async (req, res) => {
     const totalPageviews = dailySeries.reduce((sum, d) => sum + d.pageviews, 0);
 
     res.json({
+      site,
       days,
+      allTime,
+      from: windowStart,
       // Deliberately NOT scoped to `days` like everything else here: this is a
       // live gauge of who is on the site right now, held in this process's
-      // memory rather than queried (see lib/activeSessions.js).
-      activeUsers: countActiveSessions(),
+      // memory rather than queried (see lib/activeSessions.js). It is scoped
+      // to the site, though - each site keeps its own count.
+      activeUsers: countActiveSessions(site),
       totalPageviews,
       uniqueVisitors: totalSessions,
       avgSessionSeconds: totalSessions > 0 ? Math.round(totalSeconds / totalSessions) : 0,
@@ -336,15 +401,18 @@ adminRouter.get('/api/admin/summary', requireAdmin, async (req, res) => {
   }
 });
 
-// GET /api/admin/active-users
-// The same live gauge /api/admin/summary returns, on its own. The dashboard
-// polls this on a 60s timer when "auto-refresh active users" is on, and
-// hitting /summary for it would re-run that route's ~8 Postgres aggregations
-// every minute to read a number that is a Map scan in this process's memory
-// (see lib/activeSessions.js). No date range applies - "right now" is the
-// only window this number has.
-adminRouter.get('/api/admin/active-users', requireAdmin, (_req, res) => {
-  res.json({ activeUsers: countActiveSessions() });
+// GET /api/admin/active-users?site=leagues
+// The same live gauge /api/admin/summary returns, on its own, for the same
+// `site` (default 'leagues', unknown -> 400). The dashboard polls this on a
+// 60s timer when "auto-refresh active users" is on, and hitting /summary for
+// it would re-run that route's ~8 Postgres aggregations every minute to read
+// a number that is a Map scan in this process's memory (see
+// lib/activeSessions.js). No date range applies - "right now" is the only
+// window this number has.
+adminRouter.get('/api/admin/active-users', requireAdmin, (req, res) => {
+  const site = siteFromQuery(req, res);
+  if (!site) return;
+  res.json({ activeUsers: countActiveSessions(site) });
 });
 
 const MIN_PAGE_SIZE = 10;
@@ -443,14 +511,99 @@ async function labelBuildGuideKeys(pool, rows) {
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Movie Battles usage (jellyflow.xyz/moviebattles - see lib/sites.js). Its
+// counters live in the same usage_counters table under an `mb_` category
+// prefix (deploy/migrations/019_analytics_site.sql has the key formats). The
+// labels are made here rather than in the dashboard so the dashboard stays a
+// dumb renderer for both sites, same as regionLabel above.
+//
+// An id this map doesn't know (a difficulty or ending added to the game later)
+// is shown as it is, never dropped - a missing row would silently change the
+// totals, the same reasoning as labelBuildGuideKeys' "deleted" entries.
+// ─────────────────────────────────────────────────────────────────────────
+const MB_DIFFICULTY_LABELS = { normal: 'Normal', hard: 'Hard', realistic: 'Realistic' };
+const MB_ACT_LABELS = { act2: 'Act 2', pro: 'Pro League', black: 'Black Market' };
+const MB_ENDING_LABELS = {
+  champion: 'Champion',
+  kingpin: 'Kingpin',
+  bankrupt: 'Bankrupt',
+  disgraced: 'Disgraced',
+  lostStart: 'Lost the first match',
+  abandoned: 'Abandoned',
+};
+// The two endings that count as winning a run, for totals.runsWon.
+const MB_WINNING_ENDINGS = new Set(['champion', 'kingpin']);
+
+function mbDifficultyLabel(difficulty) {
+  return MB_DIFFICULTY_LABELS[difficulty] ?? difficulty;
+}
+
+// "<thing>:<difficulty>" -> { thing, label: "<Thing label> · <Difficulty>" }.
+// Split on the LAST colon so a thing id can never swallow the difficulty; a key
+// with no colon at all is shown whole.
+function mbPairLabel(key, thingLabels) {
+  const at = key.lastIndexOf(':');
+  if (at === -1) return { thing: key, label: thingLabels[key] ?? key };
+  const thing = key.slice(0, at);
+  return { thing, label: `${thingLabels[thing] ?? thing} · ${mbDifficultyLabel(key.slice(at + 1))}` };
+}
+
+const sumCounts = (rows) => rows.reduce((sum, r) => sum + r.count, 0);
+
+async function queryMovieBattlesUsage(pool) {
+  // count::float8 rather than the bigint as-is: node-postgres returns bigint as
+  // a string (it can exceed a JS number), and these totals are summed below. A
+  // counter would need to pass 2^53 before float8 lost a unit. Ties are broken
+  // by key so the order is stable between refreshes.
+  const byCategory = (category) =>
+    pool.query(
+      `select key, count::float8 as count from public.usage_counters
+       where category = $1 order by count desc, key`,
+      [category],
+    );
+  const [runsStarted, actsReached, runEndings] = await Promise.all([
+    byCategory('mb_run_started'),
+    byCategory('mb_act_reached'),
+    byCategory('mb_run_ended'),
+  ]);
+
+  const endings = runEndings.rows.map((r) => ({ ...mbPairLabel(r.key, MB_ENDING_LABELS), count: r.count }));
+  return {
+    runsStarted: runsStarted.rows.map((r) => ({ difficulty: mbDifficultyLabel(r.key), count: r.count })),
+    actsReached: actsReached.rows.map((r) => ({ act: mbPairLabel(r.key, MB_ACT_LABELS).label, count: r.count })),
+    runEndings: endings.map(({ label, count }) => ({ ending: label, count })),
+    totals: {
+      runsStarted: sumCounts(runsStarted.rows),
+      runsEnded: sumCounts(runEndings.rows),
+      runsWon: sumCounts(endings.filter((e) => MB_WINNING_ENDINGS.has(e.thing))),
+    },
+  };
+}
+
 // GET /api/admin/usage
 // Ever-incrementing product-usage counters (see deploy/migrations/008_usage_counters.sql
 // and routes/trackCounter.js) - distinct from /api/admin/summary's
 // pageview/session stats, which are day-bucketed, rolled up, and pruned
 // after a week. These have no time dimension at all, just a running total
 // per (category, key) since the counter was first hit.
+//
+// `?site=moviebattles` returns Movie Battles' counters instead, in their own
+// shape (queryMovieBattlesUsage above). No `site`, or `site=leagues`, is this
+// app's response exactly as it was before sites existed; an unknown one 400s.
 adminRouter.get('/api/admin/usage', requireAdmin, async (req, res) => {
+  const site = siteFromQuery(req, res);
+  if (!site) return;
   const pool = getAnalyticsPool();
+
+  if (site === 'moviebattles') {
+    try {
+      return res.json(await queryMovieBattlesUsage(pool));
+    } catch (err) {
+      console.error('admin usage query failed (moviebattles):', err);
+      return res.status(502).json({ error: 'could not load usage stats right now' });
+    }
+  }
 
   try {
     const [

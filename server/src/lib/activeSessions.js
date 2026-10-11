@@ -23,17 +23,30 @@
 const ACTIVE_WINDOW_MS = 3 * 60 * 1000;
 const SWEEP_INTERVAL_MS = 60 * 1000;
 
-const lastSeenBySession = new Map();
+// site -> (sessionId -> last seen). Per site because the dashboard shows each
+// site on its own tab, and a visitor can be on both at once (Leagues in one
+// tab, Movie Battles in another): session_id has no site in it (it's derived
+// from ip + user agent alone, see lib/session.js), so a single flat Map would
+// let one site's ping keep the visitor "active" on the other, and would count
+// them once in total rather than once on each.
+const lastSeenBySite = new Map();
 
 // Called for every tracked request - a real pageview counts as activity just as
 // much as a heartbeat does, so a visitor who is clicking around is never missed
-// even between heartbeats.
-export function markSessionActive(sessionId) {
-  if (!sessionId) return;
+// even between heartbeats. `site` is already validated by routes/track.js.
+export function markSessionActive(sessionId, site) {
+  if (!sessionId || !site) return;
+  let lastSeenBySession = lastSeenBySite.get(site);
+  if (!lastSeenBySession) {
+    lastSeenBySession = new Map();
+    lastSeenBySite.set(site, lastSeenBySession);
+  }
   lastSeenBySession.set(sessionId, Date.now());
 }
 
-export function countActiveSessions() {
+export function countActiveSessions(site) {
+  const lastSeenBySession = lastSeenBySite.get(site);
+  if (!lastSeenBySession) return 0;
   const cutoff = Date.now() - ACTIVE_WINDOW_MS;
   let active = 0;
   for (const lastSeen of lastSeenBySession.values()) {
@@ -42,14 +55,17 @@ export function countActiveSessions() {
   return active;
 }
 
-// Without this the Map would keep one entry per session seen since boot, which
+// Without this the Maps would keep one entry per session seen since boot, which
 // is a slow leak on a long-running process. Sweeping on a timer rather than
 // inside countActiveSessions keeps the read cheap and bounds memory even if
-// nobody ever opens the admin dashboard.
+// nobody ever opens the admin dashboard. The per-site Maps themselves stay
+// (there are only ever as many as lib/sites.js lists).
 const sweepTimer = setInterval(() => {
   const cutoff = Date.now() - ACTIVE_WINDOW_MS;
-  for (const [sessionId, lastSeen] of lastSeenBySession) {
-    if (lastSeen <= cutoff) lastSeenBySession.delete(sessionId);
+  for (const lastSeenBySession of lastSeenBySite.values()) {
+    for (const [sessionId, lastSeen] of lastSeenBySession) {
+      if (lastSeen <= cutoff) lastSeenBySession.delete(sessionId);
+    }
   }
 }, SWEEP_INTERVAL_MS);
 

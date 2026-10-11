@@ -4,6 +4,7 @@ import { sessionIdFor } from '../lib/session.js';
 import { parseUserAgent } from '../lib/userAgent.js';
 import { isAdminSession, ADMIN_COOKIE_NAME } from '../lib/adminAuth.js';
 import { markSessionActive } from '../lib/activeSessions.js';
+import { parseSite } from '../lib/sites.js';
 
 export const trackRouter = Router();
 
@@ -16,19 +17,27 @@ const EVENT_TYPE_RE = /^[a-z0-9_-]{1,50}$/;
 const HEARTBEAT_EVENT_TYPE = 'heartbeat';
 
 // POST /api/track
-// Body: { event_type: string, path: string, referrer?: string }
+// Body: { event_type: string, path: string, referrer?: string, site?: string }
+// `site` says which jellyflow.xyz project the pageview belongs to (see
+// lib/sites.js) - absent means 'leagues', so this app's own frontend never
+// sends it; Movie Battles sends 'moviebattles'. Anything else is a 400 rather
+// than being filed under Leagues.
 // Fire-and-forget from the frontend's perspective - always resolves fast
 // and never surfaces a failure to the visitor (analytics should never break
 // the site). session_id is derived here, server-side, from the request's
 // real IP + User-Agent - see lib/session.js for why that can't happen in
 // the browser.
 trackRouter.post('/api/track', async (req, res) => {
-  const { event_type: eventType, path, referrer } = req.body ?? {};
+  const { event_type: eventType, path, referrer, site: rawSite } = req.body ?? {};
   if (typeof eventType !== 'string' || !EVENT_TYPE_RE.test(eventType)) {
     return res.status(400).json({ error: 'invalid event_type' });
   }
   if (typeof path !== 'string' || path.length === 0 || path.length > MAX_PATH_LENGTH) {
     return res.status(400).json({ error: 'invalid path' });
+  }
+  const site = parseSite(rawSite);
+  if (!site) {
+    return res.status(400).json({ error: 'invalid site' });
   }
 
   // Don't record the admin's own browsing - the admin session cookie
@@ -45,8 +54,9 @@ trackRouter.post('/api/track', async (req, res) => {
 
   // Every tracked request counts as activity, heartbeat or not - someone
   // clicking between tabs is obviously active and should not depend on a
-  // heartbeat landing. In-memory only; see lib/activeSessions.js.
-  markSessionActive(sessionId);
+  // heartbeat landing. In-memory only, and per site - see
+  // lib/activeSessions.js.
+  markSessionActive(sessionId, site);
 
   // Heartbeats stop here. They exist purely to keep a reading visitor inside
   // the active window (a pageview only fires on tab change, so someone reading
@@ -69,6 +79,7 @@ trackRouter.post('/api/track', async (req, res) => {
       browser,
       os,
       device_type: deviceType,
+      site,
     });
   } catch (err) {
     console.error('track insert failed:', err);

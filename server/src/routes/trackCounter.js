@@ -7,8 +7,8 @@ export const trackCounterRouter = Router();
 
 // Kept in sync with the CHECK constraint on usage_counters.category (see
 // deploy/migrations/008_usage_counters.sql, widened by
-// 009_relic_drop_table_usage.sql, 010_build_guide_usage.sql and
-// 011_blessing_usage.sql) - validated here too so a bad request 400s with a
+// 009_relic_drop_table_usage.sql, 010_build_guide_usage.sql,
+// 011_blessing_usage.sql and 019_analytics_site.sql) - validated here too so a bad request 400s with a
 // clear error instead of surfacing a raw Postgres constraint-violation
 // message.
 //
@@ -23,6 +23,13 @@ const VALID_CATEGORIES = new Set([
   'relic_drop_table',
   'build_guide',
   'blessing_pick',
+  // Movie Battles (jellyflow.xyz/moviebattles), which reports through this
+  // service too. usage_counters has no site column - the `mb_` prefix is that
+  // site's namespace. Key formats are documented in 019_analytics_site.sql and
+  // turned into labels by routes/admin.js's /api/admin/usage?site=moviebattles.
+  'mb_run_started',
+  'mb_act_reached',
+  'mb_run_ended',
 ]);
 const MAX_KEY_LENGTH = 200;
 // A single user action can fire several increments at once (locking in a
